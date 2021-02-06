@@ -1,25 +1,22 @@
 # Meta Data for SEO
 
 ## Homepage
-title = "Doks"
+title = "Litestream"
 titleSeparator = "-"
-titleAddition = "Modern Documentation Theme"
-description = "Doks is a Hugo theme helping you build modern documentation websites that are secure, fast, and SEO-ready — by default."
+titleAddition = "Streaming SQLite Replication"
+description = "Litestream replicates SQLite databases in real-time to S3."
 
 ## Open Graph + Twitter Cards
-images = ["doks.png"]
-twitterSite = "henkverlinde"
-twitterCreator = "henkverlinde"
-facebookAuthor = "verlinde.henk"
-facebookPublisher = "verlinde.henk"
+images = ["litestream.png"]
+twitterSite = "litestreamio"
+twitterCreator = "litestreamio"
 ogLocale = "en_US"
 
 ## JSON-LD
 schemaType = "Organization"
-schemaLogo = "logo-doks.png"
-schemaTwitter = "https://twitter.com/henkverlinde"
-schemaLinkedIn = "https://www.linkedin.com/in/henkverlinde/"
-schemaGitHub = "https://github.com/h-enk"
+schemaLogo = "litestream.png"
+schemaTwitter = "https://twitter.com/litestreamio"
+schemaGitHub = "https://github.com/benbjohnson/litestream"
 schemaSection = "blog"
 
 ## Sitelinks Search Box
@@ -36,12 +33,12 @@ portraitPhotoWidths = [800, 700, 600, 500]
 lqipWidth = "20x"
 
 # Footer
-footer = "Powered by <a href=\"https://www.netlify.com/\">Netlify</a>, <a href=\"https://gohugo.io/\">Hugo</a>, and <a href=\"https://getdoks.org/\">Doks</a>"
+footer = "Powered by <a href=\"https://gohugo.io/\">Hugo</a> + <a href=\"https://getdoks.org/\">Doks</a>"
 
 # Alert
 alert = false
-alertText = "Like Doks? <a class=\"alert-link\" href=\"https://github.com/h-enk/doks/stargazers\">Star on GitHub</a>. Thanks!</a>"
+alertText = "Like Litestream? <a class=\"alert-link\" href=\"https://github.com/benbjohnson/litestream/stargazers\">Star on GitHub</a>. Thanks!</a>"
 
 # Edit Page
-docsRepo = "https://github.com/h-enk/doks"
-editPage = false
+docsRepo = "https://github.com/benbjohnson/litestreamio"
+editPage = true
