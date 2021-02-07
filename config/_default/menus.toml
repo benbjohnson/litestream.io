@@ -14,7 +14,7 @@
   weight = 30
 
 [[docs]]
-  name = "Installation"
+  name = "Install"
   weight = 10
   identifier = "install"
   url = "/install"
@@ -23,7 +23,7 @@
   name = "Getting Started"
   weight = 20
   identifier = "getting-started"
-  url = "/docs/getting-started/"
+  url = "/getting-started/"
 
 [[docs]]
   name = "Reference"

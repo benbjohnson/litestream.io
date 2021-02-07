@@ -1,8 +1,11 @@
 ---
-title : "Getting Started"
+title : "Replicating a Single Database"
 date: 2021-02-01T00:00:00Z
-layout: single
-draft: false
+layout: docs
+menu:
+  docs:
+    parent: "getting-started"
+weight: 210
 ---
 
 This tutorial will get you up and running with Litestream locally and
@@ -150,5 +153,13 @@ apple|red
 banana|yellow
 grape|purple
 ```
+
+
+## Further reading
+
+Litestream was built to run as a background service that you don't need to worry
+about—it just replicates your database all the time. To run Litestream as a
+background service, please read the [Running as a Systemd Service](/getting-started/systemd)
+tutorial.
 
 
