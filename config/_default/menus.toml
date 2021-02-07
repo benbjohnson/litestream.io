@@ -1,12 +1,17 @@
 [[main]]
-  name = "Docs"
-  url = "/docs"
+  name = "Install"
+  url = "/install"
   weight = 10
+
+[[main]]
+  name = "Documentation"
+  url = "/docs"
+  weight = 20
 
 [[main]]
   name = "Blog"
   url = "/blog/"
-  weight = 20
+  weight = 30
 
 [[docs]]
   name = "Getting Started"

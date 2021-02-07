@@ -33,7 +33,7 @@ portraitPhotoWidths = [800, 700, 600, 500]
 lqipWidth = "20x"
 
 # Footer
-footer = "Powered by <a href=\"https://gohugo.io/\">Hugo</a> + <a href=\"https://getdoks.org/\">Doks</a>"
+# footer = "Powered by <a href=\"https://gohugo.io/\">Hugo</a> + <a href=\"https://getdoks.org/\">Doks</a>"
 
 # Alert
 alert = false

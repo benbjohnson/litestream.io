@@ -173,10 +173,6 @@ body {
   list-style: none;
 }
 
-::selection {
-  background: lighten($primary, 55%);
-}
-
 .bg-dots {
   background-image: radial-gradient($gray-300 15%, transparent 15%);
   background-position: 0 0;
