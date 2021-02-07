@@ -4,8 +4,8 @@
   weight = 10
 
 [[main]]
-  name = "Documentation"
-  url = "/docs"
+  name = "Getting Started"
+  url = "/getting-started"
   weight = 20
 
 [[main]]
@@ -14,14 +14,19 @@
   weight = 30
 
 [[docs]]
-  name = "Getting Started"
+  name = "Installation"
   weight = 10
+  url = "/docs/getting-started/"
+
+[[docs]]
+  name = "Getting Started"
+  weight = 20
   identifier = "getting-started"
-  url = "/getting-started/"
+  url = "/docs/getting-started/"
 
 [[docs]]
   name = "Reference"
-  weight = 10
+  weight = 30
   identifier = "reference"
   url = "/reference/"
 

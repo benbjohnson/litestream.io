@@ -15,7 +15,7 @@ You will also need SQLite installed for this tutorial. It comes packaged with
 some operating systems such as Mac OS X but you may need to install it separately.
 
 
-## Setting up an AWS S3 bucket
+## Creating an S3 bucket
 
 If you don't already have an Amazon AWS account, you can go 
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
