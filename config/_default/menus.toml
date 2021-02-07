@@ -5,7 +5,7 @@
 
 [[main]]
   name = "Getting Started"
-  url = "/getting-started"
+  url = "/docs/getting-started"
   weight = 20
 
 [[main]]
@@ -16,7 +16,8 @@
 [[docs]]
   name = "Installation"
   weight = 10
-  url = "/docs/getting-started/"
+  identifier = "install"
+  url = "/install"
 
 [[docs]]
   name = "Getting Started"
