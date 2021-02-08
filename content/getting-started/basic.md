@@ -1,5 +1,5 @@
 ---
-title : "Replicating a Single Database"
+title : "Replicating a single database"
 date: 2021-02-01T00:00:00Z
 layout: docs
 menu:
@@ -11,14 +11,23 @@ weight: 210
 This tutorial will get you up and running with Litestream locally and
 replicating a SQLite database to Amazon S3. By the end, you'll understand the
 `replicate` and `restore` commands and be able to continuously backup your
-database. This tutorial assumes you're comfortable on the command line.
+database. It assumes you're comfortable on the command line.
+
+_You should expect to complete this tutorial in about 10 minutes._
+
+
+## Prerequisites
+
+### Install Litestream & SQLite
 
 Before continuing, [please install Litestream on your local machine](/install).
-You will also need SQLite installed for this tutorial. It comes packaged with
-some operating systems such as Mac OS X but you may need to install it separately.
+
+You will also need [SQLite](https://sqlite.org/) installed for this tutorial. It
+comes packaged with some operating systems such as Mac OS X but you may need to
+install it separately.
 
 
-## Creating an S3 bucket
+### Creating an S3 bucket
 
 If you don't already have an Amazon AWS account, you can go 
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
@@ -131,9 +140,7 @@ Then write a new row to our table:
 INSERT INTO fruits (name, color) VALUES ('grape', 'blue');
 ```
 
-Litestream will replicate to S3 _every 10 seconds_ by default so you'll need to
-wait for that time to pass and then you can restore your database again to a
-new `fruits3.db` file:
+Then you can restore your database from our S3 backup to a new `fruits3.db` file:
 
 ```
 litestream restore -o fruits3.db s3://mybkt.litestream.io/fruits.db
@@ -159,7 +166,7 @@ grape|purple
 
 Litestream was built to run as a background service that you don't need to worry
 about—it just replicates your database all the time. To run Litestream as a
-background service, please read the [Running as a Systemd Service](/getting-started/systemd)
+background service, please read the [Running as a systemd service](/getting-started/systemd)
 tutorial.
 
 
