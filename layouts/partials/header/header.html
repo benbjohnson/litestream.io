@@ -5,7 +5,9 @@
 
     <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
 
-    <a class="navbar-brand order-1 order-md-0 mr-auto" href="{{ .Site.BaseURL | absURL }}">{{ .Site.Params.Title }}</a>
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="{{ .Site.BaseURL | absURL }}">
+      {{ .Site.Params.Title }}
+    </a>
 
     <ul class="navbar-nav social-nav order-3 order-md-5">
       {{ range .Site.Menus.social -}}
@@ -24,7 +26,7 @@
           {{- $active = or $active (and (eq .Name "Docs") (eq $current.Section "docs")) -}}
           {{- $active = or $active (and (eq .Name "Guides") (eq $current.Section "guides")) -}}
           {{- $active = or $active (and (eq .Name "Blog") (eq $current.Section "blog" "authors")) -}}
-          <li class="nav-item{{ if $active }} active{{ end }}">
+          <li class="nav-item">
             <a class="nav-link" href="{{ .URL | absURL }}">{{ .Name }}</a>
           </li>
         {{ end -}}

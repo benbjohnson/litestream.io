@@ -37,3 +37,11 @@ h3 a {
 .menu-icon {
 	padding: 0.375rem 0.625rem !important;
 }
+
+.navbar-brand {
+	color: #0053fa !important;
+}
+
+body.home .navbar-brand {
+	color: #1d2d35 !important;
+}
