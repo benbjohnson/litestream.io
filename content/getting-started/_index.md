@@ -124,6 +124,8 @@ apple|red
 banana|yellow
 ```
 
+Then type `.quit` or hit `CTRL-D` to exit the `sqlite3` session.
+
 
 ## Continuous replication
 
@@ -156,6 +158,8 @@ apple|red
 banana|yellow
 grape|purple
 ```
+
+Then type `.quit` or hit `CTRL-D` to exit the `sqlite3` session.
 
 
 ## Further reading

@@ -24,7 +24,7 @@ tutorial already. Please read that to understand the basic operation of Litestre
 
 ### Install Litestream & SQLite
 
-Before continuing, [please install Litestream on your local machine](/install).
+Before continuing, [please install Litestream](/install/debian).
 
 You will also need [SQLite](https://sqlite.org/) installed for this guide. It
 comes packaged with some operating systems such as Mac OS X but you may need to
@@ -35,19 +35,15 @@ install it separately.
 
 If you don't already have an Amazon AWS account, you can go 
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
-Once you have an account, you'll log in and obtain API credentials from their
-IAM service. You should have an "access key id" and a "secret access key".
-Once you have those, add them to your environment variables. On Mac OS X &
-Linux, you can run this from your command line using your own key values:
+Once you have an account, you'll need to create an AWS IAM user with
+_programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
+the user, you should have an **access key id** and a **secret access key**. We
+will use those in one of the steps below.
 
-```sh
-export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
-```
-
-After your credentials are set, you'll also need to create a bucket in the S3
-service of AWS. You'll need to create a unique name for your bucket. In this
-guide, we'll name our bucket, `"mybkt.litestream.io"`.
+You'll also need to create a bucket in AWS S3. You'll need to create a unique
+name for your bucket. In this guide, we'll name our bucket
+`"mybkt.litestream.io"` but replace that with your bucket name in the examples
+below.
 
 
 ## Configuration file
@@ -57,10 +53,10 @@ When running as a systemd service, we'll configure Litestream using a
 don't need to edit the service definition. The default path for the Litestream
 configuration is `/etc/litestream.yml`
 
-Litestream monitors one or more _databases_ and each of those databases replicates
-to one or more _replicas_. First, we'll create a basic configuration file. Make
-sure to replace replace your AWS credentials with your own, the bucket name with
-your bucket name, and update `MYUSER` to your local Linux username.
+Litestream monitors one or more _databases_ and each of those databases
+replicates to one or more _replicas_. First, we'll create a basic configuration
+file. Make sure to replace your AWS credentials with your own, the bucket name
+with your bucket name, and update `MYUSER` to your local Linux username.
 
 ```
 sudo cat > /etc/litestream.yml <<EOF
@@ -71,9 +67,8 @@ dbs:
   - path: /home/MYUSER/friends.db
     replicas:
       - url: s3://mybkt.litestream.io/friends.db
-      - sync-interval: 1s
+        sync-interval: 1s
 EOF
-
 ```
 
 This configuration specifies that we want want Litestream to monitor our
@@ -109,6 +104,8 @@ INSERT INTO friends (name) VALUES ('Cory');
 INSERT INTO friends (name) VALUES ('Kelly');
 ```
 
+Then type `.quit` or hit `CTRL-D` to exit the `sqlite3` session.
+
 
 ## Simulating a disaster
 
@@ -121,7 +118,7 @@ sudo systemctl stop litestream
 And then we'll delete our database:
 
 ```sh
-rm friends.db friends.db-shm friends.db-wal
+rm -f friends.db friends.db-shm friends.db-wal
 ```
 
 This is the state our server would be in if it had crashed and we had rebuilt it
@@ -150,7 +147,7 @@ sqlite3 friends.db
 And querying for your data:
 
 ```
-SELECT * FROM friends
+SELECT * FROM friends;
 Cory
 Kelly
 ```
