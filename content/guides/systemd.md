@@ -35,7 +35,7 @@ install it separately.
 
 If you don't already have an Amazon AWS account, you can go 
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
-Once you have an account, you'll need to create an AWS IAM user with
+Once you have an account, you'll need to [create an AWS IAM user][iam] with
 _programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
 the user, you should have an **access key id** and a **secret access key**. We
 will use those in one of the steps below.
@@ -44,6 +44,8 @@ You'll also need to create a bucket in AWS S3. You'll need to create a unique
 name for your bucket. In this guide, we'll name our bucket
 `"mybkt.litestream.io"` but replace that with your bucket name in the examples
 below.
+
+[iam]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html
 
 
 ## Configuration file
