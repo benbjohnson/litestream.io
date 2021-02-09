@@ -10,12 +10,10 @@ install it separately.</p><h3 id=creating-an-s3-bucket>Creating an S3 bucket<a h
 Once you have an account, you&rsquo;ll need to create an AWS IAM user with
 <em>programmatic access</em> and with <code>AmazonS3FullAccess</code> permissions. After creating
 the user, you should have an <strong>access key id</strong> and a <strong>secret access key</strong>. We
-will use those in one of the steps below.</p><p>You&rsquo;ll also need to create a bucket in AWS S3. You&rsquo;ll need to create a unique
-name for your bucket. In this tutorial, we&rsquo;ll name our bucket
-<code>"mybkt.litestream.io"</code> but replace that with your bucket name in the examples
-below.</p><h2 id=setting-up-your-database>Setting up your database<a href=#setting-up-your-database class=anchor aria-hidden=true>#</a></h2><p>Now that our S3 bucket is created, we can replicate data to it. Litestream
+will use those in one of the steps below. <a href=/videos/iam.mp4>Click here
+to watch a short video on creating an AWS IAM user.</a></p><p>You’ll also need to create a bucket in AWS S3. You’ll need to create a unique name for your bucket.</p><div class="alert alert-warning d-flex" role=alert><div class="flex-shrink-1 alert-icon">❗️</div><div class=w-100>In this tutorial, we’ll name our bucket 'mybkt.litestream.io' but replace that with your bucket name, like 'mybkt.yourdomain.com'.</div></div><h2 id=setting-up-your-database>Setting up your database<a href=#setting-up-your-database class=anchor aria-hidden=true>#</a></h2><p>Now that our S3 bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we&rsquo;ll use the <code>sqlite3</code> command line tool
-to show how it works.</p><p><strong>In a terminal window</strong>, a new database file:</p><pre><code>sqlite3 fruits.db
+to show how it works.</p><p><strong>In a terminal window</strong>, create a new database file:</p><pre><code>sqlite3 fruits.db
 </code></pre><p>This will open the SQLite command prompt and now we can execute SQL commands.
 We&rsquo;ll start by creating a new table:</p><pre><code>CREATE TABLE fruits (name TEXT, color TEXT);
 </code></pre><p>And we can add some data to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('apple', 'red');
