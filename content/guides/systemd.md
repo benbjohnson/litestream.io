@@ -26,7 +26,7 @@ tutorial already. Please read that to understand the basic operation of Litestre
 
 Before continuing, [please install Litestream on your local machine](/install).
 
-You will also need [SQLite](https://sqlite.org/) installed for this tutorial. It
+You will also need [SQLite](https://sqlite.org/) installed for this guide. It
 comes packaged with some operating systems such as Mac OS X but you may need to
 install it separately.
 
@@ -47,7 +47,7 @@ export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 After your credentials are set, you'll also need to create a bucket in the S3
 service of AWS. You'll need to create a unique name for your bucket. In this
-tutorial, we'll name our bucket, `"mybkt.litestream.io"`.
+guide, we'll name our bucket, `"mybkt.litestream.io"`.
 
 
 ## Configuration file

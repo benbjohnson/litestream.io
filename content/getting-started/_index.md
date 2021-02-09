@@ -7,9 +7,10 @@ layout: docs
 This tutorial will get you up and running with Litestream locally and
 replicating a SQLite database to Amazon S3. By the end, you'll understand the
 `replicate` and `restore` commands and be able to continuously backup your
-database. It assumes you're comfortable on the command line.
+database. It assumes you're comfortable on the command line and have some basic
+familiarity with Amazon AWS.
 
-_You should expect to complete this tutorial in about 10 minutes._
+_You should expect to this tutorial to take about 10 minutes._
 
 
 ## Prerequisites
@@ -27,35 +28,31 @@ install it separately.
 
 If you don't already have an Amazon AWS account, you can go 
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
-Once you have an account, you'll log in and obtain API credentials from their
-IAM service. You should have an "access key id" and a "secret access key".
-Once you have those, add them to your environment variables. On Mac OS X &
-Linux, you can run this from your command line using your own key values:
+Once you have an account, you'll need to create an AWS IAM user with
+_programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
+the user, you should have an **access key id** and a **secret access key**. We
+will use those in one of the steps below.
 
-```sh
-export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
-```
-
-After your credentials are set, you'll also need to create a bucket in the S3
-service of AWS. You'll need to create a unique name for your bucket. In this
-tutorial, we'll name our bucket, `"mybkt.litestream.io"`.
+You'll also need to create a bucket in AWS S3. You'll need to create a unique
+name for your bucket. In this tutorial, we'll name our bucket
+`"mybkt.litestream.io"` but replace that with your bucket name in the examples
+below.
 
 
 ## Setting up your database
 
-Now that our S3 bucket is configured, we can replicate data to it. Litestream
+Now that our S3 bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we'll use the `sqlite3` command line tool
 to show how it works.
 
-First, we'll open a new database file:
+**In a terminal window**, a new database file:
 
 ```
 sqlite3 fruits.db
 ```
 
 This will open the SQLite command prompt and now we can execute SQL commands.
-We'll start with creating a new table:
+We'll start by creating a new table:
 
 ```
 CREATE TABLE fruits (name TEXT, color TEXT);
@@ -73,13 +70,24 @@ INSERT INTO fruits (name, color) VALUES ('banana', 'yellow');
 **In a separate terminal window**, we'll run Litestream to replicate our new
 database. Make sure both terminal windows are using the same working directory.
 
+Using the AWS credentials obtained in the [_prerequisites section_](#creating-an-s3-bucket)
+above, add them to your environment variables. On Mac OS X &
+Linux, you can run this from your command line with your credentials:
+
+```sh
+export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
+export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+```
+
+Next, run Litesteam's `replicate` command to start replication:
+
 ```
 litestream replicate fruits.db s3://mybkt.litestream.io/fruits.db
 ```
 
-You should see Litestream print some initialization commands and then hang
+You should see Litestream print some initialization commands and then wait
 indefinitely. Normally, Litestream is run as a background service so it
-continuously watches your database for new changes.
+continuously watches your database for new changes so the command does not exit.
 
 If you open the [S3 Management Console](https://s3.console.aws.amazon.com/s3),
 you will see there is a `fruits.db` directory in your bucket.
@@ -87,10 +95,17 @@ you will see there is a `fruits.db` directory in your bucket.
 
 ## Restoring your database
 
-**In a third terminal window**, we'll restore our database to a new file. Make
-sure your environment variables are set correctly and run:
+**In a third terminal window**, we'll restore our database to a new file. First, 
+make sure your environment variables are set correctly:
 
+```sh
+export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
+export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
+
+Then run:
+
+```sh
 litestream restore -o fruits2.db s3://mybkt.litestream.io/fruits.db
 ```
 
@@ -109,34 +124,19 @@ apple|red
 banana|yellow
 ```
 
-Litestream physically replicates the data so the original and restored database
-should match byte-for-byte. You can verify this by running a checksum on the
-files:
-
-```
-md5 fruit*
-MD5 (fruit.db) = e6a6ceda013b99c7ddc8b68ebd4351d0
-MD5 (fruit2.db) = e6a6ceda013b99c7ddc8b68ebd4351d0
-```
-
 
 ## Continuous replication
 
 Litestream continuously monitors your database and backs it up to S3. We can
-see this by writing some more data to our original `fruit.db` database. Open
-the database (if you don't already have it open):
-
-```
-sqlite3 fruit.db
-```
-
-Then write a new row to our table:
+see this by writing some more data to our original `fruits.db` database. In our
+first terminal window, write a new row to our table:
 
 ```
 INSERT INTO fruits (name, color) VALUES ('grape', 'blue');
 ```
 
-Then you can restore your database from our S3 backup to a new `fruits3.db` file:
+Then in your **third terminal window**, restore your database from our S3 backup
+to a new `fruits3.db` file:
 
 ```
 litestream restore -o fruits3.db s3://mybkt.litestream.io/fruits.db
