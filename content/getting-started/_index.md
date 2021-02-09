@@ -31,12 +31,12 @@ If you don't already have an Amazon AWS account, you can go
 Once you have an account, you'll need to create an AWS IAM user with
 _programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
 the user, you should have an **access key id** and a **secret access key**. We
-will use those in one of the steps below.
+will use those in one of the steps below. <a href='/videos/iam.mp4'>Click here
+to watch a short video on creating an AWS IAM user.</a>
 
-You'll also need to create a bucket in AWS S3. You'll need to create a unique
-name for your bucket. In this tutorial, we'll name our bucket
-`"mybkt.litestream.io"` but replace that with your bucket name in the examples
-below.
+You’ll also need to create a bucket in AWS S3. You’ll need to create a unique name for your bucket. 
+
+{{< alert icon="❗️" text="In this tutorial, we’ll name our bucket 'mybkt.litestream.io' but replace that with your bucket name, like 'mybkt.yourdomain.com'." >}}
 
 
 ## Setting up your database
@@ -45,7 +45,7 @@ Now that our S3 bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we'll use the `sqlite3` command line tool
 to show how it works.
 
-**In a terminal window**, a new database file:
+**In a terminal window**, create a new database file:
 
 ```
 sqlite3 fruits.db
