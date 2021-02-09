@@ -13,7 +13,7 @@ operating systems such as Ubuntu. Running as a background service means that
 Litestream will always run in the background and restart automatically if the
 server restarts. It assumes you are comfortable with using a command line.
 
-_This should take approximately 10 minutes to complete._
+{{< alert icon="⏱" text="This should take approximately 10 minutes to complete." >}}
 
 
 ## Prerequisites
