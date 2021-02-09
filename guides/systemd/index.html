@@ -7,7 +7,7 @@ Prerequisites This guide assumes you have read the Replicating a single database
 operating systems such as Ubuntu. Running as a background service means that
 Litestream will always run in the background and restart automatically if the
 server restarts. It assumes you are comfortable with using a command line.</p><p><em>This should take approximately 10 minutes to complete.</em></p><h2 id=prerequisites>Prerequisites<a href=#prerequisites class=anchor aria-hidden=true>#</a></h2><p>This guide assumes you have read the <a href=/getting-started/basic/><em>Replicating a single database</em></a>
-tutorial already. Please read that to understand the basic operation of Litestream.</p><h3 id=install-litestream--sqlite>Install Litestream & SQLite<a href=#install-litestream--sqlite class=anchor aria-hidden=true>#</a></h3><p>Before continuing, <a href=/install>please install Litestream on your local machine</a>.</p><p>You will also need <a href=https://sqlite.org/>SQLite</a> installed for this tutorial. It
+tutorial already. Please read that to understand the basic operation of Litestream.</p><h3 id=install-litestream--sqlite>Install Litestream & SQLite<a href=#install-litestream--sqlite class=anchor aria-hidden=true>#</a></h3><p>Before continuing, <a href=/install>please install Litestream on your local machine</a>.</p><p>You will also need <a href=https://sqlite.org/>SQLite</a> installed for this guide. It
 comes packaged with some operating systems such as Mac OS X but you may need to
 install it separately.</p><h3 id=creating-an-s3-bucket>Creating an S3 bucket<a href=#creating-an-s3-bucket class=anchor aria-hidden=true>#</a></h3><p>If you don&rsquo;t already have an Amazon AWS account, you can go
 <a href=https://aws.amazon.com/>https://aws.amazon.com/</a> and click &ldquo;Create Account&rdquo;.
@@ -18,7 +18,7 @@ Linux, you can run this from your command line using your own key values:</p><di
 <span class=nb>export</span> <span class=nv>AWS_SECRET_ACCESS_KEY</span><span class=o>=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 </code></pre></div><p>After your credentials are set, you&rsquo;ll also need to create a bucket in the S3
 service of AWS. You&rsquo;ll need to create a unique name for your bucket. In this
-tutorial, we&rsquo;ll name our bucket, <code>"mybkt.litestream.io"</code>.</p><h2 id=configuration-file>Configuration file<a href=#configuration-file class=anchor aria-hidden=true>#</a></h2><p>When running as a systemd service, we&rsquo;ll configure Litestream using a
+guide, we&rsquo;ll name our bucket, <code>"mybkt.litestream.io"</code>.</p><h2 id=configuration-file>Configuration file<a href=#configuration-file class=anchor aria-hidden=true>#</a></h2><p>When running as a systemd service, we&rsquo;ll configure Litestream using a
 <a href=/reference/config>configuration file</a> instead of command line flags so we
 don&rsquo;t need to edit the service definition. The default path for the Litestream
 configuration is <code>/etc/litestream.yml</code></p><p>Litestream monitors one or more <em>databases</em> and each of those databases replicates
