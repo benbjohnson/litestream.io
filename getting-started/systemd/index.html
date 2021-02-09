@@ -19,9 +19,9 @@ Linux, you can run this from your command line using your own key values:</p><di
 </code></pre></div><p>After your credentials are set, you&rsquo;ll also need to create a bucket in the S3
 service of AWS. You&rsquo;ll need to create a unique name for your bucket. In this
 tutorial, we&rsquo;ll name our bucket, <code>"mybkt.litestream.io"</code>.</p><h2 id=configuration-file>Configuration file<a href=#configuration-file class=anchor aria-hidden=true>#</a></h2><p>When running as a systemd service, we&rsquo;ll configure Litestream using a
-configuration file instead of command line flags so we don&rsquo;t need to edit the
-service definition. The default path for the Litestream configuration is
-<code>/etc/litestream.yml</code></p><p>Litestream monitors one or more <em>databases</em> and each of those databases replicates
+<a href=/reference/config>configuration file</a> instead of command line flags so we
+don&rsquo;t need to edit the service definition. The default path for the Litestream
+configuration is <code>/etc/litestream.yml</code></p><p>Litestream monitors one or more <em>databases</em> and each of those databases replicates
 to one or more <em>replicas</em>. First, we&rsquo;ll create a basic configuration file. Make
 sure to replace replace your AWS credentials with your own, the bucket name with
 your bucket name, and update <code>MYUSER</code> to your local Linux username.</p><pre><code>sudo cat &gt; /etc/litestream.yml &lt;&lt;EOF
