@@ -53,9 +53,9 @@ tutorial, we'll name our bucket, `"mybkt.litestream.io"`.
 ## Configuration file
 
 When running as a systemd service, we'll configure Litestream using a
-configuration file instead of command line flags so we don't need to edit the
-service definition. The default path for the Litestream configuration is
-`/etc/litestream.yml`
+[configuration file](/reference/config) instead of command line flags so we
+don't need to edit the service definition. The default path for the Litestream
+configuration is `/etc/litestream.yml`
 
 Litestream monitors one or more _databases_ and each of those databases replicates
 to one or more _replicas_. First, we'll create a basic configuration file. Make

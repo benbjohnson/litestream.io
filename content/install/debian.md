@@ -43,8 +43,8 @@ You can verify the service is running by checking the systemd journal:
 sudo journalctl -u litestream -f
 ```
 
-If you make changes to Litestream configuration file, you'll need to restart
-the service:
+If you make changes to Litestream [configuration file](/reference/config),
+you'll need to restart the service:
 
 ```sh
 sudo systemctl restart litestream
