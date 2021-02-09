@@ -7,24 +7,23 @@ Prerequisites This guide assumes you have read the Replicating a single database
 operating systems such as Ubuntu. Running as a background service means that
 Litestream will always run in the background and restart automatically if the
 server restarts. It assumes you are comfortable with using a command line.</p><p><em>This should take approximately 10 minutes to complete.</em></p><h2 id=prerequisites>Prerequisites<a href=#prerequisites class=anchor aria-hidden=true>#</a></h2><p>This guide assumes you have read the <a href=/getting-started/basic/><em>Replicating a single database</em></a>
-tutorial already. Please read that to understand the basic operation of Litestream.</p><h3 id=install-litestream--sqlite>Install Litestream & SQLite<a href=#install-litestream--sqlite class=anchor aria-hidden=true>#</a></h3><p>Before continuing, <a href=/install>please install Litestream on your local machine</a>.</p><p>You will also need <a href=https://sqlite.org/>SQLite</a> installed for this guide. It
+tutorial already. Please read that to understand the basic operation of Litestream.</p><h3 id=install-litestream--sqlite>Install Litestream & SQLite<a href=#install-litestream--sqlite class=anchor aria-hidden=true>#</a></h3><p>Before continuing, <a href=/install/debian>please install Litestream</a>.</p><p>You will also need <a href=https://sqlite.org/>SQLite</a> installed for this guide. It
 comes packaged with some operating systems such as Mac OS X but you may need to
 install it separately.</p><h3 id=creating-an-s3-bucket>Creating an S3 bucket<a href=#creating-an-s3-bucket class=anchor aria-hidden=true>#</a></h3><p>If you don&rsquo;t already have an Amazon AWS account, you can go
 <a href=https://aws.amazon.com/>https://aws.amazon.com/</a> and click &ldquo;Create Account&rdquo;.
-Once you have an account, you&rsquo;ll log in and obtain API credentials from their
-IAM service. You should have an &ldquo;access key id&rdquo; and a &ldquo;secret access key&rdquo;.
-Once you have those, add them to your environment variables. On Mac OS X &
-Linux, you can run this from your command line using your own key values:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>export</span> <span class=nv>AWS_ACCESS_KEY_ID</span><span class=o>=</span>AKIAxxxxxxxxxxxxxxxx
-<span class=nb>export</span> <span class=nv>AWS_SECRET_ACCESS_KEY</span><span class=o>=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
-</code></pre></div><p>After your credentials are set, you&rsquo;ll also need to create a bucket in the S3
-service of AWS. You&rsquo;ll need to create a unique name for your bucket. In this
-guide, we&rsquo;ll name our bucket, <code>"mybkt.litestream.io"</code>.</p><h2 id=configuration-file>Configuration file<a href=#configuration-file class=anchor aria-hidden=true>#</a></h2><p>When running as a systemd service, we&rsquo;ll configure Litestream using a
+Once you have an account, you&rsquo;ll need to create an AWS IAM user with
+<em>programmatic access</em> and with <code>AmazonS3FullAccess</code> permissions. After creating
+the user, you should have an <strong>access key id</strong> and a <strong>secret access key</strong>. We
+will use those in one of the steps below.</p><p>You&rsquo;ll also need to create a bucket in AWS S3. You&rsquo;ll need to create a unique
+name for your bucket. In this guide, we&rsquo;ll name our bucket
+<code>"mybkt.litestream.io"</code> but replace that with your bucket name in the examples
+below.</p><h2 id=configuration-file>Configuration file<a href=#configuration-file class=anchor aria-hidden=true>#</a></h2><p>When running as a systemd service, we&rsquo;ll configure Litestream using a
 <a href=/reference/config>configuration file</a> instead of command line flags so we
 don&rsquo;t need to edit the service definition. The default path for the Litestream
-configuration is <code>/etc/litestream.yml</code></p><p>Litestream monitors one or more <em>databases</em> and each of those databases replicates
-to one or more <em>replicas</em>. First, we&rsquo;ll create a basic configuration file. Make
-sure to replace replace your AWS credentials with your own, the bucket name with
-your bucket name, and update <code>MYUSER</code> to your local Linux username.</p><pre><code>sudo cat &gt; /etc/litestream.yml &lt;&lt;EOF
+configuration is <code>/etc/litestream.yml</code></p><p>Litestream monitors one or more <em>databases</em> and each of those databases
+replicates to one or more <em>replicas</em>. First, we&rsquo;ll create a basic configuration
+file. Make sure to replace your AWS credentials with your own, the bucket name
+with your bucket name, and update <code>MYUSER</code> to your local Linux username.</p><pre><code>sudo cat &gt; /etc/litestream.yml &lt;&lt;EOF
 access-key-id:     AKIAxxxxxxxxxxxxxxxx
 secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
@@ -32,9 +31,8 @@ dbs:
   - path: /home/MYUSER/friends.db
     replicas:
       - url: s3://mybkt.litestream.io/friends.db
-      - sync-interval: 1s
+        sync-interval: 1s
 EOF
-
 </code></pre><p>This configuration specifies that we want want Litestream to monitor our
 <code>friends.db</code> database in our home directory and continuously replicate it to
 our <code>mybkt.litestream.io</code> S3 bucket.</p><p>After changing our configuration, we&rsquo;ll need to restart the Litestream service
@@ -44,15 +42,15 @@ database:</p><div class=highlight><pre class=chroma><code class=language-sh data
 </code></pre></div><p>We&rsquo;ll create a simple table to store our friends' names:</p><div class=highlight><pre class=chroma><code class=language-sql data-lang=sql><span class=k>CREATE</span> <span class=k>TABLE</span> <span class=n>friends</span> <span class=p>(</span><span class=n>name</span> <span class=nb>TEXT</span><span class=p>);</span>
 </code></pre></div><p>Then we&rsquo;ll insert some rows:</p><pre><code>INSERT INTO friends (name) VALUES ('Cory');
 INSERT INTO friends (name) VALUES ('Kelly');
-</code></pre><h2 id=simulating-a-disaster>Simulating a disaster<a href=#simulating-a-disaster class=anchor aria-hidden=true>#</a></h2><p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sudo systemctl stop litestream
-</code></pre></div><p>And then we&rsquo;ll delete our database:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>rm friends.db friends.db-shm friends.db-wal
+</code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p><h2 id=simulating-a-disaster>Simulating a disaster<a href=#simulating-a-disaster class=anchor aria-hidden=true>#</a></h2><p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sudo systemctl stop litestream
+</code></pre></div><p>And then we&rsquo;ll delete our database:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>rm -f friends.db friends.db-shm friends.db-wal
 </code></pre></div><p>This is the state our server would be in if it had crashed and we had rebuilt it
 but lost our data.</p><h2 id=restoring-our-database>Restoring our database<a href=#restoring-our-database class=anchor aria-hidden=true>#</a></h2><p>Our Litestream service and configuration file are still in place so we can
 easily restore our database. Simply run the <code>restore</code> command with our database
 path:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>litestream restore friends.db
 </code></pre></div><p>Litesteam will find the database in the configuration file and restore the most
 recent copy it has from its S3 replica.</p><p>You can verify that your data is all there by connecting with SQLite:</p><pre><code>sqlite3 friends.db
-</code></pre><p>And querying for your data:</p><pre><code>SELECT * FROM friends
+</code></pre><p>And querying for your data:</p><pre><code>SELECT * FROM friends;
 Cory
 Kelly
 </code></pre><h2 id=further-reading>Further reading<a href=#further-reading class=anchor aria-hidden=true>#</a></h2><p>You now have a production-ready replication setup using SQLite and Litestream.

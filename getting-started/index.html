@@ -38,7 +38,7 @@ You can verify the database matches by opening it with SQLite:</p><pre><code>sql
 </code></pre><p>And reading the data:</p><pre><code>SELECT * FROM fruits;
 apple|red
 banana|yellow
-</code></pre><h2 id=continuous-replication>Continuous replication<a href=#continuous-replication class=anchor aria-hidden=true>#</a></h2><p>Litestream continuously monitors your database and backs it up to S3. We can
+</code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p><h2 id=continuous-replication>Continuous replication<a href=#continuous-replication class=anchor aria-hidden=true>#</a></h2><p>Litestream continuously monitors your database and backs it up to S3. We can
 see this by writing some more data to our original <code>fruits.db</code> database. In our
 first terminal window, write a new row to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'blue');
 </code></pre><p>Then in your <strong>third terminal window</strong>, restore your database from our S3 backup
@@ -48,7 +48,7 @@ to a new <code>fruits3.db</code> file:</p><pre><code>litestream restore -o fruit
 apple|red
 banana|yellow
 grape|purple
-</code></pre><h2 id=further-reading>Further reading<a href=#further-reading class=anchor aria-hidden=true>#</a></h2><p>Litestream was built to run as a background service that you don&rsquo;t need to worry
+</code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p><h2 id=further-reading>Further reading<a href=#further-reading class=anchor aria-hidden=true>#</a></h2><p>Litestream was built to run as a background service that you don&rsquo;t need to worry
 about—it just replicates your database all the time. To run Litestream as a
 background service, please refer to the <a href=/guides>How-To Guides section</a> to
 run on your particular platform.</p></main></div></div></div><footer></footer><script src=https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js integrity="sha512-9rSE9VatHzvPYGEIITmi8h+nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin=anonymous defer></script><script src=https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin=anonymous defer></script></body></html>
