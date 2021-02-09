@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 360
+weight: 570
 ---
 
 The `wal` command lists WAL files available for a database or replica. This

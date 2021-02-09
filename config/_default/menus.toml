@@ -26,14 +26,20 @@
   url = "/getting-started/"
 
 [[docs]]
-  name = "How it Works"
+  name = "Guides"
   weight = 30
+  identifier = "guides"
+  url = "/guides/"
+
+[[docs]]
+  name = "How it Works"
+  weight = 40
   identifier = "how-it-works"
   url = "/how-it-works/"
 
 [[docs]]
   name = "Reference"
-  weight = 40
+  weight = 50
   identifier = "reference"
   url = "/reference/"
 

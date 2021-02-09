@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 300
+weight: 500
 ---
 
 The YAML configuration file provides a way to list databases and replicas that

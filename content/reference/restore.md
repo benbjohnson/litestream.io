@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 340
+weight: 540
 ---
 
 The `restore` command recovers a database from a replica. By default, it

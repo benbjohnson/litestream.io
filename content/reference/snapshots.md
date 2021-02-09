@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 350
+weight: 550
 ---
 
 The `snapshots` command lists snapshots available for a database or replica.

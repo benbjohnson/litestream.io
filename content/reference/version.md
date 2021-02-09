@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 360
+weight: 560
 ---
 
 The `version` command prints the version of the binary.

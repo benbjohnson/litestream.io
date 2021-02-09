@@ -4,21 +4,21 @@ date: 2021-02-01T00:00:00Z
 layout: docs
 menu:
   docs:
-    parent: "getting-started"
-weight: 220
+    parent: "guides"
+weight: 320
 ---
 
-This tutorial will get you running Litestream as a systemd service on Debian-based
+This guide will get you running Litestream as a systemd service on Debian-based
 operating systems such as Ubuntu. Running as a background service means that
 Litestream will always run in the background and restart automatically if the
 server restarts. It assumes you are comfortable with using a command line.
 
-_This tutorial should take approximately 10 minutes to complete._
+_This should take approximately 10 minutes to complete._
 
 
 ## Prerequisites
 
-This tutorial assumes you have read the [Replicating a single database](/getting-started/basic/)
+This guide assumes you have read the [_Replicating a single database_](/getting-started/basic/)
 tutorial already. Please read that to understand the basic operation of Litestream.
 
 
@@ -159,6 +159,5 @@ Kelly
 ## Further reading
 
 You now have a production-ready replication setup using SQLite and Litestream.
-Please see the [How-To Guides](/guides) and [Reference](/reference) sections
-for more details about how to configure and run Litestream.
+Please see the [Reference](/reference) section for more configuration options.
 

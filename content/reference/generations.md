@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 320
+weight: 520
 ---
 
 The `generations` command lists all generations for a database or replica. It 

@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 310
+weight: 510
 ---
 
 The `databases` command lists all databases in the configuration file as well

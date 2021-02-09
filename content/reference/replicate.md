@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 330
+weight: 530
 ---
 
 The `replicate` command starts a server to monitor & continuously replicate
