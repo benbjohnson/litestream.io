@@ -14,7 +14,8 @@ Most users should follow the steps above to install prebuilt binaries but you
 can also install from source if a binary is not provided for your operating
 system or architecture. First, [install the Go toolchain](https://golang.org/dl/).
 
-Next, download the source code and run the following command:
+Next, download the [source code](https://github.com/benbjohnson/litestream) and
+run the following command:
 
 ```sh
 go install ./cmd/litestream
