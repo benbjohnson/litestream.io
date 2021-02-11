@@ -1,15 +1,15 @@
 ---
 title: "Why I Built Litestream"
-description: "Despite an exponential increase in computing power century, our applications require more machines than ever because of architectural decisions made 25 years ago. You can reduce your complexity and cost by using SQLite & Litestream for your production applications."
+description: "Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite & Litestream for your production applications."
 date: 2021-02-10T00:00:00Z
 draft: false
 weight: 50
 contributors: ["Ben Johnson"]
 ---
 
-_tl;dr—Despite an exponential increase in computing power century, our
-applications require more machines than ever because of architectural decisions
-made 25 years ago. You can reduce your complexity and cost by using SQLite &
+_tl;dr—Despite an exponential increase in computing power, our applications
+require more machines than ever because of architectural decisions made 25 years
+ago. You can eliminate much of your complexity and cost by using SQLite &
 Litestream for your production applications._
 
 
