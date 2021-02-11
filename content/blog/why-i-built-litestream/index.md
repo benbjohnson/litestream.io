@@ -195,8 +195,8 @@ start of it. There are exciting features coming including replication to
 [read-only replicas][replicas]. This will give you the ability to run local
 copies of your database at the edge to deliver requests instantly.
 
-If you're interested in trying out Litestream, the [Getting Started][/getting-started]
-can get you up and running in less than 10 minutes. 
+If you're interested in trying out Litestream, the [Getting
+Started](/getting-started) can get you up and running in less than 10 minutes. 
 
 I'm interested to hear from others that want to simplify and improve application
 development. If you have ideas or thoughts about the future of Litestream, 
