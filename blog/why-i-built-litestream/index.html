@@ -62,9 +62,9 @@ uptime and have suffered no catastrophic failures.</p><h3 id=sounds-good-but-how
 application. Typically, you want to scale vertically first by simply increasing
 amount of CPUs cores and RAM on your machine first.</p><p>Servers these days have a <em>ton</em> of power. I recently wrote a Go web application
 with a SQLite database that would serve an HTTP request with multiple database
-queries in under <em>50µs</em> on a $5/month VPS. That translates to 20,000 requests
-per second per core. SQLite scales reads well with the number of cores on a
-machine. Amazon AWS has machines that can then scale up to 96 CPU cores and
+queries in under <em>50µs</em> on a $5/month VPS. That translates to thousands of
+requests per second per core. SQLite scales reads well with the number of cores
+on a machine. Amazon AWS has machines that can then scale up to 96 CPU cores and
 hundreds of gigabytes of RAM.</p><p>If you exceed the capacity of a single node, sharding your data can allow you to
 scale horizontally to multiple nodes. This works particularly well for SaaS
 applications where each customer is isolated from one another. Because SQLite
