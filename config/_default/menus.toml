@@ -13,6 +13,11 @@
   url = "/blog/"
   weight = 30
 
+[[main]]
+  name = "GitHub"
+  url = "https://github.com/benbjohnson/litestream"
+  weight = 40
+
 [[docs]]
   name = "Install"
   weight = 10
