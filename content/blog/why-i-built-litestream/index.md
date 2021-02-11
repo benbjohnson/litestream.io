@@ -192,14 +192,18 @@ is easy to maintain.
 
 Litestream is helping to simplify application development but that's only the
 start of it. There are exciting features coming including replication to
-read-only replicas. This will give you the ability to run local copies of your
+[read-only replicas]. This will give you the ability to run local copies of your
 database at the edge to deliver requests instantly.
+
+If you're interested in trying out Litestream, the [Getting Started][/getting-started]
+can get you up and running in less than 10 minutes. 
 
 I'm interested to hear from others that want to simplify and improve application
 development. If you have ideas or thoughts about the future of Litestream, 
 please get in touch on the [GitHub Discussions board][discussions] and drop me a
 line.
 
-—Ben Johnson
+—Ben Johnson ([@benbjohnson](https://twitter.com/benbjohnson))
 
+[replicas]: https://github.com/benbjohnson/litestream/issues/8
 [discussions]: https://github.com/benbjohnson/litestream/discussions
