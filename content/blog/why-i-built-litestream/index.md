@@ -192,8 +192,8 @@ is easy to maintain.
 
 Litestream is helping to simplify application development but that's only the
 start of it. There are exciting features coming including replication to
-[read-only replicas]. This will give you the ability to run local copies of your
-database at the edge to deliver requests instantly.
+[read-only replicas][replicas]. This will give you the ability to run local
+copies of your database at the edge to deliver requests instantly.
 
 If you're interested in trying out Litestream, the [Getting Started][/getting-started]
 can get you up and running in less than 10 minutes. 
