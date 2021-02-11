@@ -1,11 +1,16 @@
 ---
 title: "Why I Built Litestream"
-lead: "We used to run applications on a single machine. Now we need a fleet of servers and infrastructure orchestration for even simple applications. Where did we go wrong?"
+description: "Despite an exponential increase in computing power century, our applications require more machines than ever because of architectural decisions made 25 years ago. You can reduce your complexity and cost by using SQLite & Litestream for your production applications."
 date: 2021-02-10T00:00:00Z
 draft: false
 weight: 50
 contributors: ["Ben Johnson"]
 ---
+
+_tl;dr—Despite an exponential increase in computing power century, our
+applications require more machines than ever because of architectural decisions
+made 25 years ago. You can reduce your complexity and cost by using SQLite &
+Litestream for your production applications._
 
 
 ## When I was your age...
