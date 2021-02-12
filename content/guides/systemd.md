@@ -18,7 +18,7 @@ server restarts. It assumes you are comfortable with using a command line.
 
 ## Prerequisites
 
-This guide assumes you have read the [_Replicating a single database_](/getting-started/basic/)
+This guide assumes you have read the [_Replicating a single database_](/getting-started)
 tutorial already. Please read that to understand the basic operation of Litestream.
 
 
