@@ -38,7 +38,7 @@ apple|red
 banana|yellow
 </code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p><h2 id=continuous-replication>Continuous replication<a href=#continuous-replication class=anchor aria-hidden=true>#</a></h2><p>Litestream continuously monitors your database and backs it up to S3. We can
 see this by writing some more data to our original <code>fruits.db</code> database. In our
-first terminal window, write a new row to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'blue');
+first terminal window, write a new row to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
 </code></pre><p>Then in your <strong>third terminal window</strong>, restore your database from our S3 backup
 to a new <code>fruits3.db</code> file:</p><pre><code>litestream restore -o fruits3.db s3://mybkt.litestream.io/fruits.db
 </code></pre><p>We can open this file:</p><pre><code>sqlite3 fruits3.db
