@@ -134,7 +134,7 @@ see this by writing some more data to our original `fruits.db` database. In our
 first terminal window, write a new row to our table:
 
 ```
-INSERT INTO fruits (name, color) VALUES ('grape', 'blue');
+INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
 ```
 
 Then in your **third terminal window**, restore your database from our S3 backup
