@@ -20,7 +20,7 @@ familiarity with Amazon AWS.
 Before continuing, [please install Litestream on your local machine](/install).
 
 You will also need [SQLite](https://sqlite.org/) installed for this tutorial. It
-comes packaged with some operating systems such as Mac OS X but you may need to
+comes packaged with some operating systems such as macOS but you may need to
 install it separately.
 
 
@@ -71,7 +71,7 @@ INSERT INTO fruits (name, color) VALUES ('banana', 'yellow');
 database. Make sure both terminal windows are using the same working directory.
 
 Using the AWS credentials obtained in the [_prerequisites section_](#creating-an-s3-bucket)
-above, add them to your environment variables. On Mac OS X &
+above, add them to your environment variables. On macOS &
 Linux, you can run this from your command line with your credentials:
 
 ```sh
