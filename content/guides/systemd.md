@@ -27,7 +27,7 @@ tutorial already. Please read that to understand the basic operation of Litestre
 Before continuing, [please install Litestream](/install/debian).
 
 You will also need [SQLite](https://sqlite.org/) installed for this guide. It
-comes packaged with some operating systems such as Mac OS X but you may need to
+comes packaged with some operating systems such as macOS but you may need to
 install it separately.
 
 
