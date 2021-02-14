@@ -10,7 +10,7 @@ replicating a SQLite database to Amazon S3. By the end, you'll understand the
 database. It assumes you're comfortable on the command line and have some basic
 familiarity with Amazon AWS.
 
-{{< alert icon="⏱" text="You should expect to this tutorial to take about 10 minutes." >}}
+{{< alert icon="⏱" text="You should expect this tutorial to take about 10 minutes." >}}
 
 
 ## Prerequisites
