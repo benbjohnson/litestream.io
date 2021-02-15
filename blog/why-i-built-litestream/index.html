@@ -38,7 +38,7 @@ single node</a> using SQLite. <a href=https://twitter.com/davidcrawshaw>David Cr
 single process applications on SQLite. Django co-creator <a href=https://simonwillison.net/>Simon
 Willison</a> built a data exploration and publishing tool called
 <a href=https://datasette.io/>Datasette</a> that&rsquo;s built on SQLite.</p><p>SQLite is known for being bulletproof and having an <a href=sqlite-testing>absurdly in-depth testing
-suite</a>. It&rsquo;s motto is <em>&ldquo;Small. Fast. Reliable. Choose any three."</em></p><p>So why is SQLite considered a &ldquo;toy&rdquo; database in the application development
+suite</a>. Its motto is <em>&ldquo;Small. Fast. Reliable. Choose any three."</em></p><p>So why is SQLite considered a &ldquo;toy&rdquo; database in the application development
 world and not a production database?</p><h3 id=that-one-big-issue>That one big issue</h3><p>The biggest problem with using SQLite in production is disaster recovery. If
 your server dies, so does your data. That&rsquo;s&mldr; not good.</p><p>Other database servers have replication so they can stream database changes to
 another server in case one goes down. The best you can hope for with standard
