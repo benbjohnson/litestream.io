@@ -8,7 +8,7 @@ menu:
 weight: 520
 ---
 
-The `generations` command lists all generations for a database or replica. It 
+The `generations` command lists all generations for a database or replica. It
 lists stats about their lag behind the primary database and the time range
 they cover.
 

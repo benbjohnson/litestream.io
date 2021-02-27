@@ -33,7 +33,7 @@ install it separately.
 
 ### Creating an S3 bucket
 
-If you don't already have an Amazon AWS account, you can go 
+If you don't already have an Amazon AWS account, you can go
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
 Once you have an account, you'll need to [create an AWS IAM user][iam] with
 _programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
@@ -159,4 +159,3 @@ Kelly
 
 You now have a production-ready replication setup using SQLite and Litestream.
 Please see the [Reference](/reference) section for more configuration options.
-
