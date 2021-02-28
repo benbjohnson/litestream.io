@@ -6,5 +6,8 @@
   "no-inline-html": false,
   "no-trailing-punctuation": false,
   "no-duplicate-heading": false,
-  "no-bare-urls": false
+  "no-bare-urls": false,
+  "no-multiple-blanks": false,
+  "commands-show-output": false,
+  "fenced-code-language": false
 }

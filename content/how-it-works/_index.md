@@ -40,7 +40,7 @@ perform checkpoints as necessary.
 
 The shadow WAL is a directory next to your SQLite database where WAL files are
 effectively recreated as a sequence. The first shadow WAL file starts with
-`00000000.wal` and when a checkpoint occurs then it starts copying to 
+`00000000.wal` and when a checkpoint occurs then it starts copying to
 `00000001.wal`.
 
 These WAL files contain the original WAL frames & checksums to ensure
@@ -68,8 +68,6 @@ snapshot. This ensures we always have a contiguous set of files to replay even
 if Litestream is stopped and misses WAL frames being written.
 
 This approach also has the benefit that two servers that accidentally share
-the same replica destination will not overwrite each other's data. However, 
+the same replica destination will not overwrite each other's data. However,
 note that it is not recommended to replicate two databases to the same exact
 replica path.
-
-

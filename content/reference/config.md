@@ -79,7 +79,7 @@ Litestream currently supports two types of replicas:
 - `"s3"` replicates a database to an S3 bucket.
 - `"file"` replicates a database to another local file path.
 
-All replicas have unique name which is specified by the `"name"` field. If a 
+All replicas have unique name which is specified by the `"name"` field. If a
 name is not specified then the name defaults to the replica type.
 
 

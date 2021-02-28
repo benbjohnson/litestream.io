@@ -39,7 +39,7 @@ exponentially faster. So why do we need more computers than ever before?
 
 Since early web languages like PHP and Ruby were slow, you didn't want them
 running on your database server so you moved them to their own servers in what
-is called an [n-tier architecture][n-tier]. Now you can keep adding more 
+is called an [n-tier architecture][n-tier]. Now you can keep adding more
 stateless Ruby servers to this _presentation layer_ and scale your application.
 
 Database servers like Oracle, PostgreSQL, and MySQL tended to be complicated to
@@ -128,7 +128,7 @@ your server dies, so does your data. That's... not good.
 Other database servers have replication so they can stream database changes to
 another server in case one goes down. The best you can hope for with standard
 SQLite is to run a nightly backup. Solutions like [rqlite][] are great but
-it requires a 3-node cluster. 
+it requires a 3-node cluster.
 
 Why can't SQLite have a replication tool that's as easy to use as SQLite?
 
@@ -196,10 +196,10 @@ start of it. There are exciting features coming including replication to
 copies of your database at the edge to deliver requests instantly.
 
 If you're interested in trying out Litestream, the [Getting
-Started](/getting-started) can get you up and running in less than 10 minutes. 
+Started](/getting-started) can get you up and running in less than 10 minutes.
 
 I'm interested to hear from others that want to simplify and improve application
-development. If you have ideas or thoughts about the future of Litestream, 
+development. If you have ideas or thoughts about the future of Litestream,
 please get in touch on the [GitHub Discussions board][discussions] and drop me a
 line.
 

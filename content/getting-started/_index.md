@@ -26,7 +26,7 @@ install it separately.
 
 ### Creating an S3 bucket
 
-If you don't already have an Amazon AWS account, you can go 
+If you don't already have an Amazon AWS account, you can go
 [https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
 Once you have an account, you'll need to create an AWS IAM user with
 _programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
@@ -34,7 +34,7 @@ the user, you should have an **access key id** and a **secret access key**. We
 will use those in one of the steps below. <a href='/videos/iam.mp4'>Click here
 to watch a short video on creating an AWS IAM user.</a>
 
-You’ll also need to create a bucket in AWS S3. You’ll need to create a unique name for your bucket. 
+You’ll also need to create a bucket in AWS S3. You’ll need to create a unique name for your bucket.
 
 {{< alert icon="❗️" text="In this tutorial, we’ll name our bucket 'mybkt.litestream.io' but replace that with your bucket name, like 'mybkt.yourdomain.com'." >}}
 
@@ -95,7 +95,7 @@ you will see there is a `fruits.db` directory in your bucket.
 
 ## Restoring your database
 
-**In a third terminal window**, we'll restore our database to a new file. First, 
+**In a third terminal window**, we'll restore our database to a new file. First,
 make sure your environment variables are set correctly:
 
 ```sh
@@ -168,4 +168,3 @@ Litestream was built to run as a background service that you don't need to worry
 about—it just replicates your database all the time. To run Litestream as a
 background service, please refer to the [How-To Guides section](/guides) to
 run on your particular platform.
-
