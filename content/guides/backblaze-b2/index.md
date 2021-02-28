@@ -16,17 +16,17 @@ Litestream.
 To begin, you'll need a bucket to store your data. If you don't already have one
 set up in Backblaze, follow the steps below:
 
-1. From your Backblaze dashboard, go to My Account > Buckets
-1. Click "Create a Bucket"
-1. Enter a unique name for "Bucket Unique Name" and leave the remaining fields as their defaults.
-1. Click "Create a Bucket"
+1. From your Backblaze dashboard, go to _My Account > Buckets_
+1. Click _"Create a Bucket"_
+1. Enter a unique name for _"Bucket Unique Name"_ and leave the remaining fields as their defaults.
+1. Click _"Create a Bucket"_
 1. Copy the bucket details to the appropriate places in your `litestream.yml` file:
 
 ![Screenshot of bucket settings in Backblaze B2](bucket.png)
 
 ```yaml
 dbs:
-  - path: path-to-your-db-file
+  - path: path-to-your-local-db-file
     replicas:
       - type: s3
         bucket: your-bucket-name
@@ -39,12 +39,12 @@ dbs:
 
 Next, create a user with programmatic access to the bucket you just created.
 
-1. From your Backblaze dashboard, go to My Account > App Keys
-1. Click "Add Application Key"
-1. In "Name of Key" enter any unique name
-1. Under "Allow access to Bucket(s)" select the bucket you created above.
+1. From your Backblaze dashboard, go to _My Account > App Keys_
+1. Click _"Add Application Key"_
+1. In _"Name of Key"_, enter any unique name
+1. Under _"Allow access to Bucket(s)"_ select the bucket you created above.
 1. Leave the remaining fields as their defaults.
-1. Click "Create new key"
+1. Click _"Create new key"_
 1. Copy the credentials to the appropriate places in your `litestream.yml` file
     * The `keyID` field is your `access-key-id`
     * The `applicationKey` field is your `secret-access-key`
@@ -65,7 +65,7 @@ access-key-id: your-backblaze-keyID
 secret-access-key: your-backblaze-applicationKey
 
 dbs:
-  - path: path-to-your-db-file
+  - path: path-to-your-local-db-file
     replicas:
       - type: s3
         bucket: your-bucket-name
