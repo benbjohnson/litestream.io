@@ -3,3 +3,8 @@ node_modules
 public
 resources
 .DS_Store
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
