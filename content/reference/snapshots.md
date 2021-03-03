@@ -29,7 +29,7 @@ This command lists all snapshots for a single replica URL. This approach is
 useful when you do not have a configuration file.
 
 ```
-litestream wal [arguments] REPLICA_URL
+litestream snapshots [arguments] REPLICA_URL
 ```
 
 
