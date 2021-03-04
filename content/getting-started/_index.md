@@ -5,10 +5,13 @@ layout: docs
 ---
 
 This tutorial will get you up and running with Litestream locally and
-replicating a SQLite database to Amazon S3. By the end, you'll understand the
-`replicate` and `restore` commands and be able to continuously backup your
-database. It assumes you're comfortable on the command line and have some basic
-familiarity with Amazon AWS.
+replicating an SQLite database to an S3-compatible store called
+[MinIO](https://min.io/). This works the same as Amazon S3 but it's easier to
+get started.
+
+By the end, you'll understand the `replicate` and `restore` commands and be able
+to continuously backup your database. It assumes you're comfortable on the
+command line and have [Docker](https://www.docker.com/) installed.
 
 {{< alert icon="⏱" text="You should expect this tutorial to take about 10 minutes." >}}
 
@@ -24,19 +27,29 @@ comes packaged with some operating systems such as macOS but you may need to
 install it separately.
 
 
-### Creating an S3 bucket
+### Setting up MinIO
 
-If you don't already have an Amazon AWS account, you can go 
-[https://aws.amazon.com/](https://aws.amazon.com/) and click "Create Account".
-Once you have an account, you'll need to create an AWS IAM user with
-_programmatic access_ and with `AmazonS3FullAccess` permissions. After creating
-the user, you should have an **access key id** and a **secret access key**. We
-will use those in one of the steps below. <a href='/videos/iam.mp4'>Click here
-to watch a short video on creating an AWS IAM user.</a>
+We'll use a Docker instance of [MinIO](https://min.io/) for this example. This
+gets us up and running quickly but it will only persist the data for as long as
+the Docker container is running. That's good enough for this tutorial but you'll
+want to use persistent storage in a production environment.
 
-You’ll also need to create a bucket in AWS S3. You’ll need to create a unique name for your bucket. 
+First, start your MinIO instance:
 
-{{< alert icon="❗️" text="In this tutorial, we’ll name our bucket 'mybkt.litestream.io' but replace that with your bucket name, like 'mybkt.yourdomain.com'." >}}
+```sh
+docker run -p 9000:9000 minio/minio server /data
+```
+
+Then open a web browser to <a href="http://localhost:9000/" target="_blank">http://localhost:9000/</a>
+and enter the default credentials:
+
+```
+Username: minioadmin
+Password: minioadmin
+```
+
+Next, click the "+" button in the lower right-hand corner and then click the
+_"Create Bucket"_ icon. Name your bucket, `"mybkt"`.
 
 
 ## Setting up your database
@@ -70,26 +83,24 @@ INSERT INTO fruits (name, color) VALUES ('banana', 'yellow');
 **In a separate terminal window**, we'll run Litestream to replicate our new
 database. Make sure both terminal windows are using the same working directory.
 
-Using the AWS credentials obtained in the [_prerequisites section_](#creating-an-s3-bucket)
-above, add them to your environment variables. On macOS &
-Linux, you can run this from your command line with your credentials:
+First, we'll set our MinIO credentials to our environment variables:
 
 ```sh
-export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+export AWS_ACCESS_KEY_ID=minioadmin
+export AWS_SECRET_ACCESS_KEY=minioadmin
 ```
 
 Next, run Litesteam's `replicate` command to start replication:
 
 ```
-litestream replicate fruits.db s3://mybkt.litestream.io/fruits.db
+litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
 ```
 
 You should see Litestream print some initialization commands and then wait
 indefinitely. Normally, Litestream is run as a background service so it
 continuously watches your database for new changes so the command does not exit.
 
-If you open the [S3 Management Console](https://s3.console.aws.amazon.com/s3),
+If you open the [MinIO Console](http://localhost:9000/minio/mybkt/),
 you will see there is a `fruits.db` directory in your bucket.
 
 
@@ -99,32 +110,29 @@ you will see there is a `fruits.db` directory in your bucket.
 make sure your environment variables are set correctly:
 
 ```sh
-export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+export AWS_ACCESS_KEY_ID=minioadmin
+export AWS_SECRET_ACCESS_KEY=minioadmin
 ```
 
 Then run:
 
 ```sh
-litestream restore -o fruits2.db s3://mybkt.litestream.io/fruits.db
+litestream restore -o fruits2.db s3://mybkt.localhost:9000/fruits.db
 ```
 
-This will pull down the backup from S3 and write it to the `fruits2.db` file.
-You can verify the database matches by opening it with SQLite:
+This will pull down the backup from MinIO and write it to the `fruits2.db` file.
+You can verify the database matches by executing a query on our file:
 
 ```
-sqlite3 fruits2.db
+sqlite3 fruits2.db 'SELECT * FROM fruits'
 ```
 
-And reading the data:
+The data should show:
 
 ```
-SELECT * FROM fruits;
 apple|red
 banana|yellow
 ```
-
-Then type `.quit` or hit `CTRL-D` to exit the `sqlite3` session.
 
 
 ## Continuous replication
@@ -141,25 +149,22 @@ Then in your **third terminal window**, restore your database from our S3 backup
 to a new `fruits3.db` file:
 
 ```
-litestream restore -o fruits3.db s3://mybkt.litestream.io/fruits.db
+litestream restore -o fruits3.db s3://mybkt.localhost:9000/fruits.db
 ```
 
-We can open this file:
+We can execute a query on this file:
 
 ```
-sqlite3 fruits3.db
+sqlite3 fruits3.db 'SELECT * FROM fruits'
 ```
 
-Then read the data and we should now see our new row:
+We should now see our new row:
 
 ```
-SELECT * FROM fruits;
 apple|red
 banana|yellow
 grape|purple
 ```
-
-Then type `.quit` or hit `CTRL-D` to exit the `sqlite3` session.
 
 
 ## Further reading
