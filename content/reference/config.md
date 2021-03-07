@@ -105,7 +105,7 @@ dbs:
   - path: /var/lib/db
     replicas:
       - url: s3://mybkt.litestream.io/db
-        region: us-east1
+        region: us-east-1
         access-key-id: AKIAxxxxxxxxxxxxxxxx
         secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
