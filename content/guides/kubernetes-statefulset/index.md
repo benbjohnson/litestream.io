@@ -1,12 +1,13 @@
 ---
-title : "Running as a sidecar container in a Kubernetes StatefulSet"
-date: 2021-03-08T00:00:00Z
+title: "Running as a sidecar container in a Kubernetes StatefulSet"
 layout: docs
+date: 2021-03-07T21:25:53Z
 menu:
   docs:
     parent: "guides"
-weight: 320
+weight: 350
 ---
+
 
 This guide will get you running Litestream as a sidecar container in a Kubernetes StatefulSet, alongside your existing application using SQLite. This means that as long as your application is running, so will Litestream. It assumes you already have a Kubernetes [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) and that your SQLite database is stored on a [Volume](https://kubernetes.io/docs/concepts/storage/volumes/).
 
@@ -156,7 +157,7 @@ This configuration:
 After applying this configuration you should be able to see Litestream start up by tailing the logs:
 
 ```sh
-kubectl logs -f -c litestream wordpress-0
+kubectl logs -f -c litestream myapp-0
 ```
 
 ## Simulating a disaster
