@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+data:
+  litestream.yml: |
+    addr: ":9090"
+    dbs:
+      - path: /db/db.db
+        replicas:
+          - url: s3://mybkt.litestream.io/db.db
+            region: us-east-1

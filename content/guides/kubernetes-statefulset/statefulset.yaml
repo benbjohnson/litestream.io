@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: myapp
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  serviceName: myapp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:latest
+        ports:
+        - name: http
+          containerPort: 8080
+        volumeMounts:
+        - name: database
+          mountPath: /myapp/db
+      - name: litestream
+        image: litestream/litestream:0.3.3
+        volumeMounts:
+        - name: database
+          mountPath: /db
+        - name: configmap
+          mountPath: /etc/litestream.yml
+          subPath: litestream.yml
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: litestream
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litestream
+              key: AWS_SECRET_ACCESS_KEY
+        args:
+        - replicate
+        ports:
+        - name: metrics
+          containerPort: 9090
+      volumes:
+      - name: configmap
+        configMap:
+          name: myapp
+  volumeClaimTemplates:
+  - metadata:
+      name: database
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 100Mi

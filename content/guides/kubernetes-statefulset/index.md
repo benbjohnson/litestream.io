@@ -9,7 +9,7 @@ weight: 350
 ---
 
 
-This guide will get you running Litestream as a sidecar container in a Kubernetes StatefulSet, alongside your existing application using SQLite. This means that as long as your application is running, so will Litestream. It assumes you already have a Kubernetes [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) and that your SQLite database is stored on a [Volume](https://kubernetes.io/docs/concepts/storage/volumes/).
+This guide will get you running Litestream as a sidecar container in a Kubernetes StatefulSet, alongside your existing application using SQLite. This means that as long as your application is running, so will Litestream.
 
 {{< alert icon="⏱" text="This should take approximately 20 minutes to complete." >}}
 
@@ -19,6 +19,7 @@ This guide will get you running Litestream as a sidecar container in a Kubernete
 This guide assumes you have read the [_Getting Started_](/getting-started)
 tutorial already. Please read that to understand the basic operation of Litestream.
 
+It also assumes you already have a Kubernetes [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) and that your SQLite database is stored on a [Volume](https://kubernetes.io/docs/concepts/storage/volumes/). However the YAML files for a full working example (minus the [Secret](#kubernetes-secret-for-aws-credentials)) are available [on GitHub](https://github.com/cablespaghetti/litestream.io/tree/develop/content/guides/kubernetes-statefulset).
 
 ### Creating an S3 bucket
 
