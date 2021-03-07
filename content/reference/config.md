@@ -27,13 +27,6 @@ access-key-id:     AKIAxxxxxxxxxxxxxxxx
 secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
-You can also specify the AWS region, however, it will be looked up on startup
-so it is not necessary.
-
-```yaml
-region: us-east1
-```
-
 
 ### Metrics
 
