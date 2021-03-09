@@ -43,5 +43,12 @@ h3 a {
 }
 
 body.home .navbar-brand {
-  display: none; // hide on home page
+	display: none; // hide on home page
+}
+
+figure {
+	border: 1px solid #ccc;
+	img {
+		max-width: 100%;
+	}
 }
