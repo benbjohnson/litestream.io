@@ -13,6 +13,7 @@ different platforms.
 
 - [Amazon S3](/guides/s3)
 - [Backblaze B2](/guides/backblaze)
+- [DigitalOcean Spaces](/guides/digitalocean)
 
 
 ### Service configurations
