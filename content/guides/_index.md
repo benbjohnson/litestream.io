@@ -10,3 +10,4 @@ These guides provides instructions for running Litesteam in production on
 different platforms.
 
 - [Running as a systemd service](/guides/systemd)
+- [Replicating Backblaze B2](/guides/backblaze)
