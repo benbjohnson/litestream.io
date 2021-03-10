@@ -1,5 +1,5 @@
 ---
-title : "Running as a systemd service"
+title : "Running as a Systemd service"
 date: 2021-02-01T00:00:00Z
 layout: docs
 menu:
@@ -12,8 +12,6 @@ This guide will get you running Litestream as a systemd service on Debian-based
 operating systems such as Ubuntu. Running as a background service means that
 Litestream will always run in the background and restart automatically if the
 server restarts. It assumes you are comfortable with using a command line.
-
-{{< alert icon="⏱" text="This should take approximately 10 minutes to complete." >}}
 
 
 ## Prerequisites
