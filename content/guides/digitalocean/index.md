@@ -19,7 +19,7 @@ complete this guide.
 
 In the [DigitalOcean Console][console], click on the green _"Create"_ button
 in the top navigation and choose _"Spaces"_. You may need to enable spaces on
-your account you have not already. 
+your account if you have not already. 
 
 On the _"Create a Space"_ screen, you'll need to choose a region and name your
 space a globally unique name. Then click the _"Create a Space"_ button at the
