@@ -14,6 +14,7 @@ different platforms.
 - [Amazon S3](/guides/s3)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)
+- [Linode Object Storage](/guides/linode)
 
 
 ### Service configurations
