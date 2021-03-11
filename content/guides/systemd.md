@@ -73,7 +73,7 @@ dbs:
 EOF
 ```
 
-This configuration specifies that we want want Litestream to monitor our
+This configuration specifies that we want Litestream to monitor our
 `friends.db` database in our home directory and continuously replicate it to
 our `mybkt.litestream.io` S3 bucket.
 
