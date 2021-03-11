@@ -30,6 +30,6 @@ $ hugo new docs/prologue/TITLE/index.md
 Add a new blog, execute:
 
 ```sh
-$ hugo new hugo new blog/TITLE/index.md
+$ hugo new blog/TITLE/index.md
 ```
 
