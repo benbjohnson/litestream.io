@@ -30,7 +30,7 @@ dbs:
       - url: s3://mybkt.litestream.io/friends.db
         sync-interval: 1s
 EOF
-</code></pre><p>This configuration specifies that we want want Litestream to monitor our
+</code></pre><p>This configuration specifies that we want Litestream to monitor our
 <code>friends.db</code> database in our home directory and continuously replicate it to
 our <code>mybkt.litestream.io</code> S3 bucket.</p><p>After changing our configuration, we&rsquo;ll need to restart the Litestream service
 for it to register the change:</p><pre><code>sudo systemctl restart litestream
