@@ -45,3 +45,11 @@ h3 a {
 body.home .navbar-brand {
   display: none; // hide on home page
 }
+
+figure {
+  border: 1px solid #ccc;
+}
+
+main img {
+  max-width: 100%;
+}

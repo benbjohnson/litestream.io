@@ -9,4 +9,17 @@ layout: docs
 These guides provides instructions for running Litesteam in production on
 different platforms.
 
-- [Running as a systemd service](/guides/systemd)
+### Service configurations
+
+- [Running as a Systemd service](/guides/systemd)
+- [Running as a Windows service](/guides/windows)
+
+
+### Replication Destinations
+
+- [Amazon S3](/guides/s3)
+- [Backblaze B2](/guides/backblaze)
+- [DigitalOcean Spaces](/guides/digitalocean)
+- [Linode Object Storage](/guides/linode)
+
+

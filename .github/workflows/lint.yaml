@@ -1,6 +1,6 @@
 name: Run linters on code
 
-on: [push, pull_request]
+on: push
 
 jobs:
   build:
