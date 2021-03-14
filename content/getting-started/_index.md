@@ -54,7 +54,7 @@ _"Create Bucket"_ icon. Name your bucket, `"mybkt"`.
 
 ## Setting up your database
 
-Now that our S3 bucket is created, we can replicate data to it. Litestream
+Now that our MinIO bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we'll use the `sqlite3` command line tool
 to show how it works.
 
@@ -138,8 +138,9 @@ banana|yellow
 ## Continuous replication
 
 Litestream continuously monitors your database and backs it up to S3. We can
-see this by writing some more data to our original `fruits.db` database. In our
-first terminal window, write a new row to our table:
+see this by writing some more data to our original `fruits.db` database.
+
+**In our first terminal window**, write a new row to our table:
 
 ```
 INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
