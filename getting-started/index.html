@@ -14,7 +14,7 @@ want to use persistent storage in a production environment.</p><p>First, start y
 and enter the default credentials:</p><pre><code>Username: minioadmin
 Password: minioadmin
 </code></pre><p>Next, click the &ldquo;+&rdquo; button in the lower right-hand corner and then click the
-<em>&ldquo;Create Bucket&rdquo;</em> icon. Name your bucket, <code>"mybkt"</code>.</p><h2 id=setting-up-your-database>Setting up your database<a href=#setting-up-your-database class=anchor aria-hidden=true>#</a></h2><p>Now that our S3 bucket is created, we can replicate data to it. Litestream
+<em>&ldquo;Create Bucket&rdquo;</em> icon. Name your bucket, <code>"mybkt"</code>.</p><h2 id=setting-up-your-database>Setting up your database<a href=#setting-up-your-database class=anchor aria-hidden=true>#</a></h2><p>Now that our MinIO bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we&rsquo;ll use the <code>sqlite3</code> command line tool
 to show how it works.</p><p><strong>In a terminal window</strong>, create a new database file:</p><pre><code>sqlite3 fruits.db
 </code></pre><p>This will open the SQLite command prompt and now we can execute SQL commands.
@@ -37,8 +37,7 @@ You can verify the database matches by executing a query on our file:</p><pre><c
 </code></pre><p>The data should show:</p><pre><code>apple|red
 banana|yellow
 </code></pre><h2 id=continuous-replication>Continuous replication<a href=#continuous-replication class=anchor aria-hidden=true>#</a></h2><p>Litestream continuously monitors your database and backs it up to S3. We can
-see this by writing some more data to our original <code>fruits.db</code> database. In our
-first terminal window, write a new row to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
+see this by writing some more data to our original <code>fruits.db</code> database.</p><p><strong>In our first terminal window</strong>, write a new row to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
 </code></pre><p>Then in your <strong>third terminal window</strong>, restore your database from our S3 backup
 to a new <code>fruits3.db</code> file:</p><pre><code>litestream restore -o fruits3.db s3://mybkt.localhost:9000/fruits.db
 </code></pre><p>We can execute a query on this file:</p><pre><code>sqlite3 fruits3.db 'SELECT * FROM fruits'
