@@ -1,4 +1,4 @@
-name: Run linters on code
+name: Lint
 
 on: push
 
