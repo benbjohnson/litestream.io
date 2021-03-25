@@ -38,6 +38,25 @@ database mode to `WAL` if it has not already been enabled by the application.
 [wal]: https://sqlite.org/wal.html
 
 
+## Deleting SQLite databases
+
+If you're deleting and recreating a SQLite database from scratch, there are 3
+files which must be deleted:
+
+- Database file
+- Shared memory file (`-shm`)
+- WAL file (`-wal`)
+
+If you delete your database file but not your WAL file then SQLite will try to
+apply those old WAL pages to your new database. Litestream also tracks changes
+via the WAL so it can cause replication issues if the WAL file is leftover.
+
+Additionally, Litestream currently does not track database deletions. If you
+remove your database and recreate it, you should delete the `-litestream`
+directory next to your database file and restart Litestream.
+
+
+
 ## Synchronous PRAGMA
 
 SQLite must call `fsync()` to flush data to disk to ensure transactions are
