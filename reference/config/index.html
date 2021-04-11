@@ -24,7 +24,19 @@ by their absolute path.</p><p>Each database accepts two options—its path and a
 </span><span class=w>      </span>- <span class=nt>path</span><span class=p>:</span><span class=w> </span><span class=l>/backup/db2</span><span class=w>
 </span><span class=w>      </span>- <span class=nt>url</span><span class=p>:</span><span class=w>  </span><span class=l>s3://mybkt.litestream.io/db2</span><span class=w>
 </span></code></pre></div><h2 id=replica-settings>Replica settings<a href=#replica-settings class=anchor aria-hidden=true>#</a></h2><p>Litestream currently supports two types of replicas:</p><ul><li><code>"s3"</code> replicates a database to an S3 bucket.</li><li><code>"file"</code> replicates a database to another local file path.</li></ul><p>All replicas have unique name which is specified by the <code>"name"</code> field. If a
-name is not specified then the name defaults to the replica type.</p><h3 id=s3-replica>S3 replica<a href=#s3-replica class=anchor aria-hidden=true>#</a></h3><p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>dbs</span><span class=p>:</span><span class=w>
+name is not specified then the name defaults to the replica type. The name is
+only needed when using multiple replicas of the same type on a database.</p><p>The following replica settings are also available for all replica types:</p><ul><li><p><code>url</code>—Short-hand form of specifying a replica location. Setting this field
+will apply changes to multiples fields including <code>bucket</code>, <code>path</code>, <code>region</code>, etc.</p></li><li><p><code>retention</code>—The amount of time that snapshot & WAL files will be kept. After
+the retention period, a new snapshot will be created and the old one will be
+removed. WAL files that exist before the oldest snapshot will also be removed.
+Defaults to <code>24h</code>.</p></li><li><p><code>retention-check-interval</code>—Specifies how often Litestream will check if
+retention needs to be enforced. Defaults to <code>1h</code>.</p></li><li><p><code>snapshot-interval</code>—Specifies how often new snapshots will be created. This is
+used to reduce the time to restore since newer snapshots will have fewer WAL
+frames to apply. Retention still applies to these snapshots. Not enabled by
+default.</p></li><li><p><code>validation-interval</code>—When specified, Litestream will automatically restore
+and validate that the data on the replica matches the local copy. Disabled by
+default. Enabling this will significantly increase the cost of running
+Litestream as S3 services charge for downloads.</p></li></ul><h3 id=s3-replica>S3 replica<a href=#s3-replica class=anchor aria-hidden=true>#</a></h3><p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>dbs</span><span class=p>:</span><span class=w>
 </span><span class=w>  </span>- <span class=nt>path</span><span class=p>:</span><span class=w> </span><span class=l>/var/lib/db</span><span class=w>
 </span><span class=w>    </span><span class=nt>replicas</span><span class=p>:</span><span class=w>
 </span><span class=w>      </span>- <span class=nt>url</span><span class=p>:</span><span class=w> </span><span class=l>s3://mybkt.litestream.io/db</span><span class=w>
@@ -41,9 +53,14 @@ name is not specified then the name defaults to the replica type.</p><h3 id=s3-r
 </span><span class=w>        </span><span class=nt>region</span><span class=p>:</span><span class=w> </span><span class=l>us-east1</span><span class=w>
 </span><span class=w>        </span><span class=nt>access-key-id</span><span class=p>:</span><span class=w> </span><span class=l>AKIAxxxxxxxxxxxxxxxx</span><span class=w>
 </span><span class=w>        </span><span class=nt>secret-access-key</span><span class=p>:</span><span class=w> </span><span class=l>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class=w>
-</span></code></pre></div><p>The S3 replica also specifies a <code>sync-interval</code> which specifies how often WAL
-files are pushed to S3. Most of your replication cost will be S3 <code>PUT</code> calls
-so setting this too low may be expensive. By default, it is set to <code>10s</code>.</p><h3 id=file-replica>File replica<a href=#file-replica class=anchor aria-hidden=true>#</a></h3><p>File replicas can be configured using the <code>"path"</code> field:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>dbs</span><span class=p>:</span><span class=w>
+</span></code></pre></div><p>The following settings are specific to S3 replicas:</p><ul><li><p><code>access-key-id</code>—Replica-specific authentication key. If not specified, the
+global key or the <code>AWS_ACCESS_KEY_ID</code> environment variable will be used instead.</p></li><li><p><code>secret-access-key</code>——Replica-specific secret key. If not specified, the global
+secret or the <code>AWS_SECRET_ACCESS_KEY</code> environment variable will be used instead.</p></li><li><p><code>bucket</code>—Specifies the name of the remote bucket to replicate to.</p></li><li><p><code>path</code>—Specifies the path to use within the bucket.</p></li><li><p><code>region</code>—Specifies the bucket&rsquo;s region. Only used for AWS S3 & Backblaze B2.</p></li><li><p><code>endpoint</code>—Specifies the endpoint URL of the S3-compatible service. Only
+required for non-AWS services.</p></li><li><p><code>force-path-style</code>—Uses the path style which is required by non-AWS services.
+This is automatically enabled if <code>endpoint</code> is set.</p></li><li><p><code>skip-verify</code>—Disables TLS verification. This is useful when testing against
+a local node such as MinIO and you are using self-signed certificates.</p></li><li><p><code>sync-interval</code>—Frequency in which frames are pushed to S3. Defaults to <code>10s</code>
+when using the config but only <code>1s</code> when specifying the replica URL directly
+in the command line. Increasing frequency can affect costs significantly.</p></li></ul><h3 id=file-replica>File replica<a href=#file-replica class=anchor aria-hidden=true>#</a></h3><p>File replicas can be configured using the <code>"path"</code> field:</p><div class=highlight><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>dbs</span><span class=p>:</span><span class=w>
 </span><span class=w>  </span>- <span class=nt>path</span><span class=p>:</span><span class=w> </span><span class=l>/var/lib/db</span><span class=w>
 </span><span class=w>    </span><span class=nt>replicas</span><span class=p>:</span><span class=w>
 </span><span class=w>      </span>- <span class=nt>path</span><span class=p>:</span><span class=w> </span><span class=l>/backup/db</span><span class=w>
