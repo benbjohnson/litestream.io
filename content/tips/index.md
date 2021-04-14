@@ -88,6 +88,9 @@ seconds. This can be reasonably configured down to 1 second with the
 has not yet been replicated, a catastrophic crash on your server will result in
 the loss of data in that time window.
 
+For more typical shutdown scenarios, when Litestream receives a signal to close,
+it will attempt to synchronize all outstanding WAL changes to the S3 replica before terminating.
+
 Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.
 
