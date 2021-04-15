@@ -73,7 +73,31 @@ Litestream currently supports two types of replicas:
 - `"file"` replicates a database to another local file path.
 
 All replicas have unique name which is specified by the `"name"` field. If a
-name is not specified then the name defaults to the replica type.
+name is not specified then the name defaults to the replica type. The name is
+only needed when using multiple replicas of the same type on a database.
+
+The following replica settings are also available for all replica types:
+
+- `url`—Short-hand form of specifying a replica location. Setting this field
+  will apply changes to multiples fields including `bucket`, `path`, `region`, etc.
+
+- `retention`—The amount of time that snapshot & WAL files will be kept. After
+  the retention period, a new snapshot will be created and the old one will be
+  removed. WAL files that exist before the oldest snapshot will also be removed.
+  Defaults to `24h`.
+
+- `retention-check-interval`—Specifies how often Litestream will check if
+  retention needs to be enforced. Defaults to `1h`.
+
+- `snapshot-interval`—Specifies how often new snapshots will be created. This is
+  used to reduce the time to restore since newer snapshots will have fewer WAL
+  frames to apply. Retention still applies to these snapshots. Not enabled by
+  default.
+
+- `validation-interval`—When specified, Litestream will automatically restore
+  and validate that the data on the replica matches the local copy. Disabled by
+  default. Enabling this will significantly increase the cost of running
+  Litestream as S3 services charge for downloads.
 
 
 ### S3 replica
@@ -110,9 +134,32 @@ dbs:
         secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
-The S3 replica also specifies a `sync-interval` which specifies how often WAL
-files are pushed to S3. Most of your replication cost will be S3 `PUT` calls
-so setting this too low may be expensive. By default, it is set to `10s`.
+The following settings are specific to S3 replicas:
+
+- `access-key-id`—Replica-specific authentication key. If not specified, the
+  global key or the `AWS_ACCESS_KEY_ID` environment variable will be used instead.
+
+- `secret-access-key`——Replica-specific secret key. If not specified, the global
+  secret or the `AWS_SECRET_ACCESS_KEY` environment variable will be used instead.
+
+- `bucket`—Specifies the name of the remote bucket to replicate to.
+
+- `path`—Specifies the path to use within the bucket.
+
+- `region`—Specifies the bucket's region. Only used for AWS S3 & Backblaze B2.
+
+- `endpoint`—Specifies the endpoint URL of the S3-compatible service. Only
+  required for non-AWS services.
+
+- `force-path-style`—Uses the path style which is required by non-AWS services.
+  This is automatically enabled if `endpoint` is set.
+
+- `skip-verify`—Disables TLS verification. This is useful when testing against
+  a local node such as MinIO and you are using self-signed certificates.
+
+- `sync-interval`—Frequency in which frames are pushed to S3. Defaults to `10s`
+  when using the config but only `1s` when specifying the replica URL directly
+  in the command line. Increasing frequency can affect costs significantly.
 
 
 ### File replica
