@@ -98,8 +98,8 @@ Litestream is typically run as a background service which uses a configuration
 file. You can configure a replica for your database using the `url` format:
 
 ```yaml
-access-key-id=AKIAxxxxxxxxxxxxxxxx
-secret-access-key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+access-key-id: AKIAxxxxxxxxxxxxxxxx
+secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 dbs:
   - path: /path/to/local/db
@@ -126,8 +126,8 @@ dbs:
   - path: /path/to/local/db
     replicas:
       - url: s3://BUCKETNAME/PATHNAME
-        access-key-id=AKIAxxxxxxxxxxxxxxxx
-        secret-access-key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+        access-key-id: AKIAxxxxxxxxxxxxxxxx
+        secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
 
