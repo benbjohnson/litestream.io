@@ -43,6 +43,9 @@ litestream snapshots [arguments] REPLICA_URL
 -replica NAME
     Optional, filters by replica.
     Only applies when listing database snapshots.
+
+-no-expand-env
+    Disables environment variable expansion in configuration file.
 ```
 
 

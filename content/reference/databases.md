@@ -23,6 +23,9 @@ litestream databases [arguments]
 -config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
+
+-no-expand-env
+    Disables environment variable expansion in configuration file.
 ```
 
 
