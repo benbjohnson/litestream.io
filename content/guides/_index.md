@@ -9,8 +9,10 @@ layout: docs
 These guides provides instructions for running Litesteam in production on
 different platforms.
 
-### Service configurations
 
+### Deployment configurations
+
+- [Running in a Docker container](/guides/docker)
 - [Running as a Systemd service](/guides/systemd)
 - [Running as a Windows service](/guides/windows)
 
