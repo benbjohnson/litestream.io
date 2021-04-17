@@ -72,6 +72,9 @@ litestream restore [arguments] REPLICA_URL
 -config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
+
+-no-expand-env
+    Disables environment variable expansion in configuration file.
 ```
 
 

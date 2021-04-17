@@ -41,6 +41,9 @@ litestream wal [arguments] REPLICA_URL
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
 
+-no-expand-env
+    Disables environment variable expansion in configuration file.
+
 -replica NAME
     Optional, filters by replica.
     Only applies when listing database snapshots.

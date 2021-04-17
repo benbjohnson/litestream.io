@@ -14,6 +14,18 @@ applied to all replicas.
 
 The default path for the configuration file is `/etc/litestream.yml`.
 
+### Variable expansion
+
+By default, Litestream will perform environment variable expansion within the
+config file before reading it. Any references to `$VAR` or `${VAR}` formatted
+variables will be replaced with their environment variable values. If no value
+is set then it will be replaced with an empty string.
+
+This can cause issues if you have a value in a configuration file which has a
+dollar sign followed by characters—for example, a password. In this case, you
+can set the `-no-expand-env` flag on any `litestream` command to disable
+expansion.
+
 
 ## Global settings
 
