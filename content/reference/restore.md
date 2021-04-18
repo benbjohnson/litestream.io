@@ -65,10 +65,6 @@ litestream restore [arguments] REPLICA_URL
     Restore to a specific point-in-time.
     Defaults to use the latest available backup.
 
--dry-run
-    Prints all log output as if it were running but does
-    not perform actual restore.
-
 -config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
