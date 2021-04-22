@@ -149,10 +149,12 @@ dbs:
 The following settings are specific to S3 replicas:
 
 - `access-key-id`—Replica-specific authentication key. If not specified, the
-  global key or the `AWS_ACCESS_KEY_ID` environment variable will be used instead.
+  global key or the `LITESTREAM_ACCESS_KEY_ID` environment variable will be used
+  instead. The `AWS_ACCESS_KEY_ID` variable can also be used.
 
 - `secret-access-key`——Replica-specific secret key. If not specified, the global
-  secret or the `AWS_SECRET_ACCESS_KEY` environment variable will be used instead.
+  secret or the `LITESTREAM_SECRET_ACCESS_KEY` environment variable will be used
+  instead. The `AWS_SECRET_ACCESS_KEY` variable can also be used.
 
 - `bucket`—Specifies the name of the remote bucket to replicate to.
 
