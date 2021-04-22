@@ -66,8 +66,8 @@ line by setting environment variables with the credentials you obtained after
 creating your key:
 
 ```sh
-export AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export LITESTREAM_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxx
+export LITESTREAM_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Then you can specify your replica hostname as a replica URL on the command line.

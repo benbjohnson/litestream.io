@@ -73,13 +73,13 @@ replica as arguments:
 
 ```sh
 docker run \
-  --env AWS_ACCESS_KEY_ID \
-  --env AWS_SECRET_ACCESS_KEY \
+  --env LITESTREAM_ACCESS_KEY_ID \
+  --env LITESTREAM_SECRET_ACCESS_KEY \
   -v /local/path/to/data:/data \
   litestream/litestream replicate /data/db s3://BUCKET/db
 ```
 
-This command will use the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+This command will use the `LITESTREAM_ACCESS_KEY_ID` and `LITESTREAM_SECRET_ACCESS_KEY`
 environment variables in your current session and pass those into your Docker
 container. You can also set the values explicitly using the `-e` flag.
 

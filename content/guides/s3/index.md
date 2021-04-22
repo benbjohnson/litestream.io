@@ -70,8 +70,8 @@ You can replicate to S3 from the command line by setting environment variables
 with the credentials you obtained after creating your IAM user:
 
 ```sh
-export AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
-export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+export LITESTREAM_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
+export LITESTREAM_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
 Then you can specify your bucket as a replica URL on the command line. For
