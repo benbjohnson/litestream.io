@@ -86,8 +86,8 @@ database. Make sure both terminal windows are using the same working directory.
 First, we'll set our MinIO credentials to our environment variables:
 
 ```sh
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
+export LITESTREAM_ACCESS_KEY_ID=minioadmin
+export LITESTREAM_SECRET_ACCESS_KEY=minioadmin
 ```
 
 Next, run Litesteam's `replicate` command to start replication:
@@ -110,8 +110,8 @@ you will see there is a `fruits.db` directory in your bucket.
 make sure your environment variables are set correctly:
 
 ```sh
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
+export LITESTREAM_ACCESS_KEY_ID=minioadmin
+export LITESTREAM_SECRET_ACCESS_KEY=minioadmin
 ```
 
 Then run:
