@@ -1,4 +1,32 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The Litestream Blog on</title><link>https://litestream.io/blog/</link><description>Recent content in The Litestream Blog on</description><generator>Hugo -- gohugo.io</generator><language>en-US</language><lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Litestream v0.3.3 Released</title><link>https://litestream.io/blog/litestream-v0.3.3-released/</link><pubDate>Tue, 16 Mar 2021 00:00:00 +0000</pubDate><guid>https://litestream.io/blog/litestream-v0.3.3-released/</guid><description>The newest version of Litestream brings support for Windows and support for S3-compatible storage such as MinIO. It also includes over a dozen quality-of-life fixes and expands documentation.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>The Litestream Blog on </title>
+    <link>https://litestream.io/blog/</link>
+    <description>Recent content in The Litestream Blog on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Litestream v0.3.3 Released</title>
+      <link>https://litestream.io/blog/litestream-v0.3.3-released/</link>
+      <pubDate>Tue, 16 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/blog/litestream-v0.3.3-released/</guid>
+      <description>The newest version of Litestream brings support for Windows and support for S3-compatible storage such as MinIO. It also includes over a dozen quality-of-life fixes and expands documentation.
 Beyond code changes, we&amp;rsquo;ve opened up a Slack channel &amp;amp; started office hours to help folks get up and running. Let&amp;rsquo;s run through some of these changes.
-Slack &amp;amp; office hours While Litestream has an active GitHub Discussions board and Issues section, sometimes you want to have synchronous communication to quickly figure out an issue or just to get up and running.</description></item><item><title>Why I Built Litestream</title><link>https://litestream.io/blog/why-i-built-litestream/</link><pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate><guid>https://litestream.io/blog/why-i-built-litestream/</guid><description>tl;dr—Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp;amp; Litestream for your production applications.
-When I was your age&amp;hellip; I can tell I&amp;rsquo;m getting old because I talk about the &amp;ldquo;good old days&amp;rdquo; of computing. Back when knowing a single programming language and SQL was good enough to work at most jobs.</description></item></channel></rss>
+Slack &amp;amp; office hours While Litestream has an active GitHub Discussions board and Issues section, sometimes you want to have synchronous communication to quickly figure out an issue or just to get up and running.</description>
+    </item>
+    
+    <item>
+      <title>Why I Built Litestream</title>
+      <link>https://litestream.io/blog/why-i-built-litestream/</link>
+      <pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/blog/why-i-built-litestream/</guid>
+      <description>tl;dr—Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp;amp; Litestream for your production applications.
+When I was your age&amp;hellip; I can tell I&amp;rsquo;m getting old because I talk about the &amp;ldquo;good old days&amp;rdquo; of computing. Back when knowing a single programming language and SQL was good enough to work at most jobs.</description>
+    </item>
+    
+  </channel>
+</rss>

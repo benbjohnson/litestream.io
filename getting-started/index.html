@@ -1,50 +1,276 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><link rel=stylesheet href=https://litestream.io/main.de5926d94da17e225ef303b78ff658d1b5c90cfdbd0af8c5f55ef5243a6b55db9404ebdad83a8063bcdaad5eff8e7e8d97e936d53fd1b725b785cdb1c0224c8b.css integrity="sha512-3lkm2U2hfiJe8wO3j/ZY0bXJDP29CvjF9V71JDprVduUBOva2DqAY7zarV7/jn6Nl+k21T/RtyW3hc2xwCJMiw==" crossorigin=anonymous><noscript><style>img.lazyload{display:none}</style></noscript><link rel=preconnect href=https://fonts.gstatic.com><link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel=stylesheet><meta name=robots content="index, follow"><meta name=googlebot content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><meta name=bingbot content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><title>Getting Started - Litestream</title><meta name=description content="Litestream replicates SQLite databases in real-time to S3."><link rel=canonical href=https://litestream.io/getting-started/><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://litestream.io/images/twitter-image.png"><meta name=twitter:title content="Getting Started"><meta name=twitter:description content="Litestream replicates SQLite databases in real-time to S3."><meta name=twitter:site content="@litestreamio"><meta name=twitter:creator content="@benbjohnson"><meta name=twitter:site content="@litestreamio"><meta name=twitter:creator content="@benbjohnson"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https:\/\/litestream.io\/"},{"@type":"ListItem","position":2,"name":"Getting Started","item":"https:\/\/litestream.io\/getting-started\/"}]}</script><meta name=theme-color content="#fff"><link rel=apple-touch-icon sizes=180x180 href=https://litestream.io/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://litestream.io/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=https://litestream.io/favicon-16x16.png><link rel=manifest href=https://litestream.io/site.webmanifest></head><body class="getting-started list"><header class="navbar fixed-top navbar-expand-md navbar-light"><div class="container align-items-baseline"><input class="menu-btn order-0" type=checkbox id=menu-btn>
-<label class="menu-icon d-md-none" for=menu-btn><span class=navicon></span></label><a class="navbar-brand order-1 order-md-0 mr-auto" href=https://litestream.io/>Litestream</a><ul class="navbar-nav social-nav order-3 order-md-5"><li class=nav-item><a class=nav-link href=https://twitter.com/litestreamio><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9.0 01-3.14 1.53 4.48 4.48.0 00-7.86 3v1A10.66 10.66.0 013 4s-4 9 5 13a11.64 11.64.0 01-7 2c9 5 20 0 20-11.5a4.5 4.5.0 00-.08-.83A7.72 7.72.0 0023 3z"/></svg><span class="ml-2 sr-only">Twitter</span></a></li><li class=nav-item><a class=nav-link href=https://github.com/benbjohnson/litestream><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77a5.44 5.44.0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg><span class="ml-2 sr-only">GitHub</span></a></li></ul><div class="collapse navbar-collapse order-4 order-md-1"><ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class=nav-item><a class=nav-link href=https://litestream.io/install>Install</a></li><li class=nav-item><a class=nav-link href=https://litestream.io/guides>Guides</a></li><li class=nav-item><a class=nav-link href=https://litestream.io/reference>Reference</a></li><li class=nav-item><a class=nav-link href=https://litestream.io/blog/>Blog</a></li><li class=nav-item><a class=nav-link href=https://github.com/benbjohnson/litestream>GitHub</a></li><li class=nav-item><a class=nav-link href=https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q>Slack</a></li></ul><div class="break order-6 d-md-none"></div></div></div></header><div class="wrap container" role=document><div class=content><div class="row flex-xl-nowrap"><div class="col-lg-5 col-xl-4 docs-sidebar"><nav class=docs-links aria-label="Main navigation"><h3><a href=https://litestream.io/install>Install</a></h3><ul class=list-unstyled><li><a class=docs-link href=https://litestream.io/install/mac/>macOS</a></li><li><a class=docs-link href=https://litestream.io/install/debian/>Linux (Debian)</a></li><li><a class=docs-link href=https://litestream.io/install/source/>Build from Source</a></li></ul><h3><a href=https://litestream.io/getting-started/>Getting Started</a></h3><h3><a href=https://litestream.io/tips/>Tips & Caveats</a></h3><h3><a href=https://litestream.io/guides/>Guides</a></h3><ul class=list-unstyled><li><a class=docs-link href=https://litestream.io/guides/systemd/>Running as a Systemd service</a></li><li><a class=docs-link href=https://litestream.io/guides/windows/>Running as a Windows Service</a></li><li><a class=docs-link href=https://litestream.io/guides/s3/>Replicating to Amazon S3</a></li><li><a class=docs-link href=https://litestream.io/guides/backblaze/>Replicating to Backblaze B2</a></li><li><a class=docs-link href=https://litestream.io/guides/digitalocean/>Replicating to DigitalOcean Spaces</a></li><li><a class=docs-link href=https://litestream.io/guides/linode/>Replicating to Linode Object Storage</a></li></ul><h3><a href=https://litestream.io/how-it-works/>How it Works</a></h3><h3><a href=https://litestream.io/reference/>Reference</a></h3><ul class=list-unstyled><li><a class=docs-link href=https://litestream.io/reference/config/>Configuration File</a></li><li><a class=docs-link href=https://litestream.io/reference/databases/>Command: databases</a></li><li><a class=docs-link href=https://litestream.io/reference/generations/>Command: generations</a></li><li><a class=docs-link href=https://litestream.io/reference/replicate/>Command: replicate</a></li><li><a class=docs-link href=https://litestream.io/reference/restore/>Command: restore</a></li><li><a class=docs-link href=https://litestream.io/reference/snapshots/>Command: snapshots</a></li><li><a class=docs-link href=https://litestream.io/reference/version/>Command: version</a></li><li><a class=docs-link href=https://litestream.io/reference/wal/>Command: wal</a></li></ul></nav></div><nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation"><div class=page-links><h3>On this page</h3><nav id=TableOfContents><ul><li><a href=#prerequisites>Prerequisites</a><ul><li><a href=#install-litestream--sqlite>Install Litestream & SQLite</a></li><li><a href=#setting-up-minio>Setting up MinIO</a></li></ul></li><li><a href=#setting-up-your-database>Setting up your database</a></li><li><a href=#replicating-your-database>Replicating your database</a></li><li><a href=#restoring-your-database>Restoring your database</a></li><li><a href=#continuous-replication>Continuous replication</a></li><li><a href=#further-reading>Further reading</a></li></ul></nav></div></nav><main class="docs-content col-lg-11 col-xl-9 mx-xl-auto"><h1>Getting Started</h1><p class=lead></p><p>This tutorial will get you up and running with Litestream locally and
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="https://litestream.io/main.de5926d94da17e225ef303b78ff658d1b5c90cfdbd0af8c5f55ef5243a6b55db9404ebdad83a8063bcdaad5eff8e7e8d97e936d53fd1b725b785cdb1c0224c8b.css" integrity="sha512-3lkm2U2hfiJe8wO3j/ZY0bXJDP29CvjF9V71JDprVduUBOva2DqAY7zarV7/jn6Nl&#43;k21T/RtyW3hc2xwCJMiw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Getting Started - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/getting-started/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Getting Started">
+<meta name="twitter:description" content="Litestream replicates SQLite databases in real-time to S3.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Getting Started",
+        "item": "https:\/\/litestream.io\/getting-started\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="getting-started list">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      Litestream
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/blog/">Blog</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/getting-started/">Getting Started</a>
+  </h3>
+  <h3>
+    <a href="https://litestream.io/tips/">Tips &amp; Caveats</a>
+  </h3>
+  <h3>
+    <a href="https://litestream.io/guides/">Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/how-it-works/">How it Works</a>
+  </h3>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#prerequisites">Prerequisites</a>
+      <ul>
+        <li><a href="#install-litestream--sqlite">Install Litestream &amp; SQLite</a></li>
+        <li><a href="#setting-up-minio">Setting up MinIO</a></li>
+      </ul>
+    </li>
+    <li><a href="#setting-up-your-database">Setting up your database</a></li>
+    <li><a href="#replicating-your-database">Replicating your database</a></li>
+    <li><a href="#restoring-your-database">Restoring your database</a></li>
+    <li><a href="#continuous-replication">Continuous replication</a></li>
+    <li><a href="#further-reading">Further reading</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Getting Started</h1>
+			<p class="lead"></p>
+			<p>This tutorial will get you up and running with Litestream locally and
 replicating an SQLite database to an S3-compatible store called
-<a href=https://min.io/>MinIO</a>. This works the same as Amazon S3 but it&rsquo;s easier to
-get started.</p><p>By the end, you&rsquo;ll understand the <code>replicate</code> and <code>restore</code> commands and be able
+<a href="https://min.io/">MinIO</a>. This works the same as Amazon S3 but it&rsquo;s easier to
+get started.</p>
+<p>By the end, you&rsquo;ll understand the <code>replicate</code> and <code>restore</code> commands and be able
 to continuously backup your database. It assumes you&rsquo;re comfortable on the
-command line and have <a href=https://www.docker.com/>Docker</a> installed.</p><div class="alert alert-warning d-flex" role=alert><div class="flex-shrink-1 alert-icon">⏱</div><div class=w-100>You should expect this tutorial to take about 10 minutes.</div></div><h2 id=prerequisites>Prerequisites<a href=#prerequisites class=anchor aria-hidden=true>#</a></h2><h3 id=install-litestream--sqlite>Install Litestream & SQLite<a href=#install-litestream--sqlite class=anchor aria-hidden=true>#</a></h3><p>Before continuing, <a href=/install>please install Litestream on your local machine</a>.</p><p>You will also need <a href=https://sqlite.org/>SQLite</a> installed for this tutorial. It
+command line and have <a href="https://www.docker.com/">Docker</a> installed.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⏱</div>
+  <div class="w-100">You should expect this tutorial to take about 10 minutes.</div>
+</div>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="install-litestream--sqlite">Install Litestream &amp; SQLite<a href="#install-litestream--sqlite" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Before continuing, <a href="/install">please install Litestream on your local machine</a>.</p>
+<p>You will also need <a href="https://sqlite.org/">SQLite</a> installed for this tutorial. It
 comes packaged with some operating systems such as macOS but you may need to
-install it separately.</p><h3 id=setting-up-minio>Setting up MinIO<a href=#setting-up-minio class=anchor aria-hidden=true>#</a></h3><p>We&rsquo;ll use a Docker instance of <a href=https://min.io/>MinIO</a> for this example. This
+install it separately.</p>
+<h3 id="setting-up-minio">Setting up MinIO<a href="#setting-up-minio" class="anchor" aria-hidden="true">#</a> </h3>
+<p>We&rsquo;ll use a Docker instance of <a href="https://min.io/">MinIO</a> for this example. This
 gets us up and running quickly but it will only persist the data for as long as
 the Docker container is running. That&rsquo;s good enough for this tutorial but you&rsquo;ll
-want to use persistent storage in a production environment.</p><p>First, start your MinIO instance:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>docker run -p 9000:9000 minio/minio server /data
-</code></pre></div><p>Then open a web browser to <a href=http://localhost:9000/ target=_blank>http://localhost:9000/</a>
-and enter the default credentials:</p><pre><code>Username: minioadmin
+want to use persistent storage in a production environment.</p>
+<p>First, start your MinIO instance:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -p 9000:9000 minio/minio server /data
+</code></pre></div><p>Then open a web browser to <a href="http://localhost:9000/" target="_blank">http://localhost:9000/</a>
+and enter the default credentials:</p>
+<pre><code>Username: minioadmin
 Password: minioadmin
 </code></pre><p>Next, click the &ldquo;+&rdquo; button in the lower right-hand corner and then click the
-<em>&ldquo;Create Bucket&rdquo;</em> icon. Name your bucket, <code>"mybkt"</code>.</p><h2 id=setting-up-your-database>Setting up your database<a href=#setting-up-your-database class=anchor aria-hidden=true>#</a></h2><p>Now that our MinIO bucket is created, we can replicate data to it. Litestream
+<em>&ldquo;Create Bucket&rdquo;</em> icon. Name your bucket, <code>&quot;mybkt&quot;</code>.</p>
+<h2 id="setting-up-your-database">Setting up your database<a href="#setting-up-your-database" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Now that our MinIO bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we&rsquo;ll use the <code>sqlite3</code> command line tool
-to show how it works.</p><p><strong>In a terminal window</strong>, create a new database file:</p><pre><code>sqlite3 fruits.db
+to show how it works.</p>
+<p><strong>In a terminal window</strong>, create a new database file:</p>
+<pre><code>sqlite3 fruits.db
 </code></pre><p>This will open the SQLite command prompt and now we can execute SQL commands.
-We&rsquo;ll start by creating a new table:</p><pre><code>CREATE TABLE fruits (name TEXT, color TEXT);
-</code></pre><p>And we can add some data to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('apple', 'red');
+We&rsquo;ll start by creating a new table:</p>
+<pre><code>CREATE TABLE fruits (name TEXT, color TEXT);
+</code></pre><p>And we can add some data to our table:</p>
+<pre><code>INSERT INTO fruits (name, color) VALUES ('apple', 'red');
 INSERT INTO fruits (name, color) VALUES ('banana', 'yellow');
-</code></pre><h2 id=replicating-your-database>Replicating your database<a href=#replicating-your-database class=anchor aria-hidden=true>#</a></h2><p><strong>In a separate terminal window</strong>, we&rsquo;ll run Litestream to replicate our new
-database. Make sure both terminal windows are using the same working directory.</p><p>First, we&rsquo;ll set our MinIO credentials to our environment variables:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>export</span> <span class=nv>AWS_ACCESS_KEY_ID</span><span class=o>=</span>minioadmin
-<span class=nb>export</span> <span class=nv>AWS_SECRET_ACCESS_KEY</span><span class=o>=</span>minioadmin
-</code></pre></div><p>Next, run Litesteam&rsquo;s <code>replicate</code> command to start replication:</p><pre><code>litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
+</code></pre><h2 id="replicating-your-database">Replicating your database<a href="#replicating-your-database" class="anchor" aria-hidden="true">#</a> </h2>
+<p><strong>In a separate terminal window</strong>, we&rsquo;ll run Litestream to replicate our new
+database. Make sure both terminal windows are using the same working directory.</p>
+<p>First, we&rsquo;ll set our MinIO credentials to our environment variables:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
+<span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
+</code></pre></div><p>Next, run Litesteam&rsquo;s <code>replicate</code> command to start replication:</p>
+<pre><code>litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
 </code></pre><p>You should see Litestream print some initialization commands and then wait
 indefinitely. Normally, Litestream is run as a background service so it
-continuously watches your database for new changes so the command does not exit.</p><p>If you open the <a href=http://localhost:9000/minio/mybkt/>MinIO Console</a>,
-you will see there is a <code>fruits.db</code> directory in your bucket.</p><h2 id=restoring-your-database>Restoring your database<a href=#restoring-your-database class=anchor aria-hidden=true>#</a></h2><p><strong>In a third terminal window</strong>, we&rsquo;ll restore our database to a new file. First,
-make sure your environment variables are set correctly:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh><span class=nb>export</span> <span class=nv>AWS_ACCESS_KEY_ID</span><span class=o>=</span>minioadmin
-<span class=nb>export</span> <span class=nv>AWS_SECRET_ACCESS_KEY</span><span class=o>=</span>minioadmin
-</code></pre></div><p>Then run:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>litestream restore -o fruits2.db s3://mybkt.localhost:9000/fruits.db
+continuously watches your database for new changes so the command does not exit.</p>
+<p>If you open the <a href="http://localhost:9000/minio/mybkt/">MinIO Console</a>,
+you will see there is a <code>fruits.db</code> directory in your bucket.</p>
+<h2 id="restoring-your-database">Restoring your database<a href="#restoring-your-database" class="anchor" aria-hidden="true">#</a> </h2>
+<p><strong>In a third terminal window</strong>, we&rsquo;ll restore our database to a new file. First,
+make sure your environment variables are set correctly:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
+<span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
+</code></pre></div><p>Then run:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream restore -o fruits2.db s3://mybkt.localhost:9000/fruits.db
 </code></pre></div><p>This will pull down the backup from MinIO and write it to the <code>fruits2.db</code> file.
-You can verify the database matches by executing a query on our file:</p><pre><code>sqlite3 fruits2.db 'SELECT * FROM fruits'
-</code></pre><p>The data should show:</p><pre><code>apple|red
+You can verify the database matches by executing a query on our file:</p>
+<pre><code>sqlite3 fruits2.db 'SELECT * FROM fruits'
+</code></pre><p>The data should show:</p>
+<pre><code>apple|red
 banana|yellow
-</code></pre><h2 id=continuous-replication>Continuous replication<a href=#continuous-replication class=anchor aria-hidden=true>#</a></h2><p>Litestream continuously monitors your database and backs it up to S3. We can
-see this by writing some more data to our original <code>fruits.db</code> database.</p><p><strong>In our first terminal window</strong>, write a new row to our table:</p><pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
+</code></pre><h2 id="continuous-replication">Continuous replication<a href="#continuous-replication" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream continuously monitors your database and backs it up to S3. We can
+see this by writing some more data to our original <code>fruits.db</code> database.</p>
+<p><strong>In our first terminal window</strong>, write a new row to our table:</p>
+<pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
 </code></pre><p>Then in your <strong>third terminal window</strong>, restore your database from our S3 backup
-to a new <code>fruits3.db</code> file:</p><pre><code>litestream restore -o fruits3.db s3://mybkt.localhost:9000/fruits.db
-</code></pre><p>We can execute a query on this file:</p><pre><code>sqlite3 fruits3.db 'SELECT * FROM fruits'
-</code></pre><p>We should now see our new row:</p><pre><code>apple|red
+to a new <code>fruits3.db</code> file:</p>
+<pre><code>litestream restore -o fruits3.db s3://mybkt.localhost:9000/fruits.db
+</code></pre><p>We can execute a query on this file:</p>
+<pre><code>sqlite3 fruits3.db 'SELECT * FROM fruits'
+</code></pre><p>We should now see our new row:</p>
+<pre><code>apple|red
 banana|yellow
 grape|purple
-</code></pre><h2 id=further-reading>Further reading<a href=#further-reading class=anchor aria-hidden=true>#</a></h2><p>Litestream was built to run as a background service that you don&rsquo;t need to worry
+</code></pre><h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream was built to run as a background service that you don&rsquo;t need to worry
 about—it just replicates your database all the time. To run Litestream as a
-background service, please refer to the <a href=/guides>How-To Guides section</a> to
-run on your particular platform.</p></main></div></div></div><footer></footer><script src=https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js integrity="sha512-9rSE9VatHzvPYGEIITmi8h+nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin=anonymous defer></script><script src=https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin=anonymous defer></script></body></html>
+background service, please refer to the <a href="/guides">How-To Guides section</a> to
+run on your particular platform.</p>
+
+			
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

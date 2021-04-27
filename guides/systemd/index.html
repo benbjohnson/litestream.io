@@ -1,26 +1,214 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><link rel=stylesheet href=https://litestream.io/main.de5926d94da17e225ef303b78ff658d1b5c90cfdbd0af8c5f55ef5243a6b55db9404ebdad83a8063bcdaad5eff8e7e8d97e936d53fd1b725b785cdb1c0224c8b.css integrity="sha512-3lkm2U2hfiJe8wO3j/ZY0bXJDP29CvjF9V71JDprVduUBOva2DqAY7zarV7/jn6Nl+k21T/RtyW3hc2xwCJMiw==" crossorigin=anonymous><noscript><style>img.lazyload{display:none}</style></noscript><link rel=preconnect href=https://fonts.gstatic.com><link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel=stylesheet><meta name=robots content="index, follow"><meta name=googlebot content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><meta name=bingbot content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><title>Running as a Systemd service - Litestream</title><meta name=description content="Litestream replicates SQLite databases in real-time to S3."><link rel=canonical href=https://litestream.io/guides/systemd/><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://litestream.io/images/twitter-image.png"><meta name=twitter:title content="Running as a Systemd service"><meta name=twitter:description content="This guide will get you running Litestream as a systemd service on Debian-based operating systems such as Ubuntu. Running as a background service means that Litestream will always run in the background and restart automatically if the server restarts. It assumes you are comfortable with using a command line.
-Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream."><meta name=twitter:site content="@litestreamio"><meta name=twitter:creator content="@benbjohnson"><meta name=twitter:site content="@litestreamio"><meta name=twitter:creator content="@benbjohnson"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https:\/\/litestream.io\/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https:\/\/litestream.io\/guides\/"},{"@type":"ListItem","position":3,"name":"Systemd","item":"https:\/\/litestream.io\/guides\/systemd\/"}]}</script><meta name=theme-color content="#fff"><link rel=apple-touch-icon sizes=180x180 href=https://litestream.io/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=https://litestream.io/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=https://litestream.io/favicon-16x16.png><link rel=manifest href=https://litestream.io/site.webmanifest></head><body class="guides single"><header class="navbar fixed-top navbar-expand-md navbar-light"><div class="container align-items-baseline"><input class="menu-btn order-0" type=checkbox id=menu-btn>
-<label class="menu-icon d-md-none" for=menu-btn><span class=navicon></span></label><a class="navbar-brand order-1 order-md-0 mr-auto" href=https://litestream.io/>Litestream</a><ul class="navbar-nav social-nav order-3 order-md-5"><li class=nav-item><a class=nav-link href=https://twitter.com/litestreamio><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9.0 01-3.14 1.53 4.48 4.48.0 00-7.86 3v1A10.66 10.66.0 013 4s-4 9 5 13a11.64 11.64.0 01-7 2c9 5 20 0 20-11.5a4.5 4.5.0 00-.08-.83A7.72 7.72.0 0023 3z"/></svg><span class="ml-2 sr-only">Twitter</span></a></li><li class=nav-item><a class=nav-link href=https://github.com/benbjohnson/litestream><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77a5.44 5.44.0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg><span class="ml-2 sr-only">GitHub</span></a></li></ul><div class="collapse navbar-collapse order-4 order-md-1"><ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class=nav-item><a class=nav-link href=https://litestream.io/install>Install</a></li><li class=nav-item><a class=nav-link href=https://litestream.io/guides>Guides</a></li><li class=nav-item><a class=nav-link href=https://litestream.io/reference>Reference</a></li><li class=nav-item><a class=nav-link href=https://litestream.io/blog/>Blog</a></li><li class=nav-item><a class=nav-link href=https://github.com/benbjohnson/litestream>GitHub</a></li><li class=nav-item><a class=nav-link href=https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q>Slack</a></li></ul><div class="break order-6 d-md-none"></div></div></div></header><div class="wrap container" role=document><div class=content><div class="row flex-xl-nowrap"><div class="col-lg-5 col-xl-4 docs-sidebar"><nav class=docs-links aria-label="Main navigation"><h3><a href=https://litestream.io/install>Install</a></h3><ul class=list-unstyled><li><a class=docs-link href=https://litestream.io/install/mac/>macOS</a></li><li><a class=docs-link href=https://litestream.io/install/debian/>Linux (Debian)</a></li><li><a class=docs-link href=https://litestream.io/install/source/>Build from Source</a></li></ul><h3><a href=https://litestream.io/getting-started/>Getting Started</a></h3><h3><a href=https://litestream.io/tips/>Tips & Caveats</a></h3><h3><a href=https://litestream.io/guides/>Guides</a></h3><ul class=list-unstyled><li><a class="docs-link active" href=https://litestream.io/guides/systemd/>Running as a Systemd service</a></li><li><a class=docs-link href=https://litestream.io/guides/windows/>Running as a Windows Service</a></li><li><a class=docs-link href=https://litestream.io/guides/s3/>Replicating to Amazon S3</a></li><li><a class=docs-link href=https://litestream.io/guides/backblaze/>Replicating to Backblaze B2</a></li><li><a class=docs-link href=https://litestream.io/guides/digitalocean/>Replicating to DigitalOcean Spaces</a></li><li><a class=docs-link href=https://litestream.io/guides/linode/>Replicating to Linode Object Storage</a></li></ul><h3><a href=https://litestream.io/how-it-works/>How it Works</a></h3><h3><a href=https://litestream.io/reference/>Reference</a></h3><ul class=list-unstyled><li><a class=docs-link href=https://litestream.io/reference/config/>Configuration File</a></li><li><a class=docs-link href=https://litestream.io/reference/databases/>Command: databases</a></li><li><a class=docs-link href=https://litestream.io/reference/generations/>Command: generations</a></li><li><a class=docs-link href=https://litestream.io/reference/replicate/>Command: replicate</a></li><li><a class=docs-link href=https://litestream.io/reference/restore/>Command: restore</a></li><li><a class=docs-link href=https://litestream.io/reference/snapshots/>Command: snapshots</a></li><li><a class=docs-link href=https://litestream.io/reference/version/>Command: version</a></li><li><a class=docs-link href=https://litestream.io/reference/wal/>Command: wal</a></li></ul></nav></div><nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation"><div class=page-links><h3>On this page</h3><nav id=TableOfContents><ul><li><a href=#prerequisites>Prerequisites</a><ul><li><a href=#install-litestream--sqlite>Install Litestream & SQLite</a></li><li><a href=#creating-an-s3-bucket>Creating an S3 bucket</a></li></ul></li><li><a href=#configuration-file>Configuration file</a></li><li><a href=#writing-to-our-database>Writing to our database</a></li><li><a href=#simulating-a-disaster>Simulating a disaster</a></li><li><a href=#restoring-our-database>Restoring our database</a></li><li><a href=#further-reading>Further reading</a></li></ul></nav></div></nav><main class="docs-content col-lg-11 col-xl-9 mx-xl-auto"><h1>Running as a Systemd service</h1><p class=lead></p><p>This guide will get you running Litestream as a systemd service on Debian-based
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="https://litestream.io/main.de5926d94da17e225ef303b78ff658d1b5c90cfdbd0af8c5f55ef5243a6b55db9404ebdad83a8063bcdaad5eff8e7e8d97e936d53fd1b725b785cdb1c0224c8b.css" integrity="sha512-3lkm2U2hfiJe8wO3j/ZY0bXJDP29CvjF9V71JDprVduUBOva2DqAY7zarV7/jn6Nl&#43;k21T/RtyW3hc2xwCJMiw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Running as a Systemd service - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/systemd/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Running as a Systemd service">
+<meta name="twitter:description" content="This guide will get you running Litestream as a systemd service on Debian-based operating systems such as Ubuntu. Running as a background service means that Litestream will always run in the background and restart automatically if the server restarts. It assumes you are comfortable with using a command line.
+Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Systemd",
+        "item": "https:\/\/litestream.io\/guides\/systemd\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      Litestream
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/blog/">Blog</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/getting-started/">Getting Started</a>
+  </h3>
+  <h3>
+    <a href="https://litestream.io/tips/">Tips &amp; Caveats</a>
+  </h3>
+  <h3>
+    <a href="https://litestream.io/guides/">Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link active" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/how-it-works/">How it Works</a>
+  </h3>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#prerequisites">Prerequisites</a>
+      <ul>
+        <li><a href="#install-litestream--sqlite">Install Litestream &amp; SQLite</a></li>
+        <li><a href="#creating-an-s3-bucket">Creating an S3 bucket</a></li>
+      </ul>
+    </li>
+    <li><a href="#configuration-file">Configuration file</a></li>
+    <li><a href="#writing-to-our-database">Writing to our database</a></li>
+    <li><a href="#simulating-a-disaster">Simulating a disaster</a></li>
+    <li><a href="#restoring-our-database">Restoring our database</a></li>
+    <li><a href="#further-reading">Further reading</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Running as a Systemd service</h1>
+			<p class="lead"></p>
+			<p>This guide will get you running Litestream as a systemd service on Debian-based
 operating systems such as Ubuntu. Running as a background service means that
 Litestream will always run in the background and restart automatically if the
-server restarts. It assumes you are comfortable with using a command line.</p><h2 id=prerequisites>Prerequisites<a href=#prerequisites class=anchor aria-hidden=true>#</a></h2><p>This guide assumes you have read the <a href=/getting-started><em>Getting Started</em></a>
-tutorial already. Please read that to understand the basic operation of Litestream.</p><h3 id=install-litestream--sqlite>Install Litestream & SQLite<a href=#install-litestream--sqlite class=anchor aria-hidden=true>#</a></h3><p>Before continuing, <a href=/install/debian>please install Litestream</a>.</p><p>You will also need <a href=https://sqlite.org/>SQLite</a> installed for this guide. It
+server restarts. It assumes you are comfortable with using a command line.</p>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
+<p>This guide assumes you have read the <a href="/getting-started"><em>Getting Started</em></a>
+tutorial already. Please read that to understand the basic operation of Litestream.</p>
+<h3 id="install-litestream--sqlite">Install Litestream &amp; SQLite<a href="#install-litestream--sqlite" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Before continuing, <a href="/install/debian">please install Litestream</a>.</p>
+<p>You will also need <a href="https://sqlite.org/">SQLite</a> installed for this guide. It
 comes packaged with some operating systems such as macOS but you may need to
-install it separately.</p><h3 id=creating-an-s3-bucket>Creating an S3 bucket<a href=#creating-an-s3-bucket class=anchor aria-hidden=true>#</a></h3><p>If you don&rsquo;t already have an Amazon AWS account, you can go
-<a href=https://aws.amazon.com/>https://aws.amazon.com/</a> and click &ldquo;Create Account&rdquo;.
-Once you have an account, you&rsquo;ll need to <a href=https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html>create an AWS IAM user</a> with
+install it separately.</p>
+<h3 id="creating-an-s3-bucket">Creating an S3 bucket<a href="#creating-an-s3-bucket" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If you don&rsquo;t already have an Amazon AWS account, you can go
+<a href="https://aws.amazon.com/">https://aws.amazon.com/</a> and click &ldquo;Create Account&rdquo;.
+Once you have an account, you&rsquo;ll need to <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html">create an AWS IAM user</a> with
 <em>programmatic access</em> and with <code>AmazonS3FullAccess</code> permissions. After creating
 the user, you should have an <strong>access key id</strong> and a <strong>secret access key</strong>. We
-will use those in one of the steps below.</p><p>You&rsquo;ll also need to create a bucket in AWS S3. You&rsquo;ll need to create a unique
+will use those in one of the steps below.</p>
+<p>You&rsquo;ll also need to create a bucket in AWS S3. You&rsquo;ll need to create a unique
 name for your bucket. In this guide, we&rsquo;ll name our bucket
-<code>"mybkt.litestream.io"</code> but replace that with your bucket name in the examples
-below.</p><h2 id=configuration-file>Configuration file<a href=#configuration-file class=anchor aria-hidden=true>#</a></h2><p>When running as a systemd service, we&rsquo;ll configure Litestream using a
-<a href=/reference/config>configuration file</a> instead of command line flags so we
+<code>&quot;mybkt.litestream.io&quot;</code> but replace that with your bucket name in the examples
+below.</p>
+<h2 id="configuration-file">Configuration file<a href="#configuration-file" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When running as a systemd service, we&rsquo;ll configure Litestream using a
+<a href="/reference/config">configuration file</a> instead of command line flags so we
 don&rsquo;t need to edit the service definition. The default path for the Litestream
-configuration is <code>/etc/litestream.yml</code></p><p>Litestream monitors one or more <em>databases</em> and each of those databases
+configuration is <code>/etc/litestream.yml</code></p>
+<p>Litestream monitors one or more <em>databases</em> and each of those databases
 replicates to one or more <em>replicas</em>. First, we&rsquo;ll create a basic configuration
 file. Make sure to replace your AWS credentials with your own, the bucket name
-with your bucket name, and update <code>MYUSER</code> to your local Linux username.</p><pre><code>sudo cat &gt; /etc/litestream.yml &lt;&lt;EOF
+with your bucket name, and update <code>MYUSER</code> to your local Linux username.</p>
+<pre><code>sudo cat &gt; /etc/litestream.yml &lt;&lt;EOF
 access-key-id:     AKIAxxxxxxxxxxxxxxxx
 secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
@@ -32,23 +220,67 @@ dbs:
 EOF
 </code></pre><p>This configuration specifies that we want Litestream to monitor our
 <code>friends.db</code> database in our home directory and continuously replicate it to
-our <code>mybkt.litestream.io</code> S3 bucket.</p><p>After changing our configuration, we&rsquo;ll need to restart the Litestream service
-for it to register the change:</p><pre><code>sudo systemctl restart litestream
-</code></pre><h2 id=writing-to-our-database>Writing to our database<a href=#writing-to-our-database class=anchor aria-hidden=true>#</a></h2><p>Now that Litestream is running in the background, let&rsquo;s create our <code>friends.db</code>
-database:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sqlite3 friends.db
-</code></pre></div><p>We&rsquo;ll create a simple table to store our friends' names:</p><div class=highlight><pre class=chroma><code class=language-sql data-lang=sql><span class=k>CREATE</span> <span class=k>TABLE</span> <span class=n>friends</span> <span class=p>(</span><span class=n>name</span> <span class=nb>TEXT</span><span class=p>);</span>
-</code></pre></div><p>Then we&rsquo;ll insert some rows:</p><pre><code>INSERT INTO friends (name) VALUES ('Cory');
+our <code>mybkt.litestream.io</code> S3 bucket.</p>
+<p>After changing our configuration, we&rsquo;ll need to restart the Litestream service
+for it to register the change:</p>
+<pre><code>sudo systemctl restart litestream
+</code></pre><h2 id="writing-to-our-database">Writing to our database<a href="#writing-to-our-database" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Now that Litestream is running in the background, let&rsquo;s create our <code>friends.db</code>
+database:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 friends.db
+</code></pre></div><p>We&rsquo;ll create a simple table to store our friends' names:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">friends</span> <span class="p">(</span><span class="n">name</span> <span class="nb">TEXT</span><span class="p">);</span>
+</code></pre></div><p>Then we&rsquo;ll insert some rows:</p>
+<pre><code>INSERT INTO friends (name) VALUES ('Cory');
 INSERT INTO friends (name) VALUES ('Kelly');
-</code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p><h2 id=simulating-a-disaster>Simulating a disaster<a href=#simulating-a-disaster class=anchor aria-hidden=true>#</a></h2><p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>sudo systemctl stop litestream
-</code></pre></div><p>And then we&rsquo;ll delete our database:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>rm -f friends.db friends.db-shm friends.db-wal
+</code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p>
+<h2 id="simulating-a-disaster">Simulating a disaster<a href="#simulating-a-disaster" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo systemctl stop litestream
+</code></pre></div><p>And then we&rsquo;ll delete our database:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rm -f friends.db friends.db-shm friends.db-wal
 </code></pre></div><p>This is the state our server would be in if it had crashed and we had rebuilt it
-but lost our data.</p><h2 id=restoring-our-database>Restoring our database<a href=#restoring-our-database class=anchor aria-hidden=true>#</a></h2><p>Our Litestream service and configuration file are still in place so we can
+but lost our data.</p>
+<h2 id="restoring-our-database">Restoring our database<a href="#restoring-our-database" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Our Litestream service and configuration file are still in place so we can
 easily restore our database. Simply run the <code>restore</code> command with our database
-path:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>litestream restore friends.db
+path:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream restore friends.db
 </code></pre></div><p>Litesteam will find the database in the configuration file and restore the most
-recent copy it has from its S3 replica.</p><p>You can verify that your data is all there by connecting with SQLite:</p><pre><code>sqlite3 friends.db
-</code></pre><p>And querying for your data:</p><pre><code>SELECT * FROM friends;
+recent copy it has from its S3 replica.</p>
+<p>You can verify that your data is all there by connecting with SQLite:</p>
+<pre><code>sqlite3 friends.db
+</code></pre><p>And querying for your data:</p>
+<pre><code>SELECT * FROM friends;
 Cory
 Kelly
-</code></pre><h2 id=further-reading>Further reading<a href=#further-reading class=anchor aria-hidden=true>#</a></h2><p>You now have a production-ready replication setup using SQLite and Litestream.
-Please see the <a href=/reference>Reference</a> section for more configuration options.</p><div class="docs-navigation d-flex justify-content-between"><a class=ml-auto href=https://litestream.io/guides/windows/><div class="card my-1"><div class="card-body py-2">Running as a Windows Service &rarr;</div></div></a></div></main></div></div></div><footer></footer><script src=https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js integrity="sha512-9rSE9VatHzvPYGEIITmi8h+nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin=anonymous defer></script><script src=https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin=anonymous defer></script></body></html>
+</code></pre><h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
+<p>You now have a production-ready replication setup using SQLite and Litestream.
+Please see the <a href="/reference">Reference</a> section for more configuration options.</p>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a class="ml-auto" href="https://litestream.io/guides/windows/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Running as a Windows Service &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
