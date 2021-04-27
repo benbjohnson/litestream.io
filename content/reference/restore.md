@@ -46,6 +46,13 @@ litestream restore [arguments] REPLICA_URL
     Output path of the restored database.
     Defaults to original DB path.
 
+-if-replica-exists
+    Returns exit code of 0 if no backups found.
+
+-parallelism NUM
+    Determines the number of WAL files downloaded in parallel.
+    Defaults to 8
+
 -v
     Verbose output.
 
