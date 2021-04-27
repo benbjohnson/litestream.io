@@ -39,7 +39,7 @@ jobs:
         run: echo "tip.litestream.io" > public/CNAME
 
       - name: Push to repo
-        uses: cpina/github-action-push-to-another-repository@master
+        uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
