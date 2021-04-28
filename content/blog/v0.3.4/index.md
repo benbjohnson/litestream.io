@@ -1,7 +1,7 @@
 ---
 title: "Litestream v0.3.4 Released"
 description: "The newest version of Litestream updates its license, adds Docker & ARM support, and improves recovery performance."
-date: 2021-04-24T00:00:00Z
+date: 2021-04-28T00:00:00Z
 draft: false
 weight: 50
 contributors: ["Ben Johnson"]
