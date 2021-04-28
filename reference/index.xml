@@ -15,8 +15,7 @@
       <guid>https://litestream.io/reference/config/</guid>
       <description>The YAML configuration file provides a way to list databases and replicas that Litestream should manage. In addition, there are global variables that can be applied to all replicas.
 The default path for the configuration file is /etc/litestream.yml.
-Global settings AWS credentials If you are using AWS S3 replication, it can be useful to specify your credentials in one place instead of for each replica:
-access-key-id:AKIAxxxxxxxxxxxxxxxxsecret-access-key:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxxMetrics Litestream produces a continuous stream of metrics that are exported as a Prometheus endpoint.</description>
+Variable expansion By default, Litestream will perform environment variable expansion within the config file before reading it. Any references to $VAR or ${VAR} formatted variables will be replaced with their environment variable values.</description>
     </item>
     
     <item>
@@ -26,7 +25,7 @@ access-key-id:AKIAxxxxxxxxxxxxxxxxsecret-access-key:xxxxxxxxxxxxxxxxxxxxxxxxxxxx
       
       <guid>https://litestream.io/reference/databases/</guid>
       <description>The databases command lists all databases in the configuration file as well as list their associated replicas.
-Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &amp;quot;file&amp;quot; and &amp;quot;s3&amp;quot;:
+Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -no-expand-env Disables environment variable expansion in configuration file. Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &amp;quot;file&amp;quot; and &amp;quot;s3&amp;quot;:
 $ litestream databases path replicas /var/lib/db file,s3 </description>
     </item>
     

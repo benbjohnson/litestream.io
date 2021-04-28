@@ -8,6 +8,16 @@
     <language>en-US</language>
     <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/guides/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Running in a Docker container</title>
+      <link>https://litestream.io/guides/docker/</link>
+      <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/guides/docker/</guid>
+      <description>This guide will show you how to run Litestream within a Docker container either as a sidecar or within the same container as your application. You will need a Docker installed on your machine for this guide.
+Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow. Docker typically recommends running one application per container and Litestream can be run as a sidecar to another container.</description>
+    </item>
+    
+    <item>
       <title>Running as a Systemd service</title>
       <link>https://litestream.io/guides/systemd/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>

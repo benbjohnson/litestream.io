@@ -3,6 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://litestream.io/blog/litestream-v0.3.4-released/</loc>
+    <lastmod>2021-04-28T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://litestream.io/blog/litestream-v0.3.3-released/</loc>
     <lastmod>2021-03-16T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -33,6 +40,13 @@
   <url>
     <loc>https://litestream.io/install/source/</loc>
     <lastmod>2021-02-01T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://litestream.io/guides/docker/</loc>
+    <lastmod>2021-03-08T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -137,14 +151,14 @@
   
   <url>
     <loc>https://litestream.io/contributors/ben-johnson/</loc>
-    <lastmod>2021-03-16T00:00:00+00:00</lastmod>
+    <lastmod>2021-04-28T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://litestream.io/contributors/</loc>
-    <lastmod>2021-03-16T00:00:00+00:00</lastmod>
+    <lastmod>2021-04-28T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

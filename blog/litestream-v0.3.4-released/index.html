@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.3767892ca24c534b0073d9dc2e5bde6c178ec79d5d14c1ac8dd8b6f1c0385b1d70dafc086a1e0f74de32121bc3e1ab5d0ff39eef99b114e8ad8b11fdc5f2cd1b.css" integrity="sha512-N2eJLKJMU0sAc9ncLlvebBeOx51dFMGsjdi28cA4Wx1w2vwIah4PdN4yEhvD4atdD/Oe75mxFOitixH9xfLNGw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Litestream v0.3.4 Released - Litestream</title>
+<meta name="description" content="The newest version of Litestream updates its license, adds Docker &amp; ARM support, and improves recovery performance.">
+<link rel="canonical" href="https://litestream.io/blog/litestream-v0.3.4-released/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Litestream v0.3.4 Released">
+<meta name="twitter:description" content="The newest version of Litestream updates its license, adds Docker &amp; ARM support, and improves recovery performance.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https:\/\/litestream.io\/blog\/litestream-v0.3.4-released\/"
+      },
+      "headline": "Litestream v0.3.4 Released",
+      "image": [],
+      "datePublished": "2021-04-28T00:00:00CET",
+      "dateModified": "2021-04-28T00:00:00CET",
+      "author": {
+        "@type": "Organization",
+        "name": "Litestream"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Litestream",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https:\/\/litestream.io\/litestream.png"
+        }
+        },
+      "description": "The newest version of Litestream updates its license, adds Docker \u0026 ARM support, and improves recovery performance."
+    }
+    </script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Blog",
+        "item": "https:\/\/litestream.io\/blog\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Litestream V0.3.4 Released",
+        "item": "https:\/\/litestream.io\/blog\/litestream-v0.3.4-released\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="blog single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      Litestream
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/blog/">Blog</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+<div class="row justify-content-center">
+	<div class="col-md-12 col-lg-10 col-xl-8">
+		<article>
+			<div class="blog-header">
+				<h1>Litestream v0.3.4 Released</h1>
+				<p>
+	<small>
+		Posted April 28, 2021
+		by <a class="stretched-link position-relative" href="https://twitter.com/benbjohnson" target="_blank">Ben Johnson</a>
+		&nbsp;&hyphen;&nbsp;
+		<strong>9&nbsp;min read</strong>
+	</small>
+<p>
+			</div>
+			<p class="lead"></p>
+			<p>Over the last month, we&rsquo;ve been focused on stability &amp; quality-of-life changes
+to Litestream. We now have an <a href="https://hub.docker.com/r/litestream/litestream/">official Litestream Docker
+image</a> so you can run your backups as a sidecar to your
+existing Docker image. We&rsquo;ve also provided an <a href="https://github.com/benbjohnson/litestream-s6-example/blob/main/Dockerfile">example Dockerfile</a>
+for those wanting to bundle their application with Litestream into a single
+Docker container using <a href="https://github.com/just-containers/s6-overlay">s6</a>.</p>
+<p>We&rsquo;ve added support for ARMv6, ARMv7, &amp; ARM64 which means you can take advantage
+of Litestream on a tiny <a href="https://www.raspberrypi.org/products/raspberry-pi-zero/">Raspberry Pi Zero</a> or on a beefy <a href="https://aws.amazon.com/ec2/graviton/">64-core Graviton
+EC2 machine</a>.</p>
+<p>Our license has changed as well! We&rsquo;ve move from a restrictive, copyleft GPLv3
+license to a permissive Apache 2 license.</p>
+<p>Finally, we&rsquo;ve significantly improved the recovery performance and fixed up a
+handful of bugs. Thanks to everyone who reported bugs, gave feedback, and helped
+with testing!</p>
+<h2 id="docker-support">Docker support</h2>
+<p>The most frequent question asked about Litestream since the project started has
+been, <em>&ldquo;how do I run this on Docker?&quot;</em> Whether you like Docker or not, the fact
+is that much of the tech world has moved to containerized deployments.</p>
+<p>In traditional applications, developers deploy their stateless, single-process
+application within a Docker container and it connects to a stateful database.
+However, with Litestream, not only is the container stateful but Litestream also
+runs as a separate process.</p>
+<p>There are a couple ways to Dockerize your application depending on your needs.
+Let&rsquo;s take a look at some common use cases.</p>
+<h3 id="shared-volume-sidecar-replication">Shared volume, sidecar replication</h3>
+<p>The first use case is to keep your application as a single-process container
+and mount a persistent volume for your database. You can then use the <a href="https://hub.docker.com/r/litestream/litestream/">official
+Litestream Docker image</a> (<a href="https://github.com/benbjohnson/litestream/pull/156">#156</a>) to mount the
+same volume and replicate from there.</p>
+<p>You can find documentation for running a shared volume in the <a href="/guides/docker/#running-as-a-sidecar"><em>Running as a
+sidecar</em></a> section of our <a href="/guides/docker/">Docker guide</a>.</p>
+<h3 id="single-container-multiple-processes">Single container, multiple processes</h3>
+<p>Not all deployments support a sidecar container. For example, <a href="https://fly.io/">fly.io</a>
+provides an excellent, simple platform for deploying applications but the caveat
+is that those applications need to be in a single container.</p>
+<p>Fortunately, there&rsquo;s a great solution called <a href="https://github.com/just-containers/s6-overlay">s6-overlay</a> for running your
+application as well as Litestream in a single container. It uses a simple init
+system called <a href="http://skarnet.org/software/s6/overview.html">s6</a> that forwards signals, restarts background processes, and
+allows you to teardown the container when your main application finishes.</p>
+<p>You can run this setup with a mounted volume to persist your database between
+deployments or you can run this ephemerally so that your database is restored
+from S3 on each deploy. Personally, I recommend using a persistent disk as it
+will minimize downtime during deployments. However, if you have a small,
+low-write database then an ephemeral disk can work just fine. You can find
+an example of this ephemeral method on Michael Lynch&rsquo;s <a href="https://github.com/mtlynch/logpaste">logpaste</a> project.</p>
+<p>You can find an example application &amp; walkthrough on the
+<a href="https://github.com/benbjohnson/litestream-s6-example">litestream-s6-example</a> repository.</p>
+<h3 id="making-docker-sing">Making Docker sing</h3>
+<p>Building a Dockerfile for Litestream was pretty straightforward, however, making
+it something developers want to use is an entirely different story. We&rsquo;ve added
+a bunch of small improvements that make deploying much simpler.</p>
+<p>First, we&rsquo;ve added a <code>-if-replica-exists</code> flag to the <code>restore</code> command
+(<a href="https://github.com/benbjohnson/litestream/pull/131">#131</a>). This will cause Litestream to exit successfully if there are no
+replicas available to restore from. This simple change makes it easy to create
+an initialization script that will restore if a database replica is available
+but otherwise will let the application create a new database on the first run.</p>
+<p>Next, we fixed up the shutdown process for Litestream so that it will flush all
+outstanding writes (<a href="https://github.com/benbjohnson/litestream/pull/132">#132</a>) and it will correctly catch <code>SIGTERM</code> (<a href="https://github.com/benbjohnson/litestream/pull/133">#133</a>).
+These two fixes allow users to run an empheral disk to help ensure recent writes
+get backed up.</p>
+<p>In the Docker world, environment variables work better than configuration files,
+however, Litestream needs configuration files for complex configuration options.
+To support both of these options, we&rsquo;ve added environment variable expansion in
+configuration files (<a href="https://github.com/benbjohnson/litestream/pull/157">#157</a>). This means you can bundle a config into your
+container and define your own environment variables that will be evaluated
+before your configuration file is read.</p>
+<p>Finally, we&rsquo;ve shrunk down the binary sizes on the release builds (<a href="https://github.com/benbjohnson/litestream/pull/159">#159</a>) and
+have included static builds in our releases (<a href="https://github.com/benbjohnson/litestream/pull/130">#130</a>). Docker container sizes
+can easily explode into the hundreds of megabytes or even gigabytes. The Linux
+amd64 binary for Litestream is now 17.4MB.</p>
+<h2 id="arm-support">ARM support</h2>
+<p>SQLite is sometimes called an &ldquo;edge database&rdquo; in that it can be run on small ARM
+devices  far away from data centers. Not only do these devices have limited
+resources but can also have intermittent internet connections.</p>
+<p>We&rsquo;ve added release builds for 32-bit ARM (<code>arm6</code>, <code>arm7</code>) and 64-bit ARM
+(<code>arm64</code>) (<a href="https://github.com/benbjohnson/litestream/pull/148">#148</a>, <a href="https://github.com/benbjohnson/litestream/pull/151">#151</a>). The 32-bit ARM processors are typically found in
+smaller or older devices like the <a href="https://www.raspberrypi.org/products/raspberry-pi-zero/">Raspberry Pi Zero</a> while the 64-bit
+processors are gaining popularity in data centers such as AWS' new <a href="https://aws.amazon.com/ec2/graviton/">Graviton
+series</a>.</p>
+<p>Apple recently released their Apple Silicon M1 chip and we do not have a release
+build for it yet but we are planning to add it in the future. If you are
+interested in using Litestream with the new Macs, please add a comment or add a
+reaction on <a href="https://github.com/benbjohnson/litestream/pull/175">issue #175</a> and that&rsquo;ll help us prioritize it.</p>
+<h2 id="open--permissive-licensing">Open &amp; permissive licensing</h2>
+<p>When Litestream first started, it used <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>. The GPL is known for what&rsquo;s
+called a &ldquo;copyleft&rdquo; provision which means that anyone who changes the code or
+creates a derivative work needs to release their code as open source as well.
+I&rsquo;ve always used very permissive licenses (e.g. <a href="https://opensource.org/licenses/MIT">MIT</a>) in other projects but I
+felt that I could try using GPL for Litestream because it&rsquo;s a standalone
+library.</p>
+<p>However, I found the license to be overly restrictive. While Litestream started
+as a separate standalone tool, I would like to release it as an embeddable
+library in the future. A GPL license would require anyone who includes
+Litestream in their application to also release their code as open source which
+seemed unreasonable. Even an LGPL license would be restrictive as  Go uses
+static compilation.</p>
+<p>I&rsquo;ve had many people theorize why I open sourced Litestream—some think I want
+to make it into a business, others think I want acclaim. The reason I open
+sourced Litestream is actually quite simple—I think the best software is
+software that gets used. Open source is a fantastic means of distribution and
+the more people that use Litestream, give feedback, &amp; share ideas, the better
+it will be.</p>
+<p>The GPL is antithetical to my goal. It restricts usage rather than encourages
+it. Because of that, I&rsquo;ve changed Litestream to an <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2</a> license
+(<a href="https://github.com/benbjohnson/litestream/pull/168">#168</a>). After researching and asking around, I found it to be the best
+choice for a permissive license. While the MIT &amp; BSD licenses are wonderful in
+their simplicity, the Apache 2 license seems to be more friendly to lawyers who,
+at the end of the day, are really who licenses are for.</p>
+<h2 id="improved-restore-performance">Improved restore performance</h2>
+<p>Hopefully you don&rsquo;t ever need to restore your database because of a catastrophic
+event but, when you do, you want it to be fast. Litestream&rsquo;s recovery process
+involves downloading a snapshot of your database and then replaying all
+subsequent WAL files into that database.</p>
+<p>Previously, Litestream would download a WAL file and then apply it, download
+another file and apply it, etc. The download time would typically dominate the
+restore time because applying the WAL file may only take a couple milliseconds.
+The constant switching also meant that there wasn&rsquo;t always a file being
+downloaded so the network device would not be saturated.</p>
+<p>The latest version of Litestream now downloads WAL files in parallel and queues
+them up on disk to be processed (<a href="https://github.com/benbjohnson/litestream/pull/167">#167</a>). By default, it will download 8 files
+in parallel. This change has improved recovery time by 3-4x. You can increase
+the number of parallel downloads by setting the <code>-parallelism</code> flag:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ litestream restore -parallelism <span class="m">16</span> /path/to/db
+</code></pre></div><p>If you need faster recovery, you should also consider setting the
+<code>snapshot-interval</code> for your replica to a lower duration (e.g. <code>1h</code>).</p>
+<p>There was also an poor usability when recovering by index. Previously, the
+<code>-index</code> flag in the <code>restore</code> command would accept a decimal number, however,
+Litestream reports the index as a hexadecimal number everywhere else. We&rsquo;ve
+fixed it so that <code>-index</code> now accepts the hex-formatted number (<a href="https://github.com/benbjohnson/litestream/pull/165">#165</a>):</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ litestream restore -generation xxxxxxxxxxxxxxxx -index 000002bc /path/to/db
+</code></pre></div><p>We&rsquo;ve also improved logging for restores to help identify bottlenecks (<a href="https://github.com/benbjohnson/litestream/pull/162">#162</a>,
+<a href="https://github.com/benbjohnson/litestream/pull/164">#164</a>), removed the <code>-dry-run</code> flag as it complicated the code (<a href="https://github.com/benbjohnson/litestream/pull/163">#163</a>),
+and fixed a bug around snapshot selection when recovering by index (<a href="https://github.com/benbjohnson/litestream/pull/166">#166</a>).</p>
+<h2 id="reduced-lock-contention">Reduced lock contention</h2>
+<p>Litestream is able to run as a separate process because SQLite is built as a
+multi-process database. However, applications typically need to set a timeout on
+their connection called <code>busy_timeout</code> to avoid returning an error if another
+process obtains a brief write lock at the same time they want a write lock. You
+can read more about it in our <a href="/tips">Tips &amp; Caveats</a> section on our site.</p>
+<p>Originally, Litestream would frequently obtain a very brief write lock to ensure
+the WAL was at the end of a transaction before copying it to Litestream&rsquo;s shadow
+WAL. However, we later updated Litestream to validate transaction boundaries
+itself so this lock was no longer needed. We updated Litestream to remove this
+lock (<a href="https://github.com/benbjohnson/litestream/pull/104">#104</a>) but found some timing issues when obtaining snapshots so we had
+to remove it (<a href="https://github.com/benbjohnson/litestream/pull/108">#108</a>).</p>
+<p>We&rsquo;ve done more testing and have been able to successfully remove the lock again
+by adding some additional read locks around snapshots (<a href="https://github.com/benbjohnson/litestream/pull/170">#170</a>). While there
+is still a write lock during checkpointing, write locks will be significantly
+less frequent.</p>
+<h2 id="other-bug-fixes">Other bug fixes</h2>
+<p>First of all, thanks to everyone who reports bugs to our <a href="https://github.com/benbjohnson/litestream">GitHub repo</a>. It
+makes a world of difference and we prioritize those to be fixed first. In this
+relase, we&rsquo;ve fixed the following bugs &amp; usability issues:</p>
+<ul>
+<li>Added <code>skip-verify</code> to replicas to allow use with MinIO self-signed certificates (<a href="https://github.com/benbjohnson/litestream/pull/141">#141</a>)</li>
+<li>Removed confusing reference to &ldquo;wal&rdquo; in error message when invalid databases are opened (<a href="https://github.com/benbjohnson/litestream/pull/154">#154</a>)</li>
+<li>Omitted load extensions from static builds to avoid warning messages (<a href="https://github.com/benbjohnson/litestream/pull/158">#158</a>)</li>
+<li>Fix flakey WAL filesystem timestamp test (<a href="https://github.com/benbjohnson/litestream/pull/161">#161</a>)</li>
+</ul>
+<p>We&rsquo;ve also started allowing for setting <code>LITESTREAM_ACCESS_KEY_ID</code> &amp;
+<code>LITESTREAM_SECRET_ACCESS_KEY</code> environment variables instead of the original
+<code>AWS</code> prefixed versions (<a href="https://github.com/benbjohnson/litestream/pull/169">#169</a>). The AWS-prefixed versions still work but
+some users where confused to use those for non-AWS S3-compatible services:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxxxxxxxxxxxxxx
+<span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<p>We continue to focus on stability &amp; usability with Litestream v0.3.4. We&rsquo;ve
+expanded our deployment options to include Docker containers &amp; ARM processors,
+we&rsquo;ve opened up our code by switching to a permissive Apache 2 license, and
+we&rsquo;ve significantly improved our time to restore.</p>
+<p>Upcoming work on the next version of Litestream (<a href="https://github.com/benbjohnson/litestream/milestone/6">v0.3.5</a>) will include a
+refactor of the replica system to make it easier to add new replica types
+(<a href="https://github.com/benbjohnson/litestream/pull/135">#135</a>). This will enable better support for major cloud vendor storage such
+as Azure Blob Storage (<a href="https://github.com/benbjohnson/litestream/pull/134">#134</a>) &amp; Google Cloud Storage (<a href="https://github.com/benbjohnson/litestream/pull/69">#69</a>) as well as
+older protocols such as SFTP (<a href="https://github.com/benbjohnson/litestream/pull/140">#140</a>).</p>
+<p>If you&rsquo;re interested in hearing more, please <a href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">join our Slack</a>, <a href="https://calendly.com/benbjohnson/litestream">book an
+office hours</a>, or <a href="https://twitter.com/litestreamio">follow Litestream on Twitter</a> for updates.</p>
+
+		</article>
+	</div>
+</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

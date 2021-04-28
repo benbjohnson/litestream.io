@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="https://litestream.io/main.de5926d94da17e225ef303b78ff658d1b5c90cfdbd0af8c5f55ef5243a6b55db9404ebdad83a8063bcdaad5eff8e7e8d97e936d53fd1b725b785cdb1c0224c8b.css" integrity="sha512-3lkm2U2hfiJe8wO3j/ZY0bXJDP29CvjF9V71JDprVduUBOva2DqAY7zarV7/jn6Nl&#43;k21T/RtyW3hc2xwCJMiw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.3767892ca24c534b0073d9dc2e5bde6c178ec79d5d14c1ac8dd8b6f1c0385b1d70dafc086a1e0f74de32121bc3e1ab5d0ff39eef99b114e8ad8b11fdc5f2cd1b.css" integrity="sha512-N2eJLKJMU0sAc9ncLlvebBeOx51dFMGsjdi28cA4Wx1w2vwIah4PdN4yEhvD4atdD/Oe75mxFOitixH9xfLNGw==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -22,8 +22,7 @@
 <meta name="twitter:title" content="Configuration File">
 <meta name="twitter:description" content="The YAML configuration file provides a way to list databases and replicas that Litestream should manage. In addition, there are global variables that can be applied to all replicas.
 The default path for the configuration file is /etc/litestream.yml.
-Global settings AWS credentials If you are using AWS S3 replication, it can be useful to specify your credentials in one place instead of for each replica:
-access-key-id:AKIAxxxxxxxxxxxxxxxxsecret-access-key:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxxMetrics Litestream produces a continuous stream of metrics that are exported as a Prometheus endpoint.">
+Variable expansion By default, Litestream will perform environment variable expansion within the config file before reading it. Any references to $VAR or ${VAR} formatted variables will be replaced with their environment variable values.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -128,6 +127,7 @@ access-key-id:AKIAxxxxxxxxxxxxxxxxsecret-access-key:xxxxxxxxxxxxxxxxxxxxxxxxxxxx
     <a href="https://litestream.io/guides/">Guides</a>
   </h3>
   <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
@@ -159,6 +159,11 @@ access-key-id:AKIAxxxxxxxxxxxxxxxxsecret-access-key:xxxxxxxxxxxxxxxxxxxxxxxxxxxx
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
+    <li>
+      <ul>
+        <li><a href="#variable-expansion">Variable expansion</a></li>
+      </ul>
+    </li>
     <li><a href="#global-settings">Global settings</a>
       <ul>
         <li><a href="#aws-credentials">AWS credentials</a></li>
@@ -186,6 +191,15 @@ access-key-id:AKIAxxxxxxxxxxxxxxxxsecret-access-key:xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Litestream should manage. In addition, there are global variables that can be
 applied to all replicas.</p>
 <p>The default path for the configuration file is <code>/etc/litestream.yml</code>.</p>
+<h3 id="variable-expansion">Variable expansion<a href="#variable-expansion" class="anchor" aria-hidden="true">#</a> </h3>
+<p>By default, Litestream will perform environment variable expansion within the
+config file before reading it. Any references to <code>$VAR</code> or <code>${VAR}</code> formatted
+variables will be replaced with their environment variable values. If no value
+is set then it will be replaced with an empty string.</p>
+<p>This can cause issues if you have a value in a configuration file which has a
+dollar sign followed by characters—for example, a password. In this case, you
+can set the <code>-no-expand-env</code> flag on any <code>litestream</code> command to disable
+expansion.</p>
 <h2 id="global-settings">Global settings<a href="#global-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="aws-credentials">AWS credentials<a href="#aws-credentials" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you are using AWS S3 replication, it can be useful to specify your
@@ -277,11 +291,13 @@ Litestream as S3 services charge for downloads.</p>
 <ul>
 <li>
 <p><code>access-key-id</code>—Replica-specific authentication key. If not specified, the
-global key or the <code>AWS_ACCESS_KEY_ID</code> environment variable will be used instead.</p>
+global key or the <code>LITESTREAM_ACCESS_KEY_ID</code> environment variable will be used
+instead. The <code>AWS_ACCESS_KEY_ID</code> variable can also be used.</p>
 </li>
 <li>
 <p><code>secret-access-key</code>——Replica-specific secret key. If not specified, the global
-secret or the <code>AWS_SECRET_ACCESS_KEY</code> environment variable will be used instead.</p>
+secret or the <code>LITESTREAM_SECRET_ACCESS_KEY</code> environment variable will be used
+instead. The <code>AWS_SECRET_ACCESS_KEY</code> variable can also be used.</p>
 </li>
 <li>
 <p><code>bucket</code>—Specifies the name of the remote bucket to replicate to.</p>
