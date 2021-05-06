@@ -175,6 +175,7 @@ Variable expansion By default, Litestream will perform environment variable expa
       <ul>
         <li><a href="#s3-replica">S3 replica</a></li>
         <li><a href="#file-replica">File replica</a></li>
+        <li><a href="#multiple-replicas">Multiple replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
         <li><a href="#validation-interval">Validation interval</a></li>
       </ul>
@@ -334,7 +335,20 @@ in the command line. Increasing frequency can affect costs significantly.</p>
 </span><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
 </span></code></pre></div><p>If no <code>&quot;type&quot;</code> field is specified and a <code>&quot;url&quot;</code> is not used then <code>&quot;file&quot;</code> is
 assumed.</p>
-<h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
+<h3 id="multiple-replicas">Multiple replicas<a href="#multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can specify multiple replicas for a database, however, each one must have
+a unique name. For example, this configuration below is for replicating to
+AWS S3 &amp; to DigitalOcean Spaces. Both of these use the &ldquo;s3&rdquo; replica type so
+their default name would be &ldquo;s3&rdquo;. Instead, we can name them each unique names,
+<code>my_aws_replica</code> &amp; <code>my_do_replica</code>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/path/to/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_aws_replica</span><span class="w">
+</span><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://myawsbucket/db</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_do_replica</span><span class="w">
+</span><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.nyc3.digitaloceanspaces.com/db</span><span class="w">
+</span></code></pre></div><h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Replicas maintain a snapshot of the database as well as a contiguous sequence of
 SQLite WAL page updates. These updates take up space so new snapshots are
 created and old WAL files are dropped through a process called &ldquo;retention&rdquo;.</p>
