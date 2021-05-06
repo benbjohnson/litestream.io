@@ -191,6 +191,25 @@ If no `"type"` field is specified and a `"url"` is not used then `"file"` is
 assumed.
 
 
+### Multiple replicas
+
+You can specify multiple replicas for a database, however, each one must have
+a unique name. For example, this configuration below is for replicating to
+AWS S3 & to DigitalOcean Spaces. Both of these use the "s3" replica type so
+their default name would be "s3". Instead, we can name them each unique names,
+`my_aws_replica` & `my_do_replica`.
+
+```yaml
+dbs:
+  - path: /local/path/to/db
+    replicas:
+      - name: my_aws_replica
+        url: s3://myawsbucket/db
+      - name: my_do_replica
+        url: s3://mybkt.nyc3.digitaloceanspaces.com/db
+```
+
+
 ### Retention period
 
 Replicas maintain a snapshot of the database as well as a contiguous sequence of
@@ -231,3 +250,4 @@ dbs:
       - url: s3://mybkt.litestream.io/db
         validation-interval: 6h
 ```
+
