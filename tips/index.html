@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Tips &amp; Caveats">
 <meta name="twitter:description" content="Running an application that uses SQLite and Litestream can require some small tweaks to optimize performance and usability. There are also some important caveats to know.
-Busy timeout SQLite is built to run as a multi-process embedded database and Litestream acts as just another process. However, Litestream requires periodic but short write locks on the database in order to sync changes. SQLite will return an error by default if your application tries to obtain a write lock at the same time.">
+Busy timeout SQLite is built to run as a multi-process embedded database and Litestream acts as just another process. However, Litestream requires periodic but short write locks on the database when checkpointing occurs. SQLite will return an error by default if your application tries to obtain a write lock at the same time.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -172,7 +172,7 @@ caveats to know.</p>
 <h2 id="busy-timeout">Busy timeout<a href="#busy-timeout" class="anchor" aria-hidden="true">#</a> </h2>
 <p>SQLite is built to run as a multi-process embedded database and Litestream acts
 as just another process. However, Litestream requires periodic but short write
-locks on the database in order to sync changes. SQLite will return an error by
+locks on the database when checkpointing occurs. SQLite will return an error by
 default if your application tries to obtain a write lock at the same time.</p>
 <p>To prevent this, your application will need to set the <a href="https://www.sqlite.org/pragma.html#pragma_busy_timeout"><code>busy_timeout</code>
 </a> pragma when it initializes the database connection. This pragma
