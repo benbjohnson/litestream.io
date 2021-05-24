@@ -13,7 +13,7 @@ caveats to know.
 
 SQLite is built to run as a multi-process embedded database and Litestream acts
 as just another process. However, Litestream requires periodic but short write
-locks on the database in order to sync changes. SQLite will return an error by
+locks on the database when checkpointing occurs. SQLite will return an error by
 default if your application tries to obtain a write lock at the same time.
 
 To prevent this, your application will need to set the [`busy_timeout`
