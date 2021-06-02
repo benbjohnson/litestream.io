@@ -81,8 +81,9 @@ dbs:
 
 Litestream currently supports two types of replicas:
 
-- `"s3"` replicates a database to an S3 bucket.
+- `"abs"` replicates a database to an Azure Blob Storage container.
 - `"file"` replicates a database to another local file path.
+- `"s3"` replicates a database to an S3-compatible bucket.
 
 All replicas have unique name which is specified by the `"name"` field. If a
 name is not specified then the name defaults to the replica type. The name is

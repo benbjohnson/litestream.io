@@ -4,8 +4,8 @@ date: 2021-02-27T00:00:00Z
 layout: docs
 menu:
   docs:
-    parent: "guides"
-weight: 350
+    parent: "replica-guides"
+weight: 420
 ---
 
 This guide will show you how to use Backblaze B2 as a database replica path for

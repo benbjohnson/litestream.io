@@ -4,8 +4,8 @@ date: 2021-03-08T00:00:00Z
 layout: docs
 menu:
   docs:
-    parent: "guides"
-weight: 360
+    parent: "replica-guides"
+weight: 430
 ---
 
 This guide will show you how to use [DigitalOcean Spaces][spaces] as a database
