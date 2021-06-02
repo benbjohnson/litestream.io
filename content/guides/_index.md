@@ -26,5 +26,6 @@ different platforms.
 - [DigitalOcean Spaces](/guides/digitalocean)
 - [Google Cloud Storage](/guides/gcs)
 - [Linode Object Storage](/guides/linode)
+- [SFTP Server](/guides/sftp)
 
 
