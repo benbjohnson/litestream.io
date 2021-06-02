@@ -4,7 +4,7 @@ date: 2021-03-08T00:00:00Z
 layout: docs
 menu:
   docs:
-    parent: "guides"
+    parent: "infrastructure-guides"
 weight: 300
 ---
 

@@ -48,20 +48,26 @@
   url = "/tips/"
 
 [[docs]]
-  name = "Guides"
+  name = "Infrastructure Guides"
   weight = 30
-  identifier = "guides"
+  identifier = "infrastructure-guides"
+  url = "/guides/"
+
+[[docs]]
+  name = "Replica Guides"
+  weight = 40
+  identifier = "replica-guides"
   url = "/guides/"
 
 [[docs]]
   name = "How it Works"
-  weight = 40
+  weight = 50
   identifier = "how-it-works"
   url = "/how-it-works/"
 
 [[docs]]
   name = "Reference"
-  weight = 50
+  weight = 60
   identifier = "reference"
   url = "/reference/"
 

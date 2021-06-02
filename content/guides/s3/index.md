@@ -4,8 +4,8 @@ date: 2021-03-08T00:00:00Z
 layout: docs
 menu:
   docs:
-    parent: "guides"
-weight: 340
+    parent: "replica-guides"
+weight: 400
 ---
 
 This guide will show you how to use Amazon S3 as a database replica path for
