@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "replica-guides"
-weight: 440
+weight: 450
 ---
 
 This guide will show you how to use [Linode Object Storage][object-storage] as a
