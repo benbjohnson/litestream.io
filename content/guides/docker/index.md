@@ -98,16 +98,33 @@ name of your bucket.
 
 If you are deploying to a service like [Fly.io][fly] that only uses a single
 container, you can bundle both your application and Litestream together using
-[s6][]. s6 provides a simple init system for managing multiple processes. It is
-wrapped by the [s6-overlay] project to provide this service to Docker
-containers.
+Litestream's built-in process supervision. You can specify your application's
+process and flags by passing them to the `-exec` flag:
 
-You can find a small example application in the [litestream-s6-example][]
-repository. This repository runs an SQLite application and a static build of 
-Litestream in an alpine container. You can find details about how to run it
-in that repository's README.
+```sh
+litestream replicate -exec "myapp -myflag myarg"
+```
+
+Or you can pass them in via the config file:
+
+```sh
+dbs:
+  - path: /path/to/db
+    exec: myapp -myflag myarg
+```
+
+Litestream will monitor your application's process and automatically shutdown
+when it closes. You can find an example application in the
+[litestream-docker-example][] repository.
+
+If you need to monitor multiple application processes, you can also use [s6][]
+as a process supervisor. s6 provides a simple init system for managing multiple
+processes. It is wrapped by the [s6-overlay] project to provide this service to
+Docker containers. You can find a small example application in the
+[litestream-s6-example][] repository. 
 
 [fly]: https://fly.io/
+[litestream-docker-example]: https://github.com/benbjohnson/litestream-docker-example
 [s6]: http://skarnet.org/software/s6
 [s6-overlay]: https://github.com/just-containers/s6-overlay
 [litestream-s6-example]: https://github.com/benbjohnson/litestream-s6-example
