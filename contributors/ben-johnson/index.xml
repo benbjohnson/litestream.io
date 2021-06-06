@@ -6,7 +6,17 @@
     <description>Recent content in Ben Johnson on </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Wed, 28 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/contributors/ben-johnson/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/contributors/ben-johnson/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Litestream v0.3.5 Released</title>
+      <link>https://litestream.io/blog/litestream-v0.3.5-released/</link>
+      <pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/blog/litestream-v0.3.5-released/</guid>
+      <description>The main focus of this latest release has been on improving the replica code so we can easily add new replication destinations. Additionally, we&amp;rsquo;ve improved Docker integration, made quality-of-life improvements for running Litestream in Kubernetes, adjusted the default S3 sync interval, updated some metrics, and made a bunch of smaller bug fixes.
+Improved replica code Originally, Litestream only had s3 and file replica types. These had a lot of similar code but there were enough small differences in how they behaved that we didn&amp;rsquo;t try to abstract the code too much.</description>
+    </item>
+    
     <item>
       <title>Litestream v0.3.4 Released</title>
       <link>https://litestream.io/blog/litestream-v0.3.4-released/</link>

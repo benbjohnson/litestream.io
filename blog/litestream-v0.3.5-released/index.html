@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.3767892ca24c534b0073d9dc2e5bde6c178ec79d5d14c1ac8dd8b6f1c0385b1d70dafc086a1e0f74de32121bc3e1ab5d0ff39eef99b114e8ad8b11fdc5f2cd1b.css" integrity="sha512-N2eJLKJMU0sAc9ncLlvebBeOx51dFMGsjdi28cA4Wx1w2vwIah4PdN4yEhvD4atdD/Oe75mxFOitixH9xfLNGw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Litestream v0.3.5 Released - Litestream</title>
+<meta name="description" content="The newest version of Litestream adds a slew of new replication destinations, improves Kubernetes integration, &amp; standardizes the S3 sync interval.">
+<link rel="canonical" href="https://litestream.io/blog/litestream-v0.3.5-released/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Litestream v0.3.5 Released">
+<meta name="twitter:description" content="The newest version of Litestream adds a slew of new replication destinations, improves Kubernetes integration, &amp; standardizes the S3 sync interval.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https:\/\/litestream.io\/blog\/litestream-v0.3.5-released\/"
+      },
+      "headline": "Litestream v0.3.5 Released",
+      "image": [],
+      "datePublished": "2021-06-03T00:00:00CET",
+      "dateModified": "2021-06-03T00:00:00CET",
+      "author": {
+        "@type": "Organization",
+        "name": "Litestream"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Litestream",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https:\/\/litestream.io\/litestream.png"
+        }
+        },
+      "description": "The newest version of Litestream adds a slew of new replication destinations, improves Kubernetes integration, \u0026 standardizes the S3 sync interval."
+    }
+    </script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Blog",
+        "item": "https:\/\/litestream.io\/blog\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Litestream V0.3.5 Released",
+        "item": "https:\/\/litestream.io\/blog\/litestream-v0.3.5-released\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="blog single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      Litestream
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/blog/">Blog</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+<div class="row justify-content-center">
+	<div class="col-md-12 col-lg-10 col-xl-8">
+		<article>
+			<div class="blog-header">
+				<h1>Litestream v0.3.5 Released</h1>
+				<p>
+	<small>
+		Posted June 3, 2021
+		by <a class="stretched-link position-relative" href="https://twitter.com/benbjohnson" target="_blank">Ben Johnson</a>
+		&nbsp;&hyphen;&nbsp;
+		<strong>6&nbsp;min read</strong>
+	</small>
+<p>
+			</div>
+			<p class="lead"></p>
+			<p>The main focus of this latest release has been on improving the replica code so
+we can easily add new replication destinations. Additionally, we&rsquo;ve improved
+Docker integration, made quality-of-life improvements for running
+Litestream in Kubernetes, adjusted the default S3 sync interval, updated
+some metrics, and made a bunch  of smaller bug fixes.</p>
+<h2 id="improved-replica-code">Improved replica code</h2>
+<p>Originally, Litestream only had <code>s3</code> and <code>file</code> replica types. These
+had a lot of similar code but there were enough small differences in how they
+behaved that we didn&rsquo;t try to abstract the code too much. For example, <code>file</code>
+replicas don&rsquo;t need to worry about batching WAL segments because writes are
+free. In contrast, S3 charges $0.000005 per PUT request which can add up with
+frequent uploads.</p>
+<p>After working with both implementations and planning out future replica
+implementations, it became clear how to separate them. Litestream now has a
+<code>Replica</code> type for managing WAL position, snapshot frequency, &amp; retention while
+the new <code>ReplicaClient</code> type provides a &ldquo;dumb&rdquo; client interface to the external
+replica. This client is &ldquo;dumb&rdquo; in the sense that it is entirely stateless so  it
+makes it easy to add new client types.</p>
+<h3 id="azure-blob-storage">Azure Blob Storage</h3>
+<p><a href="https://azure.microsoft.com/en-us/">Azure</a> is one of the largest cloud providers after AWS and, sadly, does not
+support the S3 API in their blob storage service. Users could add a translation
+layer to convert S3 requests to Azure&rsquo;s API but that&rsquo;s a poor experience.</p>
+<p>We&rsquo;ve added native support for <a href="https://azure.microsoft.com/en-us/services/storage/blobs/">Azure Blob Storage</a> in the latest release. It
+uses the <a href="https://github.com/Azure/azure-sdk-for-go">official Azure SDK</a> and you
+can use it by specifying the <code>abs</code> replica type.</p>
+<p>If you&rsquo;re using replica URLs, you can specify it like this:</p>
+<pre><code>abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+</code></pre><p>However, if you use the Litestream <a href="/reference/config">config file</a> then you can break it out like
+this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span><span class="w">        </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">STORAGEACCOUNT</span><span class="w">
+</span><span class="w">        </span><span class="nt">account-key</span><span class="p">:</span><span class="w">  </span><span class="l">ACCOUNTKEY</span><span class="w">
+</span><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w">       </span><span class="l">CONTAINERNAME</span><span class="w">
+</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">         </span><span class="l">PATH</span><span class="w">
+</span></code></pre></div><p>You&rsquo;ll need to set the <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable if
+you are using the URL format. You can find more details on our <a href="/guides/azure"><em>Replicating to
+Azure Blob Storage guide</em></a>.</p>
+<h3 id="google-cloud-storage">Google Cloud Storage</h3>
+<p><a href="https://cloud.google.com/storage">Google Cloud Storage</a> was originally supported in Litestream via its
+S3-compatible API, however, it turns out that it&rsquo;s not all that compatible.
+We&rsquo;ve integrated the native <a href="https://cloud.google.com/go/storage">Google Cloud SDK</a> to provide a replica client
+for GCS which you can specify using the <code>gcs</code> replica type.</p>
+<p>The replica URL format looks like:</p>
+<pre><code>gcs://BUCKET/PATH
+</code></pre><p>While the configuration file usage looks like:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">gcs</span><span class="w">
+</span><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKET</span><span class="w">
+</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">PATH</span><span class="w">
+</span></code></pre></div><p>You&rsquo;ll need to make sure the path to your service account key JSON file is set
+to the <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable. You can find more
+details on our <a href="/guides/gcs"><em>Replicating to Google Cloud Storage guide</em></a>.</p>
+<h3 id="sftp">SFTP</h3>
+<p>If there&rsquo;s one thing we love it&rsquo;s old school technology. Tried &amp; true. SQLite is
+a perfect example!</p>
+<p><a href="https://github.com/chillfox">Mia Bennett</a> posted on the Litestream <a href="https://github.com/benbjohnson/litestream/discussions">discussion
+board</a> to suggest adding SFTP support to be able to replicate to <a href="https://www.rsync.net/">rsync.net</a>
+and we jumped on it. Huge shout out to <a href="https://www.linkedin.com/in/kozubik/">John Kozubik</a> from rsync.net for
+providing a test account!</p>
+<p>SFTP is an FTP-like protocol that runs over SSH so it&rsquo;s secure and pretty easy
+to setup. It&rsquo;s typically secured via password or SSH key file. You can use both
+with Litestream.</p>
+<p>You can specify an SFTP replica destination via replica URL:</p>
+<pre><code>sftp://USER:PASSWORD@HOST:PORT/PATH
+</code></pre><p>Or you can use the configuration file format:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">     </span><span class="l">sftp</span><span class="w">
+</span><span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w">     </span><span class="l">HOST:PORT</span><span class="w">
+</span><span class="w">        </span><span class="nt">user</span><span class="p">:</span><span class="w">     </span><span class="l">USER</span><span class="w">
+</span><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
+</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">PATH</span><span class="w">
+</span></code></pre></div><p>If you are using an SSH key file, you can specify its path in the config only:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER@HOST:PORT/PATH</span><span class="w">
+</span><span class="w">        </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/id_rsa</span><span class="w">
+</span></code></pre></div><h2 id="improved-docker-integration">Improved Docker integration</h2>
+<p>The previous version of Litestream added quality-of-life improvements to
+integrate with Docker by using <a href="https://skarnet.org/software/s6/">s6</a> for process supervision. This worked
+well but it added an additional layer of complexity for most applications
+that only need to run a single application process.</p>
+<p>We&rsquo;ve added subprocess execution into Litestream so you can run a single
+process as a child of Litestream. This process will be monitored and Litestream
+will automatically shutdown when the process exits.</p>
+<p>You can run a child process by providing your command and args with the <code>-exec</code>
+flag:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
+</code></pre></div><p>or you can specify it in your config file:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">dbs:
+  - path: /path/to/db
+    exec: myapp -myflag myarg
+</code></pre></div><p>You can find a full, working example of a Dockerized application running with
+subprocess execution at the <a href="https://github.com/benbjohnson/litestream-docker-example">Litestream/Docker example repo</a>.</p>
+<h2 id="kubernetes-deployments">Kubernetes deployments</h2>
+<p>Since the early days of Litestream, folks have been asking how to run it as a
+sidecar in Kubernetes. It seemed like an odd request since Litestream is meant
+to simplify application deployments and <a href="https://kubernetes.io/">Kubernetes</a> is anything by simple.
+Litestream also constrains applications to a single node so it complicates
+Kubernetes deployments where most pods are stateless.</p>
+<p>However, it turns out there are some great use cases for running Litestream in
+Kubernetes. Most applications have peripheral services don&rsquo;t require zero
+downtime or extremely high traffic. Worker and monitoring services are good
+examples. Being able to run against a local SQLite database greatly simplifies
+the deployment &amp; development process.</p>
+<p><a href="https://twitter.com/cablespaghetti">Sam Weston</a> did some great work to get
+Litestream working in a Kubernetes StatefulSet with a single replica. You can
+find details about configuring it and setting up autorecovery on the <a href="/guides/kubernetes/"><em>Running
+in a Kubernetes Cluster guide</em></a>.</p>
+<h2 id="s3-sync-interval-changes">S3 sync interval changes</h2>
+<p>One of the goals of Litestream was to let you run your application on a single
+server and pay almost nothing to replicate it. The goal was to target $1 per
+month. S3 charges $0.000005 per upload so if Litestream uploads every 10 seconds
+(or 260,000 times per month) then it would cost you about $1.30 per month. So we
+picked a default sync interval of 10 seconds.</p>
+<p>However, replicating every 10 seconds is not a great experience when folks were
+going through the <a href="/getting-started">Getting Started</a> tutorial so we changed
+the the default to be 1 second if you were running via the command line args.</p>
+<p>This is obviously confusing.</p>
+<p>After some usage by the community, it became obvious that the original 10 second
+sync interval was too conservative. Most applications don&rsquo;t have a continuous
+stream of writes 24/7. For example, <a href="https://twitter.com/deliberatecoder">Michael Lynch</a> wrote about his experience
+in a <a href="https://mtlynch.io/litestream/">blog post</a> where his costs were only $0.03/month.</p>
+<p>So we&rsquo;ve standardized the sync interval for S3 to replicate every 1 second
+regardless of if you&rsquo;re using the config or command line args. If you do have a
+heavy, constant write load then you may want to adjust your replica&rsquo;s
+<code>sync-interval</code> property to a higher interval.</p>
+<h2 id="replica-metrics">Replica metrics</h2>
+<p>The original S3 replica had two Prometheus metrics that it published to track
+the number of operations and the number of bytes used by those operations:</p>
+<pre><code>litestream_s3_operation_total{&quot;operation&quot;}
+litestream_s3_operation_bytes{&quot;operation&quot;}
+</code></pre><p>However, we have a lot more replica types now and it didn&rsquo;t make sense to have
+separate metrics for each one. These have now been consolidated into generic
+metrics with a <code>&quot;replica_type&quot;</code> label:</p>
+<pre><code>litestream_replica_operation_total{&quot;replica_type&quot;,&quot;operation&quot;}
+litestream_replica_operation_bytes{&quot;replica_type&quot;,&quot;operation&quot;}
+</code></pre><p>Note that each replica type reports a little differently because of how the
+native library implements LIST, GET, and PUT commands.</p>
+<h2 id="miscellaneous-fixes">Miscellaneous fixes</h2>
+<p>We&rsquo;ve fixed a few minor bugs in the latest version:</p>
+<ul>
+<li>Support older versions of Linux (<a href="https://github.com/benbjohnson/litestream/pull/199">#199</a>)</li>
+<li>Add support for <a href="https://filebase.com/">Filebase</a> replica URLs (<a href="https://github.com/benbjohnson/litestream/pull/210">#210</a>)</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>The latest release of Litestream greatly expands the number of replica
+destinations and provides some quality of life improvements for Kubernetes
+users. We&rsquo;re excited for the next release (v0.4.0) where we will be focused on
+<a href="https://github.com/benbjohnson/litestream/issues/8">live read replicas</a> to allow
+users to run multiple nodes and distribute query load between them. It creates
+some fantastic opportunities for building large read-heavy applications or for
+reducing client latency by creating a globally-distributed SQLite database.</p>
+<p>If you&rsquo;re interested in hearing more, please <a href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">join our Slack</a>, <a href="https://calendly.com/benbjohnson/litestream">book an
+office hours</a>, or <a href="https://twitter.com/litestreamio">follow Litestream on Twitter</a> for updates.</p>
+
+		</article>
+	</div>
+</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

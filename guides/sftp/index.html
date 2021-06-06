@@ -14,15 +14,14 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Command: wal - Litestream</title>
+  <title>Replicating to an SFTP Server - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/reference/wal/">
+<link rel="canonical" href="https://litestream.io/guides/sftp/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Command: wal">
-<meta name="twitter:description" content="The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.
-Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:
-litestream wal [arguments] DB_PATH List by replica URL This command lists all WAL files for a single replica URL. This approach is useful when you do not have a configuration file.">
+<meta name="twitter:title" content="Replicating to an SFTP Server">
+<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running.
+Usage Command line usage You can specify your SFTP replica using a replica URL on the command line. For example, you can replicate a database to an SFTP server with the following command. Replace the placeholders with your username, password, server, &amp; path.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -41,13 +40,13 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Reference",
-        "item": "https:\/\/litestream.io\/reference\/"
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Wal",
-        "item": "https:\/\/litestream.io\/reference\/wal\/"
+        "name": "Sftp",
+        "item": "https:\/\/litestream.io\/guides\/sftp\/"
     }]
 }
 </script>
@@ -59,7 +58,7 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="reference single">
+  <body class="guides single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -142,7 +141,7 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
     <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
-    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/how-it-works/">How it Works</a>
@@ -158,7 +157,7 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
   
 			</nav>        
@@ -170,16 +169,8 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
   <ul>
     <li><a href="#usage">Usage</a>
       <ul>
-        <li><a href="#list-by-database">List by database</a></li>
-        <li><a href="#list-by-replica-url">List by replica URL</a></li>
-      </ul>
-    </li>
-    <li><a href="#arguments">Arguments</a></li>
-    <li><a href="#example">Example</a>
-      <ul>
-        <li><a href="#database-wal-files">Database WAL files</a></li>
-        <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
-        <li><a href="#replica-url-wal-files">Replica URL WAL files</a></li>
+        <li><a href="#command-line-usage">Command line usage</a></li>
+        <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
   </ul>
@@ -188,50 +179,55 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Command: wal</h1>
+		<h1>Replicating to an SFTP Server</h1>
 			<p class="lead"></p>
-			<p>The <code>wal</code> command lists WAL files available for a database or replica. This
-command is not typically used in normal usage and is mainly used for debugging.</p>
+			<p>This guide will show you how to use Litestream to replicate to a remote SFTP
+server. You will need to have an SFTP server already set up and running.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="list-by-database">List by database<a href="#list-by-database" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all WAL files across all replicas for a database specified
-in the Litestream configuration file:</p>
-<pre><code>litestream wal [arguments] DB_PATH
-</code></pre><h3 id="list-by-replica-url">List by replica URL<a href="#list-by-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all WAL files for a single replica URL. This approach is
-useful when you do not have a configuration file.</p>
-<pre><code>litestream wal [arguments] REPLICA_URL
-</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre><code>-config PATH
-    Specifies the configuration file.
-    Defaults to /etc/litestream.yml
-
--no-expand-env
-    Disables environment variable expansion in configuration file.
-
--replica NAME
-    Optional, filters by replica.
-    Only applies when listing database snapshots.
-
--generation NAME
-    Optional, filter by a specific generation.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="database-wal-files">Database WAL files<a href="#database-wal-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all WAL files across all replicas for the <code>/var/lib/db</code> database:</p>
-<pre><code>$ litestream wal /var/lib/db
-</code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all WAL files for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
-<pre><code>$ litestream wal -replica s3 /var/lib/db
-</code></pre><h3 id="replica-url-wal-files">Replica URL WAL files<a href="#replica-url-wal-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all WAL files for a single replica URL:</p>
-<pre><code>$ litestream wal s3://mybkt.litestream.io/db
-</code></pre>
+<h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can specify your SFTP replica using a replica URL on the command line. For
+example, you can replicate a database to an SFTP server with the following
+command. <em>Replace the placeholders with your username, password, server, &amp; path.</em></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream replicate /path/to/db sftp://USER:PASSWORD@HOST:PORT/PATH
+</code></pre></div><p>You can later restore your database from SFTP to a local <code>my.db</code> path with the
+following command.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream restore -o my.db sftp://USER:PASSWORD@HOST:PORT/PATH
+</code></pre></div><p>Note that the port is optional if you are using the default SSH port (<code>22</code>).
+Also note that that the <code>PATH</code> should be an absolute path and not relative to
+the present working directory. If you need to use a relative path, you must use
+a configuration file.</p>
+<h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
+file</a>. You can configure a replica for your database using the <code>url</code> format.</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER:PASSWORD@HOST:PORT/PATH</span><span class="w">
+</span></code></pre></div><p>Or you can expand your configuration into multiple fields:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">     </span><span class="l">sftp</span><span class="w">
+</span><span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w">     </span><span class="l">HOST:PORT</span><span class="w">
+</span><span class="w">        </span><span class="nt">user</span><span class="p">:</span><span class="w">     </span><span class="l">USER</span><span class="w">
+</span><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
+</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">PATH</span><span class="w">
+</span></code></pre></div><p>The <code>path</code> is treated as a relative path from the present working directory
+unless there is a leading slash.</p>
+<p>You can also specify an SSH key file path instead of using a password The key
+file path should point to your private key.</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER@HOST:PORT/PATH</span><span class="w">
+</span><span class="w">        </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/id_rsa</span><span class="w">
+</span></code></pre></div>
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/reference/version/">
+	<a href="https://litestream.io/guides/linode/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Command: version
+					&larr; Replicating to Linode Object Storage
 				</div>
 			</div>
 		</a>

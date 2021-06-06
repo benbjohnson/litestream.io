@@ -14,15 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Command: wal - Litestream</title>
+  <title>Replicating to Azure Blob Storage - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/reference/wal/">
+<link rel="canonical" href="https://litestream.io/guides/azure/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Command: wal">
-<meta name="twitter:description" content="The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.
-Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:
-litestream wal [arguments] DB_PATH List by replica URL This command lists all WAL files for a single replica URL. This approach is useful when you do not have a configuration file.">
+<meta name="twitter:title" content="Replicating to Azure Blob Storage">
+<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to an Azure Blob Storage container. You will need an Azure account and to complete this guide.
+Setup Create a container In the Azure Portal, use the top search bar to navigate to &ldquo;Storage Accounts&rdquo;. If you do not have a storage account, click the &ldquo;New&rdquo; button, enter your storage account name, and click &ldquo;Review &#43; create&rdquo;.
+Once you have a storage account, select it from the list of accounts and navigate to the Containers subsection.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -41,13 +41,13 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Reference",
-        "item": "https:\/\/litestream.io\/reference\/"
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Wal",
-        "item": "https:\/\/litestream.io\/reference\/wal\/"
+        "name": "Azure",
+        "item": "https:\/\/litestream.io\/guides\/azure\/"
     }]
 }
 </script>
@@ -59,7 +59,7 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="reference single">
+  <body class="guides single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -137,7 +137,7 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
   </h3>
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
-    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
@@ -158,7 +158,7 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
   
 			</nav>        
@@ -168,18 +168,16 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#usage">Usage</a>
+    <li><a href="#setup">Setup</a>
       <ul>
-        <li><a href="#list-by-database">List by database</a></li>
-        <li><a href="#list-by-replica-url">List by replica URL</a></li>
+        <li><a href="#create-a-container">Create a container</a></li>
+        <li><a href="#create-an-access-key">Create an access key</a></li>
       </ul>
     </li>
-    <li><a href="#arguments">Arguments</a></li>
-    <li><a href="#example">Example</a>
+    <li><a href="#usage">Usage</a>
       <ul>
-        <li><a href="#database-wal-files">Database WAL files</a></li>
-        <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
-        <li><a href="#replica-url-wal-files">Replica URL WAL files</a></li>
+        <li><a href="#command-line-usage">Command line usage</a></li>
+        <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
   </ul>
@@ -188,50 +186,69 @@ litestream wal [arguments] DB_PATH List by replica URL This command lists all WA
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Command: wal</h1>
+		<h1>Replicating to Azure Blob Storage</h1>
 			<p class="lead"></p>
-			<p>The <code>wal</code> command lists WAL files available for a database or replica. This
-command is not typically used in normal usage and is mainly used for debugging.</p>
+			<p>This guide will show you how to use Litestream to replicate to an <a href="https://azure.microsoft.com/en-us/services/storage/blobs/">Azure Blob
+Storage</a> container. You will need an <a href="https://azure.microsoft.com/en-us/">Azure</a> account and to complete this
+guide.</p>
+<h2 id="setup">Setup<a href="#setup" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="create-a-container">Create a container<a href="#create-a-container" class="anchor" aria-hidden="true">#</a> </h3>
+<p>In the <a href="https://portal.azure.com/">Azure Portal</a>, use the top search bar to navigate to <em>&ldquo;Storage
+Accounts&rdquo;</em>. If you do not have a storage account, click the <em>&ldquo;New&rdquo;</em> button,
+enter your storage account name, and click <em>&ldquo;Review + create&rdquo;</em>.</p>
+<p>Once you have a storage account, select it from the list of accounts and
+navigate to the <em>Containers</em> subsection. Click the <em>&quot;+&quot;</em> button to create a new
+container. Remember your storage account name and your container name as you&rsquo;ll
+need those later.</p>
+<h3 id="create-an-access-key">Create an access key<a href="#create-an-access-key" class="anchor" aria-hidden="true">#</a> </h3>
+<p>From your storage account, navigate to the <em>Access Keys</em> subsection. You&rsquo;ll see
+two access keys already exist. Click the <em>&ldquo;Show keys&rdquo;</em> button to reveal them.
+Copy the value of one of the <em>&ldquo;Key&rdquo;</em> textboxes. This will be be your account key.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="list-by-database">List by database<a href="#list-by-database" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all WAL files across all replicas for a database specified
-in the Litestream configuration file:</p>
-<pre><code>litestream wal [arguments] DB_PATH
-</code></pre><h3 id="list-by-replica-url">List by replica URL<a href="#list-by-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all WAL files for a single replica URL. This approach is
-useful when you do not have a configuration file.</p>
-<pre><code>litestream wal [arguments] REPLICA_URL
-</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre><code>-config PATH
-    Specifies the configuration file.
-    Defaults to /etc/litestream.yml
+<h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can replicate to <a href="https://azure.microsoft.com/en-us/services/storage/blobs/">Azure Blob Storage</a> from the command line by setting
+your account key via an environment variable:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">LITESTREAM_AZURE_ACCOUNT_KEY</span><span class="o">=</span>...
+</code></pre></div><p>You can then specify your replica as a replica URL on the command line. For
+example, you can replicate a database to your container with the following
+command. <em>Replace the placeholders for your account, container, &amp; path.</em></p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream replicate /path/to/db abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+</code></pre></div><p>You can later restore your database from Azure Blob Storage to a local <code>my.db</code>
+path with the following command.</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream restore -o my.db abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+</code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
+file</a>. You can configure a replica for your database using the <code>url</code> format.</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">abs://STORAGEACCOUNT@CONTAINERNAME/PATH</span><span class="w">
+</span><span class="w">        </span><span class="nt">account-key</span><span class="p">:</span><span class="w">  </span><span class="l">ACCOUNTKEY</span><span class="w">
+</span></code></pre></div><p>Or you can expand your configuration into multiple fields:</p>
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span><span class="w">        </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">STORAGEACCOUNT</span><span class="w">
+</span><span class="w">        </span><span class="nt">account-key</span><span class="p">:</span><span class="w">  </span><span class="l">ACCOUNTKEY</span><span class="w">
+</span><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w">       </span><span class="l">CONTAINERNAME</span><span class="w">
+</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">         </span><span class="l">PATH</span><span class="w">
+</span></code></pre></div><p>You can also use the <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable instead
+of specifying the account key in your configuration file.</p>
 
--no-expand-env
-    Disables environment variable expansion in configuration file.
-
--replica NAME
-    Optional, filters by replica.
-    Only applies when listing database snapshots.
-
--generation NAME
-    Optional, filter by a specific generation.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="database-wal-files">Database WAL files<a href="#database-wal-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all WAL files across all replicas for the <code>/var/lib/db</code> database:</p>
-<pre><code>$ litestream wal /var/lib/db
-</code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all WAL files for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
-<pre><code>$ litestream wal -replica s3 /var/lib/db
-</code></pre><h3 id="replica-url-wal-files">Replica URL WAL files<a href="#replica-url-wal-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all WAL files for a single replica URL:</p>
-<pre><code>$ litestream wal s3://mybkt.litestream.io/db
-</code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/reference/version/">
+	<a href="https://litestream.io/guides/s3/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Command: version
+					&larr; Replicating to Amazon S3
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/backblaze/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Replicating to Backblaze B2 &rarr;
 				</div>
 			</div>
 		</a>

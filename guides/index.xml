@@ -18,6 +18,16 @@ Overview Docker is a common tool for deploying applications and Litestream can b
     </item>
     
     <item>
+      <title>Running in a Kubernetes cluster</title>
+      <link>https://litestream.io/guides/kubernetes/</link>
+      <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/guides/kubernetes/</guid>
+      <description>This guide will show you how to run Litestream as a sidecar to your application within Kubernetes using StatefulSets. Setting up &amp;amp; managing Kubernetes is a complex topic that will not be covered here. This guide assumes you are comfortable with Kubernetes and have a running cluster.
+It also assumes you have a replica destination (e.g. S3) for your Litestream data already setup and you are comfortable with basic operations in Litestream.</description>
+    </item>
+    
+    <item>
       <title>Running as a Systemd service</title>
       <link>https://litestream.io/guides/systemd/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
@@ -49,6 +59,17 @@ Setup Create an IAM user You will need to set up a user with programmatic access
     </item>
     
     <item>
+      <title>Replicating to Azure Blob Storage</title>
+      <link>https://litestream.io/guides/azure/</link>
+      <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/guides/azure/</guid>
+      <description>This guide will show you how to use Litestream to replicate to an Azure Blob Storage container. You will need an Azure account and to complete this guide.
+Setup Create a container In the Azure Portal, use the top search bar to navigate to &amp;ldquo;Storage Accounts&amp;rdquo;. If you do not have a storage account, click the &amp;ldquo;New&amp;rdquo; button, enter your storage account name, and click &amp;ldquo;Review + create&amp;rdquo;.
+Once you have a storage account, select it from the list of accounts and navigate to the Containers subsection.</description>
+    </item>
+    
+    <item>
       <title>Replicating to Backblaze B2</title>
       <link>https://litestream.io/guides/backblaze/</link>
       <pubDate>Sat, 27 Feb 2021 00:00:00 +0000</pubDate>
@@ -68,6 +89,17 @@ Create a bucket To begin, you&amp;rsquo;ll need a bucket to store your data. If 
       <description>This guide will show you how to use DigitalOcean Spaces as a database replica path for Litestream. You will need a DigitalOcean account to complete this guide.
 Setup Create a space In the DigitalOcean Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Spaces&amp;rdquo;. You may need to enable spaces on your account if you have not already.
 On the &amp;ldquo;Create a Space&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
+    </item>
+    
+    <item>
+      <title>Replicating to Google Cloud Storage</title>
+      <link>https://litestream.io/guides/gcs/</link>
+      <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/guides/gcs/</guid>
+      <description>This guide will show you how to use Litestream to replicate to a Google Cloud Storage bucket. You will need a Google Cloud account and to complete this guide.
+Setup Create a bucket In the GCP Console, use the top search bar to navigate to &amp;ldquo;Cloud Storage&amp;rdquo;. You may need to enable storage and billing if you have not previously set it up.
+Next, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a globally unique bucket name and click the &amp;ldquo;Create&amp;rdquo; button.</description>
     </item>
     
     <item>

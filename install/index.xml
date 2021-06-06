@@ -24,8 +24,8 @@ brew install benbjohnson/litestream/litestream You should now be able to run lit
       
       <guid>https://litestream.io/install/debian/</guid>
       <description>Download &amp;amp; install Debian package files are provided so you can install Litestream and its systemd service with a few commands. First, download the latest .deb file to your local machine:
-wget https://github.com/benbjohnson/litestream/releases/download/v0.3.4/litestream-v0.3.4-linux-amd64.deb Then install it using dpkg:
-sudo dpkg -i litestream-v0.3.4-linux-amd64.deb You should now be able to run litestream version to verify it is installed.
+wget https://github.com/benbjohnson/litestream/releases/download/v0.3.5/litestream-v0.3.5-linux-amd64.deb Then install it using dpkg:
+sudo dpkg -i litestream-v0.3.5-linux-amd64.deb You should now be able to run litestream version to verify it is installed.
 Installing as a service To run Litestream continuously as a background service, you&amp;rsquo;ll need to enable and start the service:</description>
     </item>
     
