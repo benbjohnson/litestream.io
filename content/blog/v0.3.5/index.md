@@ -146,7 +146,7 @@ dbs:
 
 [rsync.net]: https://www.rsync.net/
 [discussion board]: https://github.com/benbjohnson/litestream/discussions
-[John Kozubik]: https://www.linkedin.com/in/kozubik/
+[John Kozubik]: https://john.kozubik.com
 
 
 ## Improved Docker integration
