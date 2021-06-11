@@ -172,9 +172,8 @@ The following settings are specific to S3 replicas:
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
 
-- `sync-interval`—Frequency in which frames are pushed to S3. Defaults to `10s`
-  when using the config but only `1s` when specifying the replica URL directly
-  in the command line. Increasing frequency can affect costs significantly.
+- `sync-interval`—Frequency in which frames are pushed to S3. Defaults to `1s`.
+  Increasing frequency can affect costs significantly.
 
 
 ### File replica
