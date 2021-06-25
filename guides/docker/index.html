@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Running in a Docker container">
 <meta name="twitter:description" content="This guide will show you how to run Litestream within a Docker container either as a sidecar or within the same container as your application. You will need a Docker installed on your machine for this guide.
-Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow. Docker typically recommends running one application per container and Litestream can be run as a sidecar to another container.">
+❗️ The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms.  Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -186,6 +186,10 @@ Overview Docker is a common tool for deploying applications and Litestream can b
 			<p>This guide will show you how to run Litestream within a Docker container either
 as a sidecar or within the same container as your application. You will need a
 <a href="https://www.docker.com/">Docker</a> installed on your machine for this guide.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">❗️</div>
+  <div class="w-100">The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms.</div>
+</div>
 <h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Docker is a common tool for deploying applications and Litestream can be easily
 integrated into your workflow. Docker typically recommends running one
