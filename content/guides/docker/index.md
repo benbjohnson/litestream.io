@@ -12,6 +12,9 @@ This guide will show you how to run Litestream within a Docker container either
 as a sidecar or within the same container as your application. You will need a
 [Docker][docker] installed on your machine for this guide.
 
+{{< alert icon="❗️" text="The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms." >}}
+
+
 [docker]: https://www.docker.com/
 
 
