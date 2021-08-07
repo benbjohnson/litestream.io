@@ -22,6 +22,9 @@ set up in Backblaze, follow the steps below:
 1. Click _"Create a Bucket"_
 1. Copy the bucket details to the appropriate places in your `litestream.yml` file:
 
+You may want to change _Lifecycle Settings_ to _"Keep only the last version of
+the file"_ as Litestream files are immutable and don't require versioning.
+
 ![Screenshot of bucket settings in Backblaze B2](bucket.png)
 
 ```yaml
