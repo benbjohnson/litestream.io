@@ -191,6 +191,8 @@ set up in Backblaze, follow the steps below:</p>
 <li>Click <em>&ldquo;Create a Bucket&rdquo;</em></li>
 <li>Copy the bucket details to the appropriate places in your <code>litestream.yml</code> file:</li>
 </ol>
+<p>You may want to change <em>Lifecycle Settings</em> to <em>&ldquo;Keep only the last version of
+the file&rdquo;</em> as Litestream files are immutable and don&rsquo;t require versioning.</p>
 <p><img src="bucket.png" alt="Screenshot of bucket settings in Backblaze B2"></p>
 <div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">path-to-your-local-db-file</span><span class="w">
