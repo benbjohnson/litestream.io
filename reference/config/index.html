@@ -276,6 +276,10 @@ and validate that the data on the replica matches the local copy. Disabled by
 default. Enabling this will significantly increase the cost of running
 Litestream as S3 services charge for downloads.</p>
 </li>
+<li>
+<p><code>sync-interval</code>—Frequency in which frames are pushed to the replica. Defaults
+to <code>1s</code>. Increasing frequency can increase cloud storage costs significantly.</p>
+</li>
 </ul>
 <h3 id="s3-replica">S3 replica<a href="#s3-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p>
@@ -330,10 +334,6 @@ This is automatically enabled if <code>endpoint</code> is set.</p>
 <li>
 <p><code>skip-verify</code>—Disables TLS verification. This is useful when testing against
 a local node such as MinIO and you are using self-signed certificates.</p>
-</li>
-<li>
-<p><code>sync-interval</code>—Frequency in which frames are pushed to S3. Defaults to <code>1s</code>.
-Increasing frequency can affect costs significantly.</p>
 </li>
 </ul>
 <h3 id="file-replica">File replica<a href="#file-replica" class="anchor" aria-hidden="true">#</a> </h3>
