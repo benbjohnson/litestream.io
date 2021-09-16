@@ -112,6 +112,9 @@ The following replica settings are also available for all replica types:
   default. Enabling this will significantly increase the cost of running
   Litestream as S3 services charge for downloads.
 
+- `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
+  to `1s`. Increasing frequency can increase cloud storage costs significantly.
+
 
 ### S3 replica
 
@@ -171,9 +174,6 @@ The following settings are specific to S3 replicas:
 
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
-
-- `sync-interval`—Frequency in which frames are pushed to S3. Defaults to `1s`.
-  Increasing frequency can affect costs significantly.
 
 
 ### File replica
