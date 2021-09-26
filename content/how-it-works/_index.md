@@ -71,3 +71,24 @@ This approach also has the benefit that two servers that accidentally share
 the same replica destination will not overwrite each other's data. However,
 note that it is not recommended to replicate two databases to the same exact
 replica path.
+
+
+## Retention
+
+The time to restore a database from backup is directly related to the number and
+size of WAL files since the snapshot. To avoid having the WAL files grow without
+bound, Litestream performs new snapshots the data periodically and removes old
+WAL files.
+
+This process is broken up into two steps. First, a snapshot interval is set to
+re-snapshot the database on a regular basis. This allows you to keep copies of
+your database at multiple points in time. 
+
+The second step is retention enforcement. This periodically runs and removes any
+snapshots older than the retention time as well as remove any WAL files older
+than the oldest snapshot. By default, this the retention time is 24 hours.
+Litestream will always ensure there is at least one snapshot retained.
+
+This two-step process allows for more use cases such as snapshotting every day
+but retaining snapshots for a week.
+
