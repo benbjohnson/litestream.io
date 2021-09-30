@@ -37,10 +37,10 @@ want to use persistent storage in a production environment.
 First, start your MinIO instance:
 
 ```sh
-docker run -p 9000:9000 minio/minio server /data
+docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address ":9001"
 ```
 
-Then open a web browser to <a href="http://localhost:9000/" target="_blank">http://localhost:9000/</a>
+Then open a web browser to <a href="http://localhost:9001/" target="_blank">http://localhost:9001/</a>
 and enter the default credentials:
 
 ```
@@ -48,8 +48,8 @@ Username: minioadmin
 Password: minioadmin
 ```
 
-Next, click the "+" button in the lower right-hand corner and then click the
-_"Create Bucket"_ icon. Name your bucket, `"mybkt"`.
+Next, navigate to "Buckets", click the "Create Bucket" button in the top right corner and then click the
+_"Save"_ icon. Name your bucket, `"mybkt"`.
 
 
 ## Setting up your database
