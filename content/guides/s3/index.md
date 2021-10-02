@@ -158,6 +158,7 @@ The following is the minimum policy to use with Litestream. Please replace the
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
+                "s3:DeleteObject",
                 "s3:GetObject"
             ],
             "Resource": [
