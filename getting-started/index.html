@@ -203,13 +203,13 @@ gets us up and running quickly but it will only persist the data for as long as
 the Docker container is running. That&rsquo;s good enough for this tutorial but you&rsquo;ll
 want to use persistent storage in a production environment.</p>
 <p>First, start your MinIO instance:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -p 9000:9000 minio/minio server /data
-</code></pre></div><p>Then open a web browser to <a href="http://localhost:9000/" target="_blank">http://localhost:9000/</a>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address <span class="s2">&#34;:9001&#34;</span>
+</code></pre></div><p>Then open a web browser to <a href="http://localhost:9001/" target="_blank">http://localhost:9001/</a>
 and enter the default credentials:</p>
 <pre><code>Username: minioadmin
 Password: minioadmin
-</code></pre><p>Next, click the &ldquo;+&rdquo; button in the lower right-hand corner and then click the
-<em>&ldquo;Create Bucket&rdquo;</em> icon. Name your bucket, <code>&quot;mybkt&quot;</code>.</p>
+</code></pre><p>Next, navigate to &ldquo;Buckets&rdquo;, click the &ldquo;Create Bucket&rdquo; button in the top right corner and then click the
+<em>&ldquo;Save&rdquo;</em> icon. Name your bucket, <code>&quot;mybkt&quot;</code>.</p>
 <h2 id="setting-up-your-database">Setting up your database<a href="#setting-up-your-database" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Now that our MinIO bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we&rsquo;ll use the <code>sqlite3</code> command line tool
