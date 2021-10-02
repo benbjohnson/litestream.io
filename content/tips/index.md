@@ -95,6 +95,6 @@ Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.
 
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
-[s3-replica]: http://localhost:1313/reference/config/#s3-replica
+[s3-replica]: https://litestream.io/reference/config/#s3-replica
 
 
