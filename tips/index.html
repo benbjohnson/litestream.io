@@ -224,7 +224,7 @@ replication</a>. Asynchronous replication is typically much faster than
 synchronous replication but it trades off durability of recent writes.</p>
 <p>By default, Litestream will replicate new changes to an S3 replica every 10
 seconds. This can be reasonably configured down to 1 second with the
-<a href="http://localhost:1313/reference/config/#s3-replica"><code>sync-timeout</code></a> configuration setting. During this time where data
+<a href="https://litestream.io/reference/config/#s3-replica"><code>sync-timeout</code></a> configuration setting. During this time where data
 has not yet been replicated, a catastrophic crash on your server will result in
 the loss of data in that time window.</p>
 <p>For more typical shutdown scenarios, when Litestream receives a signal to close,
