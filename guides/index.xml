@@ -81,6 +81,17 @@ Create a bucket To begin, you&amp;rsquo;ll need a bucket to store your data. If 
     </item>
     
     <item>
+      <title>Replicating to Scaleway Object Storage</title>
+      <link>https://litestream.io/guides/scaleway/</link>
+      <pubDate>Sun, 28 Nov 2021 19:20:59 +0100</pubDate>
+      
+      <guid>https://litestream.io/guides/scaleway/</guid>
+      <description>This guide will show you how to use Scaleway Object Storage as a database replica path for Litestream. You will need a Scaleway account to complete this guide.
+Setup Create a bucket In the Scaleway Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Object Storage Bucket&amp;rdquo;.
+On the &amp;ldquo;Create a bucket&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
+    </item>
+    
+    <item>
       <title>Replicating to DigitalOcean Spaces</title>
       <link>https://litestream.io/guides/digitalocean/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
@@ -100,17 +111,6 @@ On the &amp;ldquo;Create a Space&amp;rdquo; screen, you&amp;rsquo;ll need to cho
       <description>This guide will show you how to use Litestream to replicate to a Google Cloud Storage bucket. You will need a Google Cloud account and to complete this guide.
 Setup Create a bucket In the GCP Console, use the top search bar to navigate to &amp;ldquo;Cloud Storage&amp;rdquo;. You may need to enable storage and billing if you have not previously set it up.
 Next, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a globally unique bucket name and click the &amp;ldquo;Create&amp;rdquo; button.</description>
-    </item>
-    
-    <item>
-      <title>Replicating to Linode Object Storage</title>
-      <link>https://litestream.io/guides/linode/</link>
-      <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://litestream.io/guides/linode/</guid>
-      <description>This guide will show you how to use Linode Object Storage as a database replica path for Litestream. You will need a Linode account to complete this guide.
-Setup Create a bucket In the Linode Console, click on &amp;ldquo;Object Storage&amp;rdquo; from the navigation and click the &amp;ldquo;Create Bucket&amp;rdquo; button. You may need to enable Object Storage on your account if you have not already.
-Enter a globally unique name for your bucket and choose a region.</description>
     </item>
     
   </channel>

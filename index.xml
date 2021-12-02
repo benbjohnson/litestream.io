@@ -58,7 +58,7 @@ Understanding the WAL SQLite has a journaling mode called &amp;ldquo;WAL&amp;rdq
       
       <guid>https://litestream.io/guides/</guid>
       <description>Overview These guides provides instructions for running Litesteam in production on different platforms.
-Infrastructure guides  Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service  Replica guides  Amazon S3 Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage SFTP Server  </description>
+Infrastructure guides  Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service  Replica guides  Amazon S3 Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Scaleway Object Storage SFTP Server  </description>
     </item>
     
     <item>
