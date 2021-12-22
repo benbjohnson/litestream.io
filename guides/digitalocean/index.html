@@ -267,7 +267,7 @@ file. You can configure a replica for your database using the <code>url</code> f
 Typically, it shows a <code>send request failed</code> error followed by a <code>connection reset by peer</code> error. This seems to be a socket that closes early on
 DigitalOcean&rsquo;s servers.</p>
 <p>Litestream is built to handle many types of failures so these requests will be
-retried on the next sync attempt which is 10 seconds later by default. While
+retried on the next sync attempt which is 1 second later by default. While
 it&rsquo;s always troublesome to see errors, these do not affect the integrity of your
 backups.</p>
 
