@@ -132,7 +132,7 @@ reset by peer` error. This seems to be a socket that closes early on
 DigitalOcean's servers. 
 
 Litestream is built to handle many types of failures so these requests will be
-retried on the next sync attempt which is 10 seconds later by default. While
+retried on the next sync attempt which is 1 second later by default. While
 it's always troublesome to see errors, these do not affect the integrity of your
 backups.
 
