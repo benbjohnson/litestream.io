@@ -46,6 +46,9 @@ litestream restore [arguments] REPLICA_URL
     Output path of the restored database.
     Defaults to original DB path.
 
+-if-db-not-exists
+    Returns exit code of 0 if the database already exists.
+
 -if-replica-exists
     Returns exit code of 0 if no backups found.
 
