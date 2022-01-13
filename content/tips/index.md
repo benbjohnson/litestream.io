@@ -94,6 +94,13 @@ it will attempt to synchronize all outstanding WAL changes to the S3 replica bef
 Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.
 
+## Snapshots to improve restore performance
+
+By default, snapshots are not created and WAL frames are replayed from the
+beginning when running restore. If you're writing data often, this may cause the
+WAL replay to take a while. You may wish to enable snapshotting in those
+situations by setting `snapshot-interval` to e.g. `1h`.
+
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
 [s3-replica]: https://litestream.io/reference/config/#s3-replica
 
