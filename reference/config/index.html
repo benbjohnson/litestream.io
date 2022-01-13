@@ -268,8 +268,9 @@ retention needs to be enforced. Defaults to <code>1h</code>.</p>
 <li>
 <p><code>snapshot-interval</code>—Specifies how often new snapshots will be created. This is
 used to reduce the time to restore since newer snapshots will have fewer WAL
-frames to apply. Retention still applies to these snapshots. Not enabled by
-default.</p>
+frames to apply. Retention still applies to these snapshots.</p>
+<p>If you do not set a snapshot interval then a new snapshot will be created
+whenever retention is performed. Retention occurs every 24 hours by default.</p>
 </li>
 <li>
 <p><code>validation-interval</code>—When specified, Litestream will automatically restore

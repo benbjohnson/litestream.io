@@ -168,6 +168,7 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a href="#deleting-sqlite-databases">Deleting SQLite databases</a></li>
     <li><a href="#synchronous-pragma">Synchronous PRAGMA</a></li>
     <li><a href="#data-loss-window">Data loss window</a></li>
+    <li><a href="#increase-snapshots-frequency-to-improve-restore-performance">Increase snapshots frequency to improve restore performance</a></li>
   </ul>
 </nav>
   </div>
@@ -232,6 +233,17 @@ the loss of data in that time window.</p>
 it will attempt to synchronize all outstanding WAL changes to the S3 replica before terminating.</p>
 <p>Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.</p>
+<h2 id="increase-snapshots-frequency-to-improve-restore-performance">Increase snapshots frequency to improve restore performance<a href="#increase-snapshots-frequency-to-improve-restore-performance" class="anchor" aria-hidden="true">#</a> </h2>
+<p>By default, the <code>snapshot-interval</code> on a replica is unset so a new snapshot is
+taken when the previous snapshot is removed because of retention. For example,
+if your retention policy is the default setting of <code>24h</code> then a new snapshot
+will be taken once per day.</p>
+<p>However, if you&rsquo;re writing data often then WAL files will build up over that
+time period and increase your restore time. If you have frequent writes then it
+is recommended to either decrease your <code>retention</code> period or to set the
+<code>snapshot-interval</code> to something lower such as <code>1h</code>.</p>
+<p>For example, if your <code>retention</code> period is one day and your <code>snapshot-interval</code>
+is one hour then you will see a rolling set of 24 snapshots for your replica.</p>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
