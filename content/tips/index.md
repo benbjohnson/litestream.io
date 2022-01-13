@@ -94,12 +94,20 @@ it will attempt to synchronize all outstanding WAL changes to the S3 replica bef
 Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.
 
-## Snapshots to improve restore performance
+## Increase snapshots frequency to improve restore performance
 
-By default, snapshots are not created and WAL frames are replayed from the
-beginning when running restore. If you're writing data often, this may cause the
-WAL replay to take a while. You may wish to enable snapshotting in those
-situations by setting `snapshot-interval` to e.g. `1h`.
+By default, the `snapshot-interval` on a replica is unset so a new snapshot is
+taken when the previous snapshot is removed because of retention. For example,
+if your retention policy is the default setting of `24h` then a new snapshot
+will be taken once per day.
+
+However, if you're writing data often then WAL files will build up over that
+time period and increase your restore time. If you have frequent writes then it
+is recommended to either decrease your `retention` period or to set the
+`snapshot-interval` to something lower such as `1h`.
+
+For example, if your `retention` period is one day and your `snapshot-interval`
+is one hour then you will see a rolling set of 24 snapshots for your replica.
 
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
 [s3-replica]: https://litestream.io/reference/config/#s3-replica

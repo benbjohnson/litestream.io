@@ -104,8 +104,11 @@ The following replica settings are also available for all replica types:
 
 - `snapshot-interval`—Specifies how often new snapshots will be created. This is
   used to reduce the time to restore since newer snapshots will have fewer WAL
-  frames to apply. Retention still applies to these snapshots. Not enabled by
-  default.
+  frames to apply. Retention still applies to these snapshots.
+
+  If you do not set a snapshot interval then a new snapshot will be created
+  whenever retention is performed. Retention occurs every 24 hours by default.
+
 
 - `validation-interval`—When specified, Litestream will automatically restore
   and validate that the data on the replica matches the local copy. Disabled by
