@@ -169,6 +169,7 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a href="#synchronous-pragma">Synchronous PRAGMA</a></li>
     <li><a href="#data-loss-window">Data loss window</a></li>
     <li><a href="#increase-snapshots-frequency-to-improve-restore-performance">Increase snapshots frequency to improve restore performance</a></li>
+    <li><a href="#disable-autocheckpoints-for-high-write-load-servers">Disable autocheckpoints for high write load servers</a></li>
   </ul>
 </nav>
   </div>
@@ -244,7 +245,22 @@ is recommended to either decrease your <code>retention</code> period or to set t
 <code>snapshot-interval</code> to something lower such as <code>1h</code>.</p>
 <p>For example, if your <code>retention</code> period is one day and your <code>snapshot-interval</code>
 is one hour then you will see a rolling set of 24 snapshots for your replica.</p>
-
+<h2 id="disable-autocheckpoints-for-high-write-load-servers">Disable autocheckpoints for high write load servers<a href="#disable-autocheckpoints-for-high-write-load-servers" class="anchor" aria-hidden="true">#</a> </h2>
+<p>By default, SQLite allows any process to perform a checkpoint. A checkpoint is
+when pages that are written to the WAL are copied back to the main database
+file. Litestream works by controlling this checkpointing process and
+replicating the pages before they get copied back into the main database.
+Litestream prevents other processes from checkpointing by maintaining a read
+lock on the database in between its checkpoint requests.</p>
+<p>However, under high load with many small write transactions (e.g. tens of
+thousands per second), the application&rsquo;s SQLite instance can perform a
+checkpoint in between Litestream-initiated checkpoints and cause Litestream
+to miss a WAL file.</p>
+<p>To prevent this, it is recommended to run your application with
+autocheckpointing disabled. To do this, run the following PRAGMA when you
+open your SQLite connection:</p>
+<pre><code>PRAGMA wal_autocheckpoint = 0;
+</code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	</div>
