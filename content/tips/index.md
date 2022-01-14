@@ -94,6 +94,7 @@ it will attempt to synchronize all outstanding WAL changes to the S3 replica bef
 Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.
 
+
 ## Increase snapshots frequency to improve restore performance
 
 By default, the `snapshot-interval` on a replica is unset so a new snapshot is
@@ -108,6 +109,31 @@ is recommended to either decrease your `retention` period or to set the
 
 For example, if your `retention` period is one day and your `snapshot-interval`
 is one hour then you will see a rolling set of 24 snapshots for your replica.
+
+
+## Disable autocheckpoints for high write load servers
+
+By default, SQLite allows any process to perform a checkpoint. A checkpoint is
+when pages that are written to the WAL are copied back to the main database
+file. Litestream works by controlling this checkpointing process and
+replicating the pages before they get copied back into the main database.
+Litestream prevents other processes from checkpointing by maintaining a read
+lock on the database in between its checkpoint requests.
+
+However, under high load with many small write transactions (e.g. tens of
+thousands per second), the application's SQLite instance can perform a
+checkpoint in between Litestream-initiated checkpoints and cause Litestream
+to miss a WAL file.
+
+To prevent this, it is recommended to run your application with
+autocheckpointing disabled. To do this, run the following PRAGMA when you
+open your SQLite connection:
+
+```
+PRAGMA wal_autocheckpoint = 0;
+```
+
+
 
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
 [s3-replica]: https://litestream.io/reference/config/#s3-replica
