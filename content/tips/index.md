@@ -145,8 +145,18 @@ cannot find max wal index for restore: missing initial wal segment: generation=f
 ```
 
 In this case, manually copy your most recent snapshot in
-`generations/<id>/snapshots/<snapshot>.lz4`, decompress with `lz4`, open the
-database with `sqlite3` and run `PRAGMA integrity_check;`. Replicate this
+`generations/<id>/snapshots/<snapshot>.lz4` and decompress with `lz4`.
+
+It's a good idea to perform an integrity check on the database using `sqlite3`:
+
+```
+$ sqlite3 /path/to/db
+sqlite> PRAGMA integrity_check;
+ok
+```
+
+You now use this snapshot file as your application's database file and continue
+replicating it again with Litestream.
 
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
 [s3-replica]: https://litestream.io/reference/config/#s3-replica
