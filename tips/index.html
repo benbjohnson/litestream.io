@@ -170,6 +170,7 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a href="#data-loss-window">Data loss window</a></li>
     <li><a href="#increase-snapshots-frequency-to-improve-restore-performance">Increase snapshots frequency to improve restore performance</a></li>
     <li><a href="#disable-autocheckpoints-for-high-write-load-servers">Disable autocheckpoints for high write load servers</a></li>
+    <li><a href="#multiple-applications-replicating-into-location-can-corrupt">Multiple applications replicating into location can corrupt</a></li>
   </ul>
 </nav>
   </div>
@@ -260,7 +261,22 @@ to miss a WAL file.</p>
 autocheckpointing disabled. To do this, run the following PRAGMA when you
 open your SQLite connection:</p>
 <pre><code>PRAGMA wal_autocheckpoint = 0;
-</code></pre>
+</code></pre><h2 id="multiple-applications-replicating-into-location-can-corrupt">Multiple applications replicating into location can corrupt<a href="#multiple-applications-replicating-into-location-can-corrupt" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Multiple applications replicating into the same bucket can cause situations
+where you will be unable to restore. It is <em>your</em> responsibility to ensure you
+do not have multiple applications replicating concurrently. In the off-chance
+that it does happen, and you&rsquo;re unable to restore, you may see an error along
+the lines of:</p>
+<pre><code>cannot find max wal index for restore: missing initial wal segment: generation=f6d6d1e96d38dafb index=00000093 offset=4152
+</code></pre><p>In this case, manually copy your most recent snapshot in
+<code>generations/&lt;id&gt;/snapshots/&lt;snapshot&gt;.lz4</code> and decompress with <code>lz4</code>.</p>
+<p>It&rsquo;s a good idea to perform an integrity check on the database using <code>sqlite3</code>:</p>
+<pre><code>$ sqlite3 /path/to/db
+sqlite&gt; PRAGMA integrity_check;
+ok
+</code></pre><p>You now use this snapshot file as your application&rsquo;s database file and continue
+replicating it again with Litestream.</p>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	</div>
