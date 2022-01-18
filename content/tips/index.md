@@ -94,7 +94,6 @@ it will attempt to synchronize all outstanding WAL changes to the S3 replica bef
 Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.
 
-
 ## Increase snapshots frequency to improve restore performance
 
 By default, the `snapshot-interval` on a replica is unset so a new snapshot is
@@ -133,7 +132,21 @@ open your SQLite connection:
 PRAGMA wal_autocheckpoint = 0;
 ```
 
+## Multiple applications replicating into location can corrupt
 
+Multiple applications replicating into the same bucket can cause situations
+where you will be unable to restore. It is _your_ responsibility to ensure you
+do not have multiple applications replicating concurrently. In the off-chance
+that it does happen, and you're unable to restore, you may see an error along
+the lines of:
+
+```
+cannot find max wal index for restore: missing initial wal segment: generation=f6d6d1e96d38dafb index=00000093 offset=4152
+```
+
+In this case, manually copy your most recent snapshot in
+`generations/<id>/snapshots/<snapshot>.lz4`, decompress with `lz4`, open the
+database with `sqlite3` and run `PRAGMA integrity_check;`. Replicate this
 
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
 [s3-replica]: https://litestream.io/reference/config/#s3-replica
