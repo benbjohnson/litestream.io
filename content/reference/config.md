@@ -159,7 +159,7 @@ The following settings are specific to S3 replicas:
   global key or the `LITESTREAM_ACCESS_KEY_ID` environment variable will be used
   instead. The `AWS_ACCESS_KEY_ID` variable can also be used.
 
-- `secret-access-key`——Replica-specific secret key. If not specified, the global
+- `secret-access-key`—Replica-specific secret key. If not specified, the global
   secret or the `LITESTREAM_SECRET_ACCESS_KEY` environment variable will be used
   instead. The `AWS_SECRET_ACCESS_KEY` variable can also be used.
 
