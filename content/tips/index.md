@@ -82,11 +82,9 @@ many replication tools work including [PostgreSQL's log-shipping
 replication][pg]. Asynchronous replication is typically much faster than
 synchronous replication but it trades off durability of recent writes.
 
-By default, Litestream will replicate new changes to an S3 replica every 10
-seconds. This can be reasonably configured down to 1 second with the
-[`sync-timeout`][s3-replica] configuration setting. During this time where data
-has not yet been replicated, a catastrophic crash on your server will result in
-the loss of data in that time window.
+By default, Litestream will replicate new changes to an S3 replica every
+second. During this time where data has not yet been replicated, a catastrophic
+crash on your server will result in the loss of data in that time window.
 
 For more typical shutdown scenarios, when Litestream receives a signal to close,
 it will attempt to synchronize all outstanding WAL changes to the S3 replica before terminating.
