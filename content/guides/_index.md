@@ -21,7 +21,7 @@ different platforms.
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)
-- [Google Cloud Storage](/guides/gcs)
+- [Google Cloud Storage](/guides/gs)
 - [Linode Object Storage](/guides/linode)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)

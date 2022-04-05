@@ -74,12 +74,12 @@ Azure Blob Storage guide_](/guides/azure).
 [Google Cloud Storage] was originally supported in Litestream via its
 S3-compatible API, however, it turns out that it's not all that compatible.
 We've integrated the native [Google Cloud SDK][] to provide a replica client
-for GCS which you can specify using the `gcs` replica type.
+for Google Cloud Storage which you can specify using the `gs` replica type.
 
 The replica URL format looks like:
 
 ```
-gcs://BUCKET/PATH
+gs://BUCKET/PATH
 ```
 
 While the configuration file usage looks like:
@@ -88,14 +88,14 @@ While the configuration file usage looks like:
 dbs:
   - path: /path/to/local/db
     replicas:
-      - type:   gcs
+      - type:   gs
         bucket: BUCKET
         path:   PATH
 ```
 
 You'll need to make sure the path to your service account key JSON file is set
 to the `GOOGLE_APPLICATION_CREDENTIALS` environment variable. You can find more
-details on our [_Replicating to Google Cloud Storage guide_](/guides/gcs).
+details on our [_Replicating to Google Cloud Storage guide_](/guides/gs).
 
 [Google Cloud Storage]: https://cloud.google.com/storage
 [Google Cloud SDK]: https://cloud.google.com/go/storage
