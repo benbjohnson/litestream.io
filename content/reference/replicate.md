@@ -50,6 +50,10 @@ litestream replicate [arguments] DB_PATH REPLICA_URL [REPLICA_URL...]
 -exec CMD
     Executes a subcommand. Litestream will exit when the child
     process exits. Useful for simple process management.
+
+-addr BIND_ADDR
+    Starts an HTTP server that reports prometheus metrics and provides
+    an endpoint for live read replication. (e.g. ":9090")
 ```
 
 When using the `-exec` flag, Litestream will pass the path of the first database
