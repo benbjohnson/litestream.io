@@ -109,12 +109,6 @@ The following replica settings are also available for all replica types:
   If you do not set a snapshot interval then a new snapshot will be created
   whenever retention is performed. Retention occurs every 24 hours by default.
 
-
-- `validation-interval`—When specified, Litestream will automatically restore
-  and validate that the data on the replica matches the local copy. Disabled by
-  default. Enabling this will significantly increase the cost of running
-  Litestream as S3 services charge for downloads.
-
 - `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
   to `1s`. Increasing frequency can increase cloud storage costs significantly.
 
@@ -235,22 +229,5 @@ Duration values can be specified using second (`s`), minute (`m`), or hour (`h`)
 but days, weeks, & years are not supported.
 
 
-### Validation interval
 
-Because Litestream performs physical replication, the resulting database files
-restored from replicas will match byte-for-byte. Litestream has an option to
-periodically validate replicas by restoring them and comparing their checksum
-to the primary database's checksum.
-
-_Please note that frequently restoring from S3 can be expensive._
-
-It can be enabled by setting the `validation-interval` field:
-
-```
-dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        validation-interval: 6h
-```
 
