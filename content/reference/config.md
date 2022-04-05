@@ -12,7 +12,9 @@ The YAML configuration file provides a way to list databases and replicas that
 Litestream should manage. In addition, there are global variables that can be
 applied to all replicas.
 
-The default path for the configuration file is `/etc/litestream.yml`.
+If the `-config` flag is not specified, Litestream will attempt to read
+`litestream.yml` from the current directory and then fallback to using
+`/etc/litestream.yml`. 
 
 ### Variable expansion
 
