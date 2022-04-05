@@ -44,15 +44,16 @@ and to scale out.
 
 ## Windows support
 
-Litestream now ships with prebuilt binaries for Windows so you can run it as a
+_Note: Windows support has been removed in v0.4.0_
+
+~~Litestream now ships with prebuilt binaries for Windows so you can run it as a
 standalone application or as a background Windows Service. It integrates in
-with the Windows Event Log so you can it can collect and manage log events.
+with the Windows Event Log so you can it can collect and manage log events.~~
 
-You can find a guide for running [Litestream as a Windows Service][windows] in
+~~You can find a guide for running _Litestream as a Windows Service_ in
 the documentation section of the web site. We'd love to hear feedback on the
-setup and if anything could be improved.
+setup and if anything could be improved.~~
 
-[windows]: http://localhost:1313/guides/windows/
 
 
 ## S3-compatible storage
