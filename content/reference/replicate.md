@@ -47,8 +47,11 @@ litestream replicate [arguments] DB_PATH REPLICA_URL [REPLICA_URL...]
 -no-expand-env
     Disables environment variable expansion in configuration file.
 
--trace PATH
-    Write verbose trace logging to PATH.
-    This trace file can produce a lot of data
-    and is not recommended for production systems.
+-exec CMD
+    Executes a subcommand. Litestream will exit when the child
+    process exits. Useful for simple process management.
 ```
+
+When using the `-exec` flag, Litestream will pass the path of the first database
+in your configuration to the child process as the `LITESTREAM_DB_PATH`
+environment variable.

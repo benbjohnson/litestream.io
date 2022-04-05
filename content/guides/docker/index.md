@@ -120,6 +120,10 @@ Litestream will monitor your application's process and automatically shutdown
 when it closes. You can find an example application in the
 [litestream-docker-example][] repository.
 
+When you use the `-exec` flag, Litestream will pass in the first database path
+from your configuration to the child process as the `LITESTREAM_DB_PATH`
+environment variable.
+
 If you need to monitor multiple application processes, you can also use [s6][]
 as a process supervisor. s6 provides a simple init system for managing multiple
 processes. It is wrapped by the [s6-overlay] project to provide this service to
