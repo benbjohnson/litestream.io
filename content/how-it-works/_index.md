@@ -86,7 +86,7 @@ your database at multiple points in time.
 
 The second step is retention enforcement. This periodically runs and removes any
 snapshots older than the retention time as well as remove any WAL files older
-than the oldest snapshot. By default, this the retention time is 24 hours.
+than the oldest snapshot. By default, the retention time is 24 hours.
 Litestream will always ensure there is at least one snapshot retained.
 
 This two-step process allows for more use cases such as snapshotting every day
