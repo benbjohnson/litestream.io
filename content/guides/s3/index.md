@@ -38,7 +38,7 @@ restrictive policy](#restrictive-iam-policy) as described later in this guide.
 
 Then click the _Next_ button twice and then click the _Create user_ button. This
 will create the user and display credentials for programmatic access. You will
-need to to save the _"Access key ID"_ and _"Secret access key"_ for later use
+need to save the _"Access key ID"_ and _"Secret access key"_ for later use
 in this guide.
 
 <figure>
