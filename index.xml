@@ -12,25 +12,6 @@
     
     
     <item>
-      <title>Tips &amp; Caveats</title>
-      <link>https://litestream.io/tips/</link>
-      <pubDate>Wed, 10 Mar 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://litestream.io/tips/</guid>
-      <description>Running an application that uses SQLite and Litestream can require some small tweaks to optimize performance and usability. There are also some important caveats to know.
-Busy timeout SQLite is built to run as a multi-process embedded database and Litestream acts as just another process. However, Litestream requires periodic but short write locks on the database when checkpointing occurs. SQLite will return an error by default if your application tries to obtain a write lock at the same time.</description>
-    </item>
-    
-    <item>
-      <title>Documentation</title>
-      <link>https://litestream.io/docs/</link>
-      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://litestream.io/docs/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Getting Started</title>
       <link>https://litestream.io/getting-started/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
@@ -42,6 +23,16 @@ By the end, you&amp;rsquo;ll understand the replicate and restore commands and b
     </item>
     
     <item>
+      <title>Tips &amp; Caveats</title>
+      <link>https://litestream.io/tips/</link>
+      <pubDate>Wed, 10 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/tips/</guid>
+      <description>Running an application that uses SQLite and Litestream can require some small tweaks to optimize performance and usability. There are also some important caveats to know.
+Busy timeout SQLite is built to run as a multi-process embedded database and Litestream acts as just another process. However, Litestream requires periodic but short write locks on the database when checkpointing occurs. SQLite will return an error by default if your application tries to obtain a write lock at the same time.</description>
+    </item>
+    
+    <item>
       <title>How it works</title>
       <link>https://litestream.io/how-it-works/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
@@ -49,6 +40,25 @@ By the end, you&amp;rsquo;ll understand the replicate and restore commands and b
       <guid>https://litestream.io/how-it-works/</guid>
       <description>Litestream is a streaming replication tool for SQLite databases. It runs as a separate background process and continuously copies write-ahead log pages from disk to one or more replicas. This asynchronous replication provides disaster recovery similar to what is available with database servers like Postgres or MySQL.
 Understanding the WAL SQLite has a journaling mode called &amp;ldquo;WAL&amp;rdquo; (write-ahead log) which writes database page changes to a separate -wal file first before later copying those pages back into the main database file.</description>
+    </item>
+    
+    <item>
+      <title>Alternatives</title>
+      <link>https://litestream.io/alternatives/</link>
+      <pubDate>Sun, 17 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/alternatives/</guid>
+      <description>Overview Litestream aims to provide a balance between durability and operational complexity by batching changes into one-second windows and asynchronously backing those changes up to external storage. This improves write performance at the expense of having a small window of data loss in the event of a catastrophic failure.
+However, this tradeoff may not make sense for all applications. This page lists alternative approaches and when they might be appropriate.</description>
+    </item>
+    
+    <item>
+      <title>Documentation</title>
+      <link>https://litestream.io/docs/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/docs/</guid>
+      <description></description>
     </item>
     
     <item>
