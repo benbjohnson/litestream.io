@@ -2,6 +2,10 @@
 title : "Tips & Caveats"
 date: 2021-03-10T00:00:00Z
 layout: docs
+menu:
+  docs:
+    parent: "general"
+weight: 120
 ---
 
 Running an application that uses SQLite and Litestream can require some small

@@ -2,6 +2,10 @@
 title : "How it works"
 date: 2021-02-01T00:00:00Z
 layout: docs
+menu:
+  docs:
+    parent: "general"
+weight: 130
 ---
 
 Litestream is a streaming replication tool for SQLite databases. It runs as a

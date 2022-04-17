@@ -3,6 +3,11 @@
   url = "/install"
   weight = 10
 
+[[docs]]
+  name = "General"
+  weight = 20
+  identifier = "general"
+
 [[main]]
   name = "Guides"
   url = "/guides"
@@ -36,18 +41,6 @@
   url = "/install"
 
 [[docs]]
-  name = "Getting Started"
-  weight = 20
-  identifier = "getting-started"
-  url = "/getting-started/"
-
-[[docs]]
-  name = "Tips & Caveats"
-  weight = 25
-  identifier = "tips"
-  url = "/tips/"
-
-[[docs]]
   name = "Infrastructure Guides"
   weight = 30
   identifier = "infrastructure-guides"
@@ -58,12 +51,6 @@
   weight = 40
   identifier = "replica-guides"
   url = "/guides/"
-
-[[docs]]
-  name = "How it Works"
-  weight = 50
-  identifier = "how-it-works"
-  url = "/how-it-works/"
 
 [[docs]]
   name = "Reference"

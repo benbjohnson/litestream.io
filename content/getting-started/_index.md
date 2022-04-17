@@ -2,6 +2,10 @@
 title : "Getting Started"
 date: 2021-02-01T00:00:00Z
 layout: docs
+menu:
+  docs:
+    parent: "general"
+weight: 110
 ---
 
 This tutorial will get you up and running with Litestream locally and
