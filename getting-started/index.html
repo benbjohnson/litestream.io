@@ -204,7 +204,7 @@ gets us up and running quickly but it will only persist the data for as long as
 the Docker container is running. That&rsquo;s good enough for this tutorial but you&rsquo;ll
 want to use persistent storage in a production environment.</p>
 <p>First, start your MinIO instance:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address <span class="s2">&#34;:9001&#34;</span>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --address <span class="s2">&#34;:9001&#34;</span>
 </code></pre></div><p>Then open a web browser to <a href="http://localhost:9001/" target="_blank">http://localhost:9001/</a>
 and enter the default credentials:</p>
 <pre><code>Username: minioadmin
