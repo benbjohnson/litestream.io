@@ -215,7 +215,8 @@ directory next to your database file and restart Litestream.</p>
 <p>SQLite must call <code>fsync()</code> to flush data to disk to ensure transactions are
 durable. While in WAL journaling mode, fsync calls can be relaxed in exchange
 for durability without risking data corruption.</p>
-<p>To do this, you can change the <code>SYNCHRONOUS</code> mode to <code>&quot;NORMAL&quot;</code>:</p>
+<p>To do this, you can change the <a href="https://www.sqlite.org/pragma.html#pragma_synchronous"><code>synchronous</code></a> mode to <code>NORMAL</code>
+(it typically <a href="https://github.com/sqlite/sqlite/blob/86fbbbf96440fddc6e691213495b563f2584fce1/src/sqliteInt.h#L1268-L1286">defaults</a> to <code>FULL</code>):</p>
 <pre><code>PRAGMA synchronous = NORMAL;
 </code></pre><p>This mode will ensure that the <code>fsync()</code> calls are only called when the WAL
 becomes full and has to checkpoint to the main database file. This is safe as
