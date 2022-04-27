@@ -67,7 +67,8 @@ SQLite must call `fsync()` to flush data to disk to ensure transactions are
 durable. While in WAL journaling mode, fsync calls can be relaxed in exchange
 for durability without risking data corruption.
 
-To do this, you can change the `SYNCHRONOUS` mode to `"NORMAL"`:
+To do this, you can change the [`synchronous`][synchronous] mode to `NORMAL`
+(it typically [defaults][synchronous_default] to `FULL`):
 
 ```
 PRAGMA synchronous = NORMAL;
@@ -76,6 +77,9 @@ PRAGMA synchronous = NORMAL;
 This mode will ensure that the `fsync()` calls are only called when the WAL
 becomes full and has to checkpoint to the main database file. This is safe as
 the WAL file is append only.
+
+[synchronous]: https://www.sqlite.org/pragma.html#pragma_synchronous
+[synchronous_default]: https://github.com/sqlite/sqlite/blob/86fbbbf96440fddc6e691213495b563f2584fce1/src/sqliteInt.h#L1268-L1286
 
 
 ## Data loss window
