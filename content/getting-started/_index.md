@@ -41,7 +41,7 @@ want to use persistent storage in a production environment.
 First, start your MinIO instance:
 
 ```sh
-docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --address ":9001"
+docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address ":9001"
 ```
 
 Then open a web browser to <a href="http://localhost:9001/" target="_blank">http://localhost:9001/</a>
