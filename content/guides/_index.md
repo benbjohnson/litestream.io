@@ -6,7 +6,7 @@ layout: docs
 
 ## Overview
 
-These guides provides instructions for running Litesteam in production on
+These guides provides instructions for running Litestream in production on
 different platforms.
 
 ### Infrastructure guides
