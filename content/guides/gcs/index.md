@@ -31,8 +31,13 @@ and click the _"Create"_ button.
 
 ### Create a service account
 
-You'll need to set up a service account to authenticate into GCP and access your
-bucket. From the top search bar, navigate to _"Service Accounts"_. Enter a name
+On a Compute Engine VM or Cloud Run service, Litestreamwill automatically pick
+up the credentials associated with the instance from the instance's metadata
+server.
+
+If you run Litestream outside of Google Cloud, you'll need to set up a service 
+account to authenticate into GCP and access your bucket.
+From the top search bar, navigate to _"Service Accounts"_. Enter a name
 for your service account and click the _"Create"_ button.
 
 Next, you'll need to grant the _Storage Object Creator_ and _Storage Object
