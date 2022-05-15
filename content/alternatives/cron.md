@@ -87,7 +87,7 @@ sqlite3 /path/to/backup 'PRAGMA integrity_check'
 
 ### Configuring cron
 
-[`crontab`](https://man7.org/linux/man-pages/man5/crontab.5.html) is a built-in
+[`cron`](https://man7.org/linux/man-pages/man5/crontab.5.html) is a built-in
 Unix tool for periodically running commands. First, we'll create a script to
 run our backup commands. This is an example that combines the commands from
 above.
