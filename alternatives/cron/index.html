@@ -243,6 +243,9 @@ run our backup commands. This is an example that combines the commands from
 above.</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="cp">#!/bin/bash -x
 </span><span class="cp"></span>
+<span class="c1"># Ensure script stops when commands fail.</span>
+<span class="nb">set</span> -e
+
 <span class="c1"># Backup &amp; compress our database to the temp directory.</span>
 sqlite3 /path/to/db <span class="s1">&#39;.backup /tmp/db&#39;</span>
 gzip /tmp/db
