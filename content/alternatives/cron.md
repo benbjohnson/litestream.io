@@ -32,7 +32,7 @@ from a single transaction. You can use that like this:
 sqlite3 /path/to/db "vacuum into '/path/to/backup'"
 ```
 
-Both of these exmaples output your database to the file `/path/to/backup`. B-tree
+Both of these examples output your database to the file `/path/to/backup`. B-tree
 databases like SQLite compress well so it's recommended to compress your database:
 
 ```sh
