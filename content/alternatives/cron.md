@@ -21,11 +21,19 @@ which will safely backup your database to another file location. You can run
 it directly from the command line:
 
 ```sh
-sqlite3 /path/to/db '.backup /path/to/backup' 
+sqlite3 /path/to/db '.backup /path/to/backup'
 ```
 
-This will output your database to the file `/path/to/backup`. B-tree databases
-like SQLite compress well so it's recommended to compress your database:
+The `VACUUM INTO` command provides an alternative to this which can work better
+if your database is recieving a high volume of writes, as it captures a snapshot
+from a single transaction. You can use that like this:
+
+```sh
+sqlite3 /path/to/db "vacuum into '/path/to/backup'"
+```
+
+Both of these exmaples output your database to the file `/path/to/backup`. B-tree
+databases like SQLite compress well so it's recommended to compress your database:
 
 ```sh
 gzip /path/to/backup
@@ -99,7 +107,7 @@ above.
 set -e
 
 # Backup & compress our database to the temp directory.
-sqlite3 /path/to/db '.backup /tmp/db'
+sqlite3 /path/to/db "vacuum into '/path/to/backup'"
 gzip /tmp/db
 
 # Upload backup to S3 using a rolling daily naming scheme.
