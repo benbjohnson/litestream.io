@@ -31,7 +31,7 @@ and click the _"Create"_ button.
 
 ### Create a service account
 
-On a Compute Engine VM or Cloud Run service, Litestreamwill automatically pick
+On a Compute Engine VM or Cloud Run service, Litestream will automatically pick
 up the credentials associated with the instance from the instance's metadata
 server.
 
