@@ -199,8 +199,12 @@ You may need to enable storage and billing if you have not previously set it up.
 <p>Next, click the <em>&ldquo;Create Bucket&rdquo;</em> button. Enter a globally unique bucket name
 and click the <em>&ldquo;Create&rdquo;</em> button.</p>
 <h3 id="create-a-service-account">Create a service account<a href="#create-a-service-account" class="anchor" aria-hidden="true">#</a> </h3>
-<p>You&rsquo;ll need to set up a service account to authenticate into GCP and access your
-bucket. From the top search bar, navigate to <em>&ldquo;Service Accounts&rdquo;</em>. Enter a name
+<p>On a Compute Engine VM or Cloud Run service, Litestream will automatically pick
+up the credentials associated with the instance from the instance&rsquo;s metadata
+server.</p>
+<p>If you run Litestream outside of Google Cloud, you&rsquo;ll need to set up a service
+account to authenticate into GCP and access your bucket.
+From the top search bar, navigate to <em>&ldquo;Service Accounts&rdquo;</em>. Enter a name
 for your service account and click the <em>&ldquo;Create&rdquo;</em> button.</p>
 <p>Next, you&rsquo;ll need to grant the <em>Storage Object Creator</em> and <em>Storage Object
 Viewer</em> roles to your service accounts so they can read &amp; write data. Then
