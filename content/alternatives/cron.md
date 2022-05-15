@@ -95,6 +95,9 @@ above.
 ```sh
 #!/bin/bash -x
 
+# Ensure script stops when commands fail.
+set -e
+
 # Backup & compress our database to the temp directory.
 sqlite3 /path/to/db '.backup /tmp/db'
 gzip /tmp/db
