@@ -200,9 +200,13 @@ too many backups!</p>
 <p>The <code>sqlite3</code> command line interface comes with a built-in <code>.backup</code> command
 which will safely backup your database to another file location. You can run
 it directly from the command line:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 /path/to/db <span class="s1">&#39;.backup /path/to/backup&#39;</span> 
-</code></pre></div><p>This will output your database to the file <code>/path/to/backup</code>. B-tree databases
-like SQLite compress well so it&rsquo;s recommended to compress your database:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 /path/to/db <span class="s1">&#39;.backup /path/to/backup&#39;</span>
+</code></pre></div><p>The <code>VACUUM INTO</code> command provides an alternative to this which can work better
+if your database is receiving a high volume of writes, as it captures a snapshot
+from a single transaction. You can use that like this:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
+</code></pre></div><p>Both of these examples output your database to the file <code>/path/to/backup</code>. B-tree
+databases like SQLite compress well so it&rsquo;s recommended to compress your database:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">gzip /path/to/backup
 </code></pre></div><p>This will compress your database to a new file called <code>/path/to/backup.gz</code>. You
 can then upload this file to external storage.</p>
@@ -247,7 +251,7 @@ above.</p>
 <span class="nb">set</span> -e
 
 <span class="c1"># Backup &amp; compress our database to the temp directory.</span>
-sqlite3 /path/to/db <span class="s1">&#39;.backup /tmp/db&#39;</span>
+sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
 gzip /tmp/db
 
 <span class="c1"># Upload backup to S3 using a rolling daily naming scheme.</span>
