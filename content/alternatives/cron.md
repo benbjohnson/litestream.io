@@ -25,11 +25,11 @@ sqlite3 /path/to/db '.backup /path/to/backup'
 ```
 
 The `VACUUM INTO` command provides an alternative to this which can work better
-if your database is recieving a high volume of writes, as it captures a snapshot
+if your database is receiving a high volume of writes, as it captures a snapshot
 from a single transaction. You can use that like this:
 
 ```sh
-sqlite3 /path/to/db "vacuum into '/path/to/backup'"
+sqlite3 /path/to/db "VACUUM INTO '/path/to/backup'"
 ```
 
 Both of these examples output your database to the file `/path/to/backup`. B-tree
@@ -107,7 +107,7 @@ above.
 set -e
 
 # Backup & compress our database to the temp directory.
-sqlite3 /path/to/db "vacuum into '/path/to/backup'"
+sqlite3 /path/to/db "VACUUM INTO '/path/to/backup'"
 gzip /tmp/db
 
 # Upload backup to S3 using a rolling daily naming scheme.
