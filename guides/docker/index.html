@@ -246,9 +246,9 @@ Litestream&rsquo;s built-in process supervision. You can specify your applicatio
 process and flags by passing them to the <code>-exec</code> flag:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
 </code></pre></div><p>Or you can pass them in via the config file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">dbs:
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">exec: myapp -myflag myarg
+dbs:
   - path: /path/to/db
-    exec: myapp -myflag myarg
 </code></pre></div><p>Litestream will monitor your application&rsquo;s process and automatically shutdown
 when it closes. You can find an example application in the
 <a href="https://github.com/benbjohnson/litestream-docker-example">litestream-docker-example</a> repository.</p>
