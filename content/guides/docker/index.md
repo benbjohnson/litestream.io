@@ -111,9 +111,9 @@ litestream replicate -exec "myapp -myflag myarg"
 Or you can pass them in via the config file:
 
 ```sh
+exec: myapp -myflag myarg
 dbs:
   - path: /path/to/db
-    exec: myapp -myflag myarg
 ```
 
 Litestream will monitor your application's process and automatically shutdown
