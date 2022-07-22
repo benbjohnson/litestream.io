@@ -249,7 +249,7 @@ INSERT INTO friends (name) VALUES ('Kelly');
 <p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sudo systemctl stop litestream
 </code></pre></div><p>And then we&rsquo;ll delete our database:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rm -f friends.db friends.db-shm friends.db-wal
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">rm -rf friends.db friends.db-shm friends.db-wal friends.db-litestream
 </code></pre></div><p>This is the state our server would be in if it had crashed and we had rebuilt it
 but lost our data.</p>
 <h2 id="restoring-our-database">Restoring our database<a href="#restoring-our-database" class="anchor" aria-hidden="true">#</a> </h2>
