@@ -118,7 +118,7 @@ sudo systemctl stop litestream
 And then we'll delete our database:
 
 ```sh
-rm -f friends.db friends.db-shm friends.db-wal
+rm -rf friends.db friends.db-shm friends.db-wal friends.db-litestream
 ```
 
 This is the state our server would be in if it had crashed and we had rebuilt it
