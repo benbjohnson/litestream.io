@@ -90,8 +90,8 @@ file. You can configure a replica for your database using the `url` format.
 _Note that your region may be different._
 
 ```yaml
-access-key-id=xxxxxxxxxxxxxxxxxxxx
-secret-access-key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+access-key-id: xxxxxxxxxxxxxxxxxxxx
+secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 dbs:
   - path: /path/to/local/db
@@ -119,8 +119,8 @@ dbs:
   - path: /path/to/local/db
     replicas:
       - url: s3://SPACENAME.nyc3.digitaloceanspaces.com/db
-        access-key-id=xxxxxxxxxxxxxxxxxxx
-        secret-access-key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+        access-key-id: xxxxxxxxxxxxxxxxxxx
+        secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
 
