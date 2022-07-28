@@ -24,7 +24,7 @@ atomic transactions because it can simply delete WAL pages if a transaction gets
 rolled back. If pages were written directly to the database file then there
 would be no way to get back the original page data on rollback.
 
-The WAL also allows read transactions have their own snapshot view of the
+The WAL also allows read transactions to have their own snapshot view of the
 database at the time the transaction started because there can be multiple
 instances of the same database page spread across the database file & WAL.
 
