@@ -145,7 +145,6 @@ The following is the minimum policy to use with Litestream. Please replace the
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
                 "s3:GetBucketLocation",
@@ -154,7 +153,6 @@ The following is the minimum policy to use with Litestream. Please replace the
             "Resource": "arn:aws:s3:::<BUCKET>"
         },
         {
-            "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
