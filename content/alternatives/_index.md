@@ -30,6 +30,17 @@ also be used in conjunction with Litestream as a fallback.
 Please see our [guide to running a cron-based backup strategy](/alternatives/cron).
 
 
+## LiteFS
+
+[LiteFS](https://github.com/superfly/litefs) is a distributed file system that
+automatically replicates SQLite databases across a cluster of machines. It is
+meant for environments where high availability and low global latency are
+important whereas Litestream is primarily meant for disaster recovery.
+
+The LiteFS project is developed by the same creators of Litestream and they
+share many similarities internally.
+
+
 ## Raft-based consensus
 
 You can achieve higher durability guarantees by running a cluster of nodes that
