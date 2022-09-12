@@ -164,6 +164,7 @@
   <ul>
     <li><a href="#overview">Overview</a></li>
     <li><a href="#periodic-sqlite-backups">Periodic SQLite backups</a></li>
+    <li><a href="#litefs">LiteFS</a></li>
     <li><a href="#raft-based-consensus">Raft-based consensus</a></li>
     <li><a href="#virtual-file-system-vfs-based-approaches">Virtual File System (VFS)-based approaches</a></li>
     <li><a href="#other-databases">Other databases</a></li>
@@ -189,6 +190,13 @@ not have high durability requirements. In these cases, it may be more
 appropriate to simply back up your database daily or hourly. This approach can
 also be used in conjunction with Litestream as a fallback.</p>
 <p>Please see our <a href="/alternatives/cron">guide to running a cron-based backup strategy</a>.</p>
+<h2 id="litefs">LiteFS<a href="#litefs" class="anchor" aria-hidden="true">#</a> </h2>
+<p><a href="https://github.com/superfly/litefs">LiteFS</a> is a distributed file system that
+automatically replicates SQLite databases across a cluster of machines. It is
+meant for environments where high availability and low global latency are
+important whereas Litestream is primarily meant for disaster recovery.</p>
+<p>The LiteFS project is developed by the same creators of Litestream and they
+share many similarities internally.</p>
 <h2 id="raft-based-consensus">Raft-based consensus<a href="#raft-based-consensus" class="anchor" aria-hidden="true">#</a> </h2>
 <p>You can achieve higher durability guarantees by running a cluster of nodes that
 perform <a href="https://raft.github.io/">Raft-based consensus</a> for every write. This
