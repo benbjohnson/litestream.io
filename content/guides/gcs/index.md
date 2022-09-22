@@ -40,9 +40,8 @@ account to authenticate into GCP and access your bucket.
 From the top search bar, navigate to _"Service Accounts"_. Enter a name
 for your service account and click the _"Create"_ button.
 
-Next, you'll need to grant the _Storage Object Creator_ and _Storage Object
-Viewer_ roles to your service accounts so they can read & write data. Then
-click the _"Done"_ button.
+Next, you'll need to grant the _Storage Admin_ role to your service accounts
+so they can read & write data. Then click the _"Done"_ button.
 
 After your account has been created, click on it and go to the _"Keys"_
 subsection. Click the _"Add Key"_ drop-down and select _"Create new key"_.
