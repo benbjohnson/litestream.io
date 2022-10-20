@@ -81,7 +81,7 @@ replica path.
 
 The time to restore a database from backup is directly related to the number and
 size of WAL files since the snapshot. To avoid having the WAL files grow without
-bound, Litestream performs new snapshots the data periodically and removes old
+bound, Litestream performs new snapshots of the data periodically and removes old
 WAL files.
 
 This process is broken up into two steps. First, a snapshot interval is set to
