@@ -58,6 +58,18 @@ store the bucket data.
 	<img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
 </figure>
 
+While Litestream files are immutable and don't require versioning; it is considered best practice to enable S3 bucket versioning by default.
+
+<figure>
+  <img src="s3_1.png" alt="Screenshot of AWS S3 versioning UI">
+</figure>
+
+It is also recommended to enable a KMS encryption bucket key to safeguard your data against unintentional public access. Default key is `aws/s3` aka Amazon S3-managed keys (SSE-S3).
+
+<figure>
+  <img src="s3_2.png" alt="Screenshot of AWS S3 bucket key encryption UI">
+</figure>
+
 Then click the _"Create bucket"_ button at the bottom of the screen. Your bucket
 has now been created.
 
