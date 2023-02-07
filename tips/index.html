@@ -261,7 +261,7 @@ autocheckpointing disabled. To do this, run the following PRAGMA when you
 open your SQLite connection:</p>
 <pre><code>PRAGMA wal_autocheckpoint = 0;
 </code></pre><h2 id="multiple-applications-replicating-into-location-can-corrupt">Multiple applications replicating into location can corrupt<a href="#multiple-applications-replicating-into-location-can-corrupt" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Multiple applications replicating into the same bucket can cause situations
+<p>Multiple applications replicating into the same bucket &amp; path can cause situations
 where you will be unable to restore. It is <em>your</em> responsibility to ensure you
 do not have multiple applications replicating concurrently. In the off-chance
 that it does happen, and you&rsquo;re unable to restore, you may see an error along
