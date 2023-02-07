@@ -140,7 +140,7 @@ PRAGMA wal_autocheckpoint = 0;
 
 ## Multiple applications replicating into location can corrupt
 
-Multiple applications replicating into the same bucket can cause situations
+Multiple applications replicating into the same bucket & path can cause situations
 where you will be unable to restore. It is _your_ responsibility to ensure you
 do not have multiple applications replicating concurrently. In the off-chance
 that it does happen, and you're unable to restore, you may see an error along
