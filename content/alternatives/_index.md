@@ -50,7 +50,7 @@ to be committed to a quorum of nodes in the cluster.
 
 Two projects exist that implement Raft-based consensus over SQLite:
 
-- [rqlite](https://github.com/rqlite/rqlite)
+- [rqlite](https://rqlite.io/)
 - [dqlite](https://dqlite.io/)
 
 
