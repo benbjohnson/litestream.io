@@ -54,7 +54,7 @@ spec:
       # before starting the application.
       initContainers:
       - name: init-litestream
-        image: litestream/litestream:0.3.6
+        image: litestream/litestream:0.3
         args: ['restore', '-if-db-not-exists', '-if-replica-exists', '-v', '/var/lib/myapp/db']
         volumeMounts:
         - name: data
@@ -86,7 +86,7 @@ spec:
           mountPath: /var/lib/myapp
 
       - name: litestream
-        image: litestream/litestream:0.3.6
+        image: litestream/litestream:0.3
         args: ['replicate']
         volumeMounts:
         - name: data
