@@ -79,7 +79,7 @@ dbs:
 
 ## Replica settings
 
-Litestream currently supports two types of replicas:
+Litestream currently supports three types of replicas:
 
 - `"abs"` replicates a database to an Azure Blob Storage container.
 - `"file"` replicates a database to another local file path.
