@@ -8,7 +8,7 @@ menu:
 weight: 420
 ---
 
-This guide will show you how to use Backblaze B2 as a database replica path for
+This guide will show you how to use [Backblaze B2](https://www.backblaze.com/cloud-storage) as a database replica path for
 Litestream.
 
 ## Create a bucket
