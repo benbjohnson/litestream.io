@@ -165,8 +165,8 @@ StatefulSet by setting the `spec.template.spec.initContainers` to:
 ```yml
 initContainers:
 - name: init-litestream
-  image: litestream/litestream:0.3.11
-  args: ['restore', '-if-db-not-exists', '-if-replica-exists', '-v', '/var/lib/myapp/db']
+  image: litestream/litestream:0.3
+  args: ['restore', '-if-db-not-exists', '-if-replica-exists', '/var/lib/myapp/db']
   volumeMounts:
   - name: data
     mountPath: /var/lib/myapp
@@ -237,7 +237,7 @@ You can specify Litestream as the second container in the
 
 ```yml
 - name: litestream
-  image: litestream/litestream:0.3.11
+  image: litestream/litestream:0.3
   args: ['replicate']
   volumeMounts:
   - name: data

@@ -56,9 +56,6 @@ litestream restore [arguments] REPLICA_URL
     Determines the number of WAL files downloaded in parallel.
     Defaults to 8
 
--v
-    Verbose output.
-
 -replica NAME
     Restore from a specific replica.
     Defaults to replica with latest data.
