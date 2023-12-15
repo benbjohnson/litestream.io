@@ -297,8 +297,8 @@ by running it in a Kubernetes <a href="https://kubernetes.io/docs/concepts/workl
 StatefulSet by setting the <code>spec.template.spec.initContainers</code> to:</p>
 <div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">initContainers</span><span class="p">:</span><span class="w">
 </span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">init-litestream</span><span class="w">
-</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3.9</span><span class="w">
-</span><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;restore&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-db-not-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-replica-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-v&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;/var/lib/myapp/db&#39;</span><span class="p">]</span><span class="w">
+</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
+</span><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;restore&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-db-not-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-replica-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;/var/lib/myapp/db&#39;</span><span class="p">]</span><span class="w">
 </span><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
 </span><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
@@ -347,7 +347,7 @@ above except this time we will be running the <code>litestream replicate</code> 
 <p>You can specify Litestream as the second container in the
 <code>spec.template.spec.containers</code> property on our StatefulSet:</p>
 <div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3.9</span><span class="w">
+</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
 </span><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;replicate&#39;</span><span class="p">]</span><span class="w">
 </span><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
 </span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
