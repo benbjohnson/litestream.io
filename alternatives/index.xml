@@ -6,16 +6,14 @@
     <description>Recent content in Alternatives on </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Sun, 17 Apr 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/alternatives/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 17 Apr 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://litestream.io/alternatives/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Cron-based backup</title>
       <link>https://litestream.io/alternatives/cron/</link>
       <pubDate>Sun, 17 Apr 2022 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/alternatives/cron/</guid>
-      <description>Overview Sometimes Litestream can be overkill for projects with a small database that do not have high durability requirements. In these cases, it may be more appropriate to simply back up your database daily or hourly. This approach can also be used in conjunction with Litestream as a fallback. You can never have too many backups!
-❗️ Do not use `cp` to back up SQLite databases. It is not transactionally safe.</description>
+      <description>Overview Sometimes Litestream can be overkill for projects with a small database that do not have high durability requirements. In these cases, it may be more appropriate to simply back up your database daily or hourly. This approach can also be used in conjunction with Litestream as a fallback. You can never have too many backups!&#xA;❗️ Do not use `cp` to back up SQLite databases. It is not transactionally safe.</description>
     </item>
-    
   </channel>
 </rss>

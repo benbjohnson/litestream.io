@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -215,31 +215,31 @@ expansion.</p>
 <h3 id="aws-credentials">AWS credentials<a href="#aws-credentials" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you are using AWS S3 replication, it can be useful to specify your
 credentials in one place instead of for each replica:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
-</span><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
-</span></code></pre></div><h3 id="metrics">Metrics<a href="#metrics" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><h3 id="metrics">Metrics<a href="#metrics" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream produces a continuous stream of metrics that are exported as a
 <a href="https://prometheus.io/">Prometheus</a> endpoint. These are disabled by default
 as it requires an HTTP server to start. You can enable it by setting a bind
 address in the config:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
-</span></code></pre></div><p>When you start Litestream with this setting enabled, you&rsquo;ll see metrics at
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
+</span></span></span></code></pre></div><p>When you start Litestream with this setting enabled, you&rsquo;ll see metrics at
 <a href="http://localhost:9090/metrics">http://localhost:9090/metrics</a></p>
 <h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream can monitor one or more database files that are specified in the
 configuration file. Database files are also referenced in <code>litestream</code> commands
 by their absolute path.</p>
 <p>Each database accepts two options—its path and a list of replicas:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db1</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db1</span><span class="w">
-</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db2</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db2</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w">  </span><span class="l">s3://mybkt.litestream.io/db2</span><span class="w">
-</span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w">  </span><span class="l">s3://mybkt.litestream.io/db2</span><span class="w">
+</span></span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream currently supports three types of replicas:</p>
 <ul>
 <li><code>&quot;abs&quot;</code> replicates a database to an Azure Blob Storage container.</li>
@@ -285,26 +285,26 @@ to <code>1s</code>. Increasing frequency can increase cloud storage costs signif
 </ul>
 <h3 id="s3-replica">S3 replica<a href="#s3-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
-</span></code></pre></div><p>However, you can break this out into separate fields as well:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">s3</span><span class="w">
-</span><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybkt.litestream.io</span><span class="w">
-</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
-</span></code></pre></div><p>In addition, you can specify the region and AWS credentials per-replica:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
-</span><span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
-</span><span class="w">        </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
-</span><span class="w">        </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
-</span></code></pre></div><p>The following settings are specific to S3 replicas:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span></code></pre></div><p>However, you can break this out into separate fields as well:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybkt.litestream.io</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
+</span></span></span></code></pre></div><p>In addition, you can specify the region and AWS credentials per-replica:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to S3 replicas:</p>
 <ul>
 <li>
 <p><code>access-key-id</code>—Replica-specific authentication key. If not specified, the
@@ -340,11 +340,11 @@ a local node such as MinIO and you are using self-signed certificates.</p>
 </ul>
 <h3 id="file-replica">File replica<a href="#file-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>File replicas can be configured using the <code>&quot;path&quot;</code> field:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
-</span></code></pre></div><p>If no <code>&quot;type&quot;</code> field is specified and a <code>&quot;url&quot;</code> is not used then <code>&quot;file&quot;</code> is
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
+</span></span></span></code></pre></div><p>If no <code>&quot;type&quot;</code> field is specified and a <code>&quot;url&quot;</code> is not used then <code>&quot;file&quot;</code> is
 assumed.</p>
 <h3 id="multiple-replicas">Multiple replicas<a href="#multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
 <p>You can specify multiple replicas for a database, however, each one must have
@@ -352,21 +352,21 @@ a unique name. For example, this configuration below is for replicating to
 AWS S3 &amp; to DigitalOcean Spaces. Both of these use the &ldquo;s3&rdquo; replica type so
 their default name would be &ldquo;s3&rdquo;. Instead, we can name them each unique names,
 <code>my_aws_replica</code> &amp; <code>my_do_replica</code>.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/path/to/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_aws_replica</span><span class="w">
-</span><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://myawsbucket/db</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_do_replica</span><span class="w">
-</span><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.nyc3.digitaloceanspaces.com/db</span><span class="w">
-</span></code></pre></div><h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_aws_replica</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://myawsbucket/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_do_replica</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.nyc3.digitaloceanspaces.com/db</span><span class="w">
+</span></span></span></code></pre></div><h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Replicas maintain a snapshot of the database as well as a contiguous sequence of
 SQLite WAL page updates. These updates take up space so new snapshots are
 created and old WAL files are dropped through a process called &ldquo;retention&rdquo;.</p>
 <p>The default retention period is <code>24h</code>. You can change that with the <code>retention</code>
 field. Retention is enforced periodically and defaults to every <code>1h</code>. This can
 be changed with the <code>retention-check-interval</code> field.</p>
-<pre><code>dbs:
+<pre tabindex="0"><code>dbs:
   - path: /var/lib/db
     replicas:
       - url: s3://mybkt.litestream.io/db
@@ -380,7 +380,7 @@ periodically validate replicas by restoring them and comparing their checksum
 to the primary database&rsquo;s checksum.</p>
 <p><em>Please note that frequently restoring from S3 can be expensive.</em></p>
 <p>It can be enabled by setting the <code>validation-interval</code> field:</p>
-<pre><code>dbs:
+<pre tabindex="0"><code>dbs:
   - path: /var/lib/db
     replicas:
       - url: s3://mybkt.litestream.io/db
@@ -407,8 +407,8 @@ to the primary database&rsquo;s checksum.</p>
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

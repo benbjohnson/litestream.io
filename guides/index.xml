@@ -6,112 +6,77 @@
     <description>Recent content in How-To Guides on </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/guides/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://litestream.io/guides/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Running in a Docker container</title>
       <link>https://litestream.io/guides/docker/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/docker/</guid>
-      <description>This guide will show you how to run Litestream within a Docker container either as a sidecar or within the same container as your application. You will need a Docker installed on your machine for this guide.
-❗️ The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms.  Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow.</description>
+      <description>This guide will show you how to run Litestream within a Docker container either as a sidecar or within the same container as your application. You will need a Docker installed on your machine for this guide.&#xA;❗️ The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms. Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow.</description>
     </item>
-    
     <item>
       <title>Running in a Kubernetes cluster</title>
       <link>https://litestream.io/guides/kubernetes/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/kubernetes/</guid>
-      <description>This guide will show you how to run Litestream as a sidecar to your application within Kubernetes using StatefulSets. Setting up &amp;amp; managing Kubernetes is a complex topic that will not be covered here. This guide assumes you are comfortable with Kubernetes and have a running cluster.
-It also assumes you have a replica destination (e.g. S3) for your Litestream data already setup and you are comfortable with basic operations in Litestream.</description>
+      <description>This guide will show you how to run Litestream as a sidecar to your application within Kubernetes using StatefulSets. Setting up &amp;amp; managing Kubernetes is a complex topic that will not be covered here. This guide assumes you are comfortable with Kubernetes and have a running cluster.&#xA;It also assumes you have a replica destination (e.g. S3) for your Litestream data already setup and you are comfortable with basic operations in Litestream.</description>
     </item>
-    
     <item>
       <title>Running as a Systemd service</title>
       <link>https://litestream.io/guides/systemd/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/systemd/</guid>
-      <description>This guide will get you running Litestream as a systemd service on Debian-based operating systems such as Ubuntu. Running as a background service means that Litestream will always run in the background and restart automatically if the server restarts. It assumes you are comfortable with using a command line.
-Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.</description>
+      <description>This guide will get you running Litestream as a systemd service on Debian-based operating systems such as Ubuntu. Running as a background service means that Litestream will always run in the background and restart automatically if the server restarts. It assumes you are comfortable with using a command line.&#xA;Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.</description>
     </item>
-    
     <item>
       <title>Running as a Windows Service</title>
       <link>https://litestream.io/guides/windows/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/windows/</guid>
-      <description>This guide will get you running Litestream on the Windows operating system as either a command line tool or as a background Windows Service.
-Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.
-Running as a Windows Service Running Litestream as a Windows Service means that it will run in the background and continuously monitor and replicate your databases.</description>
+      <description>This guide will get you running Litestream on the Windows operating system as either a command line tool or as a background Windows Service.&#xA;Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.&#xA;Running as a Windows Service Running Litestream as a Windows Service means that it will run in the background and continuously monitor and replicate your databases.</description>
     </item>
-    
     <item>
       <title>Replicating to Amazon S3</title>
       <link>https://litestream.io/guides/s3/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/s3/</guid>
-      <description>This guide will show you how to use Amazon S3 as a database replica path for Litestream. You will need an Amazon AWS account to complete this guide.
-Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Add User button.</description>
+      <description>This guide will show you how to use Amazon S3 as a database replica path for Litestream. You will need an Amazon AWS account to complete this guide.&#xA;Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Add User button.</description>
     </item>
-    
     <item>
       <title>Replicating to Azure Blob Storage</title>
       <link>https://litestream.io/guides/azure/</link>
       <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/azure/</guid>
-      <description>This guide will show you how to use Litestream to replicate to an Azure Blob Storage container. You will need an Azure account and to complete this guide.
-Setup Create a container In the Azure Portal, use the top search bar to navigate to &amp;ldquo;Storage Accounts&amp;rdquo;. If you do not have a storage account, click the &amp;ldquo;New&amp;rdquo; button, enter your storage account name, and click &amp;ldquo;Review + create&amp;rdquo;.
-Once you have a storage account, select it from the list of accounts and navigate to the Containers subsection.</description>
+      <description>This guide will show you how to use Litestream to replicate to an Azure Blob Storage container. You will need an Azure account and to complete this guide.&#xA;Setup Create a container In the Azure Portal, use the top search bar to navigate to &amp;ldquo;Storage Accounts&amp;rdquo;. If you do not have a storage account, click the &amp;ldquo;New&amp;rdquo; button, enter your storage account name, and click &amp;ldquo;Review + create&amp;rdquo;.&#xA;Once you have a storage account, select it from the list of accounts and navigate to the Containers subsection.</description>
     </item>
-    
     <item>
       <title>Replicating to Backblaze B2</title>
       <link>https://litestream.io/guides/backblaze/</link>
       <pubDate>Sat, 27 Feb 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/backblaze/</guid>
-      <description>This guide will show you how to use Backblaze B2 as a database replica path for Litestream.
-Create a bucket To begin, you&amp;rsquo;ll need a bucket to store your data. If you don&amp;rsquo;t already have one set up in Backblaze, follow the steps below:
- From your Backblaze dashboard, go to My Account &amp;gt; Buckets Click &amp;ldquo;Create a Bucket&amp;rdquo; Enter a unique name for &amp;ldquo;Bucket Unique Name&amp;rdquo; and leave the remaining fields as their defaults.</description>
+      <description>This guide will show you how to use Backblaze B2 as a database replica path for Litestream.&#xA;Create a bucket To begin, you&amp;rsquo;ll need a bucket to store your data. If you don&amp;rsquo;t already have one set up in Backblaze, follow the steps below:&#xA;From your Backblaze dashboard, go to My Account &amp;gt; Buckets Click &amp;ldquo;Create a Bucket&amp;rdquo; Enter a unique name for &amp;ldquo;Bucket Unique Name&amp;rdquo; and leave the remaining fields as their defaults.</description>
     </item>
-    
     <item>
       <title>Replicating to Scaleway Object Storage</title>
       <link>https://litestream.io/guides/scaleway/</link>
       <pubDate>Sun, 28 Nov 2021 19:20:59 +0100</pubDate>
-      
       <guid>https://litestream.io/guides/scaleway/</guid>
-      <description>This guide will show you how to use Scaleway Object Storage as a database replica path for Litestream. You will need a Scaleway account to complete this guide.
-Setup Create a bucket In the Scaleway Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Object Storage Bucket&amp;rdquo;.
-On the &amp;ldquo;Create a bucket&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
+      <description>This guide will show you how to use Scaleway Object Storage as a database replica path for Litestream. You will need a Scaleway account to complete this guide.&#xA;Setup Create a bucket In the Scaleway Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Object Storage Bucket&amp;rdquo;.&#xA;On the &amp;ldquo;Create a bucket&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
     </item>
-    
     <item>
       <title>Replicating to DigitalOcean Spaces</title>
       <link>https://litestream.io/guides/digitalocean/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/digitalocean/</guid>
-      <description>This guide will show you how to use DigitalOcean Spaces as a database replica path for Litestream. You will need a DigitalOcean account to complete this guide.
-Setup Create a space In the DigitalOcean Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Spaces&amp;rdquo;. You may need to enable spaces on your account if you have not already.
-On the &amp;ldquo;Create a Space&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
+      <description>This guide will show you how to use DigitalOcean Spaces as a database replica path for Litestream. You will need a DigitalOcean account to complete this guide.&#xA;Setup Create a space In the DigitalOcean Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Spaces&amp;rdquo;. You may need to enable spaces on your account if you have not already.&#xA;On the &amp;ldquo;Create a Space&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
     </item>
-    
     <item>
       <title>Replicating to Google Cloud Storage</title>
       <link>https://litestream.io/guides/gcs/</link>
       <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/guides/gcs/</guid>
-      <description>This guide will show you how to use Litestream to replicate to a Google Cloud Storage bucket. You will need a Google Cloud account and to complete this guide.
-Setup Create a bucket In the GCP Console, use the top search bar to navigate to &amp;ldquo;Cloud Storage&amp;rdquo;. You may need to enable storage and billing if you have not previously set it up.
-Next, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a globally unique bucket name and click the &amp;ldquo;Create&amp;rdquo; button.</description>
+      <description>This guide will show you how to use Litestream to replicate to a Google Cloud Storage bucket. You will need a Google Cloud account and to complete this guide.&#xA;Setup Create a bucket In the GCP Console, use the top search bar to navigate to &amp;ldquo;Cloud Storage&amp;rdquo;. You may need to enable storage and billing if you have not previously set it up.&#xA;Next, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a globally unique bucket name and click the &amp;ldquo;Create&amp;rdquo; button.</description>
     </item>
-    
   </channel>
 </rss>

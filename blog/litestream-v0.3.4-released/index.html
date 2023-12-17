@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -162,7 +162,7 @@ handful of bugs. Thanks to everyone who reported bugs, gave feedback, and helped
 with testing!</p>
 <h2 id="docker-support">Docker support</h2>
 <p>The most frequent question asked about Litestream since the project started has
-been, <em>&ldquo;how do I run this on Docker?&quot;</em> Whether you like Docker or not, the fact
+been, <em>&ldquo;how do I run this on Docker?&rdquo;</em> Whether you like Docker or not, the fact
 is that much of the tech world has moved to containerized deployments.</p>
 <p>In traditional applications, developers deploy their stateless, single-process
 application within a Docker container and it connects to a stateful database.
@@ -223,7 +223,7 @@ resources but can also have intermittent internet connections.</p>
 <p>We&rsquo;ve added release builds for 32-bit ARM (<code>arm6</code>, <code>arm7</code>) and 64-bit ARM
 (<code>arm64</code>) (<a href="https://github.com/benbjohnson/litestream/pull/148">#148</a>, <a href="https://github.com/benbjohnson/litestream/pull/151">#151</a>). The 32-bit ARM processors are typically found in
 smaller or older devices like the <a href="https://www.raspberrypi.org/products/raspberry-pi-zero/">Raspberry Pi Zero</a> while the 64-bit
-processors are gaining popularity in data centers such as AWS' new <a href="https://aws.amazon.com/ec2/graviton/">Graviton
+processors are gaining popularity in data centers such as AWS&rsquo; new <a href="https://aws.amazon.com/ec2/graviton/">Graviton
 series</a>.</p>
 <p>Apple recently released their Apple Silicon M1 chip and we do not have a release
 build for it yet but we are planning to add it in the future. If you are
@@ -268,15 +268,15 @@ downloaded so the network device would not be saturated.</p>
 them up on disk to be processed (<a href="https://github.com/benbjohnson/litestream/pull/167">#167</a>). By default, it will download 8 files
 in parallel. This change has improved recovery time by 3-4x. You can increase
 the number of parallel downloads by setting the <code>-parallelism</code> flag:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ litestream restore -parallelism <span class="m">16</span> /path/to/db
-</code></pre></div><p>If you need faster recovery, you should also consider setting the
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ litestream restore -parallelism <span class="m">16</span> /path/to/db
+</span></span></code></pre></div><p>If you need faster recovery, you should also consider setting the
 <code>snapshot-interval</code> for your replica to a lower duration (e.g. <code>1h</code>).</p>
 <p>There was also an poor usability when recovering by index. Previously, the
 <code>-index</code> flag in the <code>restore</code> command would accept a decimal number, however,
 Litestream reports the index as a hexadecimal number everywhere else. We&rsquo;ve
 fixed it so that <code>-index</code> now accepts the hex-formatted number (<a href="https://github.com/benbjohnson/litestream/pull/165">#165</a>):</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ litestream restore -generation xxxxxxxxxxxxxxxx -index 000002bc /path/to/db
-</code></pre></div><p>We&rsquo;ve also improved logging for restores to help identify bottlenecks (<a href="https://github.com/benbjohnson/litestream/pull/162">#162</a>,
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ litestream restore -generation xxxxxxxxxxxxxxxx -index 000002bc /path/to/db
+</span></span></code></pre></div><p>We&rsquo;ve also improved logging for restores to help identify bottlenecks (<a href="https://github.com/benbjohnson/litestream/pull/162">#162</a>,
 <a href="https://github.com/benbjohnson/litestream/pull/164">#164</a>), removed the <code>-dry-run</code> flag as it complicated the code (<a href="https://github.com/benbjohnson/litestream/pull/163">#163</a>),
 and fixed a bug around snapshot selection when recovering by index (<a href="https://github.com/benbjohnson/litestream/pull/166">#166</a>).</p>
 <h2 id="reduced-lock-contention">Reduced lock contention</h2>
@@ -309,9 +309,9 @@ relase, we&rsquo;ve fixed the following bugs &amp; usability issues:</p>
 <code>LITESTREAM_SECRET_ACCESS_KEY</code> environment variables instead of the original
 <code>AWS</code> prefixed versions (<a href="https://github.com/benbjohnson/litestream/pull/169">#169</a>). The AWS-prefixed versions still work but
 some users where confused to use those for non-AWS S3-compatible services:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxxxxxxxxxxxxxx
-<span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxxxxxxxxxxxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</span></span></code></pre></div><h2 id="conclusion">Conclusion</h2>
 <p>We continue to focus on stability &amp; usability with Litestream v0.3.4. We&rsquo;ve
 expanded our deployment options to include Docker containers &amp; ARM processors,
 we&rsquo;ve opened up our code by switching to a permissive Apache 2 license, and
@@ -335,8 +335,8 @@ office hours</a>, or <a href="https://twitter.com/litestreamio">follow Litestrea
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

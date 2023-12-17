@@ -68,7 +68,7 @@ However, this tradeoff may not make sense for all applications. This page lists 
       
       <guid>https://litestream.io/guides/</guid>
       <description>Overview These guides provides instructions for running Litestream in production on different platforms.
-Infrastructure guides  Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service  Replica guides  Amazon S3 Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Scaleway Object Storage SFTP Server  </description>
+Infrastructure guides Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service Replica guides Amazon S3 Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Scaleway Object Storage SFTP Server </description>
     </item>
     
     <item>
@@ -78,7 +78,7 @@ Infrastructure guides  Running in a Docker container Running in a Kubernetes clu
       
       <guid>https://litestream.io/install/</guid>
       <description>Overview Most users should install Litestream using prebuilt binaries as they make it easy to get up and running quickly. If a binaries are not available for your operating system or architecture, you&amp;rsquo;ll need to build Litestream from source.
- Install on macOS Install on Debian Build from source  </description>
+Install on macOS Install on Debian Build from source </description>
     </item>
     
     <item>
@@ -89,7 +89,7 @@ Infrastructure guides  Running in a Docker container Running in a Kubernetes clu
       <guid>https://litestream.io/reference/</guid>
       <description>The Litestream command line provides several subcommands to help you manage replication &amp;amp; recovery of your databases. This reference provides details about the options available and different modes of operation.
 Commands The litestream commands are:
- litestream databases — Lists databases specified in config file. litestream generations — list available generations for a database. litestream replicate — Runs a server to replicate databases. litestream restore — Recovers database backup from a replica.</description>
+litestream databases — Lists databases specified in config file. litestream generations — list available generations for a database. litestream replicate — Runs a server to replicate databases. litestream restore — Recovers database backup from a replica.</description>
     </item>
     
     <item>

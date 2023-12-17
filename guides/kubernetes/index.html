@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -229,41 +229,41 @@ database. You can replace this with your own application.</p>
 <p>Litestream requires credentials to connect to AWS S3. You can provide them to
 your Litestream container by creating a secret. Update the command to include
 your specific credentials.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl create secret generic litestream <span class="se">\
-</span><span class="se"></span>    --from-literal<span class="o">=</span><span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&#34;...&#34;</span> <span class="se">\
-</span><span class="se"></span>    --from-literal<span class="o">=</span><span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&#34;...&#34;</span>
-</code></pre></div><h2 id="create-a-configmap-for-litestream-configuration">Create a ConfigMap for Litestream configuration<a href="#create-a-configmap-for-litestream-configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl create secret generic litestream <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --from-literal<span class="o">=</span><span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&#34;...&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --from-literal<span class="o">=</span><span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&#34;...&#34;</span>
+</span></span></code></pre></div><h2 id="create-a-configmap-for-litestream-configuration">Create a ConfigMap for Litestream configuration<a href="#create-a-configmap-for-litestream-configuration" class="anchor" aria-hidden="true">#</a> </h2>
 <p>It&rsquo;s recommended to run Litestream using a <a href="/reference/config">configuration file</a> for
 flexibility. We&rsquo;ll pass this configuration file in by using a Kubernetes
 <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
 <p>First, create a file called <code>litestream.yml</code> locally. Update the <code>YOURBUCKET</code>
 text in configuration file to your S3 bucket name. This configuration file
 is set up to replicate a database at <code>/var/lib/myapp/db</code> to a remote S3 bucket.</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://YOURBUCKET/db</span><span class="w">
-</span></code></pre></div><p>Next, we&rsquo;ll need to add this as a ConfigMap in our Kubernetes cluster:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl create configmap litestream --from-file<span class="o">=</span>litestream.yml
-</code></pre></div><h2 id="create-a-statefulset">Create a StatefulSet<a href="#create-a-statefulset" class="anchor" aria-hidden="true">#</a> </h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://YOURBUCKET/db</span><span class="w">
+</span></span></span></code></pre></div><p>Next, we&rsquo;ll need to add this as a ConfigMap in our Kubernetes cluster:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl create configmap litestream --from-file<span class="o">=</span>litestream.yml
+</span></span></code></pre></div><h2 id="create-a-statefulset">Create a StatefulSet<a href="#create-a-statefulset" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="ensure-single-replica">Ensure single replica<a href="#ensure-single-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>First, it&rsquo;s important that your application only runs on a single node at a
 time. Litestream does not currently support multiple live replicas, however, that
 is an upcoming feature.</p>
 <p>To only run a single node, we&rsquo;ll set the <code>spec.replicas</code> field to <code>1</code> on our
 StatefulSet:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apps/v1</span><span class="w">
-</span><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">StatefulSet</span><span class="w">
-</span><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
-</span><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
-</span><span class="w">  </span><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
-</span><span class="w">
-</span><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
-</span></code></pre></div><p>StatefulSet pods are numbered incrementally so your pod name will always be <code>myapp-0</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apps/v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">StatefulSet</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w">
+</span></span></span></code></pre></div><p>StatefulSet pods are numbered incrementally so your pod name will always be <code>myapp-0</code>.</p>
 <h3 id="using-a-pvc">Using a PVC<a href="#using-a-pvc" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Although not required, it&rsquo;s recommended that pods using SQLite &amp; Litestream run
 with a persistent volume claim (PVC). This provides better durability
@@ -271,23 +271,23 @@ guarantees in the event that a pod crashes and Litestream may have a small
 buffer of data that has not been replicated yet.</p>
 <p>We&rsquo;ll create a PVC template on our StatefulSet named <code>data</code> by setting the
 <code>spec.volumeClaimTemplates</code> property:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">volumeClaimTemplates</span><span class="p">:</span><span class="w">
-</span><span class="w"></span>- <span class="nt">metadata</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
-</span><span class="w">  </span><span class="nt">spec</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;ReadWriteOnce&#34;</span><span class="p">]</span><span class="w">
-</span><span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">requests</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l">100Mi</span><span class="w">
-</span></code></pre></div><h3 id="pass-in-litestream-configuration">Pass in Litestream configuration<a href="#pass-in-litestream-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">volumeClaimTemplates</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>- <span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;ReadWriteOnce&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">resources</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">requests</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l">100Mi</span><span class="w">
+</span></span></span></code></pre></div><h3 id="pass-in-litestream-configuration">Pass in Litestream configuration<a href="#pass-in-litestream-configuration" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The <code>litestream.yml</code> configuration that we passed in earlier can be mapped into
 our containers by creating a volume from it. We&rsquo;ll set the <code>spec.template.spec.volumes</code>
 property on our StatefulSet:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">volumes</span><span class="p">:</span><span class="w">
-</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">configmap</span><span class="w">
-</span><span class="w">  </span><span class="nt">configMap</span><span class="p">:</span><span class="w">
-</span><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span></code></pre></div><h3 id="automatic-recovery">Automatic recovery<a href="#automatic-recovery" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">configmap</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">configMap</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span></code></pre></div><h3 id="automatic-recovery">Automatic recovery<a href="#automatic-recovery" class="anchor" aria-hidden="true">#</a> </h3>
 <p>When our application starts up for the first time, it will automatically create
 a new SQLite database at <code>/var/lib/myapp/db</code>. However, if our pod and underlying
 storage volume fail then we want to first restore our database from our replica
@@ -295,31 +295,31 @@ before starting our application.</p>
 <p>We can have this restore check occur automatically before our application starts
 by running it in a Kubernetes <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">init container</a>. We&rsquo;ll configure it in our
 StatefulSet by setting the <code>spec.template.spec.initContainers</code> to:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">initContainers</span><span class="p">:</span><span class="w">
-</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">init-litestream</span><span class="w">
-</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
-</span><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;restore&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-db-not-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-replica-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;/var/lib/myapp/db&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
-</span><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">configmap</span><span class="w">
-</span><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream.yml</span><span class="w">
-</span><span class="w">    </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l">litestream.yml</span><span class="w">
-</span><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
-</span><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
-</span><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
-</span></code></pre></div><p>This <code>initContainers</code> block does several things. First, it uses the <a href="https://hub.docker.com/r/litestream/litestream">official
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">initContainers</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">init-litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;restore&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-db-not-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-replica-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;/var/lib/myapp/db&#39;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">configmap</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream.yml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l">litestream.yml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span></code></pre></div><p>This <code>initContainers</code> block does several things. First, it uses the <a href="https://hub.docker.com/r/litestream/litestream">official
 Litestream Docker image</a> and executes the following command:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream restore -if-db-not-exists -if-replica-exists -v /var/lib/myapp/db
-</code></pre></div><p>This restores the database <code>/var/lib/myapp/db</code> specified in our config file,
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -if-db-not-exists -if-replica-exists -v /var/lib/myapp/db
+</span></span></code></pre></div><p>This restores the database <code>/var/lib/myapp/db</code> specified in our config file,
 however, it will skip the restore if the database already exists or if there
 are no replicas. It also enables verbose logging.</p>
 <p>Next, it specifies volume mounts to the data directory from our PVC and to the
@@ -331,88 +331,88 @@ key. You could also use the <code>AWS_</code> prefixed environment variables ins
 <p>Our example application, <code>myapp</code>, simply needs to make port <code>8080</code> available
 and mount the data directory that it shares with Litestream. We can set the
 <code>spec.template.spec.containers</code> property on our StatefulSet:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">containers</span><span class="p">:</span><span class="w">
-</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
-</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">benbjohnson/myapp:latest</span><span class="w">
-</span><span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
-</span><span class="w">    </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">8080</span><span class="w">
-</span><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
-</span><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
-</span></code></pre></div><h3 id="litestream-application-container">Litestream application container<a href="#litestream-application-container" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">benbjohnson/myapp:latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">http</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">8080</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
+</span></span></span></code></pre></div><h3 id="litestream-application-container">Litestream application container<a href="#litestream-application-container" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream will run as a sidecar to our application and monitor the shared data
 directory. Most of the configuration is the same as the init container specified
 above except this time we will be running the <code>litestream replicate</code> command.</p>
 <p>You can specify Litestream as the second container in the
 <code>spec.template.spec.containers</code> property on our StatefulSet:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
-</span><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;replicate&#39;</span><span class="p">]</span><span class="w">
-</span><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
-</span><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">configmap</span><span class="w">
-</span><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream.yml</span><span class="w">
-</span><span class="w">    </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l">litestream.yml</span><span class="w">
-</span><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
-</span><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
-</span><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
-</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
-</span><span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">metrics</span><span class="w">
-</span><span class="w">    </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">9090</span><span class="w">
-</span></code></pre></div><p>Additionally, we open port <code>9090</code> to provide Prometheus metrics.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;replicate&#39;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">configmap</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream.yml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l">litestream.yml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">metrics</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">9090</span><span class="w">
+</span></span></span></code></pre></div><p>Additionally, we open port <code>9090</code> to provide Prometheus metrics.</p>
 <h3 id="applying-changes">Applying changes<a href="#applying-changes" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The full Kubernetes configuration for our StatefulSet &amp; Service can be found
 at <a href="https://raw.githubusercontent.com/benbjohnson/litestream.io/main/content/guides/kubernetes/litestream-k8s.yml">litestream-k8s.yml</a>. We can deploy this on our Kubernetes cluster:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl apply -f litestream-k8s.yml
-</code></pre></div><h2 id="using-our-application">Using our application<a href="#using-our-application" class="anchor" aria-hidden="true">#</a> </h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl apply -f litestream-k8s.yml
+</span></span></code></pre></div><h2 id="using-our-application">Using our application<a href="#using-our-application" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Exposing our service from Kubernetes is outside the scope of this guide so we&rsquo;ll
 test our replication from within the pod using <code>kubectl exec</code>.</p>
 <h3 id="initial-startup">Initial startup<a href="#initial-startup" class="anchor" aria-hidden="true">#</a> </h3>
 <p>First, you should be able to see your pod running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ kubectl get pods
-NAME      READY   STATUS    RESTARTS   AGE
-myapp-0   2/2     Running   <span class="m">0</span>          1m
-</code></pre></div><p>Next, we can cURL our <code>myapp</code> web server by running:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
-This server has been visited <span class="m">1</span> times.
-</code></pre></div><p>Each time we run this command, the counter will increase by one.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ kubectl get pods
+</span></span><span class="line"><span class="cl">NAME      READY   STATUS    RESTARTS   AGE
+</span></span><span class="line"><span class="cl">myapp-0   2/2     Running   <span class="m">0</span>          1m
+</span></span></code></pre></div><p>Next, we can cURL our <code>myapp</code> web server by running:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
+</span></span><span class="line"><span class="cl">This server has been visited <span class="m">1</span> times.
+</span></span></code></pre></div><p>Each time we run this command, the counter will increase by one.</p>
 <h3 id="deleting-the-pod">Deleting the pod<a href="#deleting-the-pod" class="anchor" aria-hidden="true">#</a> </h3>
 <p>We can see that it&rsquo;s persisted to our PVC by deleting our pod and running it
 again:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl delete pod myapp-0
-pod <span class="s2">&#34;myapp-0&#34;</span> deleted
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
-This server has been visited <span class="m">2</span> times.
-</code></pre></div><h3 id="deleting-the-pvc">Deleting the PVC<a href="#deleting-the-pvc" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl delete pod myapp-0
+</span></span><span class="line"><span class="cl">pod <span class="s2">&#34;myapp-0&#34;</span> deleted
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
+</span></span><span class="line"><span class="cl">This server has been visited <span class="m">2</span> times.
+</span></span></code></pre></div><h3 id="deleting-the-pvc">Deleting the PVC<a href="#deleting-the-pvc" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Next, we can simulate a catastrophic failure of our PVC by deleting it:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl delete pvc --wait<span class="o">=</span><span class="nb">false</span> data-myapp-0
-</code></pre></div><p>Then delete the pod that is using it:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">kubectl delete pod myapp-0
-</code></pre></div><p>Once our pod is back up and running, we can read the logs from the init
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl delete pvc --wait<span class="o">=</span><span class="nb">false</span> data-myapp-0
+</span></span></code></pre></div><p>Then delete the pod that is using it:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl delete pod myapp-0
+</span></span></code></pre></div><p>Once our pod is back up and running, we can read the logs from the init
 container to see that it was restored from S3:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ kubectl logs myapp-0 init-litestream
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: restoring snapshot 24456b497507f0c5/00000000 to /var/lib/myapp/db.tmp
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: restoring wal files: <span class="nv">generation</span><span class="o">=</span>24456b497507f0c5 <span class="nv">index</span><span class="o">=[</span>00000000,00000001<span class="o">]</span>
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: downloaded wal 24456b497507f0c5/00000000 <span class="nv">elapsed</span><span class="o">=</span>613.525612ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: downloaded wal 24456b497507f0c5/00000001 <span class="nv">elapsed</span><span class="o">=</span>599.573817ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: applied wal 24456b497507f0c5/00000000 <span class="nv">elapsed</span><span class="o">=</span>2.357647ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: applied wal 24456b497507f0c5/00000001 <span class="nv">elapsed</span><span class="o">=</span>1.800142ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: renaming database from temporary location
-</code></pre></div><p>We can then cURL our endpoint again and see that the count continues from where
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ kubectl logs myapp-0 init-litestream
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: restoring snapshot 24456b497507f0c5/00000000 to /var/lib/myapp/db.tmp
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: restoring wal files: <span class="nv">generation</span><span class="o">=</span>24456b497507f0c5 <span class="nv">index</span><span class="o">=[</span>00000000,00000001<span class="o">]</span>
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: downloaded wal 24456b497507f0c5/00000000 <span class="nv">elapsed</span><span class="o">=</span>613.525612ms
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: downloaded wal 24456b497507f0c5/00000001 <span class="nv">elapsed</span><span class="o">=</span>599.573817ms
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: applied wal 24456b497507f0c5/00000000 <span class="nv">elapsed</span><span class="o">=</span>2.357647ms
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: applied wal 24456b497507f0c5/00000001 <span class="nv">elapsed</span><span class="o">=</span>1.800142ms
+</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: renaming database from temporary location
+</span></span></code></pre></div><p>We can then cURL our endpoint again and see that the count continues from where
 it left off before the PVC deletion:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
-This server has been visited <span class="m">3</span> times.
-</code></pre></div><h2 id="conclusion">Conclusion<a href="#conclusion" class="anchor" aria-hidden="true">#</a> </h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
+</span></span><span class="line"><span class="cl">This server has been visited <span class="m">3</span> times.
+</span></span></code></pre></div><h2 id="conclusion">Conclusion<a href="#conclusion" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream can provide a simple persistence layer for Kubernetes services
 by using StatefulSets and PVCs. Currently, Litestream only allows a single node
 at a time in a StatefulSet but future versions will allow read replication to
@@ -446,8 +446,8 @@ additional nodes.</p>
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

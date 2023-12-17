@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -123,7 +123,7 @@
     <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
     <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
     <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
-    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/alternatives/">Alternatives</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/guides/">Infrastructure Guides</a>
@@ -200,34 +200,34 @@ too many backups!</p>
 <p>The <code>sqlite3</code> command line interface comes with a built-in <code>.backup</code> command
 which will safely backup your database to another file location. You can run
 it directly from the command line:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 /path/to/db <span class="s1">&#39;.backup /path/to/backup&#39;</span>
-</code></pre></div><p>The <code>VACUUM INTO</code> command provides an alternative to this which can work better
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s1">&#39;.backup /path/to/backup&#39;</span>
+</span></span></code></pre></div><p>The <code>VACUUM INTO</code> command provides an alternative to this which can work better
 if your database is receiving a high volume of writes, as it captures a snapshot
 from a single transaction. You can use that like this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
-</code></pre></div><p>Both of these examples output your database to the file <code>/path/to/backup</code>. B-tree
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
+</span></span></code></pre></div><p>Both of these examples output your database to the file <code>/path/to/backup</code>. B-tree
 databases like SQLite compress well so it&rsquo;s recommended to compress your database:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">gzip /path/to/backup
-</code></pre></div><p>This will compress your database to a new file called <code>/path/to/backup.gz</code>. You
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">gzip /path/to/backup
+</span></span></code></pre></div><p>This will compress your database to a new file called <code>/path/to/backup.gz</code>. You
 can then upload this file to external storage.</p>
 <h3 id="external-storage-using-s3">External storage using S3<a href="#external-storage-using-s3" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you are using S3, you can use the <a href="https://aws.amazon.com/cli/">AWS CLI</a> to
 copy the file to an S3 bucket:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">aws s3 cp /path/to/backup.gz s3://mybucket/backup.gz
-</code></pre></div><h3 id="rolling-backups">Rolling backups<a href="#rolling-backups" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup.gz
+</span></span></code></pre></div><h3 id="rolling-backups">Rolling backups<a href="#rolling-backups" class="anchor" aria-hidden="true">#</a> </h3>
 <p>You can also add the day or hour to your filename to create a rolling backup.
 For example, adding the hour to your filename gives you a back up every hour
 for the last day. Newer backups for the same hour will overwrite the previous
 one:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># 1-day, rolling hourly backup</span>
-aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%H<span class="sb">`</span>.gz
-
-<span class="c1"># 1-month, rolling daily backup</span>
-aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%d<span class="sb">`</span>.gz
-
-<span class="c1"># 1-month, rolling hourly backup</span>
-aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%d%H<span class="sb">`</span>.gz
-</code></pre></div><h3 id="monitoring-backups">Monitoring backups<a href="#monitoring-backups" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># 1-day, rolling hourly backup</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%H<span class="sb">`</span>.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 1-month, rolling daily backup</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%d<span class="sb">`</span>.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 1-month, rolling hourly backup</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%d%H<span class="sb">`</span>.gz
+</span></span></code></pre></div><h3 id="monitoring-backups">Monitoring backups<a href="#monitoring-backups" class="anchor" aria-hidden="true">#</a> </h3>
 <p>It&rsquo;s recommended to call a &ldquo;dead man&rdquo; service after performing your backup. This
 ensures that you will be notified if your backups stop working for any reason.
 <a href="https://deadmanssnitch.com/">Dead Man&rsquo;s Snitch</a> is one such service although
@@ -239,33 +239,33 @@ path. Be sure to stop your application before copying the database into place.</
 <p>While it is rare for backups to go wrong with SQLite, it&rsquo;s always good to
 regularly test your backups. To do this, simply download the back up and run
 an integrity check against it:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">sqlite3 /path/to/backup <span class="s1">&#39;PRAGMA integrity_check&#39;</span>
-</code></pre></div><h3 id="configuring-cron">Configuring cron<a href="#configuring-cron" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 /path/to/backup <span class="s1">&#39;PRAGMA integrity_check&#39;</span>
+</span></span></code></pre></div><h3 id="configuring-cron">Configuring cron<a href="#configuring-cron" class="anchor" aria-hidden="true">#</a> </h3>
 <p><a href="https://man7.org/linux/man-pages/man5/crontab.5.html"><code>cron</code></a> is a built-in
 Unix tool for periodically running commands. First, we&rsquo;ll create a script to
 run our backup commands. This is an example that combines the commands from
 above.</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="cp">#!/bin/bash -x
-</span><span class="cp"></span>
-<span class="c1"># Ensure script stops when commands fail.</span>
-<span class="nb">set</span> -e
-
-<span class="c1"># Backup &amp; compress our database to the temp directory.</span>
-sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
-gzip /tmp/db
-
-<span class="c1"># Upload backup to S3 using a rolling daily naming scheme.</span>
-aws s3 cp /tmp/db.gz s3://mybucket/db-<span class="sb">`</span>date +%d<span class="sb">`</span>.gz
-
-<span class="c1"># Notify dead man that back up completed successfully.</span>
-curl -d <span class="nv">s</span><span class="o">=</span><span class="nv">$?</span> https://nosnch.in/xxxxxxxxxx <span class="p">&amp;</span>&gt; /dev/null
-</code></pre></div><p>Then you can configure <code>crontab</code> to run this daily at midnight:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># Edit your cron jobs</span>
-crontab -e
-
-<span class="c1"># Add this to the end of the crontab</span>
-<span class="m">0</span> <span class="m">0</span> * * * /path/to/my_backup_script.sh
-</code></pre></div>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="cp">#!/bin/bash -x
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Ensure script stops when commands fail.</span>
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Backup &amp; compress our database to the temp directory.</span>
+</span></span><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
+</span></span><span class="line"><span class="cl">gzip /tmp/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Upload backup to S3 using a rolling daily naming scheme.</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /tmp/db.gz s3://mybucket/db-<span class="sb">`</span>date +%d<span class="sb">`</span>.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Notify dead man that back up completed successfully.</span>
+</span></span><span class="line"><span class="cl">curl -d <span class="nv">s</span><span class="o">=</span><span class="nv">$?</span> https://nosnch.in/xxxxxxxxxx <span class="p">&amp;</span>&gt; /dev/null
+</span></span></code></pre></div><p>Then you can configure <code>crontab</code> to run this daily at midnight:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Edit your cron jobs</span>
+</span></span><span class="line"><span class="cl">crontab -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Add this to the end of the crontab</span>
+</span></span><span class="line"><span class="cl"><span class="m">0</span> <span class="m">0</span> * * * /path/to/my_backup_script.sh
+</span></span></code></pre></div>
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	</div>
@@ -280,8 +280,8 @@ crontab -e
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

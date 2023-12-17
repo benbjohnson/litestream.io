@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -141,7 +141,7 @@
 		Posted June 3, 2021
 		by <a class="stretched-link position-relative" href="https://twitter.com/benbjohnson" target="_blank">Ben Johnson</a>
 		&nbsp;&hyphen;&nbsp;
-		<strong>6&nbsp;min read</strong>
+		<strong>7&nbsp;min read</strong>
 	</small>
 <p>
 			</div>
@@ -172,18 +172,18 @@ layer to convert S3 requests to Azure&rsquo;s API but that&rsquo;s a poor experi
 uses the <a href="https://github.com/Azure/azure-sdk-for-go">official Azure SDK</a> and you
 can use it by specifying the <code>abs</code> replica type.</p>
 <p>If you&rsquo;re using replica URLs, you can specify it like this:</p>
-<pre><code>abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+<pre tabindex="0"><code>abs://STORAGEACCOUNT@CONTAINERNAME/PATH
 </code></pre><p>However, if you use the Litestream <a href="/reference/config">config file</a> then you can break it out like
 this:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
-</span><span class="w">        </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">STORAGEACCOUNT</span><span class="w">
-</span><span class="w">        </span><span class="nt">account-key</span><span class="p">:</span><span class="w">  </span><span class="l">ACCOUNTKEY</span><span class="w">
-</span><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w">       </span><span class="l">CONTAINERNAME</span><span class="w">
-</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">         </span><span class="l">PATH</span><span class="w">
-</span></code></pre></div><p>You&rsquo;ll need to set the <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable if
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">STORAGEACCOUNT</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">account-key</span><span class="p">:</span><span class="w">  </span><span class="l">ACCOUNTKEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w">       </span><span class="l">CONTAINERNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">         </span><span class="l">PATH</span><span class="w">
+</span></span></span></code></pre></div><p>You&rsquo;ll need to set the <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable if
 you are using the URL format. You can find more details on our <a href="/guides/azure"><em>Replicating to
 Azure Blob Storage guide</em></a>.</p>
 <h3 id="google-cloud-storage">Google Cloud Storage</h3>
@@ -192,15 +192,15 @@ S3-compatible API, however, it turns out that it&rsquo;s not all that compatible
 We&rsquo;ve integrated the native <a href="https://cloud.google.com/go/storage">Google Cloud SDK</a> to provide a replica client
 for GCS which you can specify using the <code>gcs</code> replica type.</p>
 <p>The replica URL format looks like:</p>
-<pre><code>gcs://BUCKET/PATH
+<pre tabindex="0"><code>gcs://BUCKET/PATH
 </code></pre><p>While the configuration file usage looks like:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">gcs</span><span class="w">
-</span><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKET</span><span class="w">
-</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">PATH</span><span class="w">
-</span></code></pre></div><p>You&rsquo;ll need to make sure the path to your service account key JSON file is set
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">gcs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKET</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">PATH</span><span class="w">
+</span></span></span></code></pre></div><p>You&rsquo;ll need to make sure the path to your service account key JSON file is set
 to the <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable. You can find more
 details on our <a href="/guides/gcs"><em>Replicating to Google Cloud Storage guide</em></a>.</p>
 <h3 id="sftp">SFTP</h3>
@@ -214,23 +214,23 @@ providing a test account!</p>
 to setup. It&rsquo;s typically secured via password or SSH key file. You can use both
 with Litestream.</p>
 <p>You can specify an SFTP replica destination via replica URL:</p>
-<pre><code>sftp://USER:PASSWORD@HOST:PORT/PATH
+<pre tabindex="0"><code>sftp://USER:PASSWORD@HOST:PORT/PATH
 </code></pre><p>Or you can use the configuration file format:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">     </span><span class="l">sftp</span><span class="w">
-</span><span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w">     </span><span class="l">HOST:PORT</span><span class="w">
-</span><span class="w">        </span><span class="nt">user</span><span class="p">:</span><span class="w">     </span><span class="l">USER</span><span class="w">
-</span><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
-</span><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">PATH</span><span class="w">
-</span></code></pre></div><p>If you are using an SSH key file, you can specify its path in the config only:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER@HOST:PORT/PATH</span><span class="w">
-</span><span class="w">        </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/id_rsa</span><span class="w">
-</span></code></pre></div><h2 id="improved-docker-integration">Improved Docker integration</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">     </span><span class="l">sftp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w">     </span><span class="l">HOST:PORT</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">user</span><span class="p">:</span><span class="w">     </span><span class="l">USER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">PATH</span><span class="w">
+</span></span></span></code></pre></div><p>If you are using an SSH key file, you can specify its path in the config only:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER@HOST:PORT/PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/id_rsa</span><span class="w">
+</span></span></span></code></pre></div><h2 id="improved-docker-integration">Improved Docker integration</h2>
 <p>The previous version of Litestream added quality-of-life improvements to
 integrate with Docker by using <a href="https://skarnet.org/software/s6/">s6</a> for process supervision. This worked
 well but it added an additional layer of complexity for most applications
@@ -240,12 +240,12 @@ process as a child of Litestream. This process will be monitored and Litestream
 will automatically shutdown when the process exits.</p>
 <p>You can run a child process by providing your command and args with the <code>-exec</code>
 flag:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
-</code></pre></div><p>or you can specify it in your config file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">dbs:
-  - path: /path/to/db
-    exec: myapp -myflag myarg
-</code></pre></div><p>You can find a full, working example of a Dockerized application running with
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
+</span></span></code></pre></div><p>or you can specify it in your config file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">dbs:
+</span></span><span class="line"><span class="cl">  - path: /path/to/db
+</span></span><span class="line"><span class="cl">    exec: myapp -myflag myarg
+</span></span></code></pre></div><p>You can find a full, working example of a Dockerized application running with
 subprocess execution at the <a href="https://github.com/benbjohnson/litestream-docker-example">Litestream/Docker example repo</a>.</p>
 <h2 id="kubernetes-deployments">Kubernetes deployments</h2>
 <p>Since the early days of Litestream, folks have been asking how to run it as a
@@ -283,13 +283,13 @@ heavy, constant write load then you may want to adjust your replica&rsquo;s
 <h2 id="replica-metrics">Replica metrics</h2>
 <p>The original S3 replica had two Prometheus metrics that it published to track
 the number of operations and the number of bytes used by those operations:</p>
-<pre><code>litestream_s3_operation_total{&quot;operation&quot;}
-litestream_s3_operation_bytes{&quot;operation&quot;}
+<pre tabindex="0"><code>litestream_s3_operation_total{&#34;operation&#34;}
+litestream_s3_operation_bytes{&#34;operation&#34;}
 </code></pre><p>However, we have a lot more replica types now and it didn&rsquo;t make sense to have
 separate metrics for each one. These have now been consolidated into generic
 metrics with a <code>&quot;replica_type&quot;</code> label:</p>
-<pre><code>litestream_replica_operation_total{&quot;replica_type&quot;,&quot;operation&quot;}
-litestream_replica_operation_bytes{&quot;replica_type&quot;,&quot;operation&quot;}
+<pre tabindex="0"><code>litestream_replica_operation_total{&#34;replica_type&#34;,&#34;operation&#34;}
+litestream_replica_operation_bytes{&#34;replica_type&#34;,&#34;operation&#34;}
 </code></pre><p>Note that each replica type reports a little differently because of how the
 native library implements LIST, GET, and PUT commands.</p>
 <h2 id="miscellaneous-fixes">Miscellaneous fixes</h2>
@@ -320,8 +320,8 @@ office hours</a>, or <a href="https://twitter.com/litestreamio">follow Litestrea
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

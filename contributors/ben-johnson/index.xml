@@ -6,47 +6,35 @@
     <description>Recent content in Ben Johnson on </description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://litestream.io/contributors/ben-johnson/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 03 Jun 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://litestream.io/contributors/ben-johnson/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Litestream v0.3.5 Released</title>
       <link>https://litestream.io/blog/litestream-v0.3.5-released/</link>
       <pubDate>Thu, 03 Jun 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/blog/litestream-v0.3.5-released/</guid>
-      <description>The main focus of this latest release has been on improving the replica code so we can easily add new replication destinations. Additionally, we&amp;rsquo;ve improved Docker integration, made quality-of-life improvements for running Litestream in Kubernetes, adjusted the default S3 sync interval, updated some metrics, and made a bunch of smaller bug fixes.
-Improved replica code Originally, Litestream only had s3 and file replica types. These had a lot of similar code but there were enough small differences in how they behaved that we didn&amp;rsquo;t try to abstract the code too much.</description>
+      <description>The main focus of this latest release has been on improving the replica code so we can easily add new replication destinations. Additionally, we&amp;rsquo;ve improved Docker integration, made quality-of-life improvements for running Litestream in Kubernetes, adjusted the default S3 sync interval, updated some metrics, and made a bunch of smaller bug fixes.&#xA;Improved replica code Originally, Litestream only had s3 and file replica types. These had a lot of similar code but there were enough small differences in how they behaved that we didn&amp;rsquo;t try to abstract the code too much.</description>
     </item>
-    
     <item>
       <title>Litestream v0.3.4 Released</title>
       <link>https://litestream.io/blog/litestream-v0.3.4-released/</link>
       <pubDate>Wed, 28 Apr 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/blog/litestream-v0.3.4-released/</guid>
-      <description>Over the last month, we&amp;rsquo;ve been focused on stability &amp;amp; quality-of-life changes to Litestream. We now have an official Litestream Docker image so you can run your backups as a sidecar to your existing Docker image. We&amp;rsquo;ve also provided an example Dockerfile for those wanting to bundle their application with Litestream into a single Docker container using s6.
-We&amp;rsquo;ve added support for ARMv6, ARMv7, &amp;amp; ARM64 which means you can take advantage of Litestream on a tiny Raspberry Pi Zero or on a beefy 64-core Graviton EC2 machine.</description>
+      <description>Over the last month, we&amp;rsquo;ve been focused on stability &amp;amp; quality-of-life changes to Litestream. We now have an official Litestream Docker image so you can run your backups as a sidecar to your existing Docker image. We&amp;rsquo;ve also provided an example Dockerfile for those wanting to bundle their application with Litestream into a single Docker container using s6.&#xA;We&amp;rsquo;ve added support for ARMv6, ARMv7, &amp;amp; ARM64 which means you can take advantage of Litestream on a tiny Raspberry Pi Zero or on a beefy 64-core Graviton EC2 machine.</description>
     </item>
-    
     <item>
       <title>Litestream v0.3.3 Released</title>
       <link>https://litestream.io/blog/litestream-v0.3.3-released/</link>
       <pubDate>Tue, 16 Mar 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/blog/litestream-v0.3.3-released/</guid>
-      <description>The newest version of Litestream brings support for Windows and support for S3-compatible storage such as MinIO. It also includes over a dozen quality-of-life fixes and expands documentation.
-Beyond code changes, we&amp;rsquo;ve opened up a Slack channel &amp;amp; started office hours to help folks get up and running. Let&amp;rsquo;s run through some of these changes.
-Slack &amp;amp; office hours While Litestream has an active GitHub Discussions board and Issues section, sometimes you want to have synchronous communication to quickly figure out an issue or just to get up and running.</description>
+      <description>The newest version of Litestream brings support for Windows and support for S3-compatible storage such as MinIO. It also includes over a dozen quality-of-life fixes and expands documentation.&#xA;Beyond code changes, we&amp;rsquo;ve opened up a Slack channel &amp;amp; started office hours to help folks get up and running. Let&amp;rsquo;s run through some of these changes.&#xA;Slack &amp;amp; office hours While Litestream has an active GitHub Discussions board and Issues section, sometimes you want to have synchronous communication to quickly figure out an issue or just to get up and running.</description>
     </item>
-    
     <item>
       <title>Why I Built Litestream</title>
       <link>https://litestream.io/blog/why-i-built-litestream/</link>
       <pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate>
-      
       <guid>https://litestream.io/blog/why-i-built-litestream/</guid>
-      <description>tl;dr—Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp;amp; Litestream for your production applications.
-When I was your age&amp;hellip; I can tell I&amp;rsquo;m getting old because I talk about the &amp;ldquo;good old days&amp;rdquo; of computing. Back when knowing a single programming language and SQL was good enough to work at most jobs.</description>
+      <description>tl;dr—Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp;amp; Litestream for your production applications.&#xA;When I was your age&amp;hellip; I can tell I&amp;rsquo;m getting old because I talk about the &amp;ldquo;good old days&amp;rdquo; of computing. Back when knowing a single programming language and SQL was good enough to work at most jobs.</description>
     </item>
-    
   </channel>
 </rss>

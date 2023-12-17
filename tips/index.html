@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -191,7 +191,7 @@ default if your application tries to obtain a write lock at the same time.</p>
 </a> pragma when it initializes the database connection. This pragma
 will wait up to a given number of milliseconds before failing a query if it is
 blocked on a write. It is recommended to set this to 5 seconds:</p>
-<pre><code>PRAGMA busy_timeout = 5000;
+<pre tabindex="0"><code>PRAGMA busy_timeout = 5000;
 </code></pre><h2 id="wal-journal-mode">WAL journal mode<a href="#wal-journal-mode" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream only works with the SQLite <a href="https://sqlite.org/wal.html">WAL journaling mode</a>. This is the
 recommended mode for most applications as it generally performs better and
@@ -217,7 +217,7 @@ durable. While in WAL journaling mode, fsync calls can be relaxed in exchange
 for durability without risking data corruption.</p>
 <p>To do this, you can change the <a href="https://www.sqlite.org/pragma.html#pragma_synchronous"><code>synchronous</code></a> mode to <code>NORMAL</code>
 (it typically <a href="https://github.com/sqlite/sqlite/blob/86fbbbf96440fddc6e691213495b563f2584fce1/src/sqliteInt.h#L1268-L1286">defaults</a> to <code>FULL</code>):</p>
-<pre><code>PRAGMA synchronous = NORMAL;
+<pre tabindex="0"><code>PRAGMA synchronous = NORMAL;
 </code></pre><p>This mode will ensure that the <code>fsync()</code> calls are only called when the WAL
 becomes full and has to checkpoint to the main database file. This is safe as
 the WAL file is append only.</p>
@@ -259,18 +259,18 @@ to miss a WAL file.</p>
 <p>To prevent this, it is recommended to run your application with
 autocheckpointing disabled. To do this, run the following PRAGMA when you
 open your SQLite connection:</p>
-<pre><code>PRAGMA wal_autocheckpoint = 0;
+<pre tabindex="0"><code>PRAGMA wal_autocheckpoint = 0;
 </code></pre><h2 id="multiple-applications-replicating-into-location-can-corrupt">Multiple applications replicating into location can corrupt<a href="#multiple-applications-replicating-into-location-can-corrupt" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Multiple applications replicating into the same bucket &amp; path can cause situations
 where you will be unable to restore. It is <em>your</em> responsibility to ensure you
 do not have multiple applications replicating concurrently. In the off-chance
 that it does happen, and you&rsquo;re unable to restore, you may see an error along
 the lines of:</p>
-<pre><code>cannot find max wal index for restore: missing initial wal segment: generation=f6d6d1e96d38dafb index=00000093 offset=4152
+<pre tabindex="0"><code>cannot find max wal index for restore: missing initial wal segment: generation=f6d6d1e96d38dafb index=00000093 offset=4152
 </code></pre><p>In this case, manually copy your most recent snapshot in
 <code>generations/&lt;id&gt;/snapshots/&lt;snapshot&gt;.lz4</code> and decompress with <code>lz4</code>.</p>
 <p>It&rsquo;s a good idea to perform an integrity check on the database using <code>sqlite3</code>:</p>
-<pre><code>$ sqlite3 /path/to/db
+<pre tabindex="0"><code>$ sqlite3 /path/to/db
 sqlite&gt; PRAGMA integrity_check;
 ok
 </code></pre><p>You now use this snapshot file as your application&rsquo;s database file and continue
@@ -290,8 +290,8 @@ replicating it again with Litestream.</p>
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

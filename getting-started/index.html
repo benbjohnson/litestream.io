@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -204,10 +204,10 @@ gets us up and running quickly but it will only persist the data for as long as
 the Docker container is running. That&rsquo;s good enough for this tutorial but you&rsquo;ll
 want to use persistent storage in a production environment.</p>
 <p>First, start your MinIO instance:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address <span class="s2">&#34;:9001&#34;</span>
-</code></pre></div><p>Then open a web browser to <a href="http://localhost:9001/" target="_blank">http://localhost:9001/</a>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address <span class="s2">&#34;:9001&#34;</span>
+</span></span></code></pre></div><p>Then open a web browser to <a href="http://localhost:9001/" target="_blank">http://localhost:9001/</a>
 and enter the default credentials:</p>
-<pre><code>Username: minioadmin
+<pre tabindex="0"><code>Username: minioadmin
 Password: minioadmin
 </code></pre><p>Next, navigate to &ldquo;Buckets&rdquo;, click the &ldquo;Create Bucket&rdquo; button in the top right corner and then click the
 <em>&ldquo;Save&rdquo;</em> icon. Name your bucket, <code>&quot;mybkt&quot;</code>.</p>
@@ -216,21 +216,21 @@ Password: minioadmin
 can work with any SQLite database so we&rsquo;ll use the <code>sqlite3</code> command line tool
 to show how it works.</p>
 <p><strong>In a terminal window</strong>, create a new database file:</p>
-<pre><code>sqlite3 fruits.db
+<pre tabindex="0"><code>sqlite3 fruits.db
 </code></pre><p>This will open the SQLite command prompt and now we can execute SQL commands.
 We&rsquo;ll start by creating a new table:</p>
-<pre><code>CREATE TABLE fruits (name TEXT, color TEXT);
+<pre tabindex="0"><code>CREATE TABLE fruits (name TEXT, color TEXT);
 </code></pre><p>And we can add some data to our table:</p>
-<pre><code>INSERT INTO fruits (name, color) VALUES ('apple', 'red');
-INSERT INTO fruits (name, color) VALUES ('banana', 'yellow');
+<pre tabindex="0"><code>INSERT INTO fruits (name, color) VALUES (&#39;apple&#39;, &#39;red&#39;);
+INSERT INTO fruits (name, color) VALUES (&#39;banana&#39;, &#39;yellow&#39;);
 </code></pre><h2 id="replicating-your-database">Replicating your database<a href="#replicating-your-database" class="anchor" aria-hidden="true">#</a> </h2>
 <p><strong>In a separate terminal window</strong>, we&rsquo;ll run Litestream to replicate our new
 database. Make sure both terminal windows are using the same working directory.</p>
 <p>First, we&rsquo;ll set our MinIO credentials to our environment variables:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
-<span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
-</code></pre></div><p>Next, run Litesteam&rsquo;s <code>replicate</code> command to start replication:</p>
-<pre><code>litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
+</span></span></code></pre></div><p>Next, run Litesteam&rsquo;s <code>replicate</code> command to start replication:</p>
+<pre tabindex="0"><code>litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
 </code></pre><p>You should see Litestream print some initialization commands and then wait
 indefinitely. Normally, Litestream is run as a background service so it
 continuously watches your database for new changes so the command does not exit.</p>
@@ -239,28 +239,28 @@ you will see there is a <code>fruits.db</code> directory in your bucket.</p>
 <h2 id="restoring-your-database">Restoring your database<a href="#restoring-your-database" class="anchor" aria-hidden="true">#</a> </h2>
 <p><strong>In a third terminal window</strong>, we&rsquo;ll restore our database to a new file. First,
 make sure your environment variables are set correctly:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
-<span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
-</code></pre></div><p>Then run:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream restore -o fruits2.db s3://mybkt.localhost:9000/fruits.db
-</code></pre></div><p>This will pull down the backup from MinIO and write it to the <code>fruits2.db</code> file.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
+</span></span></code></pre></div><p>Then run:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o fruits2.db s3://mybkt.localhost:9000/fruits.db
+</span></span></code></pre></div><p>This will pull down the backup from MinIO and write it to the <code>fruits2.db</code> file.
 You can verify the database matches by executing a query on our file:</p>
-<pre><code>sqlite3 fruits2.db 'SELECT * FROM fruits'
+<pre tabindex="0"><code>sqlite3 fruits2.db &#39;SELECT * FROM fruits&#39;
 </code></pre><p>The data should show:</p>
-<pre><code>apple|red
+<pre tabindex="0"><code>apple|red
 banana|yellow
 </code></pre><h2 id="continuous-replication">Continuous replication<a href="#continuous-replication" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream continuously monitors your database and backs it up to S3. We can
 see this by writing some more data to our original <code>fruits.db</code> database.</p>
 <p><strong>In our first terminal window</strong>, write a new row to our table:</p>
-<pre><code>INSERT INTO fruits (name, color) VALUES ('grape', 'purple');
+<pre tabindex="0"><code>INSERT INTO fruits (name, color) VALUES (&#39;grape&#39;, &#39;purple&#39;);
 </code></pre><p>Then in your <strong>third terminal window</strong>, restore your database from our S3 backup
 to a new <code>fruits3.db</code> file:</p>
-<pre><code>litestream restore -o fruits3.db s3://mybkt.localhost:9000/fruits.db
+<pre tabindex="0"><code>litestream restore -o fruits3.db s3://mybkt.localhost:9000/fruits.db
 </code></pre><p>We can execute a query on this file:</p>
-<pre><code>sqlite3 fruits3.db 'SELECT * FROM fruits'
+<pre tabindex="0"><code>sqlite3 fruits3.db &#39;SELECT * FROM fruits&#39;
 </code></pre><p>We should now see our new row:</p>
-<pre><code>apple|red
+<pre tabindex="0"><code>apple|red
 banana|yellow
 grape|purple
 </code></pre><h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
@@ -280,8 +280,8 @@ run on your particular platform.</p>
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.1cf992edc1f37b95c4ddf85b36862f715228199a718763a6aa21f686499e342a4f93190577c6c39e89fd604dfc6a4bfab3e42be269bf084761ad9009e06b5457.css" integrity="sha512-HPmS7cHze5XE3fhbNoYvcVIoGZpxh2OmqiH2hkmeNCpPkxkFd8bDnon9YE38akv6s&#43;Qr4mm/CEdhrZAJ4GtUVw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Running in a Docker container">
 <meta name="twitter:description" content="This guide will show you how to run Litestream within a Docker container either as a sidecar or within the same container as your application. You will need a Docker installed on your machine for this guide.
-❗️ The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms.  Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow.">
+❗️ The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms. Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -203,22 +203,22 @@ with a configuration file or with a replica URL.</p>
 <h3 id="using-a-configuration-file">Using a configuration file<a href="#using-a-configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Typically, it&rsquo;s recommended to run Litestream using a configuration file as it
 provides more configuration options. First, create your configuration file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-yml" data-lang="yml"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">YOUR_ACCESS_KEY_ID</span><span class="w">
-</span><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">YOUR_SECRET_ACCESS_KEY</span><span class="w">
-</span><span class="w">
-</span><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/db</span><span class="w">
-</span><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKET/db</span><span class="w">
-</span></code></pre></div><p>Note that the database <code>path</code> is using the <code>/data</code> path in your Docker container.
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">YOUR_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">YOUR_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKET/db</span><span class="w">
+</span></span></span></code></pre></div><p>Note that the database <code>path</code> is using the <code>/data</code> path in your Docker container.
 Also, you can specify access key &amp; secret key via environment variables instead.</p>
 <p>Next, you&rsquo;ll need to attach both your data directory and your configuration
 file via a volume:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run <span class="se">\
-</span><span class="se"></span>  -v /local/path/to/data:/data <span class="se">\
-</span><span class="se"></span>  -v /local/path/to/litestream.yml:/etc/litestream.yml <span class="se">\
-</span><span class="se"></span>  litestream/litestream replicate
-</code></pre></div><p>You can also use named volumes instead of absolute paths. See Docker&rsquo;s <a href="https://docs.docker.com/storage/volumes/">Use
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker run <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v /local/path/to/data:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v /local/path/to/litestream.yml:/etc/litestream.yml <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  litestream/litestream replicate
+</span></span></code></pre></div><p>You can also use named volumes instead of absolute paths. See Docker&rsquo;s <a href="https://docs.docker.com/storage/volumes/">Use
 volumes</a> documentation for more information about which one to use.</p>
 <p>Now that Litestream is running, you can start your application and mount the
 same data volume.</p>
@@ -226,12 +226,12 @@ same data volume.</p>
 <p>For basic replication of a single database, you can set your S3 credentials via
 environment variables, mount a volume to read from, and specify the path and
 replica as arguments:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">docker run <span class="se">\
-</span><span class="se"></span>  --env LITESTREAM_ACCESS_KEY_ID <span class="se">\
-</span><span class="se"></span>  --env LITESTREAM_SECRET_ACCESS_KEY <span class="se">\
-</span><span class="se"></span>  -v /local/path/to/data:/data <span class="se">\
-</span><span class="se"></span>  litestream/litestream replicate /data/db s3://BUCKET/db
-</code></pre></div><p>This command will use the <code>LITESTREAM_ACCESS_KEY_ID</code> and <code>LITESTREAM_SECRET_ACCESS_KEY</code>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker run <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --env LITESTREAM_ACCESS_KEY_ID <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --env LITESTREAM_SECRET_ACCESS_KEY <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v /local/path/to/data:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  litestream/litestream replicate /data/db s3://BUCKET/db
+</span></span></code></pre></div><p>This command will use the <code>LITESTREAM_ACCESS_KEY_ID</code> and <code>LITESTREAM_SECRET_ACCESS_KEY</code>
 environment variables in your current session and pass those into your Docker
 container. You can also set the values explicitly using the <code>-e</code> flag.</p>
 <p>The command then mounts a volume from your localpath to the <code>/data</code> directory
@@ -244,12 +244,12 @@ name of your bucket.</p>
 container, you can bundle both your application and Litestream together using
 Litestream&rsquo;s built-in process supervision. You can specify your application&rsquo;s
 process and flags by passing them to the <code>-exec</code> flag:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
-</code></pre></div><p>Or you can pass them in via the config file:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">exec: myapp -myflag myarg
-dbs:
-  - path: /path/to/db
-</code></pre></div><p>Litestream will monitor your application&rsquo;s process and automatically shutdown
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
+</span></span></code></pre></div><p>Or you can pass them in via the config file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">exec: myapp -myflag myarg
+</span></span><span class="line"><span class="cl">dbs:
+</span></span><span class="line"><span class="cl">  - path: /path/to/db
+</span></span></code></pre></div><p>Litestream will monitor your application&rsquo;s process and automatically shutdown
 when it closes. You can find an example application in the
 <a href="https://github.com/benbjohnson/litestream-docker-example">litestream-docker-example</a> repository.</p>
 <p>If you need to monitor multiple application processes, you can also use <a href="http://skarnet.org/software/s6">s6</a>
@@ -279,8 +279,8 @@ Docker containers. You can find a small example application in the
     <footer>
 </footer>
     
-    <script src="https://litestream.io/main.f6b484f556ad1f3bcf6061082139a2f21fa759f13930c39a25fe4a9f78f35e64122c2d86dffd56e67b292dabbda4095d8077194f196e0e348441c106a9f3d40e.js" integrity="sha512-9rSE9VatHzvPYGEIITmi8h&#43;nWfE5MMOaJf5Kn3jzXmQSLC2G3/1W5nspLau9pAldgHcZTxluDjSEQcEGqfPUDg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.3cf72e2d46fb5e5ef4c137f33b9a80ab66cb3d96bc8451412b740d90917bb1d3f5f511faa6358f78f6c5b4610e34b9f0a696d9a355e8ed0e55884a6267cf452c.js" integrity="sha512-PPcuLUb7Xl70wTfzO5qAq2bLPZa8hFFBK3QNkJF7sdP19RH6pjWPePbFtGEONLnwppbZo1Xo7Q5ViEpiZ89FLA==" crossorigin="anonymous" defer></script>
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
