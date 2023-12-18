@@ -1,4 +1,2 @@
 params:
   litestreamVersion: 0.3.13
-security:
-  enableInlineShortcodes: true

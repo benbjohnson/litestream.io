@@ -15,13 +15,13 @@ service with a few commands. First, download the latest `.deb` file to your
 local machine:
 
 ```sh
-wget https://github.com/benbjohnson/litestream/releases/download/v{{< version.inline >}}{{ .Site.Param "litestreamVersion" }}{{< /version.inline >}}/litestream-v{{< version.inline />}}-linux-amd64.deb
+wget https://github.com/benbjohnson/litestream/releases/download/v{{< version >}}/litestream-v{{< version >}}-linux-amd64.deb
 ```
 
 Then install it using `dpkg`:
 
 ```sh
-sudo dpkg -i litestream-v{{< version.inline />}}-linux-amd64.deb
+sudo dpkg -i litestream-v{{< version >}}-linux-amd64.deb
 ```
 
 You should now be able to run `litestream version` to verify it is installed.
