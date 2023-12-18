@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.b44da09d14b45c6d186e73d0b4a4d319f693fa05d55db999b9bc99a9829308208d40db5072cafe6e1436a5fdf8a5a4b9e7562c34e33768c28bfcc1b98bd67bd1.css" integrity="sha512-tE2gnRS0XG0YbnPQtKTTGfaT&#43;gXVXbmZubyZqYKTCCCNQNtQcsr&#43;bhQ2pf34paS551YsNOM3aMKL/MG5i9Z70Q==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.2228bd4ca08e45f4272f8d11386a386c2ea6211d9ef46b78a8ad3cf15f2bd1b19cab0c1bb7e68ffffbd35c2fa3fa9622f89cb78f8caf0608726ed32f720abda5.css" integrity="sha512-Iii9TKCORfQnL40ROGo4bC6mIR2e9Gt4qK088V8r0bGcqwwbt&#43;aP//vTXC&#43;j&#43;pYi&#43;Jy3j4yvBghybtMvcgq9pQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -178,6 +178,7 @@ Variable expansion By default, Litestream will perform environment variable expa
       <ul>
         <li><a href="#aws-credentials">AWS credentials</a></li>
         <li><a href="#metrics">Metrics</a></li>
+        <li><a href="#logging">Logging</a></li>
       </ul>
     </li>
     <li><a href="#database-settings">Database settings</a></li>
@@ -188,6 +189,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#multiple-replicas">Multiple replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
         <li><a href="#validation-interval">Validation interval</a></li>
+        <li><a href="#encryption">Encryption</a></li>
       </ul>
     </li>
   </ul>
@@ -225,7 +227,19 @@ address in the config:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
 </span></span></span></code></pre></div><p>When you start Litestream with this setting enabled, you&rsquo;ll see metrics at
 <a href="http://localhost:9090/metrics">http://localhost:9090/metrics</a></p>
-<h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="logging">Logging<a href="#logging" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.12">
+    v0.3.12
+</span>
+ Log <code>type</code> can be set to either &ldquo;text&rdquo; or &ldquo;json&rdquo;.
+Logging <code>level</code> can be set to &ldquo;debug&rdquo;, &ldquo;info&rdquo;, &ldquo;warn&rdquo; or &ldquo;error&rdquo;. By setting
+<code>stderr</code> to <code>true</code> logs will be written to stderr instead of stdout.</p>
+<p>The defaults are shown below:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">info</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div><h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream can monitor one or more database files that are specified in the
 configuration file. Database files are also referenced in <code>litestream</code> commands
 by their absolute path.</p>
@@ -281,6 +295,10 @@ Litestream as S3 services charge for downloads.</p>
 <li>
 <p><code>sync-interval</code>—Frequency in which frames are pushed to the replica. Defaults
 to <code>1s</code>. Increasing frequency can increase cloud storage costs significantly.</p>
+</li>
+<li>
+<p><code>age</code>—Client-side encryption with <a href="https://age-encryption.org">age</a>, see
+<a href="#encryption">Encryption</a> for configuration details. Defaults to off.</p>
 </li>
 </ul>
 <h3 id="s3-replica">S3 replica<a href="#s3-replica" class="anchor" aria-hidden="true">#</a> </h3>
@@ -385,7 +403,37 @@ to the primary database&rsquo;s checksum.</p>
     replicas:
       - url: s3://mybkt.litestream.io/db
         validation-interval: 6h
-</code></pre>
+</code></pre><h3 id="encryption">Encryption<a href="#encryption" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.10">
+    v0.3.10
+</span>
+ Client-side encryption can be enabled per replica by adding an <code>age</code> section to
+the replica configuration with corresponding <code>identities</code> and <code>recipients</code>
+fields.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">❗️</div>
+  <div class="w-100">When enabling encryption restoring requires matching age identity to restore from the replica.</div>
+</div>
+<pre tabindex="0"><code>dbs:
+  - path: /var/lib/db
+    replicas:
+      - url: s3://mybkt.litestream.io/db
+        age:
+          identities:
+            - AGE-SECRET-KEY-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          recipients:
+            - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</code></pre><p>To generate keys, refer to the
+age <a href="https://github.com/FiloSottile/age/blob/main/README.md">README</a>
+how to install and use the command line tools.</p>
+<p>As of now identities must be a superset of recipients but key rotation can be
+achieved by adding a new identity while changing the recipient list to only have
+a key for it.</p>
+<p>Note that enabling encryption after replication has already been done can
+confuse Litestream so it is recommended the replica is empty when doing so.
+Restoring from a replica that has mixed encrypted and non-encrypted files will
+fail.</p>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	<a class="ml-auto" href="https://litestream.io/reference/databases/">
