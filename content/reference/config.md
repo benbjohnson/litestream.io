@@ -118,6 +118,9 @@ The following replica settings are also available for all replica types:
 - `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
   to `1s`. Increasing frequency can increase cloud storage costs significantly.
 
+- `age`—Client-side encryption with [age](https://age-encryption.org), see
+  [Encryption](#encryption) for configuration details. Defaults to off.
+
 
 ### S3 replica
 
@@ -254,3 +257,35 @@ dbs:
         validation-interval: 6h
 ```
 
+### Encryption
+
+{{< since version="0.3.10" >}} Client-side encryption can be enabled per replica by adding an `age` section to
+the replica configuration with corresponding `identities` and `recipients`
+fields.
+
+{{< alert icon="❗️" text="When enabling encryption restoring requires matching age identity to restore from the replica." >}}
+
+```
+dbs:
+  - path: /var/lib/db
+    replicas:
+      - url: s3://mybkt.litestream.io/db
+        age:
+          identities:
+            - AGE-SECRET-KEY-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          recipients:
+            - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+To generate keys, refer to the
+age [README](https://github.com/FiloSottile/age/blob/main/README.md)
+how to install and use the command line tools.
+
+As of now identities must be a superset of recipients but key rotation can be
+achieved by adding a new identity while changing the recipient list to only have
+a key for it.
+
+Note that enabling encryption after replication has already been done can
+confuse Litestream so it is recommended the replica is empty when doing so.
+Restoring from a replica that has mixed encrypted and non-encrypted files will
+fail.
