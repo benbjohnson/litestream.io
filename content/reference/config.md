@@ -55,6 +55,21 @@ When you start Litestream with this setting enabled, you'll see metrics at
 [http://localhost:9090/metrics](http://localhost:9090/metrics)
 
 
+### Logging
+
+{{< since version="0.3.12" >}} Log `type` can be set to either "text" or "json".
+Logging `level` can be set to "debug", "info", "warn" or "error". By setting
+`stderr` to `true` logs will be written to stderr instead of stdout.
+
+The defaults are shown below:
+
+```yaml
+logging:
+  level: info
+  type: text
+  stderr: false
+```
+
 
 ## Database settings
 
