@@ -128,7 +128,8 @@ lock on the database in between its checkpoint requests.
 However, under high load with many small write transactions (e.g. tens of
 thousands per second), the application's SQLite instance can perform a
 checkpoint in between Litestream-initiated checkpoints and cause Litestream
-to miss a WAL file.
+to miss a WAL file. When Litestream notices this it will force a new
+generation and take a full snapshot to ensure consistency.
 
 To prevent this, it is recommended to run your application with
 autocheckpointing disabled. To do this, run the following PRAGMA when you
