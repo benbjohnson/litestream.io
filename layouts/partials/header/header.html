@@ -5,7 +5,8 @@
     <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
 
     <a class="navbar-brand order-1 order-md-0 mr-auto" href="{{ .Site.BaseURL | absURL }}">
-      {{ .Site.Params.Title }}
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">{{ .Site.Params.Title }}</span>
     </a>
 
     <ul class="navbar-nav social-nav order-3 order-md-5">

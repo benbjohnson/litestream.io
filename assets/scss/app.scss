@@ -39,7 +39,12 @@ h3 a {
 }
 
 .navbar-brand {
-  color: #0053fa !important;
+  color: rgb(12,13,95) !important;
+  letter-spacing: -1px;
+}
+
+.navbar-brand img {
+  height: 2rem;
 }
 
 body.home .navbar-brand {
