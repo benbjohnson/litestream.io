@@ -30,12 +30,8 @@
   }
 }
 
-.navbar-nav {
+ul.social-nav.navbar-nav {
   flex-direction: row;
-}
-
-.nav-item {
-  margin-left: 1.25rem;
 }
 
 @include media-breakpoint-up(md) {
@@ -47,6 +43,9 @@
 @include media-breakpoint-down(sm) {
   .nav-item:first-child {
     margin-left: 0;
+  }
+  ul.social-nav .nav-item {
+    margin-left: 1.25rem;
   }
 }
 
