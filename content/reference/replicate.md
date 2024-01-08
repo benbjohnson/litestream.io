@@ -50,9 +50,4 @@ litestream replicate [arguments] DB_PATH REPLICA_URL [REPLICA_URL...]
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
-
--trace PATH
-    Write verbose trace logging to PATH.
-    This trace file can produce a lot of data
-    and is not recommended for production systems.
 ```
