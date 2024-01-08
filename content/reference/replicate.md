@@ -44,6 +44,10 @@ litestream replicate [arguments] DB_PATH REPLICA_URL [REPLICA_URL...]
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
 
+-exec CMD
+    Executes a subcommand. Litestream will exit when the child
+    process exits. Useful for simple process management.
+
 -no-expand-env
     Disables environment variable expansion in configuration file.
 
