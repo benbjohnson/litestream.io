@@ -87,7 +87,7 @@ dbs:
 
   - path: /var/lib/db2
     replicas:
-      - path: /backup/db2
+      - file: /backup/db2
       - url:  s3://mybkt.litestream.io/db2
 ```
 
