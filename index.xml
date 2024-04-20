@@ -53,6 +53,15 @@ However, this tradeoff may not make sense for all applications. This page lists 
     </item>
     
     <item>
+      <title>Blogs</title>
+      <link>https://litestream.io/blog/</link>
+      <pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/blog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Documentation</title>
       <link>https://litestream.io/docs/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
@@ -90,15 +99,6 @@ Install on macOS Install on Debian Build from source </description>
       <description>The Litestream command line provides several subcommands to help you manage replication &amp;amp; recovery of your databases. This reference provides details about the options available and different modes of operation.
 Commands The litestream commands are:
 litestream databases — Lists databases specified in config file. litestream generations — list available generations for a database. litestream replicate — Runs a server to replicate databases. litestream restore — Recovers database backup from a replica.</description>
-    </item>
-    
-    <item>
-      <title>The Litestream Blog</title>
-      <link>https://litestream.io/blog/</link>
-      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://litestream.io/blog/</guid>
-      <description></description>
     </item>
     
   </channel>
