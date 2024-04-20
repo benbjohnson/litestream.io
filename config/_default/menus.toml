@@ -19,11 +19,6 @@
   weight = 40
 
 [[main]]
-  name = "Blog"
-  url = "/blog/"
-  weight = 50
-
-[[main]]
   name = "GitHub"
   url = "https://github.com/benbjohnson/litestream"
   weight = 60

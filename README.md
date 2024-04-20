@@ -25,11 +25,3 @@ $ hugo new docs/prologue/TITLE/index.md
 ```
 
 
-### Blogging
-
-Add a new blog, execute:
-
-```sh
-$ hugo new blog/TITLE/index.md
-```
-
