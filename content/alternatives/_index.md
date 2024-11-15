@@ -30,6 +30,13 @@ also be used in conjunction with Litestream as a fallback.
 Please see our [guide to running a cron-based backup strategy](/alternatives/cron).
 
 
+## SQLite Rsync
+
+As of SQLite [3.47.0](https://www.sqlite.org/releaselog/3_47_0.html), the included
+[`sqlite3_rsync`](https://sqlite.org/rsync.html) utility may be used to
+perform bandwidth-efficient live backups over SSH.
+
+
 ## LiteFS
 
 [LiteFS](https://github.com/superfly/litefs) is a distributed file system that
