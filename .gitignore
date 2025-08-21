@@ -10,7 +10,3 @@ yarn-debug.log*
 yarn-error.log*
 
 /.hugo_build.lock
-
-# Playwright and local working files
-.playwright-mcp/
-.local/
