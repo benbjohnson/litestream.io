@@ -66,7 +66,7 @@ mcp-addr: ":3001"
 ```
 
 When enabled, the MCP server will start alongside replication and provide AI tools at
-[http://localhost:3001](http://localhost:3001). See the [MCP Integration Guide]({{< ref "mcp" >}}) for details.
+[http://localhost:3001](http://localhost:3001). See the [MCP command reference]({{< ref "mcp" >}}) for available tools and usage.
 
 
 ### Logging

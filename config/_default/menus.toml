@@ -47,11 +47,6 @@
   identifier = "replica-guides"
   url = "/guides/"
 
-[[docs]]
-  name = "AI Integration"
-  weight = 50
-  identifier = "ai-integration"
-  url = "/guides/"
 
 [[docs]]
   name = "Reference"
