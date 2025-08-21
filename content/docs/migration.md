@@ -19,9 +19,9 @@ This guide covers upgrading Litestream versions, migrating configuration formats
 
 ## Version Upgrades
 
-### Upgrading to v0.4.0+
+### Upgrading to v0.5.0+
 
-{{< since version="0.4.0" >}} introduces significant new features including MCP support and NATS replication.
+{{< since version="0.5.0" >}} includes MCP support and NATS replication.
 
 #### Pre-Upgrade Checklist
 
@@ -46,11 +46,11 @@ This guide covers upgrading Litestream versions, migrating configuration formats
 Download and install the new version:
 
 ```bash
-# Download latest release
-wget https://github.com/benbjohnson/litestream/releases/download/v0.4.0/litestream-v0.4.0-linux-amd64.tar.gz
+# Download latest stable release (check https://github.com/benbjohnson/litestream/releases)
+wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz
 
 # Extract and install
-tar -xzf litestream-v0.4.0-linux-amd64.tar.gz
+tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
 sudo mv litestream /usr/local/bin/
 sudo chmod +x /usr/local/bin/litestream
 
@@ -58,14 +58,14 @@ sudo chmod +x /usr/local/bin/litestream
 litestream version
 ```
 
-### Upgrading from v0.3.x to v0.4.0+
+### Upgrading from v0.3.x to v0.5.0+
 
 #### Key Changes
 
 1. **Command Changes**:
    - `litestream wal` → `litestream ltx` (WAL command renamed to LTX)
    - New `mcp-addr` configuration option for Model Context Protocol support
-   - Enhanced NATS replica support with JetStream
+   - NATS replica support with JetStream
 
 2. **Configuration Changes**:
    - Single `replica` field replaces `replicas` array (backward compatible)

@@ -24,5 +24,6 @@ different platforms.
 - [DigitalOcean Spaces](/guides/digitalocean)
 - [Google Cloud Storage](/guides/gcs)
 - [Linode Object Storage](/guides/linode)
+- [NATS JetStream](/guides/nats)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)

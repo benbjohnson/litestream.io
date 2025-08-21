@@ -8,7 +8,7 @@ menu:
 weight: 535
 ---
 
-{{< since version="0.4.0" >}} The `ltx` command lists LTX (Litestream Transaction 
+{{< since version="0.5.0" >}} The `ltx` command lists LTX (Litestream Transaction 
 Log) files available for a database or replica. This command is not typically 
 used in normal usage and is mainly used for debugging.
 

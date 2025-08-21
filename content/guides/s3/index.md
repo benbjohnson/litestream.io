@@ -130,7 +130,7 @@ dbs:
       secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
-{{< since version="0.4.0" >}} Litestream v0.4.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
+{{< since version="0.5.0" >}} Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
 
 
 ## Restrictive IAM Policy

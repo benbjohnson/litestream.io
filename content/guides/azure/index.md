@@ -94,6 +94,6 @@ dbs:
 You can also use the `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable instead
 of specifying the account key in your configuration file.
 
-{{< since version="0.4.0" >}} Litestream v0.4.0+ uses Azure SDK v2, which maintains compatibility with existing authentication methods.
+{{< since version="0.5.0" >}} Litestream v0.5.0+ uses Azure SDK v2, which maintains compatibility with existing authentication methods.
 
 [configuration file]: /reference/config

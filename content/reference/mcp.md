@@ -32,7 +32,7 @@ mcp-addr: "127.0.0.1:3001"
 The MCP server exposes these tools for AI assistants:
 
 ### litestream_info
-Get comprehensive system status and configuration information.
+Get system status and configuration information.
 
 ### litestream_databases  
 List all configured databases and their replica status.
@@ -73,7 +73,7 @@ Start Litestream with MCP enabled:
 
 ```
 $ litestream replicate -config litestream.yml
-INFO litestream version=v0.4.0
+INFO litestream version=v0.5.0
 INFO Starting MCP server addr=:3001
 INFO initialized db path=/var/lib/myapp.db
 ```

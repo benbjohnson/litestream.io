@@ -96,6 +96,6 @@ dbs:
       path:   PATH
 ```
 
-{{< since version="0.4.0" >}} Litestream v0.4.0+ maintains compatibility with existing authentication methods.
+{{< since version="0.5.0" >}} Litestream v0.5.0+ maintains compatibility with existing authentication methods.
 
 [configuration file]: /reference/config

@@ -57,7 +57,7 @@ When you start Litestream with this setting enabled, you'll see metrics at
 
 ### MCP (Model Context Protocol)
 
-{{< since version="0.4.0" >}} Litestream includes built-in support for the Model Context Protocol (MCP),
+{{< since version="0.5.0" >}} Litestream includes built-in support for the Model Context Protocol (MCP),
 allowing AI assistants to interact with your databases and replicas. Enable the MCP server
 by setting a bind address:
 
@@ -92,7 +92,7 @@ configuration file. Database files are also referenced in `litestream` commands
 by their absolute path.
 
 Each database configuration includes the database path and replica configuration.
-{{< since version="0.4.0" >}} Database configuration has been simplified to use a single
+{{< since version="0.5.0" >}} Database configuration has been simplified to use a single
 `replica` field instead of the deprecated `replicas` array.
 
 ```yaml
@@ -290,7 +290,7 @@ account key file, or use workload identity in GKE environments.
 
 ### Azure Blob Storage (ABS) replica
 
-{{< since version="0.4.0" >}} Updated to use Azure SDK v2 with enhanced features and performance.
+{{< since version="0.5.0" >}} Updated to use Azure SDK v2.
 
 ABS replicas can be configured using the `url` field:
 
@@ -360,8 +360,7 @@ The following settings are specific to SFTP replicas:
 
 ### NATS JetStream Object Store replica
 
-{{< since version="0.4.0" >}} NATS JetStream Object Store provides distributed, highly available storage
-with strong consistency guarantees.
+{{< since version="0.5.0" >}} NATS JetStream Object Store provides distributed storage.
 
 NATS replicas can be configured using the `url` field:
 
@@ -444,7 +443,7 @@ dbs:
         url: s3://mybkt.nyc3.digitaloceanspaces.com/db
 ```
 
-**Current (v0.4.0+):**
+**Current (v0.5.0+):**
 
 ```yaml
 dbs:
@@ -533,7 +532,7 @@ fail.
 
 #### Identity Files
 
-{{< since version="0.4.0" >}} You can also reference identity files instead of embedding keys directly:
+{{< since version="0.5.0" >}} You can also reference identity files instead of embedding keys directly:
 
 ```yaml
 dbs:
@@ -549,7 +548,7 @@ dbs:
 
 ## Complete Configuration Example
 
-Here's a comprehensive example showing all available configuration options:
+Example showing available configuration options:
 
 ```yaml
 # Global settings
@@ -625,7 +624,7 @@ If you're upgrading from Litestream v0.3.x, note these breaking changes:
 
 1. **Multiple replicas deprecated**: Use single `replica` field instead of `replicas` array
 2. **LTX terminology**: References to "WAL" are now "LTX" (Litestream Transaction Log)
-3. **Enhanced cloud clients**: AWS SDK v2, Azure SDK v2 with potential authentication changes
+3. **Updated cloud clients**: AWS SDK v2, Azure SDK v2 with potential authentication changes
 4. **New replica types**: NATS and SFTP support added
 5. **MCP integration**: New AI assistant capabilities
 
