@@ -8,8 +8,12 @@ menu:
 weight: 570
 ---
 
+{{< alert icon="⚠️" text="The wal command has been deprecated in v0.4.0 and replaced with the ltx command." >}}
+
 The `wal` command lists WAL files available for a database or replica. This
 command is not typically used in normal usage and is mainly used for debugging.
+
+**For Litestream v0.4.0+, use the [`ltx` command]({{< ref "ltx" >}}) instead.**
 
 
 ## Usage

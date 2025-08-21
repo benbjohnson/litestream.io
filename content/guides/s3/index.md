@@ -103,8 +103,8 @@ secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: s3://BUCKETNAME/PATHNAME
+    replica:
+      url: s3://BUCKETNAME/PATHNAME
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -112,11 +112,11 @@ Or you can expand your configuration into multiple fields:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type: s3
-        bucket: BUCKETNAME
-        path:   PATHNAME
-        region: us-east-1   # optional, set to your region
+    replica:
+      type: s3
+      bucket: BUCKETNAME
+      path:   PATHNAME
+      region: us-east-1   # optional, set to your region
 ```
 
 You may also specify your AWS credentials on a per-replica basis:
@@ -124,11 +124,13 @@ You may also specify your AWS credentials on a per-replica basis:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: s3://BUCKETNAME/PATHNAME
-        access-key-id: AKIAxxxxxxxxxxxxxxxx
-        secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+    replica:
+      url: s3://BUCKETNAME/PATHNAME
+      access-key-id: AKIAxxxxxxxxxxxxxxxx
+      secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
+
+{{< since version="0.4.0" >}} Litestream v0.4.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
 
 
 ## Restrictive IAM Policy

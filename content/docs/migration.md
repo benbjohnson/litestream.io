@@ -309,8 +309,8 @@ When changing replica types, you may want to preserve existing backups:
 
 1. **Export current backups**:
    ```bash
-   # List available generations
-   litestream generations /var/lib/app.db
+   # List available LTX files
+   litestream ltx /var/lib/app.db
    
    # Restore latest to temporary file
    litestream restore -o /tmp/app-backup.db /var/lib/app.db

@@ -37,15 +37,9 @@ Get comprehensive system status and configuration information.
 ### litestream_databases  
 List all configured databases and their replica status.
 
-### litestream_generations
-View available backup generations for a specific database.
+### litestream_ltx
+View available LTX files for a specific database.
 - **Required**: `path` - Database file path or replica URL
-- **Optional**: `config` - Path to configuration file
-- **Optional**: `replica` - Replica name to filter by
-
-### litestream_snapshots
-Get snapshot information for a database.
-- **Required**: `path` - Database file path or replica URL  
 - **Optional**: `config` - Path to configuration file
 - **Optional**: `replica` - Replica name to filter by
 

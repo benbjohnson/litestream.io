@@ -284,8 +284,7 @@ Look for these key messages:
 
 List available restore points:
 ```bash
-litestream generations /path/to/db.sqlite
-litestream snapshots /path/to/db.sqlite
+litestream ltx /path/to/db.sqlite
 ```
 
 Restore to specific time:
