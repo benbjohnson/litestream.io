@@ -77,14 +77,12 @@ litestream version
 1. **Update configuration format**:
 
 ```yaml
-# OLD FORMAT (still supported)
+# OLD FORMAT (still supported, but only with a single replica)
 dbs:
   - path: /var/lib/app.db
     replicas:
       - url: s3://my-bucket/app
         retention: 72h
-      - type: file
-        path: /backup/app
 
 # NEW FORMAT (recommended)
 dbs:
@@ -94,18 +92,18 @@ dbs:
       retention: 72h
 ```
 
-2. **Add new optional features**:
+2. **Override default settings**:
 
 ```yaml
-# Add MCP support (optional)
+# Add MCP support (disabled by default)
 mcp-addr: ":3001"
 
-# Add global snapshot configuration (optional)
+# Override global snapshot configuration (defaults: interval=24h, retention=24h)
 snapshot:
   interval: 24h
   retention: 168h
 
-# Add level-based retention (optional)
+# Add level-based retention (no default levels configured)
 levels:
   - interval: 1h
     retention: 24h
