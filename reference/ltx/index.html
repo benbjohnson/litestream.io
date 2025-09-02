@@ -14,16 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Command: snapshots - Litestream</title>
+  <title>Command: ltx - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/reference/snapshots/">
+<link rel="canonical" href="https://litestream.io/reference/ltx/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Command: snapshots">
-<meta name="twitter:description" content="The snapshots command lists snapshots available for a database or replica.
-Usage List by database This command lists all snapshots across all replicas for a database specified in the Litestream configuration file:
-litestream snapshots [arguments] DB_PATH List by replica URL This command lists all snapshots for a single replica URL. This approach is useful when you do not have a configuration file.
-litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies the configuration file.">
+<meta name="twitter:title" content="Command: ltx">
+<meta name="twitter:description" content="v0.5.0 The ltx command lists LTX (Litestream Transaction Log) files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.
+Usage List by database This command lists all LTX files across all replicas for a database specified in the Litestream configuration file:
+litestream ltx [arguments] DB_PATH List by replica URL This command lists all LTX files for a single replica URL.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -47,8 +46,8 @@ litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies th
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Snapshots",
-        "item": "https:\/\/litestream.io\/reference\/snapshots\/"
+        "name": "Ltx",
+        "item": "https:\/\/litestream.io\/reference\/ltx\/"
     }]
 }
 </script>
@@ -146,6 +145,7 @@ litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies th
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/reference/">Reference</a>
@@ -153,12 +153,19 @@ litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies th
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
     </ul>
   
 			</nav>        
@@ -175,11 +182,11 @@ litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies th
       </ul>
     </li>
     <li><a href="#arguments">Arguments</a></li>
-    <li><a href="#example">Example</a>
+    <li><a href="#examples">Examples</a>
       <ul>
-        <li><a href="#database-snapshots">Database snapshots</a></li>
+        <li><a href="#database-ltx-files">Database LTX files</a></li>
         <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
-        <li><a href="#replica-url-snapshots">Replica URL snapshots</a></li>
+        <li><a href="#replica-url-ltx-files">Replica URL LTX files</a></li>
       </ul>
     </li>
   </ul>
@@ -188,53 +195,57 @@ litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies th
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Command: snapshots</h1>
+		<h1>Command: ltx</h1>
 			<p class="lead"></p>
-			<p>The <code>snapshots</code> command lists snapshots available for a database or replica.</p>
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ The <code>ltx</code> command lists LTX (Litestream Transaction
+Log) files available for a database or replica. This command is not typically
+used in normal usage and is mainly used for debugging.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="list-by-database">List by database<a href="#list-by-database" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all snapshots across all replicas for a database specified
+<p>This command lists all LTX files across all replicas for a database specified
 in the Litestream configuration file:</p>
-<pre tabindex="0"><code>litestream snapshots [arguments] DB_PATH
+<pre tabindex="0"><code>litestream ltx [arguments] DB_PATH
 </code></pre><h3 id="list-by-replica-url">List by replica URL<a href="#list-by-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all snapshots for a single replica URL. This approach is
+<p>This command lists all LTX files for a single replica URL. This approach is
 useful when you do not have a configuration file.</p>
-<pre tabindex="0"><code>litestream snapshots [arguments] REPLICA_URL
+<pre tabindex="0"><code>litestream ltx [arguments] REPLICA_URL
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>-config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
 
--replica NAME
-    Optional, filters by replica.
-    Only applies when listing database snapshots.
-
 -no-expand-env
     Disables environment variable expansion in configuration file.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="database-snapshots">Database snapshots<a href="#database-snapshots" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all snapshots across all replicas for the <code>/var/lib/db</code> database:</p>
-<pre tabindex="0"><code>$ litestream snapshots /var/lib/db
+
+-replica NAME
+    Optional, filter by a specific replica.
+</code></pre><h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="database-ltx-files">Database LTX files<a href="#database-ltx-files" class="anchor" aria-hidden="true">#</a> </h3>
+<p>List all LTX files across all replicas for the <code>/var/lib/db</code> database:</p>
+<pre tabindex="0"><code>$ litestream ltx /var/lib/db
 </code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all snapshots for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
-<pre tabindex="0"><code>$ litestream snapshots -replica s3 /var/lib/db
-</code></pre><h3 id="replica-url-snapshots">Replica URL snapshots<a href="#replica-url-snapshots" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all snapshots for a single replica URL:</p>
-<pre tabindex="0"><code>$ litestream snapshots s3://mybkt.litestream.io/db
+<p>Lists all LTX files for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
+<pre tabindex="0"><code>$ litestream ltx -replica s3 /var/lib/db
+</code></pre><h3 id="replica-url-ltx-files">Replica URL LTX files<a href="#replica-url-ltx-files" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Lists all LTX files for a single replica URL:</p>
+<pre tabindex="0"><code>$ litestream ltx s3://mybkt.litestream.io/db
 </code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/reference/restore/">
+	<a href="https://litestream.io/reference/replicate/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Command: restore
+					&larr; Command: replicate
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/reference/version/">
+	<a class="ml-auto" href="https://litestream.io/reference/restore/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Command: version &rarr;
+					Command: restore &rarr;
 				</div>
 			</div>
 		</a>
@@ -251,7 +262,7 @@ useful when you do not have a configuration file.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c42aa8b14d5a3ee8a3b5f59f3e547705fec938cd2bfa7c436d96803ef684fec81dc75290466d6ea8fe8bb1decf8a30066b5058825d80b2de63a054682effffb3.js" integrity="sha512-xCqosU1aPuijtfWfPlR3Bf7JOM0r&#43;nxDbZaAPvaE/sgdx1KQRm1uqP6Lsd7PijAGa1BYgl2Ast5joFRoLv//sw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

@@ -84,4 +84,11 @@
       <changefreq>weekly</changefreq>
       <priority>0.5</priority>
     </url>
+    
+    <url>
+      <loc>https://litestream.io/guides/nats/</loc>
+      <lastmod>2025-01-21T00:00:00+00:00</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.5</priority>
+    </url>
     </urlset>

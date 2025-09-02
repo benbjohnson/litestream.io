@@ -145,6 +145,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/reference/">Reference</a>
@@ -152,12 +153,19 @@ Variable expansion By default, Litestream will perform environment variable expa
   <ul class="list-unstyled">
     <li><a class="docs-link active" href="https://litestream.io/reference/config/">Configuration File</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
     </ul>
   
 			</nav>        
@@ -176,20 +184,31 @@ Variable expansion By default, Litestream will perform environment variable expa
       <ul>
         <li><a href="#aws-credentials">AWS credentials</a></li>
         <li><a href="#metrics">Metrics</a></li>
+        <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
         <li><a href="#logging">Logging</a></li>
       </ul>
     </li>
-    <li><a href="#database-settings">Database settings</a></li>
+    <li><a href="#database-settings">Database settings</a>
+      <ul>
+        <li><a href="#database-configuration-options">Database configuration options</a></li>
+      </ul>
+    </li>
     <li><a href="#replica-settings">Replica settings</a>
       <ul>
         <li><a href="#s3-replica">S3 replica</a></li>
         <li><a href="#file-replica">File replica</a></li>
-        <li><a href="#multiple-replicas">Multiple replicas</a></li>
+        <li><a href="#google-cloud-storage-gcs-replica">Google Cloud Storage (GCS) replica</a></li>
+        <li><a href="#azure-blob-storage-abs-replica">Azure Blob Storage (ABS) replica</a></li>
+        <li><a href="#sftp-replica">SFTP replica</a></li>
+        <li><a href="#nats-jetstream-object-store-replica">NATS JetStream Object Store replica</a></li>
+        <li><a href="#legacy-multiple-replicas">Legacy Multiple Replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
         <li><a href="#validation-interval">Validation interval</a></li>
         <li><a href="#encryption">Encryption</a></li>
       </ul>
     </li>
+    <li><a href="#complete-configuration-example">Complete Configuration Example</a></li>
+    <li><a href="#migration-from-v03x">Migration from v0.3.x</a></li>
   </ul>
 </nav>
   </div>
@@ -225,6 +244,16 @@ address in the config:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
 </span></span></span></code></pre></div><p>When you start Litestream with this setting enabled, you&rsquo;ll see metrics at
 <a href="http://localhost:9090/metrics">http://localhost:9090/metrics</a></p>
+<h3 id="mcp-model-context-protocol">MCP (Model Context Protocol)<a href="#mcp-model-context-protocol" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream includes built-in support for the Model Context Protocol (MCP),
+allowing AI assistants to interact with your databases and replicas. Enable the MCP server
+by setting a bind address:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
+</span></span></span></code></pre></div><p>When enabled, the MCP server will start alongside replication and provide AI tools at
+<a href="http://localhost:3001">http://localhost:3001</a>. See the <a href="https://litestream.io/reference/mcp/">MCP command reference</a> for available tools and usage.</p>
 <h3 id="logging">Logging<a href="#logging" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.12">
     v0.3.12
@@ -241,22 +270,55 @@ Logging <code>level</code> can be set to &ldquo;debug&rdquo;, &ldquo;info&rdquo;
 <p>Litestream can monitor one or more database files that are specified in the
 configuration file. Database files are also referenced in <code>litestream</code> commands
 by their absolute path.</p>
-<p>Each database accepts two options—its path and a list of replicas:</p>
+<p>Each database configuration includes the database path and replica configuration.
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Database configuration has been simplified to use a single
+<code>replica</code> field instead of the deprecated <code>replicas</code> array.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db1</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db2</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db2</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w">  </span><span class="l">s3://mybkt.litestream.io/db2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/my-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="database-configuration-options">Database configuration options<a href="#database-configuration-options" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Each database supports the following configuration options:</p>
+<ul>
+<li><code>path</code>—Absolute path to the SQLite database file</li>
+<li><code>meta-path</code>—Path to store Litestream metadata (defaults to <code>&lt;path&gt;-litestream</code>)</li>
+<li><code>monitor-interval</code>—How often to check for changes (default: <code>1s</code>)</li>
+<li><code>checkpoint-interval</code>—How often to perform WAL checkpoints (default: <code>1m</code>)</li>
+<li><code>busy-timeout</code>—SQLite busy timeout (default: <code>1s</code>)</li>
+<li><code>min-checkpoint-page-count</code>—Minimum pages before checkpointing (default: <code>1000</code>)</li>
+<li><code>max-checkpoint-page-count</code>—Maximum pages before forcing checkpoint (default: <code>10000</code>)</li>
+<li><code>replica</code>—Single replica configuration (replaces deprecated <code>replicas</code> array)</li>
+</ul>
+<p>Example with database-level options:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">meta-path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp-litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">500ms</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">busy-timeout</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">500</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">max-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">5000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
 </span></span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Litestream currently supports three types of replicas:</p>
+<p>Litestream supports six types of replicas:</p>
 <ul>
 <li><code>&quot;abs&quot;</code> replicates a database to an Azure Blob Storage container.</li>
 <li><code>&quot;file&quot;</code> replicates a database to another local file path.</li>
+<li><code>&quot;gs&quot;</code> replicates a database to a Google Cloud Storage bucket.</li>
+<li><code>&quot;nats&quot;</code> replicates a database to a NATS JetStream Object Store.</li>
 <li><code>&quot;s3&quot;</code> replicates a database to an S3-compatible bucket.</li>
+<li><code>&quot;sftp&quot;</code> replicates a database to a remote server via SFTP.</li>
 </ul>
 <p>All replicas have unique name which is specified by the <code>&quot;name&quot;</code> field. If a
 name is not specified then the name defaults to the replica type. The name is
@@ -268,9 +330,9 @@ only needed when using multiple replicas of the same type on a database.</p>
 will apply changes to multiples fields including <code>bucket</code>, <code>path</code>, <code>region</code>, etc.</p>
 </li>
 <li>
-<p><code>retention</code>—The amount of time that snapshot &amp; WAL files will be kept. After
+<p><code>retention</code>—The amount of time that snapshot &amp; LTX files will be kept. After
 the retention period, a new snapshot will be created and the old one will be
-removed. WAL files that exist before the oldest snapshot will also be removed.
+removed. LTX files that exist before the oldest snapshot will also be removed.
 Defaults to <code>24h</code>.</p>
 </li>
 <li>
@@ -279,7 +341,7 @@ retention needs to be enforced. Defaults to <code>1h</code>.</p>
 </li>
 <li>
 <p><code>snapshot-interval</code>—Specifies how often new snapshots will be created. This is
-used to reduce the time to restore since newer snapshots will have fewer WAL
+used to reduce the time to restore since newer snapshots will have fewer LTX
 frames to apply. Retention still applies to these snapshots.</p>
 <p>If you do not set a snapshot interval then a new snapshot will be created
 whenever retention is performed. Retention occurs every 24 hours by default.</p>
@@ -362,12 +424,138 @@ a local node such as MinIO and you are using self-signed certificates.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
 </span></span></span></code></pre></div><p>If no <code>&quot;type&quot;</code> field is specified and a <code>&quot;url&quot;</code> is not used then <code>&quot;file&quot;</code> is
 assumed.</p>
-<h3 id="multiple-replicas">Multiple replicas<a href="#multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
-<p>You can specify multiple replicas for a database, however, each one must have
-a unique name. For example, this configuration below is for replicating to
-AWS S3 &amp; to DigitalOcean Spaces. Both of these use the &ldquo;s3&rdquo; replica type so
-their default name would be &ldquo;s3&rdquo;. Instead, we can name them each unique names,
-<code>my_aws_replica</code> &amp; <code>my_do_replica</code>.</p>
+<h3 id="google-cloud-storage-gcs-replica">Google Cloud Storage (GCS) replica<a href="#google-cloud-storage-gcs-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p>GCS replicas can be configured using the <code>url</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">gs://mybucket.example.com/db</span><span class="w">
+</span></span></span></code></pre></div><p>Or by specifying individual fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">gs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket.example.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span></code></pre></div><p>GCS authentication uses Google Application Default Credentials (ADC). Set the
+<code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable to point to your service
+account key file, or use workload identity in GKE environments.</p>
+<h3 id="azure-blob-storage-abs-replica">Azure Blob Storage (ABS) replica<a href="#azure-blob-storage-abs-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Updated to use Azure SDK v2.</p>
+<p>ABS replicas can be configured using the <code>url</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">abs://account@myaccount.blob.core.windows.net/container/db</span><span class="w">
+</span></span></span></code></pre></div><p>Or by specifying individual fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">myaccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AZURE_ACCOUNT_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">container</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://myaccount.blob.core.windows.net/</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to ABS replicas:</p>
+<ul>
+<li><code>account-name</code>—Azure storage account name</li>
+<li><code>account-key</code>—Azure storage account key or use <code>AZURE_STORAGE_KEY</code> environment variable</li>
+<li><code>bucket</code>—Container name within the storage account</li>
+<li><code>path</code>—Path within the container</li>
+<li><code>endpoint</code>—Custom endpoint URL (optional)</li>
+</ul>
+<h3 id="sftp-replica">SFTP replica<a href="#sftp-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p>SFTP replicas allow replication to remote servers via SSH File Transfer Protocol:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://user:password@example.com:22/backup/db</span><span class="w">
+</span></span></span></code></pre></div><p>Or with individual fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">sftp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">example.com:22</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l">backup-user</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${SFTP_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream/sftp_key</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to SFTP replicas:</p>
+<ul>
+<li><code>host</code>—SFTP server hostname and port</li>
+<li><code>user</code>—Username for authentication</li>
+<li><code>password</code>—Password for authentication (not recommended for production)</li>
+<li><code>key-path</code>—Path to SSH private key file for key-based authentication</li>
+<li><code>path</code>—Remote path where replica files will be stored</li>
+</ul>
+<h3 id="nats-jetstream-object-store-replica">NATS JetStream Object Store replica<a href="#nats-jetstream-object-store-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ NATS JetStream Object Store provides distributed storage.</p>
+<p>NATS replicas can be configured using the <code>url</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/my-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
+</span></span></span></code></pre></div><p>Or with individual fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">my-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># TLS configuration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/nats-client.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/nats-client.key</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Connection tuning</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to NATS replicas:</p>
+<p><strong>Connection Settings:</strong></p>
+<ul>
+<li><code>bucket</code>—NATS JetStream Object Store bucket name (must be pre-created)</li>
+<li><code>max-reconnects</code>—Maximum reconnection attempts (-1 for unlimited)</li>
+<li><code>reconnect-wait</code>—Wait time between reconnection attempts</li>
+<li><code>timeout</code>—Connection timeout</li>
+</ul>
+<p><strong>Authentication Options (choose one):</strong></p>
+<ul>
+<li><code>username</code> &amp; <code>password</code>—Basic username/password authentication</li>
+<li><code>jwt</code> &amp; <code>seed</code>—JWT token and seed for NATS 2.0 authentication</li>
+<li><code>creds</code>—Path to NATS credentials file</li>
+<li><code>nkey</code>—NKey for signature-based authentication</li>
+<li><code>token</code>—Simple token authentication</li>
+</ul>
+<p><strong>TLS Options:</strong></p>
+<ul>
+<li><code>tls</code>—Enable TLS encryption</li>
+<li><code>root-cas</code>—List of CA certificate file paths</li>
+<li><code>client-cert</code>—Client certificate for mutual TLS</li>
+<li><code>client-key</code>—Client private key for mutual TLS</li>
+</ul>
+<p>See the <a href="https://litestream.io/guides/nats/">NATS Integration Guide</a> for detailed setup instructions.</p>
+<h3 id="legacy-multiple-replicas">Legacy Multiple Replicas<a href="#legacy-multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Multiple replicas per database are deprecated. Use a single replica configuration instead.</div>
+</div>
+<p>Previous versions supported multiple replicas per database using the <code>replicas</code> array.
+This has been simplified to use a single <code>replica</code> field:</p>
+<p><strong>Deprecated (v0.3.x and earlier):</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/path/to/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
@@ -375,7 +563,14 @@ their default name would be &ldquo;s3&rdquo;. Instead, we can name them each uni
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://myawsbucket/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_do_replica</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.nyc3.digitaloceanspaces.com/db</span><span class="w">
-</span></span></span></code></pre></div><h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
+</span></span></span></code></pre></div><p><strong>Current (v0.5.0+):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://myawsbucket/db</span><span class="w">
+</span></span></span></code></pre></div><p>If you need multiple backup destinations, consider using your cloud provider&rsquo;s
+cross-region replication features or multiple Litestream instances.</p>
+<h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Replicas maintain a snapshot of the database as well as a contiguous sequence of
 SQLite WAL page updates. These updates take up space so new snapshots are
 created and old WAL files are dropped through a process called &ldquo;retention&rdquo;.</p>
@@ -412,16 +607,16 @@ fields.</p>
   <div class="flex-shrink-1 alert-icon">❗️</div>
   <div class="w-100">When enabling encryption restoring requires matching age identity to restore from the replica.</div>
 </div>
-<pre tabindex="0"><code>dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        age:
-          identities:
-            - AGE-SECRET-KEY-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-          recipients:
-            - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-</code></pre><p>To generate keys, refer to the
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">age</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">identities</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">AGE-SECRET-KEY-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">recipients</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><p>To generate keys, refer to the
 age <a href="https://github.com/FiloSottile/age/blob/main/README.md">README</a>
 how to install and use the command line tools.</p>
 <p>As of now identities must be a superset of recipients but key rotation can be
@@ -431,6 +626,97 @@ a key for it.</p>
 confuse Litestream so it is recommended the replica is empty when doing so.
 Restoring from a replica that has mixed encrypted and non-encrypted files will
 fail.</p>
+<h4 id="identity-files">Identity Files<a href="#identity-files" class="anchor" aria-hidden="true">#</a> </h4>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ You can also reference identity files instead of embedding keys directly:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">age</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">identities</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">/etc/litestream/age-identity.txt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">recipients</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><h2 id="complete-configuration-example">Complete Configuration Example<a href="#complete-configuration-example" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Example showing available configuration options:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Metrics endpoint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># MCP server for AI integration  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Subcommand to execute</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">exec</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp -config /etc/myapp.conf&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Logging configuration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">logging</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">info</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Compaction levels</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">levels</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global snapshot settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Database configurations</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># S3 replica with encryption</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app1.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/app1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">age</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">identities</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">/etc/litestream/age-identity.txt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">recipients</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># NATS replica with TLS</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app2.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/app2-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># File replica for local backup</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app3.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/app3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h </span><span class="w"> </span><span class="c"># 1 week</span><span class="w">
+</span></span></span></code></pre></div><h2 id="migration-from-v03x">Migration from v0.3.x<a href="#migration-from-v03x" class="anchor" aria-hidden="true">#</a> </h2>
+<p>If you&rsquo;re upgrading from Litestream v0.3.x, note these breaking changes:</p>
+<ol>
+<li><strong>Multiple replicas deprecated</strong>: Use single <code>replica</code> field instead of <code>replicas</code> array</li>
+<li><strong>LTX terminology</strong>: References to &ldquo;WAL&rdquo; are now &ldquo;LTX&rdquo; (Litestream Transaction Log)</li>
+<li><strong>Updated cloud clients</strong>: AWS SDK v2, Azure SDK v2 with potential authentication changes</li>
+<li><strong>New replica types</strong>: NATS and SFTP support added</li>
+<li><strong>MCP integration</strong>: New AI assistant capabilities</li>
+</ol>
+<p>See the <a href="https://litestream.io/docs/migration/">Migration Guide</a> for detailed upgrade instructions.</p>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
@@ -454,7 +740,7 @@ fail.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c42aa8b14d5a3ee8a3b5f59f3e547705fec938cd2bfa7c436d96803ef684fec81dc75290466d6ea8fe8bb1decf8a30066b5058825d80b2de63a054682effffb3.js" integrity="sha512-xCqosU1aPuijtfWfPlR3Bf7JOM0r&#43;nxDbZaAPvaE/sgdx1KQRm1uqP6Lsd7PijAGa1BYgl2Ast5joFRoLv//sw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

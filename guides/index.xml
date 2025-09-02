@@ -78,5 +78,26 @@
       <guid>https://litestream.io/guides/gcs/</guid>
       <description>This guide will show you how to use Litestream to replicate to a Google Cloud Storage bucket. You will need a Google Cloud account and to complete this guide.&#xA;Setup Create a bucket In the GCP Console, use the top search bar to navigate to &amp;ldquo;Cloud Storage&amp;rdquo;. You may need to enable storage and billing if you have not previously set it up.&#xA;Next, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a globally unique bucket name and click the &amp;ldquo;Create&amp;rdquo; button.</description>
     </item>
+    <item>
+      <title>Replicating to Linode Object Storage</title>
+      <link>https://litestream.io/guides/linode/</link>
+      <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/linode/</guid>
+      <description>This guide will show you how to use Linode Object Storage as a database replica path for Litestream. You will need a Linode account to complete this guide.&#xA;Setup Create a bucket In the Linode Console, click on &amp;ldquo;Object Storage&amp;rdquo; from the navigation and click the &amp;ldquo;Create Bucket&amp;rdquo; button. You may need to enable Object Storage on your account if you have not already.&#xA;Enter a globally unique name for your bucket and choose a region.</description>
+    </item>
+    <item>
+      <title>Replicating to an SFTP Server</title>
+      <link>https://litestream.io/guides/sftp/</link>
+      <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/sftp/</guid>
+      <description>This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running.&#xA;Usage Command line usage You can specify your SFTP replica using a replica URL on the command line. For example, you can replicate a database to an SFTP server with the following command. Replace the placeholders with your username, password, server, &amp;amp; path.</description>
+    </item>
+    <item>
+      <title>Replicating to NATS JetStream</title>
+      <link>https://litestream.io/guides/nats/</link>
+      <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/nats/</guid>
+      <description>This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.&#xA;Setup Install NATS Server Using Docker:&#xA;# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:&#xA;# Download and install NATS server curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip unzip nats-server.</description>
+    </item>
   </channel>
 </rss>

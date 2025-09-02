@@ -143,6 +143,13 @@
   </url>
   
   <url>
+    <loc>https://litestream.io/guides/nats/</loc>
+    <lastmod>2025-01-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://litestream.io/reference/config/</loc>
     <lastmod>2021-02-01T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -157,8 +164,8 @@
   </url>
   
   <url>
-    <loc>https://litestream.io/reference/generations/</loc>
-    <lastmod>2021-02-01T00:00:00+00:00</lastmod>
+    <loc>https://litestream.io/reference/mcp/</loc>
+    <lastmod>2025-01-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -171,14 +178,14 @@
   </url>
   
   <url>
-    <loc>https://litestream.io/reference/restore/</loc>
-    <lastmod>2021-02-01T00:00:00+00:00</lastmod>
+    <loc>https://litestream.io/reference/ltx/</loc>
+    <lastmod>2025-01-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://litestream.io/reference/snapshots/</loc>
+    <loc>https://litestream.io/reference/restore/</loc>
     <lastmod>2021-02-01T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -194,6 +201,20 @@
   <url>
     <loc>https://litestream.io/reference/wal/</loc>
     <lastmod>2021-02-01T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://litestream.io/docs/migration/</loc>
+    <lastmod>2025-08-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://litestream.io/docs/troubleshooting/</loc>
+    <lastmod>2025-08-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

@@ -8,5 +8,19 @@
     <language>en-US</language>
     <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://litestream.io/docs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Migration Guide</title>
+      <link>https://litestream.io/docs/migration/</link>
+      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/docs/migration/</guid>
+      <description>Overview This guide covers upgrading Litestream versions, migrating configuration formats, and switching between replica types. Follow the appropriate section based on your current setup and target version.&#xA;Version Upgrades Upgrading to v0.5.0+ v0.5.0 includes MCP support and NATS replication.&#xA;Pre-Upgrade Checklist Backup your current setup:&#xA;# Stop Litestream sudo systemctl stop litestream # Backup configuration cp /etc/litestream.yml /etc/litestream.yml.backup # Backup binary cp $(which litestream) /usr/local/bin/litestream.backup Review configuration changes (see Configuration Migration below)</description>
+    </item>
+    <item>
+      <title>Troubleshooting</title>
+      <link>https://litestream.io/docs/troubleshooting/</link>
+      <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/docs/troubleshooting/</guid>
+      <description>Configuration Issues Invalid Configuration File Error: yaml: unmarshal errors or cannot parse config&#xA;Solution: Validate your YAML syntax:&#xA;Check indentation (use spaces, not tabs) Ensure proper nesting of configuration sections Validate string values are properly quoted when containing special characters # ❌ Invalid - mixed tabs and spaces dbs: - path: /path/to/db.sqlite replica: url: s3://bucket/path # ✅ Valid - consistent spacing dbs: - path: /path/to/db.sqlite replica: url: s3://bucket/path Database Path Issues Error: no such file or directory or database is locked</description>
+    </item>
   </channel>
 </rss>

@@ -14,15 +14,18 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Command: generations - Litestream</title>
+  <title>Command: mcp - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/reference/generations/">
+<link rel="canonical" href="https://litestream.io/reference/mcp/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Command: generations">
-<meta name="twitter:description" content="The generations command lists all generations for a database or replica. It lists stats about their lag behind the primary database and the time range they cover.
-Usage List by database This command format finds all generations across all replicas for a database that is specified in the configuration file. The -replica flag can optionally be used to filter by replica name.
-litestream generations [arguments] DB_PATH List by replica URL This command format finds all generations for a single replica by using the replica URL.">
+<meta name="twitter:title" content="Command: mcp">
+<meta name="twitter:description" content="The mcp server provides Model Context Protocol integration, allowing AI assistants to interact with Litestream databases and replicas through a standardized HTTP API.
+Configuration Enable the MCP server by adding the mcp-addr setting to your configuration file:
+mcp-addr: &#34;:3001&#34; Security For production deployments, bind to localhost only:
+mcp-addr: &#34;127.0.0.1:3001&#34; Available Tools The MCP server exposes these tools for AI assistants:
+litestream_info Get system status and configuration information.
+litestream_databases List all configured databases and their replica status.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -46,8 +49,8 @@ litestream generations [arguments] DB_PATH List by replica URL This command form
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Generations",
-        "item": "https:\/\/litestream.io\/reference\/generations\/"
+        "name": "Mcp",
+        "item": "https:\/\/litestream.io\/reference\/mcp\/"
     }]
 }
 </script>
@@ -145,6 +148,7 @@ litestream generations [arguments] DB_PATH List by replica URL This command form
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/reference/">Reference</a>
@@ -152,12 +156,19 @@ litestream generations [arguments] DB_PATH List by replica URL This command form
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/snapshots/">Command: snapshots</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
     </ul>
   
 			</nav>        
@@ -167,13 +178,18 @@ litestream generations [arguments] DB_PATH List by replica URL This command form
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#usage">Usage</a>
+    <li><a href="#configuration">Configuration</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#available-tools">Available Tools</a>
       <ul>
-        <li><a href="#list-by-database">List by database</a></li>
-        <li><a href="#list-by-replica-url">List by replica URL</a></li>
+        <li><a href="#litestream_info">litestream_info</a></li>
+        <li><a href="#litestream_databases">litestream_databases</a></li>
+        <li><a href="#litestream_ltx">litestream_ltx</a></li>
+        <li><a href="#litestream_restore">litestream_restore</a></li>
+        <li><a href="#litestream_ltx-1">litestream_ltx</a></li>
       </ul>
     </li>
-    <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#ai-assistant-setup">AI Assistant Setup</a></li>
     <li><a href="#example">Example</a></li>
   </ul>
 </nav>
@@ -181,42 +197,61 @@ litestream generations [arguments] DB_PATH List by replica URL This command form
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Command: generations</h1>
+		<h1>Command: mcp</h1>
 			<p class="lead"></p>
-			<p>The <code>generations</code> command lists all generations for a database or replica. It
-lists stats about their lag behind the primary database and the time range
-they cover.</p>
-<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="list-by-database">List by database<a href="#list-by-database" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command format finds all generations across all replicas for a database
-that is specified in the configuration file. The <code>-replica</code> flag can optionally
-be used to filter by replica name.</p>
-<pre tabindex="0"><code>litestream generations [arguments] DB_PATH
-</code></pre><h3 id="list-by-replica-url">List by replica URL<a href="#list-by-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command format finds all generations for a single replica by using the
-replica URL. This approach is useful when you do not have a configuration file.</p>
-<pre tabindex="0"><code>litestream generations [arguments] REPLICA_URL
-</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>-config PATH
-    Specifies the configuration file.
-    Defaults to /etc/litestream.yml
-
--no-expand-env
-    Disables environment variable expansion in configuration file.
-
--replica NAME
-    Optional, filters by replica.
-    Only applies when listing database generations.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<p>This example shows a set of generations for the <code>/var/lib/db</code> database across
-two replicas (<code>file</code> &amp; <code>s3</code>). The current generation <code>fb47ba294ac8dd70</code> has
-minimal lag across both replicas and there is an older generation
-<code>3fe4669c8066974b</code> that has not been removed yet.</p>
-<pre tabindex="0"><code>$ litestream generations /var/lib/db
-name  generation        lag    start                 end
-file  fb47ba294ac8dd70  0.2s   2020-01-01T00:00:00Z  2021-01-01T00:00:00Z
-s3    fb47ba294ac8dd70  1.3s   2020-01-01T00:00:00Z  2021-01-01T00:00:00Z
-file  3fe4669c8066974b  10m3s  2020-01-01T00:00:00Z  2021-01-01T00:00:00Z
+			<p>The <code>mcp</code> server provides Model Context Protocol integration, allowing AI assistants
+to interact with Litestream databases and replicas through a standardized HTTP API.</p>
+<h2 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Enable the MCP server by adding the <code>mcp-addr</code> setting to your configuration file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
+</span></span></span></code></pre></div><h2 id="security">Security<a href="#security" class="anchor" aria-hidden="true">#</a> </h2>
+<p>For production deployments, bind to localhost only:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;127.0.0.1:3001&#34;</span><span class="w">
+</span></span></span></code></pre></div><h2 id="available-tools">Available Tools<a href="#available-tools" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The MCP server exposes these tools for AI assistants:</p>
+<h3 id="litestream_info">litestream_info<a href="#litestream_info" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Get system status and configuration information.</p>
+<h3 id="litestream_databases">litestream_databases<a href="#litestream_databases" class="anchor" aria-hidden="true">#</a> </h3>
+<p>List all configured databases and their replica status.</p>
+<h3 id="litestream_ltx">litestream_ltx<a href="#litestream_ltx" class="anchor" aria-hidden="true">#</a> </h3>
+<p>View available LTX files for a specific database.</p>
+<ul>
+<li><strong>Required</strong>: <code>path</code> - Database file path or replica URL</li>
+<li><strong>Optional</strong>: <code>config</code> - Path to configuration file</li>
+<li><strong>Optional</strong>: <code>replica</code> - Replica name to filter by</li>
+</ul>
+<h3 id="litestream_restore">litestream_restore<a href="#litestream_restore" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Restore a database to a specific point in time.</p>
+<ul>
+<li><strong>Required</strong>: <code>path</code> - Source database path or replica URL</li>
+<li><strong>Optional</strong>: <code>o</code> - Output file path</li>
+<li><strong>Optional</strong>: <code>config</code> - Path to configuration file</li>
+<li><strong>Optional</strong>: <code>replica</code> - Replica name to restore from</li>
+<li><strong>Optional</strong>: <code>generation</code> - Generation name to restore from</li>
+<li><strong>Optional</strong>: <code>index</code> - Restore up to specific WAL index</li>
+<li><strong>Optional</strong>: <code>timestamp</code> - Restore to specific point-in-time (RFC3339)</li>
+<li><strong>Optional</strong>: <code>parallelism</code> - Number of WAL files to download in parallel</li>
+<li><strong>Optional</strong>: <code>if_db_not_exists</code> - Return 0 if database already exists</li>
+<li><strong>Optional</strong>: <code>if_replica_exists</code> - Return 0 if no backups found</li>
+</ul>
+<h3 id="litestream_ltx-1">litestream_ltx<a href="#litestream_ltx-1" class="anchor" aria-hidden="true">#</a> </h3>
+<p>List all LTX (transaction log) files for a database or replica.</p>
+<ul>
+<li><strong>Required</strong>: <code>path</code> - Database file path or replica URL</li>
+<li><strong>Optional</strong>: <code>config</code> - Path to configuration file</li>
+<li><strong>Optional</strong>: <code>replica</code> - Replica name to filter by</li>
+<li><strong>Optional</strong>: <code>generation</code> - Generation name to filter by</li>
+</ul>
+<h2 id="ai-assistant-setup">AI Assistant Setup<a href="#ai-assistant-setup" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Most modern AI assistants support MCP integration. Refer to <a href="https://modelcontextprotocol.io">modelcontextprotocol.io</a> for setup instructions with your specific AI assistant.</p>
+<h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Start Litestream with MCP enabled:</p>
+<pre tabindex="0"><code>$ litestream replicate -config litestream.yml
+INFO litestream version=v0.5.0
+INFO Starting MCP server addr=:3001
+INFO initialized db path=/var/lib/myapp.db
+</code></pre><p>Test MCP connectivity:</p>
+<pre tabindex="0"><code>$ curl http://localhost:3001/mcp/tools
 </code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
@@ -247,7 +282,7 @@ file  3fe4669c8066974b  10m3s  2020-01-01T00:00:00Z  2021-01-01T00:00:00Z
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.0e659944585b7f34b65dc5c6889aecade6086326d0a1120401218997ba56299c29f87e5c13c0424fdfa2f2b825a6407d1c352169134255e300c0f80614b6c93e.js" integrity="sha512-DmWZRFhbfzS2XcXGiJrsreYIYybQoRIEASGJl7pWKZwp&#43;H5cE8BCT9&#43;i8rglpkB9HDUhaRNCVeMAwPgGFLbJPg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c42aa8b14d5a3ee8a3b5f59f3e547705fec938cd2bfa7c436d96803ef684fec81dc75290466d6ea8fe8bb1decf8a30066b5058825d80b2de63a054682effffb3.js" integrity="sha512-xCqosU1aPuijtfWfPlR3Bf7JOM0r&#43;nxDbZaAPvaE/sgdx1KQRm1uqP6Lsd7PijAGa1BYgl2Ast5joFRoLv//sw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

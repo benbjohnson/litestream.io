@@ -23,11 +23,11 @@
       <description>The databases command lists all databases in the configuration file as well as list their associated replicas.&#xA;Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -no-expand-env Disables environment variable expansion in configuration file. Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &amp;quot;file&amp;quot; and &amp;quot;s3&amp;quot;:&#xA;$ litestream databases path replicas /var/lib/db file,s3 </description>
     </item>
     <item>
-      <title>Command: generations</title>
-      <link>https://litestream.io/reference/generations/</link>
-      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
-      <guid>https://litestream.io/reference/generations/</guid>
-      <description>The generations command lists all generations for a database or replica. It lists stats about their lag behind the primary database and the time range they cover.&#xA;Usage List by database This command format finds all generations across all replicas for a database that is specified in the configuration file. The -replica flag can optionally be used to filter by replica name.&#xA;litestream generations [arguments] DB_PATH List by replica URL This command format finds all generations for a single replica by using the replica URL.</description>
+      <title>Command: mcp</title>
+      <link>https://litestream.io/reference/mcp/</link>
+      <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/mcp/</guid>
+      <description>The mcp server provides Model Context Protocol integration, allowing AI assistants to interact with Litestream databases and replicas through a standardized HTTP API.&#xA;Configuration Enable the MCP server by adding the mcp-addr setting to your configuration file:&#xA;mcp-addr: &amp;#34;:3001&amp;#34; Security For production deployments, bind to localhost only:&#xA;mcp-addr: &amp;#34;127.0.0.1:3001&amp;#34; Available Tools The MCP server exposes these tools for AI assistants:&#xA;litestream_info Get system status and configuration information.&#xA;litestream_databases List all configured databases and their replica status.</description>
     </item>
     <item>
       <title>Command: replicate</title>
@@ -37,18 +37,18 @@
       <description>The replicate command starts a server to monitor &amp;amp; continuously replicate SQLite databases. You can specify your database &amp;amp; replicas in a configuration file or you can replicate a single database file by specifying its path and its replicas in the command line arguments.&#xA;Usage Using a configuration file This command format will read all options from the configuration file. This is the recommended approach for production systems.&#xA;litestream replicate [arguments] Replicate a single file This command format sets up replication for a single database file DB_PATH and replicates it to one or more replica URLs.</description>
     </item>
     <item>
+      <title>Command: ltx</title>
+      <link>https://litestream.io/reference/ltx/</link>
+      <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/ltx/</guid>
+      <description>v0.5.0 The ltx command lists LTX (Litestream Transaction Log) files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;Usage List by database This command lists all LTX files across all replicas for a database specified in the Litestream configuration file:&#xA;litestream ltx [arguments] DB_PATH List by replica URL This command lists all LTX files for a single replica URL.</description>
+    </item>
+    <item>
       <title>Command: restore</title>
       <link>https://litestream.io/reference/restore/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/restore/</guid>
       <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.&#xA;Usage With a database path This command will restore a database specified in the Litestream configuration file to its original location.</description>
-    </item>
-    <item>
-      <title>Command: snapshots</title>
-      <link>https://litestream.io/reference/snapshots/</link>
-      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
-      <guid>https://litestream.io/reference/snapshots/</guid>
-      <description>The snapshots command lists snapshots available for a database or replica.&#xA;Usage List by database This command lists all snapshots across all replicas for a database specified in the Litestream configuration file:&#xA;litestream snapshots [arguments] DB_PATH List by replica URL This command lists all snapshots for a single replica URL. This approach is useful when you do not have a configuration file.&#xA;litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies the configuration file.</description>
     </item>
     <item>
       <title>Command: version</title>
@@ -62,7 +62,7 @@
       <link>https://litestream.io/reference/wal/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/wal/</guid>
-      <description>The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:&#xA;litestream wal [arguments] DB_PATH List by replica URL This command lists all WAL files for a single replica URL. This approach is useful when you do not have a configuration file.</description>
+      <description>⚠️ The wal command has been deprecated in v0.5.0 and replaced with the ltx command. The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;For Litestream v0.5.0+, use the ltx command instead.&#xA;Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:</description>
     </item>
   </channel>
 </rss>

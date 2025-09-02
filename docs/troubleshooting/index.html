@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.d65f98aaaa96b3c0d1c186545ad69eb8c5f99d405b363f829b41a3bda18746cd52af4a662c9c8f8e04c63a23fad9ffc0a103f70adbdcd4fd153a0e897e2af3fc.css" integrity="sha512-1l&#43;YqqqWs8DRwYZUWtaeuMX5nUBbNj&#43;Cm0GjvaGHRs1Sr0pmLJyPjgTGOiP62f/AoQP3Ctvc1P0VOg6Jfirz/A==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Troubleshooting - Litestream</title>
+<meta name="description" content="Common issues and solutions when using Litestream">
+<link rel="canonical" href="https://litestream.io/docs/troubleshooting/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Troubleshooting">
+<meta name="twitter:description" content="Common issues and solutions when using Litestream">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Docs",
+        "item": "https:\/\/litestream.io\/docs\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Troubleshooting",
+        "item": "https:\/\/litestream.io\/docs\/troubleshooting\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="docs single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+<div class="row justify-content-center">
+  <div class="col-md-12 col-lg-10 col-xl-8">
+    <article>
+      <h1>Troubleshooting</h1>
+      <h2 id="configuration-issues">Configuration Issues</h2>
+<h3 id="invalid-configuration-file">Invalid Configuration File</h3>
+<p><strong>Error</strong>: <code>yaml: unmarshal errors</code> or <code>cannot parse config</code></p>
+<p><strong>Solution</strong>: Validate your YAML syntax:</p>
+<ul>
+<li>Check indentation (use spaces, not tabs)</li>
+<li>Ensure proper nesting of configuration sections</li>
+<li>Validate string values are properly quoted when containing special characters</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># ❌ Invalid - mixed tabs and spaces</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># ✅ Valid - consistent spacing</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path</span><span class="w">
+</span></span></span></code></pre></div><h3 id="database-path-issues">Database Path Issues</h3>
+<p><strong>Error</strong>: <code>no such file or directory</code> or <code>database is locked</code></p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Ensure the database path exists and is accessible</li>
+<li>Check file permissions (Litestream needs read/write access)</li>
+<li>Verify the database isn&rsquo;t being used by another process without proper <code>busy_timeout</code></li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Set busy timeout in your application
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">busy_timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><h3 id="mcp-server-wont-start">MCP Server Won&rsquo;t Start</h3>
+<p><strong>Error</strong>: <code>bind: address already in use</code></p>
+<p><strong>Solution</strong>: Check if another process is using the MCP port:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check what&#39;s using port 3001</span>
+</span></span><span class="line"><span class="cl">lsof -i :3001
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Use a different port in configuration</span>
+</span></span><span class="line"><span class="cl">mcp-addr: <span class="s2">&#34;:3002&#34;</span>
+</span></span></code></pre></div><h2 id="replication-issues">Replication Issues</h2>
+<h3 id="s3-connection-failures">S3 Connection Failures</h3>
+<p><strong>Error</strong>: <code>NoCredentialsProviders</code> or <code>access denied</code></p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Verify AWS credentials are properly configured:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check AWS credentials</span>
+</span></span><span class="line"><span class="cl">aws configure list
+</span></span></code></pre></div></li>
+<li>
+<p>Ensure IAM permissions include required S3 actions:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;s3:GetObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;s3:PutObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;s3:DeleteObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;s3:ListBucket&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;arn:aws:s3:::your-bucket&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;arn:aws:s3:::your-bucket/*&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="nats-connection-issues">NATS Connection Issues</h3>
+<p><strong>Error</strong>: <code>connection refused</code> or <code>authentication failed</code></p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Verify NATS server is running and accessible:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Test NATS connectivity</span>
+</span></span><span class="line"><span class="cl">nats server check --server nats://localhost:4222
+</span></span></code></pre></div></li>
+<li>
+<p>Check authentication credentials:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Use appropriate auth method</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">user</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">pass</span><span class="w">
+</span></span></span></code></pre></div></li>
+</ol>
+<h3 id="slow-replication">Slow Replication</h3>
+<p><strong>Symptoms</strong>: High lag between database changes and replica updates</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Check sync intervals in configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># Reduce intervals for faster sync</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>Monitor system resources (CPU, memory, network)</p>
+</li>
+<li>
+<p>Consider using local file replica for testing performance</p>
+</li>
+</ol>
+<h2 id="database-issues">Database Issues</h2>
+<h3 id="wal-mode-problems">WAL Mode Problems</h3>
+<p><strong>Error</strong>: <code>database is not in WAL mode</code></p>
+<p><strong>Solution</strong>: Litestream requires WAL mode. Enable it in your application:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Enable WAL mode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">journal_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WAL</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>Or let Litestream enable it automatically by ensuring proper database permissions.</p>
+<h3 id="database-locks">Database Locks</h3>
+<p><strong>Error</strong>: <code>database is locked</code> or <code>SQLITE_BUSY</code></p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Set busy timeout in your application (see above)</li>
+<li>Ensure no long-running transactions are blocking checkpoints</li>
+<li>Check for applications holding exclusive locks</li>
+</ol>
+<h3 id="corruption-detection">Corruption Detection</h3>
+<p><strong>Error</strong>: <code>database disk image is malformed</code></p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Stop Litestream replication</li>
+<li>Run SQLite integrity check:
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sqlite3 /path/to/db.sqlite <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
+</span></span></code></pre></div></li>
+<li>If corrupted, restore from latest backup:
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /path/to/recovered.db /path/to/db.sqlite
+</span></span></code></pre></div></li>
+</ol>
+<h2 id="performance-issues">Performance Issues</h2>
+<h3 id="high-cpu-usage">High CPU Usage</h3>
+<p><strong>Symptoms</strong>: Litestream consuming excessive CPU</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Increase monitoring intervals:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s </span><span class="w"> </span><span class="c"># Reduce frequency</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>Check for database hotspots (frequent small transactions)</p>
+</li>
+<li>
+<p>Consider batch operations in your application</p>
+</li>
+</ol>
+<h3 id="memory-issues">Memory Issues</h3>
+<p><strong>Symptoms</strong>: High memory usage or out-of-memory errors</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Monitor snapshot sizes and retention policies</li>
+<li>Adjust retention settings:
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h </span><span class="w"> </span><span class="c"># Keep fewer snapshots</span><span class="w">
+</span></span></span></code></pre></div></li>
+</ol>
+<h2 id="network-and-connectivity">Network and Connectivity</h2>
+<h3 id="intermittent-network-failures">Intermittent Network Failures</h3>
+<p><strong>Error</strong>: <code>connection reset by peer</code> or <code>timeout</code></p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Implement retry logic in replica configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Add connection tuning</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>Check network stability and firewall rules</p>
+</li>
+<li>
+<p>Consider using regional endpoints for cloud storage</p>
+</li>
+</ol>
+<h3 id="dns-resolution-issues">DNS Resolution Issues</h3>
+<p><strong>Error</strong>: <code>no such host</code> or DNS timeouts</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Test DNS resolution:
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">nslookup s3.amazonaws.com
+</span></span></code></pre></div></li>
+<li>Use IP addresses instead of hostnames if needed</li>
+<li>Check <code>/etc/resolv.conf</code> configuration</li>
+</ol>
+<h2 id="logging-and-debugging">Logging and Debugging</h2>
+<h3 id="enabling-debug-logging">Enabling Debug Logging</h3>
+<p>Add debug logging to your configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><h3 id="reading-logs">Reading Logs</h3>
+<p>Common log locations:</p>
+<ul>
+<li><strong>Linux systemd</strong>: <code>journalctl -u litestream</code></li>
+<li><strong>Docker</strong>: <code>docker logs container_name</code></li>
+<li><strong>Windows Service</strong>: Event Viewer → Application → Litestream</li>
+<li><strong>Command Line</strong>: stdout/stderr</li>
+</ul>
+<h3 id="important-log-messages">Important Log Messages</h3>
+<p>Look for these key messages:</p>
+<ul>
+<li><code>initialized db</code>: Database successfully loaded</li>
+<li><code>replicating to</code>: Replica configuration loaded</li>
+<li><code>sync error</code>: Replication issues</li>
+<li><code>checkpoint completed</code>: Successful WAL checkpoint</li>
+</ul>
+<h2 id="recovery-and-restore">Recovery and Restore</h2>
+<h3 id="point-in-time-recovery">Point-in-Time Recovery</h3>
+<p>List available restore points:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream ltx /path/to/db.sqlite
+</span></span></code></pre></div><p>Restore to specific time:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -timestamp 2025-01-01T12:00:00Z -o restored.db /path/to/db.sqlite
+</span></span></code></pre></div><h3 id="backup-validation">Backup Validation</h3>
+<p>Verify backup integrity:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Restore to temporary location</span>
+</span></span><span class="line"><span class="cl">litestream restore -o /tmp/test.db /path/to/db.sqlite
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Run integrity check</span>
+</span></span><span class="line"><span class="cl">sqlite3 /tmp/test.db <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
+</span></span></code></pre></div><h2 id="getting-help">Getting Help</h2>
+<h3 id="before-asking-for-help">Before Asking for Help</h3>
+<ol>
+<li><strong>Check the logs</strong> for error messages (use debug level)</li>
+<li><strong>Test with minimal config</strong> to isolate the issue</li>
+<li><strong>Verify versions</strong>: Ensure you&rsquo;re using compatible Litestream version</li>
+<li><strong>Search existing issues</strong> on GitHub</li>
+</ol>
+<h3 id="where-to-get-help">Where to Get Help</h3>
+<ul>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/benbjohnson/litestream/issues">github.com/benbjohnson/litestream/issues</a></li>
+<li><strong>GitHub Discussions</strong>: <a href="https://github.com/benbjohnson/litestream/discussions">github.com/benbjohnson/litestream/discussions</a></li>
+<li><strong>Slack Community</strong>: <a href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Join Litestream Slack</a></li>
+<li><strong>Documentation</strong>: Review <a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
+</ul>
+<h3 id="reporting-issues">Reporting Issues</h3>
+<p>When reporting issues on GitHub, the bug report template will ask for:</p>
+<ul>
+<li><strong>Bug Description</strong>: Clear description of the issue</li>
+<li><strong>Environment</strong>: Litestream version, operating system, installation method, storage backend</li>
+<li><strong>Steps to Reproduce</strong>: Numbered steps, expected vs actual behavior</li>
+<li><strong>Configuration</strong>: Your <code>litestream.yml</code> file (remove sensitive data)</li>
+<li><strong>Logs</strong>: Relevant log output with debug level enabled</li>
+<li><strong>Additional Context</strong>: Recent changes, related issues, workarounds attempted</li>
+</ul>
+<h2 id="common-error-reference">Common Error Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Error Message</th>
+<th>Common Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database is locked</code></td>
+<td>No busy timeout set</td>
+<td>Add <code>PRAGMA busy_timeout = 5000;</code></td>
+</tr>
+<tr>
+<td><code>no such file or directory</code></td>
+<td>Incorrect database path</td>
+<td>Verify path exists and permissions</td>
+</tr>
+<tr>
+<td><code>NoCredentialsProviders</code></td>
+<td>Missing AWS credentials</td>
+<td>Configure AWS credentials</td>
+</tr>
+<tr>
+<td><code>connection refused</code></td>
+<td>Service not running</td>
+<td>Check if target service is accessible</td>
+</tr>
+<tr>
+<td><code>yaml: unmarshal errors</code></td>
+<td>Invalid YAML syntax</td>
+<td>Validate configuration file syntax</td>
+</tr>
+<tr>
+<td><code>bind: address already in use</code></td>
+<td>Port conflict</td>
+<td>Change MCP port or stop conflicting service</td>
+</tr>
+</tbody>
+</table>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
+<li><a href="https://litestream.io/install/">Installation Guide</a></li>
+<li><a href="https://litestream.io/getting-started/">Getting Started</a></li>
+<li><a href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+</ul>
+
+    </article>
+  </div>
+</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c42aa8b14d5a3ee8a3b5f59f3e547705fec938cd2bfa7c436d96803ef684fec81dc75290466d6ea8fe8bb1decf8a30066b5058825d80b2de63a054682effffb3.js" integrity="sha512-xCqosU1aPuijtfWfPlR3Bf7JOM0r&#43;nxDbZaAPvaE/sgdx1KQRm1uqP6Lsd7PijAGa1BYgl2Ast5joFRoLv//sw==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

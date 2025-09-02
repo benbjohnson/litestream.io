@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.d65f98aaaa96b3c0d1c186545ad69eb8c5f99d405b363f829b41a3bda18746cd52af4a662c9c8f8e04c63a23fad9ffc0a103f70adbdcd4fd153a0e897e2af3fc.css" integrity="sha512-1l&#43;YqqqWs8DRwYZUWtaeuMX5nUBbNj&#43;Cm0GjvaGHRs1Sr0pmLJyPjgTGOiP62f/AoQP3Ctvc1P0VOg6Jfirz/A==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Replicating to NATS JetStream - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/nats/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Replicating to NATS JetStream">
+<meta name="twitter:description" content="This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.
+Setup Install NATS Server Using Docker:
+# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:
+# Download and install NATS server curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip unzip nats-server.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Nats",
+        "item": "https:\/\/litestream.io\/guides\/nats\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#setup">Setup</a>
+      <ul>
+        <li><a href="#install-nats-server">Install NATS Server</a></li>
+        <li><a href="#create-object-store-bucket">Create Object Store Bucket</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#command-line-usage">Command line usage</a></li>
+        <li><a href="#configuration-file-usage">Configuration file usage</a></li>
+        <li><a href="#authentication">Authentication</a></li>
+        <li><a href="#tls-configuration">TLS Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#connection-options">Connection Options</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Replicating to NATS JetStream</h1>
+			<p class="lead"></p>
+			<p>This guide will show you how to use NATS JetStream Object Store as a replica
+destination for Litestream. You will need a NATS server with JetStream enabled
+to complete this guide.</p>
+<h2 id="setup">Setup<a href="#setup" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="install-nats-server">Install NATS Server<a href="#install-nats-server" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Using Docker:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Run NATS server with JetStream enabled</span>
+</span></span><span class="line"><span class="cl">docker run -d --name nats-server <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -p 4222:4222 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  nats:alpine <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -js
+</span></span></code></pre></div><p><strong>Using Binary:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Download and install NATS server</span>
+</span></span><span class="line"><span class="cl">curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip
+</span></span><span class="line"><span class="cl">unzip nats-server.zip
+</span></span><span class="line"><span class="cl">sudo mv nats-server-v2.10.7-linux-amd64/nats-server /usr/local/bin/
+</span></span></code></pre></div><h3 id="create-object-store-bucket">Create Object Store Bucket<a href="#create-object-store-bucket" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Install the NATS CLI tool:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Using Go</span>
+</span></span><span class="line"><span class="cl">go install github.com/nats-io/natscli/nats@latest
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Using curl</span>
+</span></span><span class="line"><span class="cl">curl -sf https://binaries.nats.dev/nats-io/natscli/nats@latest <span class="p">|</span> sh
+</span></span><span class="line"><span class="cl">sudo mv nats /usr/local/bin/
+</span></span></code></pre></div><p>Create an object store bucket for Litestream:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Create object store bucket</span>
+</span></span><span class="line"><span class="cl">nats object store add litestream-backups
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Verify bucket creation</span>
+</span></span><span class="line"><span class="cl">nats object store list
+</span></span></code></pre></div><h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can replicate to NATS JetStream from the command line by setting your
+NATS server URL via an environment variable:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">NATS_URL</span><span class="o">=</span>nats://localhost:4222
+</span></span></code></pre></div><p>You can then specify your bucket as a replica URL on the command line. For
+example, you can replicate a database to your bucket with the following
+command. Replace the placeholders for your server and bucket name.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db nats://localhost:4222/BUCKETNAME
+</span></span></code></pre></div><p>You can later restore your database from NATS to a local <code>my.db</code> path with
+the following command:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db nats://localhost:4222/BUCKETNAME
+</span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream is typically run as a background service which uses a configuration
+file. You can configure a replica for your database using the <code>url</code> format:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/BUCKETNAME</span><span class="w">
+</span></span></span></code></pre></div><h3 id="authentication">Authentication<a href="#authentication" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If your NATS server requires authentication, you can specify credentials:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">myuser</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">mypassword</span><span class="w">
+</span></span></span></code></pre></div><p>Alternatively, you can use other authentication methods:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># JWT authentication</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">jwt</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;SUACSL3UAHUDXKFSNVMJEGGJUQJNAIKBEM364ZYIJUUXI3YCJRYGSREX&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Credentials file</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">creds</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream/nats.creds</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Token authentication</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;my-secret-token&#34;</span><span class="w">
+</span></span></span></code></pre></div><h3 id="tls-configuration">TLS Configuration<a href="#tls-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For secure connections, enable TLS:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://secure.nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><p>You can also specify custom CA certificates or client certificates:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/litestream.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/litestream.key</span><span class="w">
+</span></span></span></code></pre></div><h2 id="connection-options">Connection Options<a href="#connection-options" class="anchor" aria-hidden="true">#</a> </h2>
+<p>You can configure connection behavior for reliability:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">        </span><span class="c"># Unlimited reconnections</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s       </span><span class="w"> </span><span class="c"># Wait between reconnection attempts</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">10s             </span><span class="w"> </span><span class="c"># Connection timeout</span><span class="w">
+</span></span></span></code></pre></div>
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/sftp/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Replicating to an SFTP Server
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c42aa8b14d5a3ee8a3b5f59f3e547705fec938cd2bfa7c436d96803ef684fec81dc75290466d6ea8fe8bb1decf8a30066b5058825d80b2de63a054682effffb3.js" integrity="sha512-xCqosU1aPuijtfWfPlR3Bf7JOM0r&#43;nxDbZaAPvaE/sgdx1KQRm1uqP6Lsd7PijAGa1BYgl2Ast5joFRoLv//sw==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
