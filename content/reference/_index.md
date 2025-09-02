@@ -13,11 +13,10 @@ about the options available and different modes of operation.
 The `litestream` commands are:
 
 - [`litestream databases`](/reference/databases) — Lists databases specified in config file.
-- [`litestream generations`](/reference/generations) — list available generations for a database.
+- [`litestream ltx`](/reference/ltx) — List available LTX files for a database.
 - [`litestream replicate`](/reference/replicate) — Runs a server to replicate databases.
 - [`litestream restore`](/reference/restore) — Recovers database backup from a replica.
-- [`litestream snapshots`](/reference/snapshots) — List available snapshots for a database.
 - [`litestream version`](/reference/version) — Prints the binary version.
-- [`litestream wal`](/reference/wal) — List available WAL files for a database.
+- [`litestream wal`](/reference/wal) — List available WAL files for a database (deprecated).
 
 

@@ -73,9 +73,9 @@ file][]. You can configure a replica for your database using the `url` format.
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: abs://STORAGEACCOUNT@CONTAINERNAME/PATH
-        account-key:  ACCOUNTKEY
+    replica:
+      url: abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+      account-key:  ACCOUNTKEY
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -83,15 +83,17 @@ Or you can expand your configuration into multiple fields:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type: abs
-        account-name: STORAGEACCOUNT
-        account-key:  ACCOUNTKEY
-        bucket:       CONTAINERNAME
-        path:         PATH
+    replica:
+      type: abs
+      account-name: STORAGEACCOUNT
+      account-key:  ACCOUNTKEY
+      bucket:       CONTAINERNAME
+      path:         PATH
 ```
 
 You can also use the `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable instead
 of specifying the account key in your configuration file.
+
+{{< since version="0.5.0" >}} Litestream v0.5.0+ uses Azure SDK v2, which maintains compatibility with existing authentication methods.
 
 [configuration file]: /reference/config

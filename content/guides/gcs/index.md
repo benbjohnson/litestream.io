@@ -81,8 +81,8 @@ file][]. You can configure a replica for your database using the `url` format.
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: gcs://BUCKET/PATH
+    replica:
+      url: gcs://BUCKET/PATH
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -90,10 +90,12 @@ Or you can expand your configuration into multiple fields:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type:   gcs
-        bucket: BUCKET
-        path:   PATH
+    replica:
+      type:   gcs
+      bucket: BUCKET
+      path:   PATH
 ```
+
+{{< since version="0.5.0" >}} Litestream v0.5.0+ maintains compatibility with existing authentication methods.
 
 [configuration file]: /reference/config
