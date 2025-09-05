@@ -133,14 +133,17 @@ dbs:
 {{< since version="0.5.0" >}} Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
 
 
-## Restrictive IAM Policy
+## Restrictive IAM Policies
 
 While specifying `AmazonS3FullAccess` is an easy way to get up and running, you
 may want to specify a more restrictive policy in order to limit abuse if your
 credentials are compromised.
 
-The following is the minimum policy to use with Litestream. Please replace the
-`<BUCKET>` with the name of your bucket.
+### Replication Policy (Read-Write)
+
+The following policy provides the minimum permissions needed for Litestream to
+replicate databases to S3. This includes creating, updating, and deleting
+replica files. Please replace `<BUCKET>` with the name of your bucket.
 
 ```json
 {
@@ -162,12 +165,55 @@ The following is the minimum policy to use with Litestream. Please replace the
                 "s3:GetObject"
             ],
             "Resource": [
-                "arn:aws:s3:::<BUCKET>/*",
-                "arn:aws:s3:::<BUCKET>"
+                "arn:aws:s3:::<BUCKET>/*"
             ]
         }
     ]
 }
 ```
 
-Thanks to [Martin](https://github.com/maluio) for contributing this policy.
+### Restoration Policy (Read-Only)
+
+If you only need to restore databases from existing S3 replicas (without
+creating new replicas), you can use this more restrictive read-only policy:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::<BUCKET>"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::<BUCKET>/*"
+            ]
+        }
+    ]
+}
+```
+
+### Path-Specific Policies
+
+For additional security, you can restrict access to a specific path within your
+bucket by modifying the resource ARNs. For example, to limit access to the
+`litestream/` directory:
+
+```json
+"Resource": [
+    "arn:aws:s3:::<BUCKET>/litestream/*"
+]
+```
+
+Thanks to [Martin](https://github.com/maluio) for contributing the original policy and
+to [cariaso](https://github.com/benbjohnson/litestream/issues/76#issuecomment-783926359)
+for additional policy insights.
