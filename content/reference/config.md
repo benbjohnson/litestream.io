@@ -180,7 +180,9 @@ The following replica settings are also available for all replica types:
   Litestream as S3 services charge for downloads.
 
 - `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
-  to `1s`. Increasing frequency can increase cloud storage costs significantly.
+  to `1s`. Decreasing this value (increasing sync frequency) can significantly
+  increase cloud storage costs due to more frequent PUT requests. See the
+  [Cost Considerations](#cost-considerations) section below for details.
 
 - `age`—Client-side encryption with [age](https://age-encryption.org), see
   [Encryption](#encryption) for configuration details. Defaults to off.
@@ -545,6 +547,68 @@ dbs:
         recipients:
           - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
+
+## Cost Considerations
+
+Understanding the cost implications of Litestream configuration is important for
+managing cloud storage expenses. The primary cost drivers vary by configuration:
+
+### Sync Interval Costs
+
+The `sync-interval` setting primarily affects **PUT request costs**, not storage costs.
+Litestream only uploads frames when the database changes, but frequent intervals
+mean more frequent requests when changes occur.
+
+**PUT Request Cost Examples (AWS S3 pricing: $0.000005 per request):**
+
+- `sync-interval: 1s` with constant writes: ~2,592,000 requests/month = **$12.96/month**
+- `sync-interval: 10s` with constant writes: ~259,200 requests/month = **$1.30/month**  
+- `sync-interval: 1m` with constant writes: ~43,200 requests/month = **$0.22/month**
+
+_Note: Actual costs depend on your database write patterns. Litestream batches
+writes by time interval, so costs scale with write frequency._
+
+### Storage vs Request Costs
+
+**Request Costs (Primary Driver):**
+
+- PUT operations for uploading frames and snapshots
+- GET operations for restores and validation
+- LIST operations for cleanup and maintenance
+
+**Storage Costs (Usually Minimal):**
+
+- LTX files (containing SQLite page updates and metadata)
+- Snapshot files (full database copies)
+- Typically much lower than request costs for active databases
+
+**Transfer Costs:**
+
+- Ingress: Often free (AWS S3, Google Cloud)
+- Egress: Charged for restores and validation
+- Varies significantly by cloud provider
+
+### Retention Impact
+
+The `retention` setting affects storage costs by controlling:
+
+- How long LTX frames are kept (affects storage volume)
+- When new snapshots are created (affects PUT requests)
+- Storage cleanup frequency (affects LIST requests)
+
+Shorter retention periods reduce storage costs but may increase snapshot creation
+frequency. Longer retention periods increase storage but reduce snapshot overhead.
+
+### Provider-Specific Considerations
+
+Different S3-compatible providers have varying pricing models:
+
+- **AWS S3**: Charges for PUT requests, ingress typically free
+- **Backblaze B2**: Lower storage costs, different request pricing
+- **DigitalOcean Spaces**: Includes egress allowance
+- **MinIO/Self-hosted**: Only infrastructure costs
+
+Always consult your provider's current pricing documentation for accurate estimates.
 
 ## Complete Configuration Example
 
