@@ -186,7 +186,13 @@ Setup Create an IAM user You will need to set up a user with programmatic access
         <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
-    <li><a href="#restrictive-iam-policy">Restrictive IAM Policy</a></li>
+    <li><a href="#restrictive-iam-policies">Restrictive IAM Policies</a>
+      <ul>
+        <li><a href="#replication-policy-read-write">Replication Policy (Read-Write)</a></li>
+        <li><a href="#restoration-policy-read-only">Restoration Policy (Read-Only)</a></li>
+        <li><a href="#path-specific-policies">Path-Specific Policies</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
@@ -276,12 +282,14 @@ file. You can configure a replica for your database using the <code>url</code> f
     v0.5.0
 </span>
  Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.</p>
-<h2 id="restrictive-iam-policy">Restrictive IAM Policy<a href="#restrictive-iam-policy" class="anchor" aria-hidden="true">#</a> </h2>
+<h2 id="restrictive-iam-policies">Restrictive IAM Policies<a href="#restrictive-iam-policies" class="anchor" aria-hidden="true">#</a> </h2>
 <p>While specifying <code>AmazonS3FullAccess</code> is an easy way to get up and running, you
 may want to specify a more restrictive policy in order to limit abuse if your
 credentials are compromised.</p>
-<p>The following is the minimum policy to use with Litestream. Please replace the
-<code>&lt;BUCKET&gt;</code> with the name of your bucket.</p>
+<h3 id="replication-policy-read-write">Replication Policy (Read-Write)<a href="#replication-policy-read-write" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The following policy provides the minimum permissions needed for Litestream to
+replicate databases to S3. This includes creating, updating, and deleting
+replica files. Please replace <code>&lt;BUCKET&gt;</code> with the name of your bucket.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -301,13 +309,46 @@ credentials are compromised.</p>
 </span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetObject&#34;</span>
 </span></span><span class="line"><span class="cl">            <span class="p">],</span>
 </span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
-</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::&lt;BUCKET&gt;/*&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::&lt;BUCKET&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::&lt;BUCKET&gt;/*&#34;</span>
 </span></span><span class="line"><span class="cl">            <span class="p">]</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">]</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>Thanks to <a href="https://github.com/maluio">Martin</a> for contributing this policy.</p>
+</span></span></code></pre></div><h3 id="restoration-policy-read-only">Restoration Policy (Read-Only)<a href="#restoration-policy-read-only" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If you only need to restore databases from existing S3 replicas (without
+creating new replicas), you can use this more restrictive read-only policy:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetBucketLocation&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:ListBucket&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="s2">&#34;arn:aws:s3:::&lt;BUCKET&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetObject&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::&lt;BUCKET&gt;/*&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="path-specific-policies">Path-Specific Policies<a href="#path-specific-policies" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For additional security, you can restrict access to a specific path within your
+bucket by modifying the resource ARNs. For example, to limit access to the
+<code>litestream/</code> directory:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;Resource&#34;</span><span class="err">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;arn:aws:s3:::&lt;BUCKET&gt;/litestream/*&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span></code></pre></div><p>Thanks to <a href="https://github.com/maluio">Martin</a> for contributing the original policy and
+to <a href="https://github.com/benbjohnson/litestream/issues/76#issuecomment-783926359">cariaso</a>
+for additional policy insights.</p>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
