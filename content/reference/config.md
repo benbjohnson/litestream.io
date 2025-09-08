@@ -578,7 +578,7 @@ writes by time interval, so costs scale with write frequency._
 
 **Storage Costs (Usually Minimal):**
 
-- LTX frame files (SQLite page updates)
+- LTX files (containing SQLite page updates and metadata)
 - Snapshot files (full database copies)
 - Typically much lower than request costs for active databases
 
