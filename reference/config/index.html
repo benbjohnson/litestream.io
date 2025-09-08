@@ -207,6 +207,14 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#encryption">Encryption</a></li>
       </ul>
     </li>
+    <li><a href="#cost-considerations">Cost Considerations</a>
+      <ul>
+        <li><a href="#sync-interval-costs">Sync Interval Costs</a></li>
+        <li><a href="#storage-vs-request-costs">Storage vs Request Costs</a></li>
+        <li><a href="#retention-impact">Retention Impact</a></li>
+        <li><a href="#provider-specific-considerations">Provider-Specific Considerations</a></li>
+      </ul>
+    </li>
     <li><a href="#complete-configuration-example">Complete Configuration Example</a></li>
     <li><a href="#migration-from-v03x">Migration from v0.3.x</a></li>
   </ul>
@@ -354,7 +362,9 @@ Litestream as S3 services charge for downloads.</p>
 </li>
 <li>
 <p><code>sync-interval</code>—Frequency in which frames are pushed to the replica. Defaults
-to <code>1s</code>. Increasing frequency can increase cloud storage costs significantly.</p>
+to <code>1s</code>. Decreasing this value (increasing sync frequency) can significantly
+increase cloud storage costs due to more frequent PUT requests. See the
+<a href="#cost-considerations">Cost Considerations</a> section below for details.</p>
 </li>
 <li>
 <p><code>age</code>—Client-side encryption with <a href="https://age-encryption.org">age</a>, see
@@ -640,7 +650,59 @@ fail.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">/etc/litestream/age-identity.txt</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">recipients</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
-</span></span></span></code></pre></div><h2 id="complete-configuration-example">Complete Configuration Example<a href="#complete-configuration-example" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><h2 id="cost-considerations">Cost Considerations<a href="#cost-considerations" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Understanding the cost implications of Litestream configuration is important for
+managing cloud storage expenses. The primary cost drivers vary by configuration:</p>
+<h3 id="sync-interval-costs">Sync Interval Costs<a href="#sync-interval-costs" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The <code>sync-interval</code> setting primarily affects <strong>PUT request costs</strong>, not storage costs.
+Litestream only uploads frames when the database changes, but frequent intervals
+mean more frequent requests when changes occur.</p>
+<p><strong>PUT Request Cost Examples (AWS S3 pricing: $0.000005 per request):</strong></p>
+<ul>
+<li><code>sync-interval: 1s</code> with constant writes: ~2,592,000 requests/month = <strong>$12.96/month</strong></li>
+<li><code>sync-interval: 10s</code> with constant writes: ~259,200 requests/month = <strong>$1.30/month</strong></li>
+<li><code>sync-interval: 1m</code> with constant writes: ~43,200 requests/month = <strong>$0.22/month</strong></li>
+</ul>
+<p><em>Note: Actual costs depend on your database write patterns. Litestream batches
+writes by time interval, so costs scale with write frequency.</em></p>
+<h3 id="storage-vs-request-costs">Storage vs Request Costs<a href="#storage-vs-request-costs" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Request Costs (Primary Driver):</strong></p>
+<ul>
+<li>PUT operations for uploading frames and snapshots</li>
+<li>GET operations for restores and validation</li>
+<li>LIST operations for cleanup and maintenance</li>
+</ul>
+<p><strong>Storage Costs (Usually Minimal):</strong></p>
+<ul>
+<li>LTX files (containing SQLite page updates and metadata)</li>
+<li>Snapshot files (full database copies)</li>
+<li>Typically much lower than request costs for active databases</li>
+</ul>
+<p><strong>Transfer Costs:</strong></p>
+<ul>
+<li>Ingress: Often free (AWS S3, Google Cloud)</li>
+<li>Egress: Charged for restores and validation</li>
+<li>Varies significantly by cloud provider</li>
+</ul>
+<h3 id="retention-impact">Retention Impact<a href="#retention-impact" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The <code>retention</code> setting affects storage costs by controlling:</p>
+<ul>
+<li>How long LTX frames are kept (affects storage volume)</li>
+<li>When new snapshots are created (affects PUT requests)</li>
+<li>Storage cleanup frequency (affects LIST requests)</li>
+</ul>
+<p>Shorter retention periods reduce storage costs but may increase snapshot creation
+frequency. Longer retention periods increase storage but reduce snapshot overhead.</p>
+<h3 id="provider-specific-considerations">Provider-Specific Considerations<a href="#provider-specific-considerations" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Different S3-compatible providers have varying pricing models:</p>
+<ul>
+<li><strong>AWS S3</strong>: Charges for PUT requests, ingress typically free</li>
+<li><strong>Backblaze B2</strong>: Lower storage costs, different request pricing</li>
+<li><strong>DigitalOcean Spaces</strong>: Includes egress allowance</li>
+<li><strong>MinIO/Self-hosted</strong>: Only infrastructure costs</li>
+</ul>
+<p>Always consult your provider&rsquo;s current pricing documentation for accurate estimates.</p>
+<h2 id="complete-configuration-example">Complete Configuration Example<a href="#complete-configuration-example" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Example showing available configuration options:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global settings</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
