@@ -8,9 +8,13 @@ menu:
 weight: 400
 ---
 
-This guide will show you how to use Amazon S3 as a database replica path for
-Litestream. You will need an [Amazon AWS](https://aws.amazon.com/) account to
-complete this guide.
+This guide will show you how to use Amazon S3 or S3-compatible storage as a database replica path for
+Litestream. You can use Amazon S3 directly, or any S3-compatible storage provider such as
+MinIO, Wasabi, Backblaze B2, Tigris, DigitalOcean Spaces, or other compatible services.
+
+For Amazon S3, you will need an [Amazon AWS](https://aws.amazon.com/) account to
+complete the AWS-specific setup sections. For other providers, you'll need an account
+with your chosen S3-compatible storage service.
 
 ## Setup
 
@@ -30,7 +34,7 @@ click the _Next_ button.
 
 On the permissions screen, click on _"Attach existing policies directly"_, then
 search for "S3" and choose `AmazonS3FullAccess`. You can also specify a [more
-restrictive policy](#restrictive-iam-policy) as described later in this guide.
+restrictive policy](#restrictive-iam-policies) as described later in this guide.
 
 <figure>
 	<img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
@@ -131,6 +135,127 @@ dbs:
 ```
 
 {{< since version="0.5.0" >}} Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
+
+## S3-Compatible Storage Providers
+
+{{< since version="0.5.0" >}} Litestream supports custom S3-compatible storage endpoints using URL query parameters, enabling you to use any S3-compatible storage service directly from the command line without requiring a configuration file.
+
+### URL Format
+
+You can specify custom endpoints using query parameters in the replica URL:
+
+```
+s3://bucket/path?endpoint=<endpoint>&region=<region>&forcePathStyle=<true|false>&skipVerify=<true|false>
+```
+
+### Query Parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `endpoint` | Custom S3-compatible endpoint URL | - |
+| `region` | AWS region (may be required by some services) | `us-east-1` for custom endpoints |
+| `forcePathStyle` | Use path-style addressing instead of virtual-hosted style | `true` for custom endpoints |
+| `skipVerify` | Skip TLS certificate verification ⚠️ | `false` |
+
+⚠️ **Security Warning**: Only use `skipVerify=true` for development or when you trust the self-signed certificate.
+
+### Provider Examples
+
+#### MinIO
+
+MinIO is a popular self-hosted S3-compatible storage server.
+
+```bash
+# Replicate to MinIO
+litestream replicate /path/to/db.sqlite \
+  "s3://mybucket/db?endpoint=localhost:9000&forcePathStyle=true"
+
+# Restore from MinIO
+litestream restore -o restored.db \
+  "s3://mybucket/db?endpoint=localhost:9000"
+```
+
+#### Tigris (Fly.io)
+
+Tigris is a globally distributed S3-compatible storage service by Fly.io.
+
+```bash
+# Replicate to Tigris
+litestream replicate /path/to/db.sqlite \
+  "s3://my-tigris-bucket/db?endpoint=fly.storage.tigris.dev&region=auto"
+
+# Restore from Tigris
+litestream restore -o restored.db \
+  "s3://my-tigris-bucket/db?endpoint=fly.storage.tigris.dev&region=auto"
+```
+
+#### Wasabi
+
+Wasabi is a low-cost S3-compatible cloud storage service.
+
+```bash
+# Replicate to Wasabi
+litestream replicate /path/to/db.sqlite \
+  "s3://mybucket/db?endpoint=s3.wasabisys.com&region=us-east-1"
+
+# Restore from Wasabi
+litestream restore -o restored.db \
+  "s3://mybucket/db?endpoint=s3.wasabisys.com&region=us-east-1"
+```
+
+#### Self-Hosted with Custom Certificate
+
+For development environments or internal services with self-signed certificates:
+
+```bash
+# ⚠️ Development only - skips certificate verification
+litestream replicate /path/to/db.sqlite \
+  "s3://mybucket/db?endpoint=storage.internal.company.com&skipVerify=true"
+```
+
+### Supported Providers
+
+The following S3-compatible providers have been tested with Litestream:
+
+- **MinIO** - Self-hosted object storage server
+- **Tigris** - Fly.io's globally distributed storage
+- **Wasabi** - Low-cost cloud storage
+- **Backblaze B2** - Using S3-compatible API
+- **DigitalOcean Spaces** - Managed object storage
+- **Scaleway Object Storage** - European cloud storage
+- **Ceph** - With S3 gateway enabled
+- Any other storage service implementing the S3 API
+
+### Configuration File Alternative
+
+You can also configure custom endpoints using the traditional configuration file approach:
+
+```yaml
+dbs:
+  - path: /path/to/db.sqlite
+    replicas:
+      - type: s3
+        bucket: mybucket
+        path: db
+        endpoint: localhost:9000
+        region: us-east-1
+        force-path-style: true
+        skip-verify: false
+        access-key-id: YOUR_ACCESS_KEY
+        secret-access-key: YOUR_SECRET_KEY
+```
+
+### Backward Compatibility
+
+All existing S3 URLs continue to work without modification. The new query parameter feature is purely additive:
+
+```bash
+# Standard AWS S3 - works exactly as before
+litestream replicate /path/to/db.sqlite s3://mybucket/db
+
+# AWS S3 with explicit region - also unchanged
+litestream replicate /path/to/db.sqlite s3://mybucket.s3.us-west-2.amazonaws.com/db
+```
 
 
 ## Restrictive IAM Policies
