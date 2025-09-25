@@ -637,7 +637,7 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <ul>
 <li><strong>GitHub Issues</strong>: <a href="https://github.com/benbjohnson/litestream/issues">github.com/benbjohnson/litestream/issues</a></li>
 <li><strong>GitHub Discussions</strong>: <a href="https://github.com/benbjohnson/litestream/discussions">github.com/benbjohnson/litestream/discussions</a></li>
-<li><strong>Slack Community</strong>: <a href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Join Litestream Slack</a></li>
+<li><strong>Slack Community</strong>: <a href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Join Litestream Slack</a></li>
 <li><strong>Documentation</strong>: Review <a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
 </ul>
 <h3 id="reporting-issues">Reporting Issues</h3>
