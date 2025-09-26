@@ -8,7 +8,9 @@ menu:
 weight: 525
 ---
 
-The `mcp` server provides Model Context Protocol integration, allowing AI assistants 
+> **⚠️ Note:** MCP support is available in Litestream v0.5.0+. This feature is not available in v0.3.13.
+
+The `mcp` server provides Model Context Protocol integration, allowing AI assistants
 to interact with Litestream databases and replicas through a standardized HTTP API.
 
 ## Configuration

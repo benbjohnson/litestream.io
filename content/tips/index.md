@@ -118,6 +118,8 @@ is one hour then you will see a rolling set of 24 snapshots for your replica.
 
 ## Disable autocheckpoints for high write load servers
 
+> **Note:** Checkpoint detection improvements in v0.5.0+ reduce the need for full snapshots when checkpoints occur.
+
 By default, SQLite allows any process to perform a checkpoint. A checkpoint is
 when pages that are written to the WAL are copied back to the main database
 file. Litestream works by controlling this checkpointing process and
