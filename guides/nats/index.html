@@ -20,10 +20,10 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Replicating to NATS JetStream">
-<meta name="twitter:description" content="This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.
+<meta name="twitter:description" content="⚠️ Note: NATS JetStream support is available in Litestream v0.5.0&#43;. This feature is not available in v0.3.13.
+This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.
 Setup Install NATS Server Using Docker:
-# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:
-# Download and install NATS server curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip unzip nats-server.">
+# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -199,7 +199,10 @@ Setup Install NATS Server Using Docker:
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
 		<h1>Replicating to NATS JetStream</h1>
 			<p class="lead"></p>
-			<p>This guide will show you how to use NATS JetStream Object Store as a replica
+			<blockquote>
+<p><strong>⚠️ Note:</strong> NATS JetStream support is available in Litestream v0.5.0+. This feature is not available in v0.3.13.</p>
+</blockquote>
+<p>This guide will show you how to use NATS JetStream Object Store as a replica
 destination for Litestream. You will need a NATS server with JetStream enabled
 to complete this guide.</p>
 <h2 id="setup">Setup<a href="#setup" class="anchor" aria-hidden="true">#</a> </h2>

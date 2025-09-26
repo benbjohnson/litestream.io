@@ -20,12 +20,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: mcp">
-<meta name="twitter:description" content="The mcp server provides Model Context Protocol integration, allowing AI assistants to interact with Litestream databases and replicas through a standardized HTTP API.
+<meta name="twitter:description" content="⚠️ Note: MCP support is available in Litestream v0.5.0&#43;. This feature is not available in v0.3.13.
+The mcp server provides Model Context Protocol integration, allowing AI assistants to interact with Litestream databases and replicas through a standardized HTTP API.
 Configuration Enable the MCP server by adding the mcp-addr setting to your configuration file:
 mcp-addr: &#34;:3001&#34; Security For production deployments, bind to localhost only:
-mcp-addr: &#34;127.0.0.1:3001&#34; Available Tools The MCP server exposes these tools for AI assistants:
-litestream_info Get system status and configuration information.
-litestream_databases List all configured databases and their replica status.">
+mcp-addr: &#34;127.0.0.1:3001&#34; Available Tools The MCP server exposes these tools for AI assistants:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -199,7 +198,10 @@ litestream_databases List all configured databases and their replica status.">
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
 		<h1>Command: mcp</h1>
 			<p class="lead"></p>
-			<p>The <code>mcp</code> server provides Model Context Protocol integration, allowing AI assistants
+			<blockquote>
+<p><strong>⚠️ Note:</strong> MCP support is available in Litestream v0.5.0+. This feature is not available in v0.3.13.</p>
+</blockquote>
+<p>The <code>mcp</code> server provides Model Context Protocol integration, allowing AI assistants
 to interact with Litestream databases and replicas through a standardized HTTP API.</p>
 <h2 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Enable the MCP server by adding the <code>mcp-addr</code> setting to your configuration file:</p>
