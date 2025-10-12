@@ -74,8 +74,8 @@ is set up to replicate a database at `/var/lib/myapp/db` to a remote S3 bucket.
 ```yml
 dbs:
   - path: /var/lib/myapp/db
-    replicas:
-      - url: s3://YOURBUCKET/db
+    replica:
+      url: s3://YOURBUCKET/db
 ```
 
 Next, we'll need to add this as a ConfigMap in our Kubernetes cluster:

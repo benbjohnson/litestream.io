@@ -30,12 +30,12 @@ the file"_ as Litestream files are immutable and don't require versioning.
 ```yaml
 dbs:
   - path: path-to-your-local-db-file
-    replicas:
-      - type: s3
-        bucket: your-bucket-name
-        path: db # change to whatever path you want
-        endpoint: s3.us-west-000.backblazeb2.com # change this
-        force-path-style: true
+    replica:
+      type: s3
+      bucket: your-bucket-name
+      path: db # change to whatever path you want
+      endpoint: s3.us-west-000.backblazeb2.com # change this
+      force-path-style: true
 ```
 
 ## Create a user
@@ -69,10 +69,10 @@ secret-access-key: your-backblaze-applicationKey
 
 dbs:
   - path: path-to-your-local-db-file
-    replicas:
-      - type: s3
-        bucket: your-bucket-name
-        path: db # change to whatever path you want
-        endpoint: s3.us-west-000.backblazeb2.com # change this
-        force-path-style: true
+    replica:
+      type: s3
+      bucket: your-bucket-name
+      path: db # change to whatever path you want
+      endpoint: s3.us-west-000.backblazeb2.com # change this
+      force-path-style: true
 ```

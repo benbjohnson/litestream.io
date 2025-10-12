@@ -95,8 +95,8 @@ secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: s3://SPACENAME.nyc3.digitaloceanspaces.com/db
+    replica:
+      url: s3://SPACENAME.nyc3.digitaloceanspaces.com/db
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -104,12 +104,12 @@ Or you can expand your configuration into multiple fields:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type: s3
-        bucket:   SPACENAME
-        path:     db
-        endpoint: nyc3.digitaloceanspaces.com
-        region:   nyc3   # set to your region
+    replica:
+      type: s3
+      bucket:   SPACENAME
+      path:     db
+      endpoint: nyc3.digitaloceanspaces.com
+      region:   nyc3   # set to your region
 ```
 
 You may also specify your key credentials on a per-replica basis:
@@ -117,10 +117,10 @@ You may also specify your key credentials on a per-replica basis:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: s3://SPACENAME.nyc3.digitaloceanspaces.com/db
-        access-key-id: xxxxxxxxxxxxxxxxxxx
-        secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+    replica:
+      url: s3://SPACENAME.nyc3.digitaloceanspaces.com/db
+      access-key-id: xxxxxxxxxxxxxxxxxxx
+      secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
 

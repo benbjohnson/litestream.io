@@ -65,9 +65,9 @@ secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 dbs:
   - path: /home/MYUSER/friends.db
-    replicas:
-      - url: s3://mybkt.litestream.io/friends.db
-        sync-interval: 1s
+    replica:
+      url: s3://mybkt.litestream.io/friends.db
+      sync-interval: 1s
 EOF
 ```
 

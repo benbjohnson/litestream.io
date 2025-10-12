@@ -44,8 +44,8 @@ secret-access-key: YOUR_SECRET_ACCESS_KEY
 
 dbs:
   - path: /data/db
-    replicas:
-      - url: s3://BUCKET/db
+    replica:
+      url: s3://BUCKET/db
 ```
 
 Note that the database `path` is using the `/data` path in your Docker container.
