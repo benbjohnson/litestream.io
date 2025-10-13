@@ -247,8 +247,8 @@ text in configuration file to your S3 bucket name. This configuration file
 is set up to replicate a database at <code>/var/lib/myapp/db</code> to a remote S3 bucket.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://YOURBUCKET/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://YOURBUCKET/db</span><span class="w">
 </span></span></span></code></pre></div><p>Next, we&rsquo;ll need to add this as a ConfigMap in our Kubernetes cluster:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl create configmap litestream --from-file<span class="o">=</span>litestream.yml
 </span></span></code></pre></div><h2 id="create-a-statefulset">Create a StatefulSet<a href="#create-a-statefulset" class="anchor" aria-hidden="true">#</a> </h2>
