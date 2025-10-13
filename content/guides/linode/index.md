@@ -97,8 +97,8 @@ secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: s3://BUCKETNAME.us-east-1.linodeobjects.com/db
+    replica:
+      url: s3://BUCKETNAME.us-east-1.linodeobjects.com/db
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -106,12 +106,12 @@ Or you can expand your configuration into multiple fields:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type: s3
-        bucket:   BUCKETNAME
-        path:     db
-        endpoint: https://us-east-1.linodeobjects.com
-        region:   us-east-1   # set to your region
+    replica:
+      type: s3
+      bucket:   BUCKETNAME
+      path:     db
+      endpoint: https://us-east-1.linodeobjects.com
+      region:   us-east-1   # set to your region
 ```
 
 You may also specify your key credentials on a per-replica basis:
@@ -119,10 +119,10 @@ You may also specify your key credentials on a per-replica basis:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: s3://BUCKETNAME.us-east-1.linodeobjects.com/db
-        access-key-id: xxxxxxxxxxxxxxxxxxx
-        secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    replica:
+      url: s3://BUCKETNAME.us-east-1.linodeobjects.com/db
+      access-key-id: xxxxxxxxxxxxxxxxxxx
+      secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 

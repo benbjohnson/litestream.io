@@ -56,14 +56,14 @@ Here is an example `litestream.yml` configuration file. Make sure to specifi the
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type: s3
-        bucket: <bucket-name>
-        path: db
-        endpoint: s3.<region>.scw.cloud # e.g. s3.fr-par.scw.cloud
-        region: <region> # e.g. fr-par
-        access-key-id: SCWXXXXXXXXXXXXXXXXX
-        secret-access-key: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    replica:
+      type: s3
+      bucket: <bucket-name>
+      path: db
+      endpoint: s3.<region>.scw.cloud # e.g. s3.fr-par.scw.cloud
+      region: <region> # e.g. fr-par
+      access-key-id: SCWXXXXXXXXXXXXXXXXX
+      secret-access-key: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 [os]: https://www.scaleway.com/en/object-storage/

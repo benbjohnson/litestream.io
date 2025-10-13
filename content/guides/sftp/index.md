@@ -45,8 +45,8 @@ file][]. You can configure a replica for your database using the `url` format.
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: sftp://USER:PASSWORD@HOST:PORT/PATH
+    replica:
+      url: sftp://USER:PASSWORD@HOST:PORT/PATH
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -54,12 +54,12 @@ Or you can expand your configuration into multiple fields:
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - type:     sftp
-        host:     HOST:PORT
-        user:     USER
-        password: PASSWORD
-        path:     PATH
+    replica:
+      type:     sftp
+      host:     HOST:PORT
+      user:     USER
+      password: PASSWORD
+      path:     PATH
 ```
 
 The `path` is treated as a relative path from the present working directory
@@ -71,9 +71,9 @@ file path should point to your private key.
 ```yaml
 dbs:
   - path: /path/to/local/db
-    replicas:
-      - url: sftp://USER@HOST:PORT/PATH
-        key-path: /path/to/id_rsa
+    replica:
+      url: sftp://USER@HOST:PORT/PATH
+      key-path: /path/to/id_rsa
 ```
 
 
