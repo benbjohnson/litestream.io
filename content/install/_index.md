@@ -11,5 +11,5 @@ easy to get up and running quickly. If a binaries are not available for your
 operating system or architecture, you'll need to build Litestream from source.
 
 - [Install on macOS](/install/mac)
-- [Install on Debian](/install/debian)
+- [Install on Linux](/install/linux) (Debian/Ubuntu or RPM-based systems)
 - [Build from source](/install/source)
