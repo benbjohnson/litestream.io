@@ -3,6 +3,6 @@ params:
   docsVersion: "0.3"
   versionBanner:
     version: "v0.3.13"
-    status: "Stable - Recommended for production use"
-    otherVersionUrl: "https://v0-5--litestream.netlify.app"
-    otherVersionText: "View v0.5.x development docs"
+    status: "Previous version - Critical fixes only"
+    otherVersionUrl: "https://litestream.io"
+    otherVersionText: "View v0.5.x (Latest)"

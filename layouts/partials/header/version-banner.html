@@ -1,5 +1,5 @@
 {{- if .Site.Params.versionBanner -}}
-<div class="version-banner alert alert-info text-center mb-0" role="alert" style="border-radius: 0;">
+<div class="version-banner alert alert-{{ if eq .Site.Params.docsVersion "0.5" }}info{{else}}warning{{end}} text-center mb-0" role="alert" style="border-radius: 0;">
   <div class="container">
     <strong>{{ .Site.Params.versionBanner.version }}</strong> - {{ .Site.Params.versionBanner.status }}
     {{- if .Site.Params.versionBanner.otherVersionUrl -}}
