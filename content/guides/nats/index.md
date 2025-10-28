@@ -8,8 +8,6 @@ menu:
 weight: 470
 ---
 
-> **⚠️ Note:** NATS JetStream support is available in Litestream v0.5.0+. This feature is not available in v0.3.13.
-
 This guide will show you how to use NATS JetStream Object Store as a replica
 destination for Litestream. You will need a NATS server with JetStream enabled
 to complete this guide.

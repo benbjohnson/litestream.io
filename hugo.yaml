@@ -1,2 +1,8 @@
 params:
-  litestreamVersion: 0.3.13
+  litestreamVersion: 0.5.2
+  docsVersion: "0.5"
+  versionBanner:
+    version: "v0.5.x"
+    status: "Development - Not for production use"
+    otherVersionUrl: "https://litestream.io"
+    otherVersionText: "View v0.3.13 stable docs"
