@@ -3,6 +3,6 @@ params:
   docsVersion: "0.5"
   versionBanner:
     version: "v0.5.x"
-    status: "Development - Not for production use"
-    otherVersionUrl: "https://litestream.io"
-    otherVersionText: "View v0.3.13 stable docs"
+    status: "Latest - Actively maintained with new features and bug fixes"
+    otherVersionUrl: "PLACEHOLDER_WILL_UPDATE_AFTER_NETLIFY_DEPLOY"
+    otherVersionText: "View v0.3.13 (Previous)"
