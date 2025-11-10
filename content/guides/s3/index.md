@@ -160,8 +160,7 @@ The following is the minimum policy to use with Litestream. Please replace the
                 "s3:GetObject"
             ],
             "Resource": [
-                "arn:aws:s3:::<BUCKET>/*",
-                "arn:aws:s3:::<BUCKET>"
+                "arn:aws:s3:::<BUCKET>/*"
             ]
         }
     ]
