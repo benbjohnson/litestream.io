@@ -17,8 +17,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build website
-        run: npm run build
+      - name: Build v0.5 (latest) documentation
+        run: |
+          git fetch origin docs-v0.5
+          git checkout docs-v0.5
+          npm run build
+          mkdir -p /tmp/public-combined
+          cp -r public/* /tmp/public-combined/
+
+      - name: Build v0.3 (previous) documentation
+        run: |
+          git fetch origin docs-v0.3
+          git checkout docs-v0.3
+          npm run build -- --baseURL=https://litestream.io/v0.3/
+          mkdir -p /tmp/public-combined/v0.3
+          cp -r public/* /tmp/public-combined/v0.3/
+
+      - name: Prepare combined build
+        run: |
+          rm -rf public
+          cp -r /tmp/public-combined public
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
