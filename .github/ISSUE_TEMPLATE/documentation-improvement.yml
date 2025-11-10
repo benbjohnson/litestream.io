@@ -1,0 +1,64 @@
+name: Documentation Improvement
+description: Suggest an improvement to existing documentation (clarity, examples, structure)
+title: "docs: "
+labels: ["documentation", "enhancement"]
+assignees: []
+
+body:
+  - type: dropdown
+    id: version
+    attributes:
+      label: Affected Version(s)
+      description: Which documentation version(s) would benefit from this improvement?
+      options:
+        - v0.5.x (main branch)
+        - v0.3.x (docs-v0.3 branch)
+        - Both versions
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: Affected Page/Section
+      description: URL or file path of the documentation
+      placeholder: "e.g., https://litestream.io/docs/getting-started/ or content/docs/getting-started/index.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_issue
+    attributes:
+      label: What Could Be Better?
+      description: What's unclear, confusing, or could be improved?
+      placeholder: "e.g., The configuration examples don't show how to handle authentication errors"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: How would you improve this section?
+      placeholder: "e.g., Add an example showing error handling, or restructure the section to follow this order..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: applies_both
+    attributes:
+      label: Version Compatibility
+      options:
+        - label: "This improvement applies to both v0.3.x and v0.5.x (if selected version is Both)"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Examples, screenshots, or related issues
+      placeholder: "Add any additional context that might help"
+
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** If this improvement applies to both versions, changes should be made to each branch. See the README for the dual-version contribution workflow.
