@@ -197,6 +197,87 @@ The following settings are specific to S3 replicas:
   a local node such as MinIO and you are using self-signed certificates.
 
 
+### MinIO Configuration
+
+MinIO is an S3-compatible object storage service. The main difference from AWS S3
+is that MinIO requires specifying an `endpoint` parameter pointing to your MinIO
+server. Additionally, when using MinIO, you must create access keys in the MinIO
+console before configuring Litestream.
+
+#### Local MinIO (Docker)
+
+For local testing with MinIO running on your machine via Docker, you can use
+command-line environment variables:
+
+```yaml
+access-key-id:     minioadmin
+secret-access-key: minioadmin
+```
+
+Command-line replication to local MinIO:
+
+```sh
+export LITESTREAM_ACCESS_KEY_ID=minioadmin
+export LITESTREAM_SECRET_ACCESS_KEY=minioadmin
+litestream replicate mydb.db s3://mybkt.localhost:9000/mydb.db
+```
+
+#### Remote MinIO Server
+
+For remote MinIO servers, you **must** use a configuration file and specify the
+`endpoint` parameter. Environment variables take precedence over config file
+values, so ensure any conflicting environment variables are unset before running
+Litestream.
+
+Configuration file example with remote MinIO:
+
+```yaml
+dbs:
+  - path: /var/lib/mydb.db
+    replicas:
+      - type: s3
+        bucket: mybkt
+        path: mydb.db
+        endpoint: https://minio.example.com:9000
+        region: us-east-1
+        access-key-id: myaccesskey
+        secret-access-key: mysecretkey
+```
+
+Or using the URL shorthand form:
+
+```yaml
+dbs:
+  - path: /var/lib/mydb.db
+    replicas:
+      - url: s3://mybkt/mydb.db
+        endpoint: https://minio.example.com:9000
+        region: us-east-1
+        access-key-id: myaccesskey
+        secret-access-key: mysecretkey
+```
+
+#### Key Points for MinIO Configuration
+
+1. **Endpoint**: Required for non-AWS S3 services. Should be the full URL to your
+   MinIO server (e.g., `https://minio.example.com:9000` or
+   `http://minio.local:9000`).
+
+2. **Region**: While MinIO ignores the region parameter, Litestream still requires
+   it. You can use any value such as `us-east-1`.
+
+3. **Access Keys**: These must be created in the MinIO console before use. The
+   default MinIO installation uses `minioadmin` / `minioadmin` but you should
+   change these credentials in production.
+
+4. **TLS Certificate**: If using self-signed certificates, add `skip-verify: true`
+   to your replica configuration (not recommended for production).
+
+5. **Environment Variables**: Environment variables take precedence over config
+   file values. If you're using a config file with inline credentials, unset any
+   conflicting `LITESTREAM_*` or `AWS_*` environment variables first.
+
+
 ### File replica
 
 File replicas can be configured using the `"path"` field:
