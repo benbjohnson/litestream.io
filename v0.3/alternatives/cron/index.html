@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/v0.3/main.6b1b8740d9d3d1c9f37138879a5cb29ec186c056723f6421dd21deb4e18504eb68df0e73df56491b24c90d1ac9de080e4d991034742630feac126b345b419f04.css" integrity="sha512-axuHQNnT0cnzcTiHmlyynsGGwFZyP2Qh3SHetOGFBOto3w5z31ZJGyTJDRrJ3ggOTZkQNHQmMP6sEms0W0GfBA==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Cron-based backup - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/v0.3/alternatives/cron/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Cron-based backup">
+<meta name="twitter:description" content="Overview Sometimes Litestream can be overkill for projects with a small database that do not have high durability requirements. In these cases, it may be more appropriate to simply back up your database daily or hourly. This approach can also be used in conjunction with Litestream as a fallback. You can never have too many backups!
+❗️ Do not use `cp` to back up SQLite databases. It is not transactionally safe.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/v0.3\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Alternatives",
+        "item": "https:\/\/litestream.io\/v0.3\/alternatives\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Cron",
+        "item": "https:\/\/litestream.io\/v0.3\/alternatives\/cron\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/v0.3/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/v0.3/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/v0.3/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/v0.3/site.webmanifest">
+  
+</head>
+  <body class="alternatives single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/v0.3/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.3.13</strong> - Previous version - Critical fixes only| <a href="https://litestream.io" class="alert-link">View v0.5.x (Latest)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/v0.3/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/how-it-works/">How it works</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/v0.3/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/sftp/">Replicating to an SFTP Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/snapshots/">Command: snapshots</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a>
+      <ul>
+        <li><a href="#backup--compress">Backup &amp; compress</a></li>
+        <li><a href="#external-storage-using-s3">External storage using S3</a></li>
+        <li><a href="#rolling-backups">Rolling backups</a></li>
+        <li><a href="#monitoring-backups">Monitoring backups</a></li>
+        <li><a href="#restoring--testing-backups">Restoring &amp; testing backups</a></li>
+        <li><a href="#configuring-cron">Configuring cron</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Cron-based backup</h1>
+			<p class="lead"></p>
+			<h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Sometimes Litestream can be overkill for projects with a small database that do
+not have high durability requirements. In these cases, it may be more
+appropriate to simply back up your database daily or hourly. This approach can
+also be used in conjunction with Litestream as a fallback. You can never have
+too many backups!</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">❗️</div>
+  <div class="w-100">Do not use `cp` to back up SQLite databases. It is not transactionally safe.</div>
+</div>
+<h3 id="backup--compress">Backup &amp; compress<a href="#backup--compress" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The <code>sqlite3</code> command line interface comes with a built-in <code>.backup</code> command
+which will safely backup your database to another file location. You can run
+it directly from the command line:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s1">&#39;.backup /path/to/backup&#39;</span>
+</span></span></code></pre></div><p>The <code>VACUUM INTO</code> command provides an alternative to this which can work better
+if your database is receiving a high volume of writes, as it captures a snapshot
+from a single transaction. You can use that like this:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
+</span></span></code></pre></div><p>Both of these examples output your database to the file <code>/path/to/backup</code>. B-tree
+databases like SQLite compress well so it&rsquo;s recommended to compress your database:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">gzip /path/to/backup
+</span></span></code></pre></div><p>This will compress your database to a new file called <code>/path/to/backup.gz</code>. You
+can then upload this file to external storage.</p>
+<h3 id="external-storage-using-s3">External storage using S3<a href="#external-storage-using-s3" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If you are using S3, you can use the <a href="https://aws.amazon.com/cli/">AWS CLI</a> to
+copy the file to an S3 bucket:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup.gz
+</span></span></code></pre></div><h3 id="rolling-backups">Rolling backups<a href="#rolling-backups" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can also add the day or hour to your filename to create a rolling backup.
+For example, adding the hour to your filename gives you a back up every hour
+for the last day. Newer backups for the same hour will overwrite the previous
+one:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># 1-day, rolling hourly backup</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%H<span class="sb">`</span>.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 1-month, rolling daily backup</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%d<span class="sb">`</span>.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 1-month, rolling hourly backup</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /path/to/backup.gz s3://mybucket/backup-<span class="sb">`</span>date +%d%H<span class="sb">`</span>.gz
+</span></span></code></pre></div><h3 id="monitoring-backups">Monitoring backups<a href="#monitoring-backups" class="anchor" aria-hidden="true">#</a> </h3>
+<p>It&rsquo;s recommended to call a &ldquo;dead man&rdquo; service after performing your backup. This
+ensures that you will be notified if your backups stop working for any reason.
+<a href="https://deadmanssnitch.com/">Dead Man&rsquo;s Snitch</a> is one such service although
+others also exist.</p>
+<h3 id="restoring--testing-backups">Restoring &amp; testing backups<a href="#restoring--testing-backups" class="anchor" aria-hidden="true">#</a> </h3>
+<p>A SQLite backup is simply the database file. To restore the database, download
+it and decompress (if necessary) and move it into your application&rsquo;s database
+path. Be sure to stop your application before copying the database into place.</p>
+<p>While it is rare for backups to go wrong with SQLite, it&rsquo;s always good to
+regularly test your backups. To do this, simply download the back up and run
+an integrity check against it:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 /path/to/backup <span class="s1">&#39;PRAGMA integrity_check&#39;</span>
+</span></span></code></pre></div><h3 id="configuring-cron">Configuring cron<a href="#configuring-cron" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://man7.org/linux/man-pages/man5/crontab.5.html"><code>cron</code></a> is a built-in
+Unix tool for periodically running commands. First, we&rsquo;ll create a script to
+run our backup commands. This is an example that combines the commands from
+above.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="cp">#!/bin/bash -x
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Ensure script stops when commands fail.</span>
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Backup &amp; compress our database to the temp directory.</span>
+</span></span><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s2">&#34;VACUUM INTO &#39;/path/to/backup&#39;&#34;</span>
+</span></span><span class="line"><span class="cl">gzip /tmp/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Upload backup to S3 using a rolling daily naming scheme.</span>
+</span></span><span class="line"><span class="cl">aws s3 cp /tmp/db.gz s3://mybucket/db-<span class="sb">`</span>date +%d<span class="sb">`</span>.gz
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Notify dead man that back up completed successfully.</span>
+</span></span><span class="line"><span class="cl">curl -d <span class="nv">s</span><span class="o">=</span><span class="nv">$?</span> https://nosnch.in/xxxxxxxxxx <span class="p">&amp;</span>&gt; /dev/null
+</span></span></code></pre></div><p>Then you can configure <code>crontab</code> to run this daily at midnight:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Edit your cron jobs</span>
+</span></span><span class="line"><span class="cl">crontab -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Add this to the end of the crontab</span>
+</span></span><span class="line"><span class="cl"><span class="m">0</span> <span class="m">0</span> * * * /path/to/my_backup_script.sh
+</span></span></code></pre></div>
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/v0.3/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/v0.3/index.min.c935650d84be045945b2d1d6db8f8c6bed84d5b629d05d2dabb4c4b0090e71784dae56d8b2ef5da783124b4fdeff00b81a61e161123740ad11d8de3db9de79da.js" integrity="sha512-yTVlDYS&#43;BFlFstHW24&#43;Ma&#43;2E1bYp0F0tq7TEsAkOcXhNrlbYsu9dp4MSS0/e/wC4GmHhYRI3QK0R2N49ud552g==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

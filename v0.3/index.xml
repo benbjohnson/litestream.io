@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Litestream on </title>
+    <link>https://litestream.io/v0.3/</link>
+    <description>Recent content in Litestream on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="https://litestream.io/v0.3/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Getting Started</title>
+      <link>https://litestream.io/v0.3/getting-started/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/getting-started/</guid>
+      <description>This tutorial will get you up and running with Litestream locally and replicating an SQLite database to an S3-compatible store called MinIO. This works the same as Amazon S3 but it&amp;rsquo;s easier to get started.
+By the end, you&amp;rsquo;ll understand the replicate and restore commands and be able to continuously backup your database. It assumes you&amp;rsquo;re comfortable on the command line and have Docker installed.
+⏱ You should expect this tutorial to take about 10 minutes.</description>
+    </item>
+    
+    <item>
+      <title>Tips &amp; Caveats</title>
+      <link>https://litestream.io/v0.3/tips/</link>
+      <pubDate>Wed, 10 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/tips/</guid>
+      <description>Running an application that uses SQLite and Litestream can require some small tweaks to optimize performance and usability. There are also some important caveats to know.
+Busy timeout SQLite is built to run as a multi-process embedded database and Litestream acts as just another process. However, Litestream requires periodic but short write locks on the database when checkpointing occurs. SQLite will return an error by default if your application tries to obtain a write lock at the same time.</description>
+    </item>
+    
+    <item>
+      <title>How it works</title>
+      <link>https://litestream.io/v0.3/how-it-works/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/how-it-works/</guid>
+      <description>Litestream is a streaming replication tool for SQLite databases. It runs as a separate background process and continuously copies write-ahead log pages from disk to one or more replicas. This asynchronous replication provides disaster recovery similar to what is available with database servers like Postgres or MySQL.
+Understanding the WAL SQLite has a journaling mode called &amp;ldquo;WAL&amp;rdquo; (write-ahead log) which writes database page changes to a separate -wal file first before later copying those pages back into the main database file.</description>
+    </item>
+    
+    <item>
+      <title>Alternatives</title>
+      <link>https://litestream.io/v0.3/alternatives/</link>
+      <pubDate>Sun, 17 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/alternatives/</guid>
+      <description>Overview Litestream aims to provide a balance between durability and operational complexity by batching changes into one-second windows and asynchronously backing those changes up to external storage. This improves write performance at the expense of having a small window of data loss in the event of a catastrophic failure.
+However, this tradeoff may not make sense for all applications. This page lists alternative approaches and when they might be appropriate.</description>
+    </item>
+    
+    <item>
+      <title>Blogs</title>
+      <link>https://litestream.io/v0.3/blog/</link>
+      <pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/blog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Documentation</title>
+      <link>https://litestream.io/v0.3/docs/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/docs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>How-To Guides</title>
+      <link>https://litestream.io/v0.3/guides/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/guides/</guid>
+      <description>Overview These guides provides instructions for running Litestream in production on different platforms.
+Infrastructure guides Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service Replica guides Amazon S3 Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Scaleway Object Storage SFTP Server </description>
+    </item>
+    
+    <item>
+      <title>Install</title>
+      <link>https://litestream.io/v0.3/install/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/install/</guid>
+      <description>Overview Most users should install Litestream using prebuilt binaries as they make it easy to get up and running quickly. If a binaries are not available for your operating system or architecture, you&amp;rsquo;ll need to build Litestream from source.
+Install on macOS Install on Debian Build from source </description>
+    </item>
+    
+    <item>
+      <title>Reference</title>
+      <link>https://litestream.io/v0.3/reference/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://litestream.io/v0.3/reference/</guid>
+      <description>The Litestream command line provides several subcommands to help you manage replication &amp;amp; recovery of your databases. This reference provides details about the options available and different modes of operation.
+Commands The litestream commands are:
+litestream databases — Lists databases specified in config file. litestream generations — list available generations for a database. litestream replicate — Runs a server to replicate databases. litestream restore — Recovers database backup from a replica.</description>
+    </item>
+    
+  </channel>
+</rss>

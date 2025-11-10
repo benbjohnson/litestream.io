@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on </title>
+    <link>https://litestream.io/v0.3/blog/</link>
+    <description>Recent content in Blogs on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Wed, 10 Feb 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://litestream.io/v0.3/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Why I Built Litestream</title>
+      <link>https://litestream.io/v0.3/blog/why-i-built-litestream/</link>
+      <pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/blog/why-i-built-litestream/</guid>
+      <description>tl;dr—Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp;amp; Litestream for your production applications.&#xA;When I was your age&amp;hellip; I can tell I&amp;rsquo;m getting old because I talk about the &amp;ldquo;good old days&amp;rdquo; of computing. Back when knowing a single programming language and SQL was good enough to work at most jobs.</description>
+    </item>
+  </channel>
+</rss>

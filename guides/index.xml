@@ -97,7 +97,7 @@
       <link>https://litestream.io/guides/nats/</link>
       <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/nats/</guid>
-      <description>⚠️ Note: NATS JetStream support is available in Litestream v0.5.0+. This feature is not available in v0.3.13.&#xA;This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.&#xA;Setup Install NATS Server Using Docker:&#xA;# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:</description>
+      <description>This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.&#xA;Setup Install NATS Server Using Docker:&#xA;# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:&#xA;# Download and install NATS server curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip unzip nats-server.</description>
     </item>
   </channel>
 </rss>

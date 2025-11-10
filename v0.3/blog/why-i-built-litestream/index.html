@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/v0.3/main.6b1b8740d9d3d1c9f37138879a5cb29ec186c056723f6421dd21deb4e18504eb68df0e73df56491b24c90d1ac9de080e4d991034742630feac126b345b419f04.css" integrity="sha512-axuHQNnT0cnzcTiHmlyynsGGwFZyP2Qh3SHetOGFBOto3w5z31ZJGyTJDRrJ3ggOTZkQNHQmMP6sEms0W0GfBA==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Why I Built Litestream - Litestream</title>
+<meta name="description" content="Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp; Litestream for your production applications.">
+<link rel="canonical" href="https://litestream.io/v0.3/blog/why-i-built-litestream/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Why I Built Litestream">
+<meta name="twitter:description" content="Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite &amp; Litestream for your production applications.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https:\/\/litestream.io\/v0.3\/blog\/why-i-built-litestream\/"
+      },
+      "headline": "Why I Built Litestream",
+      "image": [],
+      "datePublished": "2021-02-10T00:00:00CET",
+      "dateModified": "2021-02-10T00:00:00CET",
+      "author": {
+        "@type": "Organization",
+        "name": "Litestream"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Litestream",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https:\/\/litestream.io\/litestream.png"
+        }
+        },
+      "description": "Despite an exponential increase in computing power, our applications require more machines than ever because of architectural decisions made 25 years ago. You can eliminate much of your complexity and cost by using SQLite \u0026 Litestream for your production applications."
+    }
+    </script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/v0.3\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Blog",
+        "item": "https:\/\/litestream.io\/v0.3\/blog\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Why I Built Litestream",
+        "item": "https:\/\/litestream.io\/v0.3\/blog\/why-i-built-litestream\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/v0.3/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/v0.3/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/v0.3/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/v0.3/site.webmanifest">
+  
+</head>
+  <body class="blog single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/v0.3/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.3.13</strong> - Previous version - Critical fixes only| <a href="https://litestream.io" class="alert-link">View v0.5.x (Latest)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+<div class="row justify-content-center">
+	<div class="col-md-12 col-lg-10 col-xl-8">
+		<article>
+			<div class="blog-header">
+				<h1>Why I Built Litestream</h1>
+				<p>
+	<small>
+		Posted February 10, 2021
+		by <a class="stretched-link position-relative" href="https://twitter.com/benbjohnson" target="_blank">Ben Johnson</a>
+		&nbsp;&hyphen;&nbsp;
+		<strong>6&nbsp;min read</strong>
+	</small>
+<p>
+			</div>
+			<p class="lead"></p>
+			<p><em>tl;dr—Despite an exponential increase in computing power, our applications
+require more machines than ever because of architectural decisions made 25 years
+ago. You can eliminate much of your complexity and cost by using SQLite &amp;
+Litestream for your production applications.</em></p>
+<h2 id="when-i-was-your-age">When I was your age&hellip;</h2>
+<p>I can tell I&rsquo;m getting old because I talk about the &ldquo;good old days&rdquo; of computing.
+Back when knowing a single programming language and SQL was good enough to work
+at most jobs. Back when you could build all your web pages with basic HTML skills.</p>
+<p>But the good old days weren&rsquo;t actually that good.</p>
+<p>They kinda sucked.</p>
+<p>In 1995, the <a href="https://tedium.co/2019/10/01/lamp-stack-php-mysql-apache-history/">LAMP stack</a> emerged. It was a combination of Linux, Apache,
+MySQL, &amp; PHP. It&rsquo;s a simple stack that all lived on one box. Unfortunately, that
+box was stocked with a CPU that was measured in megahertz and memory that was
+measured in megabytes. It was dog slow.</p>
+<p>But <a href="https://en.wikipedia.org/wiki/Moore%27s_law">Moore&rsquo;s Law</a> promised a better future as computers became
+exponentially faster. So why do we need more computers than ever before?</p>
+<h3 id="where-it-went-wrong">Where it went wrong</h3>
+<p>Since early web languages like PHP and Ruby were slow, you didn&rsquo;t want them
+running on your database server so you moved them to their own servers in what
+is called an <a href="https://en.wikipedia.org/wiki/Multitier_architecture">n-tier architecture</a>. Now you can keep adding more
+stateless Ruby servers to this <em>presentation layer</em> and scale your application.</p>
+<p>Database servers like Oracle, PostgreSQL, and MySQL tended to be complicated to
+operate so this architecture helped to isolate them. Scaling and managing
+a fleet of database servers is a nighmare so organizations scale up their
+database machine vertically as much as possible before they scaled horizontally
+to multiple servers.</p>
+<p>This n-tier architecture sounds simple at first but it has hidden complexity. On
+a single machine, our server could add an in-memory cache to speed up requests
+but now data is shared across multiple machines so we must add a <a href="https://memcached.org/">memcached</a>
+or <a href="https://redis.io/">Redis</a> server to share cached data. Database servers are easily overloaded
+by numerous connections so we have to add intermediate services like
+<a href="https://www.pgbouncer.org/">PgBouncer</a> to pool connections. If we have events in our system that must be
+communicated to all our nodes then we need a cluster of <a href="https://kafka.apache.org/">Kafka</a> machines.</p>
+<p>Now we have a fleet of machines to manage. These systems have then caused an
+explosion in infrastructure automation with tooling like <a href="https://kubernetes.io/">Kubernetes</a>. All of
+these layers slow us down from our job of writing software systems that solve
+real problems.</p>
+<p>What started as a simple two-tier software system has grown into a behemoth with
+a dozen layers of complexity.</p>
+<p>Complexity begets complexity.</p>
+<h2 id="building-litestream">Building Litestream</h2>
+<p>My background is in writing databases. Seven years ago, I wrote a pure Go,
+embedded key/value store called <a href="http://github.com/boltdb/bolt">BoltDB</a> that has seen success in other
+open-source applications that use it such as <a href="https://etcd.io/">etcd</a>.</p>
+<p>For a while, I used Bolt when writing applications and it was refreshing because
+there were no depedencies to set up and performance was <em>blazingly fast</em>.
+However, it lacked features like schema migration, a query language, or a
+<a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a> so it made application development difficult. But instead of going back
+to database servers like Postgres, I turned to <a href="https://sqlite.org/">SQLite</a>.</p>
+<h3 id="moving-to-sqlite">Moving to SQLite</h3>
+<p><em>&ldquo;But nobody writes production applications with SQLite, right?&rdquo;</em></p>
+<p>No, there&rsquo;s a growing movement of people that see the value of single process
+applications. Expensify has run tests of <a href="https://blog.expensify.com/2018/01/08/scaling-sqlite-to-4m-qps-on-a-single-server/">4 million queries per second on a
+single node</a> using SQLite. <a href="https://twitter.com/davidcrawshaw">David Crawshaw</a> has a
+<a href="https://www.youtube.com/watch?v=RqubKSF3wig">conference talk</a> and <a href="https://crawshaw.io/blog/one-process-programming-notes">blog post</a> on building
+single process applications on SQLite. Django co-creator <a href="https://simonwillison.net/">Simon
+Willison</a> built a data exploration and publishing tool called
+<a href="https://datasette.io/">Datasette</a> that&rsquo;s built on SQLite.</p>
+<p>SQLite is known for being bulletproof and having an <a href="sqlite-testing">absurdly in-depth testing
+suite</a>. Its motto is <em>&ldquo;Small. Fast. Reliable. Choose any three.&rdquo;</em></p>
+<p>So why is SQLite considered a &ldquo;toy&rdquo; database in the application development
+world and not a production database?</p>
+<h3 id="that-one-big-issue">That one big issue</h3>
+<p>The biggest problem with using SQLite in production is disaster recovery. If
+your server dies, so does your data. That&rsquo;s&hellip; not good.</p>
+<p>Other database servers have replication so they can stream database changes to
+another server in case one goes down. The best you can hope for with standard
+SQLite is to run a nightly backup. Solutions like <a href="https://github.com/rqlite/rqlite">rqlite</a> are great but
+it requires a 3-node cluster.</p>
+<p>Why can&rsquo;t SQLite have a replication tool that&rsquo;s as easy to use as SQLite?</p>
+<h3 id="the-problem-litestream-solves">The problem Litestream solves</h3>
+<p>I built Litestream to bring back sanity to application development. Litestream
+is a tool that runs in a separate process and continuously replicates a SQLite
+database to Amazon S3. You can get up and running with a few
+lines of configuration. Then you can set-it-and-forget-it and get back to
+writing code.</p>
+<p>You might think this sounds expensive to continuously write to cloud storage
+that provides <a href="https://aws.amazon.com/s3/storage-classes/">99.99% uptime</a> and <a href="https://aws.amazon.com/s3/storage-classes/">99.999999999% durability</a> but
+it&rsquo;s astoundingly cheap. Typical costs are only about $1 per month. Litestream
+is free and open-source too so there&rsquo;s never a license to pay for.</p>
+<h3 id="but-i-need-100-uptime">But I need 100% uptime&hellip;</h3>
+<p>The software industry has chased uptime as a goal in and of itself over the last
+several decades. Solutions such as Kubernetes tout the benefits of zero-downtime
+deployments but ignore that their inherent complexity causes availability
+issues. <a href="https://k8s.af/">There&rsquo;s even a web site dedicated to public postmortems related to
+Kubernetes.</a></p>
+<p>Most cloud providers provide multiple layers of redundancy in their systems to
+protect against individual node and network failures. This doesn&rsquo;t provide a
+100% guarantee but will provide you with very high uptime servers. Anecdotally,
+I&rsquo;ve run several VPS servers over the years which all have well over 99.9%
+uptime and have suffered no catastrophic failures.</p>
+<h3 id="sounds-good-but-how-do-you-scale-this">Sounds good, but how do you scale this?</h3>
+<p>Developers always want to know how to scale but that depends on their particular
+application. Typically, you want to scale vertically first by simply increasing
+amount of CPUs cores and RAM on your machine first.</p>
+<p>Servers these days have a <em>ton</em> of power. I recently wrote a Go web application
+with a SQLite database that would serve an HTTP request with multiple database
+queries in under <em>50µs</em> on a $5/month VPS. That translates to thousands of
+requests per second per core. SQLite scales reads well with the number of cores
+on a machine. Amazon AWS has machines that can then scale up to 96 CPU cores and
+hundreds of gigabytes of RAM.</p>
+<p>If you exceed the capacity of a single node, sharding your data can allow you to
+scale horizontally to multiple nodes. This works particularly well for SaaS
+applications where each customer is isolated from one another. Because SQLite
+and Litestream simplify deployment, managing a cluster of several isolated nodes
+is easy to maintain.</p>
+<h2 id="the-future-of-litestream">The Future of Litestream</h2>
+<p>Litestream is helping to simplify application development but that&rsquo;s only the
+start of it. There are exciting features coming including replication to
+<a href="https://github.com/benbjohnson/litestream/issues/8">read-only replicas</a>. This will give you the ability to run local
+copies of your database at the edge to deliver requests instantly.</p>
+<p>If you&rsquo;re interested in trying out Litestream, the <a href="/getting-started">Getting
+Started</a> can get you up and running in less than 10 minutes.</p>
+<p>I&rsquo;m interested to hear from others that want to simplify and improve application
+development. If you have ideas or thoughts about the future of Litestream,
+please get in touch on the <a href="https://github.com/benbjohnson/litestream/discussions">GitHub Discussions board</a> and drop me a
+line.</p>
+<p><em>Update: This post sparked a lot of discussion on Hacker News that you can <a href="https://news.ycombinator.com/item?id=26103776">read here</a>.</em></p>
+<p>—Ben Johnson (<a href="https://twitter.com/benbjohnson">@benbjohnson</a>)</p>
+
+		</article>
+	</div>
+</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/v0.3/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/v0.3/index.min.c935650d84be045945b2d1d6db8f8c6bed84d5b629d05d2dabb4c4b0090e71784dae56d8b2ef5da783124b4fdeff00b81a61e161123740ad11d8de3db9de79da.js" integrity="sha512-yTVlDYS&#43;BFlFstHW24&#43;Ma&#43;2E1bYp0F0tq7TEsAkOcXhNrlbYsu9dp4MSS0/e/wC4GmHhYRI3QK0R2N49ud552g==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/v0.3/main.6b1b8740d9d3d1c9f37138879a5cb29ec186c056723f6421dd21deb4e18504eb68df0e73df56491b24c90d1ac9de080e4d991034742630feac126b345b419f04.css" integrity="sha512-axuHQNnT0cnzcTiHmlyynsGGwFZyP2Qh3SHetOGFBOto3w5z31ZJGyTJDRrJ3ggOTZkQNHQmMP6sEms0W0GfBA==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Running in a Docker container - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/v0.3/guides/docker/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Running in a Docker container">
+<meta name="twitter:description" content="This guide will show you how to run Litestream within a Docker container either as a sidecar or within the same container as your application. You will need a Docker installed on your machine for this guide.
+❗️ The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms. Overview Docker is a common tool for deploying applications and Litestream can be easily integrated into your workflow.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/v0.3\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/v0.3\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Docker",
+        "item": "https:\/\/litestream.io\/v0.3\/guides\/docker\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/v0.3/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/v0.3/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/v0.3/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/v0.3/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/v0.3/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.3.13</strong> - Previous version - Critical fixes only| <a href="https://litestream.io" class="alert-link">View v0.5.x (Latest)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/v0.3/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link active" href="https://litestream.io/v0.3/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/sftp/">Replicating to an SFTP Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/snapshots/">Command: snapshots</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#running-as-a-sidecar">Running as a sidecar</a>
+      <ul>
+        <li><a href="#using-a-configuration-file">Using a configuration file</a></li>
+        <li><a href="#using-a-replica-url">Using a replica URL</a></li>
+      </ul>
+    </li>
+    <li><a href="#running-in-the-same-container">Running in the same container</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Running in a Docker container</h1>
+			<p class="lead"></p>
+			<p>This guide will show you how to run Litestream within a Docker container either
+as a sidecar or within the same container as your application. You will need a
+<a href="https://www.docker.com/">Docker</a> installed on your machine for this guide.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">❗️</div>
+  <div class="w-100">The host and container must use the same OS. For example, running SQLite on macOS and running Litestream on Linux will not work as they use different locking mechanisms.</div>
+</div>
+<h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Docker is a common tool for deploying applications and Litestream can be easily
+integrated into your workflow. Docker typically recommends running one
+application per container and Litestream can be run as a sidecar to another
+container. However, some deployment models do not support this so we&rsquo;ll show
+you how to run your application &amp; Litestream in the same container as well.</p>
+<h2 id="running-as-a-sidecar">Running as a sidecar<a href="#running-as-a-sidecar" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream provides an <a href="https://hub.docker.com/r/litestream/litestream">official image</a> via Docker Hub. You can use it
+with a configuration file or with a replica URL.</p>
+<h3 id="using-a-configuration-file">Using a configuration file<a href="#using-a-configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Typically, it&rsquo;s recommended to run Litestream using a configuration file as it
+provides more configuration options. First, create your configuration file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">YOUR_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">YOUR_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKET/db</span><span class="w">
+</span></span></span></code></pre></div><p>Note that the database <code>path</code> is using the <code>/data</code> path in your Docker container.
+Also, you can specify access key &amp; secret key via environment variables instead.</p>
+<p>Next, you&rsquo;ll need to attach both your data directory and your configuration
+file via a volume:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker run <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v /local/path/to/data:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v /local/path/to/litestream.yml:/etc/litestream.yml <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  litestream/litestream replicate
+</span></span></code></pre></div><p>You can also use named volumes instead of absolute paths. See Docker&rsquo;s <a href="https://docs.docker.com/storage/volumes/">Use
+volumes</a> documentation for more information about which one to use.</p>
+<p>Now that Litestream is running, you can start your application and mount the
+same data volume.</p>
+<h3 id="using-a-replica-url">Using a replica URL<a href="#using-a-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For basic replication of a single database, you can set your S3 credentials via
+environment variables, mount a volume to read from, and specify the path and
+replica as arguments:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker run <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --env LITESTREAM_ACCESS_KEY_ID <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --env LITESTREAM_SECRET_ACCESS_KEY <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -v /local/path/to/data:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  litestream/litestream replicate /data/db s3://BUCKET/db
+</span></span></code></pre></div><p>This command will use the <code>LITESTREAM_ACCESS_KEY_ID</code> and <code>LITESTREAM_SECRET_ACCESS_KEY</code>
+environment variables in your current session and pass those into your Docker
+container. You can also set the values explicitly using the <code>-e</code> flag.</p>
+<p>The command then mounts a volume from your localpath to the <code>/data</code> directory
+inside the container.</p>
+<p>Finally, the <code>replicate</code> command will replicate data from the <code>db</code> database file
+in your <code>/data</code> volume to an S3 bucket. You&rsquo;ll need to replace <code>BUCKET</code> with the
+name of your bucket.</p>
+<h2 id="running-in-the-same-container">Running in the same container<a href="#running-in-the-same-container" class="anchor" aria-hidden="true">#</a> </h2>
+<p>If you are deploying to a service like <a href="https://fly.io/">Fly.io</a> that only uses a single
+container, you can bundle both your application and Litestream together using
+Litestream&rsquo;s built-in process supervision. You can specify your application&rsquo;s
+process and flags by passing them to the <code>-exec</code> flag:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
+</span></span></code></pre></div><p>Or you can pass them in via the config file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">exec: myapp -myflag myarg
+</span></span><span class="line"><span class="cl">dbs:
+</span></span><span class="line"><span class="cl">  - path: /path/to/db
+</span></span></code></pre></div><p>Litestream will monitor your application&rsquo;s process and automatically shutdown
+when it closes. You can find an example application in the
+<a href="https://github.com/benbjohnson/litestream-docker-example">litestream-docker-example</a> repository.</p>
+<p>If you need to monitor multiple application processes, you can also use <a href="http://skarnet.org/software/s6">s6</a>
+as a process supervisor. s6 provides a simple init system for managing multiple
+processes. It is wrapped by the <a href="https://github.com/just-containers/s6-overlay">s6-overlay</a> project to provide this service to
+Docker containers. You can find a small example application in the
+<a href="https://github.com/benbjohnson/litestream-s6-example">litestream-s6-example</a> repository.</p>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a class="ml-auto" href="https://litestream.io/v0.3/guides/kubernetes/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Running in a Kubernetes cluster &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/v0.3/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/v0.3/index.min.c935650d84be045945b2d1d6db8f8c6bed84d5b629d05d2dabb4c4b0090e71784dae56d8b2ef5da783124b4fdeff00b81a61e161123740ad11d8de3db9de79da.js" integrity="sha512-yTVlDYS&#43;BFlFstHW24&#43;Ma&#43;2E1bYp0F0tq7TEsAkOcXhNrlbYsu9dp4MSS0/e/wC4GmHhYRI3QK0R2N49ud552g==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

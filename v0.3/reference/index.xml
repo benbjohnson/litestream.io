@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Reference on </title>
+    <link>https://litestream.io/v0.3/reference/</link>
+    <description>Recent content in Reference on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://litestream.io/v0.3/reference/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Configuration File</title>
+      <link>https://litestream.io/v0.3/reference/config/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/config/</guid>
+      <description>The YAML configuration file provides a way to list databases and replicas that Litestream should manage. In addition, there are global variables that can be applied to all replicas.&#xA;The default path for the configuration file is /etc/litestream.yml.&#xA;Variable expansion By default, Litestream will perform environment variable expansion within the config file before reading it. Any references to $VAR or ${VAR} formatted variables will be replaced with their environment variable values.</description>
+    </item>
+    <item>
+      <title>Command: databases</title>
+      <link>https://litestream.io/v0.3/reference/databases/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/databases/</guid>
+      <description>The databases command lists all databases in the configuration file as well as list their associated replicas.&#xA;Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -no-expand-env Disables environment variable expansion in configuration file. Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &amp;quot;file&amp;quot; and &amp;quot;s3&amp;quot;:&#xA;$ litestream databases path replicas /var/lib/db file,s3 </description>
+    </item>
+    <item>
+      <title>Command: generations</title>
+      <link>https://litestream.io/v0.3/reference/generations/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/generations/</guid>
+      <description>The generations command lists all generations for a database or replica. It lists stats about their lag behind the primary database and the time range they cover.&#xA;Usage List by database This command format finds all generations across all replicas for a database that is specified in the configuration file. The -replica flag can optionally be used to filter by replica name.&#xA;litestream generations [arguments] DB_PATH List by replica URL This command format finds all generations for a single replica by using the replica URL.</description>
+    </item>
+    <item>
+      <title>Command: replicate</title>
+      <link>https://litestream.io/v0.3/reference/replicate/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/replicate/</guid>
+      <description>The replicate command starts a server to monitor &amp;amp; continuously replicate SQLite databases. You can specify your database &amp;amp; replicas in a configuration file or you can replicate a single database file by specifying its path and its replicas in the command line arguments.&#xA;Usage Using a configuration file This command format will read all options from the configuration file. This is the recommended approach for production systems.&#xA;litestream replicate [arguments] Replicate a single file This command format sets up replication for a single database file DB_PATH and replicates it to one or more replica URLs.</description>
+    </item>
+    <item>
+      <title>Command: restore</title>
+      <link>https://litestream.io/v0.3/reference/restore/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/restore/</guid>
+      <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.&#xA;Usage With a database path This command will restore a database specified in the Litestream configuration file to its original location.</description>
+    </item>
+    <item>
+      <title>Command: snapshots</title>
+      <link>https://litestream.io/v0.3/reference/snapshots/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/snapshots/</guid>
+      <description>The snapshots command lists snapshots available for a database or replica.&#xA;Usage List by database This command lists all snapshots across all replicas for a database specified in the Litestream configuration file:&#xA;litestream snapshots [arguments] DB_PATH List by replica URL This command lists all snapshots for a single replica URL. This approach is useful when you do not have a configuration file.&#xA;litestream snapshots [arguments] REPLICA_URL Arguments -config PATH Specifies the configuration file.</description>
+    </item>
+    <item>
+      <title>Command: version</title>
+      <link>https://litestream.io/v0.3/reference/version/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/version/</guid>
+      <description>The version command prints the version of the binary.&#xA;Usage litestream version </description>
+    </item>
+    <item>
+      <title>Command: wal</title>
+      <link>https://litestream.io/v0.3/reference/wal/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/v0.3/reference/wal/</guid>
+      <description>The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:&#xA;litestream wal [arguments] DB_PATH List by replica URL This command lists all WAL files for a single replica URL. This approach is useful when you do not have a configuration file.</description>
+    </item>
+  </channel>
+</rss>

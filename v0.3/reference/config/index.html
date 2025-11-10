@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/v0.3/main.6b1b8740d9d3d1c9f37138879a5cb29ec186c056723f6421dd21deb4e18504eb68df0e73df56491b24c90d1ac9de080e4d991034742630feac126b345b419f04.css" integrity="sha512-axuHQNnT0cnzcTiHmlyynsGGwFZyP2Qh3SHetOGFBOto3w5z31ZJGyTJDRrJ3ggOTZkQNHQmMP6sEms0W0GfBA==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Configuration File - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/v0.3/reference/config/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Configuration File">
+<meta name="twitter:description" content="The YAML configuration file provides a way to list databases and replicas that Litestream should manage. In addition, there are global variables that can be applied to all replicas.
+The default path for the configuration file is /etc/litestream.yml.
+Variable expansion By default, Litestream will perform environment variable expansion within the config file before reading it. Any references to $VAR or ${VAR} formatted variables will be replaced with their environment variable values.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/v0.3\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Reference",
+        "item": "https:\/\/litestream.io\/v0.3\/reference\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Config",
+        "item": "https:\/\/litestream.io\/v0.3\/reference\/config\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/v0.3/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/v0.3/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/v0.3/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/v0.3/site.webmanifest">
+  
+</head>
+  <body class="reference single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/v0.3/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/v0.3/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.3.13</strong> - Previous version - Critical fixes only| <a href="https://litestream.io" class="alert-link">View v0.5.x (Latest)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/v0.3/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/guides/sftp/">Replicating to an SFTP Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/v0.3/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link active" href="https://litestream.io/v0.3/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/generations/">Command: generations</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/snapshots/">Command: snapshots</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/v0.3/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#variable-expansion">Variable expansion</a></li>
+      </ul>
+    </li>
+    <li><a href="#global-settings">Global settings</a>
+      <ul>
+        <li><a href="#aws-credentials">AWS credentials</a></li>
+        <li><a href="#metrics">Metrics</a></li>
+        <li><a href="#logging">Logging</a></li>
+      </ul>
+    </li>
+    <li><a href="#database-settings">Database settings</a></li>
+    <li><a href="#replica-settings">Replica settings</a>
+      <ul>
+        <li><a href="#s3-replica">S3 replica</a></li>
+        <li><a href="#file-replica">File replica</a></li>
+        <li><a href="#multiple-replicas">Multiple replicas</a></li>
+        <li><a href="#retention-period">Retention period</a></li>
+        <li><a href="#validation-interval">Validation interval</a></li>
+        <li><a href="#encryption">Encryption</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Configuration File</h1>
+			<p class="lead"></p>
+			<p>The YAML configuration file provides a way to list databases and replicas that
+Litestream should manage. In addition, there are global variables that can be
+applied to all replicas.</p>
+<p>The default path for the configuration file is <code>/etc/litestream.yml</code>.</p>
+<h3 id="variable-expansion">Variable expansion<a href="#variable-expansion" class="anchor" aria-hidden="true">#</a> </h3>
+<p>By default, Litestream will perform environment variable expansion within the
+config file before reading it. Any references to <code>$VAR</code> or <code>${VAR}</code> formatted
+variables will be replaced with their environment variable values. If no value
+is set then it will be replaced with an empty string.</p>
+<p>This can cause issues if you have a value in a configuration file which has a
+dollar sign followed by characters—for example, a password. In this case, you
+can set the <code>-no-expand-env</code> flag on any <code>litestream</code> command to disable
+expansion.</p>
+<h2 id="global-settings">Global settings<a href="#global-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="aws-credentials">AWS credentials<a href="#aws-credentials" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If you are using AWS S3 replication, it can be useful to specify your
+credentials in one place instead of for each replica:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><h3 id="metrics">Metrics<a href="#metrics" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream produces a continuous stream of metrics that are exported as a
+<a href="https://prometheus.io/">Prometheus</a> endpoint. These are disabled by default
+as it requires an HTTP server to start. You can enable it by setting a bind
+address in the config:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
+</span></span></span></code></pre></div><p>When you start Litestream with this setting enabled, you&rsquo;ll see metrics at
+<a href="http://localhost:9090/metrics">http://localhost:9090/metrics</a></p>
+<h3 id="logging">Logging<a href="#logging" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.12">
+    v0.3.12
+</span>
+ Log <code>type</code> can be set to either &ldquo;text&rdquo; or &ldquo;json&rdquo;.
+Logging <code>level</code> can be set to &ldquo;debug&rdquo;, &ldquo;info&rdquo;, &ldquo;warn&rdquo; or &ldquo;error&rdquo;. By setting
+<code>stderr</code> to <code>true</code> logs will be written to stderr instead of stdout.</p>
+<p>The defaults are shown below:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">info</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div><h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream can monitor one or more database files that are specified in the
+configuration file. Database files are also referenced in <code>litestream</code> commands
+by their absolute path.</p>
+<p>Each database accepts two options—its path and a list of replicas:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w">  </span><span class="l">s3://mybkt.litestream.io/db2</span><span class="w">
+</span></span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream currently supports three types of replicas:</p>
+<ul>
+<li><code>&quot;abs&quot;</code> replicates a database to an Azure Blob Storage container.</li>
+<li><code>&quot;file&quot;</code> replicates a database to another local file path.</li>
+<li><code>&quot;s3&quot;</code> replicates a database to an S3-compatible bucket.</li>
+</ul>
+<p>All replicas have unique name which is specified by the <code>&quot;name&quot;</code> field. If a
+name is not specified then the name defaults to the replica type. The name is
+only needed when using multiple replicas of the same type on a database.</p>
+<p>The following replica settings are also available for all replica types:</p>
+<ul>
+<li>
+<p><code>url</code>—Short-hand form of specifying a replica location. Setting this field
+will apply changes to multiples fields including <code>bucket</code>, <code>path</code>, <code>region</code>, etc.</p>
+</li>
+<li>
+<p><code>retention</code>—The amount of time that snapshot &amp; WAL files will be kept. After
+the retention period, a new snapshot will be created and the old one will be
+removed. WAL files that exist before the oldest snapshot will also be removed.
+Defaults to <code>24h</code>.</p>
+</li>
+<li>
+<p><code>retention-check-interval</code>—Specifies how often Litestream will check if
+retention needs to be enforced. Defaults to <code>1h</code>.</p>
+</li>
+<li>
+<p><code>snapshot-interval</code>—Specifies how often new snapshots will be created. This is
+used to reduce the time to restore since newer snapshots will have fewer WAL
+frames to apply. Retention still applies to these snapshots.</p>
+<p>If you do not set a snapshot interval then a new snapshot will be created
+whenever retention is performed. Retention occurs every 24 hours by default.</p>
+</li>
+<li>
+<p><code>validation-interval</code>—When specified, Litestream will automatically restore
+and validate that the data on the replica matches the local copy. Disabled by
+default. Enabling this will significantly increase the cost of running
+Litestream as S3 services charge for downloads.</p>
+</li>
+<li>
+<p><code>sync-interval</code>—Frequency in which frames are pushed to the replica. Defaults
+to <code>1s</code>. Increasing frequency can increase cloud storage costs significantly.</p>
+</li>
+<li>
+<p><code>age</code>—Client-side encryption with <a href="https://age-encryption.org">age</a>, see
+<a href="#encryption">Encryption</a> for configuration details. Defaults to off.</p>
+</li>
+</ul>
+<h3 id="s3-replica">S3 replica<a href="#s3-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span></code></pre></div><p>However, you can break this out into separate fields as well:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybkt.litestream.io</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
+</span></span></span></code></pre></div><p>In addition, you can specify the region and AWS credentials per-replica:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to S3 replicas:</p>
+<ul>
+<li>
+<p><code>access-key-id</code>—Replica-specific authentication key. If not specified, the
+global key or the <code>LITESTREAM_ACCESS_KEY_ID</code> environment variable will be used
+instead. The <code>AWS_ACCESS_KEY_ID</code> variable can also be used.</p>
+</li>
+<li>
+<p><code>secret-access-key</code>—Replica-specific secret key. If not specified, the global
+secret or the <code>LITESTREAM_SECRET_ACCESS_KEY</code> environment variable will be used
+instead. The <code>AWS_SECRET_ACCESS_KEY</code> variable can also be used.</p>
+</li>
+<li>
+<p><code>bucket</code>—Specifies the name of the remote bucket to replicate to.</p>
+</li>
+<li>
+<p><code>path</code>—Specifies the path to use within the bucket.</p>
+</li>
+<li>
+<p><code>region</code>—Specifies the bucket&rsquo;s region. Only used for AWS S3 &amp; Backblaze B2.</p>
+</li>
+<li>
+<p><code>endpoint</code>—Specifies the endpoint URL of the S3-compatible service. Only
+required for non-AWS services.</p>
+</li>
+<li>
+<p><code>force-path-style</code>—Uses the path style which is required by non-AWS services.
+This is automatically enabled if <code>endpoint</code> is set.</p>
+</li>
+<li>
+<p><code>skip-verify</code>—Disables TLS verification. This is useful when testing against
+a local node such as MinIO and you are using self-signed certificates.</p>
+</li>
+</ul>
+<h3 id="file-replica">File replica<a href="#file-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p>File replicas can be configured using the <code>&quot;path&quot;</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
+</span></span></span></code></pre></div><p>If no <code>&quot;type&quot;</code> field is specified and a <code>&quot;url&quot;</code> is not used then <code>&quot;file&quot;</code> is
+assumed.</p>
+<h3 id="multiple-replicas">Multiple replicas<a href="#multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can specify multiple replicas for a database, however, each one must have
+a unique name. For example, this configuration below is for replicating to
+AWS S3 &amp; to DigitalOcean Spaces. Both of these use the &ldquo;s3&rdquo; replica type so
+their default name would be &ldquo;s3&rdquo;. Instead, we can name them each unique names,
+<code>my_aws_replica</code> &amp; <code>my_do_replica</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_aws_replica</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://myawsbucket/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my_do_replica</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.nyc3.digitaloceanspaces.com/db</span><span class="w">
+</span></span></span></code></pre></div><h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Replicas maintain a snapshot of the database as well as a contiguous sequence of
+SQLite WAL page updates. These updates take up space so new snapshots are
+created and old WAL files are dropped through a process called &ldquo;retention&rdquo;.</p>
+<p>The default retention period is <code>24h</code>. You can change that with the <code>retention</code>
+field. Retention is enforced periodically and defaults to every <code>1h</code>. This can
+be changed with the <code>retention-check-interval</code> field.</p>
+<pre tabindex="0"><code>dbs:
+  - path: /var/lib/db
+    replicas:
+      - url: s3://mybkt.litestream.io/db
+        retention: 4h
+</code></pre><p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
+but days, weeks, &amp; years are not supported.</p>
+<h3 id="validation-interval">Validation interval<a href="#validation-interval" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Because Litestream performs physical replication, the resulting database files
+restored from replicas will match byte-for-byte. Litestream has an option to
+periodically validate replicas by restoring them and comparing their checksum
+to the primary database&rsquo;s checksum.</p>
+<p><em>Please note that frequently restoring from S3 can be expensive.</em></p>
+<p>It can be enabled by setting the <code>validation-interval</code> field:</p>
+<pre tabindex="0"><code>dbs:
+  - path: /var/lib/db
+    replicas:
+      - url: s3://mybkt.litestream.io/db
+        validation-interval: 6h
+</code></pre><h3 id="encryption">Encryption<a href="#encryption" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.10">
+    v0.3.10
+</span>
+ Client-side encryption can be enabled per replica by adding an <code>age</code> section to
+the replica configuration with corresponding <code>identities</code> and <code>recipients</code>
+fields.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">❗️</div>
+  <div class="w-100">When enabling encryption restoring requires matching age identity to restore from the replica.</div>
+</div>
+<pre tabindex="0"><code>dbs:
+  - path: /var/lib/db
+    replicas:
+      - url: s3://mybkt.litestream.io/db
+        age:
+          identities:
+            - AGE-SECRET-KEY-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          recipients:
+            - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</code></pre><p>To generate keys, refer to the
+age <a href="https://github.com/FiloSottile/age/blob/main/README.md">README</a>
+how to install and use the command line tools.</p>
+<p>As of now identities must be a superset of recipients but key rotation can be
+achieved by adding a new identity while changing the recipient list to only have
+a key for it.</p>
+<p>Note that enabling encryption after replication has already been done can
+confuse Litestream so it is recommended the replica is empty when doing so.
+Restoring from a replica that has mixed encrypted and non-encrypted files will
+fail.</p>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a class="ml-auto" href="https://litestream.io/v0.3/reference/databases/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Command: databases &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/v0.3/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/v0.3/index.min.c935650d84be045945b2d1d6db8f8c6bed84d5b629d05d2dabb4c4b0090e71784dae56d8b2ef5da783124b4fdeff00b81a61e161123740ad11d8de3db9de79da.js" integrity="sha512-yTVlDYS&#43;BFlFstHW24&#43;Ma&#43;2E1bYp0F0tq7TEsAkOcXhNrlbYsu9dp4MSS0/e/wC4GmHhYRI3QK0R2N49ud552g==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
