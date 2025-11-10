@@ -4,5 +4,5 @@ params:
   versionBanner:
     version: "v0.5.x"
     status: "Latest - Actively maintained with new features and bug fixes"
-    otherVersionUrl: "PLACEHOLDER_WILL_UPDATE_AFTER_NETLIFY_DEPLOY"
+    otherVersionUrl: "/v0.3/"
     otherVersionText: "View v0.3.13 (Previous)"
