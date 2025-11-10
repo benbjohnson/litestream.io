@@ -1,0 +1,64 @@
+name: Documentation Bug
+description: Report an error in the documentation (typo, incorrect info, broken link)
+title: "docs: "
+labels: ["documentation", "bug"]
+assignees: []
+
+body:
+  - type: dropdown
+    id: version
+    attributes:
+      label: Affected Version(s)
+      description: Which documentation version(s) are affected?
+      options:
+        - v0.5.x (main branch)
+        - v0.3.x (docs-v0.3 branch)
+        - Both versions
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: Have you verified this issue applies to the selected version(s)?
+      options:
+        - label: "I have verified this issue exists in the selected version(s)"
+          required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: Affected Page/Section
+      description: URL or file path of the affected documentation
+      placeholder: "e.g., https://litestream.io/docs/getting-started/ or content/docs/getting-started/index.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's Wrong?
+      description: Describe the issue clearly
+      placeholder: "e.g., The configuration example shows the wrong syntax for SFTP_KEY_PASSPHRASE"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Documentation
+      description: What should the documentation say instead?
+      placeholder: "The correct syntax should be..."
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information (screenshots, related issues, etc.)
+      placeholder: "Add screenshots or links if helpful"
+
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** If this issue applies to both versions, you may need to file separate PRs for each branch. See the README for the dual-version contribution workflow.
