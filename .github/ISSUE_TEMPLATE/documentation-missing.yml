@@ -1,0 +1,62 @@
+name: Missing Documentation
+description: Suggest documentation for a feature or topic that isn't documented
+title: "docs: "
+labels: ["documentation", "enhancement"]
+assignees: []
+
+body:
+  - type: dropdown
+    id: version
+    attributes:
+      label: Affected Version(s)
+      description: Which version(s) should this documentation be added to?
+      options:
+        - v0.5.x (main branch)
+        - v0.3.x (docs-v0.3 branch)
+        - Both versions
+    validations:
+      required: true
+
+  - type: input
+    id: feature
+    attributes:
+      label: Feature/Topic
+      description: What feature or topic needs documentation?
+      placeholder: "e.g., Multi-segment replication, REPLICA_URL environment variable"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Current State
+      description: Is this documented anywhere else or partially documented?
+      placeholder: "e.g., This is mentioned in the reference docs but not explained in the guides section"
+
+  - type: textarea
+    id: why_needed
+    attributes:
+      label: Why is This Documentation Needed?
+      description: What use case or confusion would this documentation resolve?
+      placeholder: "e.g., Users often ask how to set up replication to multiple cloud providers without understanding the architecture"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: applies_both
+    attributes:
+      label: Version Compatibility
+      options:
+        - label: "This feature/topic exists in both v0.3.x and v0.5.x (if selected version is Both)"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Links to issues, discussions, or examples that might help
+      placeholder: "Add related issues, discussions, or real-world examples"
+
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** If this applies to both versions, documentation should be created for each branch. See the README for the dual-version contribution workflow.
