@@ -55,6 +55,8 @@ Password: minioadmin
 Next, navigate to "Buckets", click the "Create Bucket" button in the top right corner and then click the
 _"Save"_ icon. Name your bucket, `"mybkt"`.
 
+{{< alert icon="⚠️" text="<strong>For remote MinIO servers:</strong> If your MinIO instance is running on a different machine (not localhost), skip this tutorial. See the <a href=\"/reference/config#minio-configuration\">MinIO Configuration</a> section in the documentation for setup instructions. This tutorial only covers local MinIO running via Docker." >}}
+
 
 ## Setting up your database
 
@@ -170,6 +172,55 @@ apple|red
 banana|yellow
 grape|purple
 ```
+
+
+## Troubleshooting
+
+### "The AWS Access Key Id you provided does not exist in our records"
+
+This error occurs when Litestream cannot authenticate with MinIO. Common causes:
+
+1. **Wrong credentials**: Verify you're using the correct access key and secret key.
+   The default MinIO Docker container uses `minioadmin` / `minioadmin`.
+
+2. **Missing endpoint for remote MinIO**: If your MinIO server is on a different machine,
+   you **must** specify the `endpoint` parameter in your configuration file. See the
+   [MinIO Configuration](/reference/config#minio-configuration) section.
+
+3. **Environment variable conflicts**: Environment variables take precedence over
+   config files. Unset any conflicting environment variables:
+   ```sh
+   unset LITESTREAM_ACCESS_KEY_ID
+   unset LITESTREAM_SECRET_ACCESS_KEY
+   unset AWS_ACCESS_KEY_ID
+   unset AWS_SECRET_ACCESS_KEY
+   ```
+
+### "Cannot lookup region"
+
+This error typically means the region is missing or invalid. For MinIO, any region
+value works (e.g., `us-east-1`) since MinIO ignores this parameter but still
+requires it in the configuration.
+
+### MinIO console shows empty bucket but replicate command ran
+
+Check that you specified the correct bucket name in your replication command. The
+URL format is `s3://BUCKET_NAME.ENDPOINT/PATH`.
+
+For local MinIO: `s3://mybkt.localhost:9000/fruits.db`
+
+For remote MinIO: You need a configuration file with the endpoint parameter—see
+the [MinIO Configuration](/reference/config#minio-configuration) section.
+
+### Changes aren't being replicated
+
+Verify that:
+- Litestream is still running in your terminal window
+- The MinIO instance is still running
+- You can access the MinIO console at the expected address
+
+If using a config file, ensure credentials are correct and the file is being read
+by passing the `-config` flag to Litestream.
 
 
 ## Further reading
