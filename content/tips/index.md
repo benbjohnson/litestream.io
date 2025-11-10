@@ -42,6 +42,26 @@ database mode to `WAL` if it has not already been enabled by the application.
 [wal]: https://sqlite.org/wal.html
 
 
+## Foreign Key Constraints
+
+Foreign key constraints are disabled by default in SQLite for backwards
+compatibility. However, foreign keys are an important feature for maintaining
+data integrity and are considered a best practice. It is recommended to enable
+them by setting the [`foreign_keys` pragma][foreign_keys] when you initialize
+your database connection:
+
+```
+PRAGMA foreign_keys = ON;
+```
+
+This pragma must be set on each database connection, as it does not persist
+across connections. Enabling foreign key constraints will ensure that your
+application cannot accidentally create orphaned records that violate foreign
+key relationships.
+
+[foreign_keys]: https://www.sqlite.org/pragma.html#pragma_foreign_keys
+
+
 ## Deleting SQLite databases
 
 If you're deleting and recreating a SQLite database from scratch, there are 3
