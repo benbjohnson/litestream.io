@@ -94,7 +94,7 @@ Variable expansion By default, Litestream will perform environment variable expa
             <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
           </li>
         <li class="nav-item">
-            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-n0j4s3ci-lx1JziR3bV6L2NMF723H3Q">Slack</a>
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
           </li>
         </ul>
       <div class="break order-6 d-md-none"></div>
@@ -187,6 +187,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a href="#replica-settings">Replica settings</a>
       <ul>
         <li><a href="#s3-replica">S3 replica</a></li>
+        <li><a href="#minio-configuration">MinIO Configuration</a></li>
         <li><a href="#file-replica">File replica</a></li>
         <li><a href="#multiple-replicas">Multiple replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
@@ -358,6 +359,71 @@ This is automatically enabled if <code>endpoint</code> is set.</p>
 a local node such as MinIO and you are using self-signed certificates.</p>
 </li>
 </ul>
+<h3 id="minio-configuration">MinIO Configuration<a href="#minio-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>MinIO is an S3-compatible object storage service. The main difference from AWS S3
+is that MinIO requires specifying an <code>endpoint</code> parameter pointing to your MinIO
+server. Additionally, when using MinIO, you must create access keys in the MinIO
+console before configuring Litestream.</p>
+<h4 id="local-minio-docker">Local MinIO (Docker)<a href="#local-minio-docker" class="anchor" aria-hidden="true">#</a> </h4>
+<p>For local testing with MinIO running on your machine via Docker, you can use
+command-line environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">minioadmin</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">minioadmin</span><span class="w">
+</span></span></span></code></pre></div><p>Command-line replication to local MinIO:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
+</span></span><span class="line"><span class="cl">litestream replicate mydb.db s3://mybkt.localhost:9000/mydb.db
+</span></span></code></pre></div><h4 id="remote-minio-server">Remote MinIO Server<a href="#remote-minio-server" class="anchor" aria-hidden="true">#</a> </h4>
+<p>For remote MinIO servers, you <strong>must</strong> use a configuration file and specify the
+<code>endpoint</code> parameter. Environment variables take precedence over config file
+values, so ensure any conflicting environment variables are unset before running
+Litestream.</p>
+<p>Configuration file example with remote MinIO:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/mydb.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybkt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">mydb.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://minio.example.com:9000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">myaccesskey</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">mysecretkey</span><span class="w">
+</span></span></span></code></pre></div><p>Or using the URL shorthand form:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/mydb.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt/mydb.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://minio.example.com:9000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">myaccesskey</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">mysecretkey</span><span class="w">
+</span></span></span></code></pre></div><h4 id="key-points-for-minio-configuration">Key Points for MinIO Configuration<a href="#key-points-for-minio-configuration" class="anchor" aria-hidden="true">#</a> </h4>
+<ol>
+<li>
+<p><strong>Endpoint</strong>: Required for non-AWS S3 services. Should be the full URL to your
+MinIO server (e.g., <code>https://minio.example.com:9000</code> or
+<code>http://minio.local:9000</code>).</p>
+</li>
+<li>
+<p><strong>Region</strong>: While MinIO ignores the region parameter, Litestream still requires
+it. You can use any value such as <code>us-east-1</code>.</p>
+</li>
+<li>
+<p><strong>Access Keys</strong>: These must be created in the MinIO console before use. The
+default MinIO installation uses <code>minioadmin</code> / <code>minioadmin</code> but you should
+change these credentials in production.</p>
+</li>
+<li>
+<p><strong>TLS Certificate</strong>: If using self-signed certificates, add <code>skip-verify: true</code>
+to your replica configuration (not recommended for production).</p>
+</li>
+<li>
+<p><strong>Environment Variables</strong>: Environment variables take precedence over config
+file values. If you&rsquo;re using a config file with inline credentials, unset any
+conflicting <code>LITESTREAM_*</code> or <code>AWS_*</code> environment variables first.</p>
+</li>
+</ol>
 <h3 id="file-replica">File replica<a href="#file-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>File replicas can be configured using the <code>&quot;path&quot;</code> field:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
