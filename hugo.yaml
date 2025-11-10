@@ -4,5 +4,5 @@ params:
   versionBanner:
     version: "v0.3.13"
     status: "Previous version - Critical fixes only"
-    otherVersionUrl: "https://litestream.io"
+    otherVersionUrl: "/"
     otherVersionText: "View v0.5.x (Latest)"
