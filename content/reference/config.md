@@ -26,6 +26,75 @@ dollar sign followed by characters—for example, a password. In this case, you
 can set the `-no-expand-env` flag on any `litestream` command to disable
 expansion.
 
+### Environment Variables
+
+Litestream supports environment variables for configuring authentication credentials.
+There are two types:
+
+1. **Auto-read variables** — Automatically read and applied by Litestream
+2. **Expansion-only variables** — Must be explicitly referenced in config using `${VAR}` syntax
+
+This distinction avoids the need to embed sensitive data in configuration files, which is
+especially useful in containerized environments, Kubernetes, and secret management systems.
+
+#### Auto-read Environment Variables
+
+Litestream automatically reads and applies these variables without config changes:
+
+| Variable | Purpose | Notes |
+|----------|---------|-------|
+| `AWS_ACCESS_KEY_ID` | AWS S3 access key | Standard AWS SDK variable |
+| `AWS_SECRET_ACCESS_KEY` | AWS S3 secret key | Standard AWS SDK variable |
+| `LITESTREAM_ACCESS_KEY_ID` | AWS S3 access key | Sets `AWS_ACCESS_KEY_ID` if unset; config file takes precedence |
+| `LITESTREAM_SECRET_ACCESS_KEY` | AWS S3 secret key | Sets `AWS_SECRET_ACCESS_KEY` if unset; config file takes precedence |
+| `LITESTREAM_AZURE_ACCOUNT_KEY` | Azure Blob Storage key | Read by ABS replica if not specified in config |
+| `LITESTREAM_CONFIG` | Config file path | Overrides default `/etc/litestream.yml` |
+
+**AWS Credential Precedence (highest to lowest):**
+1. Credentials in config file (replica-level or global)
+2. `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` environment variables
+3. `LITESTREAM_ACCESS_KEY_ID` / `LITESTREAM_SECRET_ACCESS_KEY` environment variables
+
+#### Expansion-only Variables (must use `${VAR}` syntax)
+
+These variables are **not** automatically read. To use them, explicitly reference them
+in your config file using `${VAR}` syntax. Litestream will expand them before parsing
+the configuration:
+
+**Examples:**
+
+```yaml
+dbs:
+  - path: /var/lib/mydb.db
+    replicas:
+      - type: s3
+        url: s3://mybucket/mydb
+        access-key-id: ${AWS_ACCESS_KEY_ID}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+      - type: abs
+        url: abs://account@myaccount.blob.core.windows.net/container/mydb
+        account-key: ${AZURE_ACCOUNT_KEY}
+```
+
+Set the variables before running Litestream:
+
+```bash
+export AWS_ACCESS_KEY_ID=your-key-id
+export AWS_SECRET_ACCESS_KEY=your-secret-key
+export AZURE_ACCOUNT_KEY=your-account-key
+litestream replicate
+```
+
+#### Google Cloud Storage Authentication
+
+GCS authentication uses Google's [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) chain.
+The `GOOGLE_APPLICATION_CREDENTIALS` environment variable is **optional** — use it only when explicitly providing a service account key file.
+
+ADC automatically supports:
+- Metadata server (for Google Compute Engine instances)
+- `gcloud auth application-default login` (local development)
+- Service account key file (via `GOOGLE_APPLICATION_CREDENTIALS`)
+
 
 ## Global settings
 
@@ -109,29 +178,13 @@ The following replica settings are also available for all replica types:
 - `url`—Short-hand form of specifying a replica location. Setting this field
   will apply changes to multiples fields including `bucket`, `path`, `region`, etc.
 
-- `retention`—The amount of time that snapshot & WAL files will be kept. After
-  the retention period, a new snapshot will be created and the old one will be
-  removed. WAL files that exist before the oldest snapshot will also be removed.
-  Defaults to `24h`.
-
-- `retention-check-interval`—Specifies how often Litestream will check if
-  retention needs to be enforced. Defaults to `1h`.
-
-- `snapshot-interval`—Specifies how often new snapshots will be created. This is
-  used to reduce the time to restore since newer snapshots will have fewer WAL
-  frames to apply. Retention still applies to these snapshots.
-
-  If you do not set a snapshot interval then a new snapshot will be created
-  whenever retention is performed. Retention occurs every 24 hours by default.
-
+- `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
+  to `1s`. Increasing frequency can increase cloud storage costs significantly.
 
 - `validation-interval`—When specified, Litestream will automatically restore
   and validate that the data on the replica matches the local copy. Disabled by
   default. Enabling this will significantly increase the cost of running
   Litestream as S3 services charge for downloads.
-
-- `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
-  to `1s`. Increasing frequency can increase cloud storage costs significantly.
 
 - `age`—Client-side encryption with [age](https://age-encryption.org), see
   [Encryption](#encryption) for configuration details. Defaults to off.
@@ -318,17 +371,8 @@ Replicas maintain a snapshot of the database as well as a contiguous sequence of
 SQLite WAL page updates. These updates take up space so new snapshots are
 created and old WAL files are dropped through a process called "retention".
 
-The default retention period is `24h`. You can change that with the `retention`
-field. Retention is enforced periodically and defaults to every `1h`. This can
-be changed with the `retention-check-interval` field.
-
-```
-dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        retention: 4h
-```
+Retention is controlled at the global level, not per-replica. Set retention in
+the global config section to control how long snapshots and WAL files are retained.
 
 Duration values can be specified using second (`s`), minute (`m`), or hour (`h`)
 but days, weeks, & years are not supported.
