@@ -146,7 +146,11 @@ If you meet **any** of the following conditions, this section applies to you:
 
 #### Why Age Encryption Was Disabled
 
-Age encryption support was temporarily removed from v0.5.0+ due to implementation issues. The feature is not currently maintained and has been disabled to prevent accidental data loss from misconfigured encryption.
+Age encryption was removed from v0.5.0+ as part of the LTX storage layer refactor. The core issue is that **Age encrypts entire files as a single unit**, which doesn't align with Litestream's new architecture.
+
+Litestream's v0.5+ uses the LTX format which allows **per-page encryption** - the ability to fetch and decrypt individual pages from storage (S3, GCS, etc.) without needing the entire file. This is more efficient and provides better integration with cloud storage.
+
+The feature was not maintained and has been disabled to prevent accidental data loss from misconfigured encryption (users believing their data was encrypted when it wasn't being encrypted at all).
 
 #### Upgrade Options
 
@@ -248,9 +252,16 @@ A: No, your existing v0.3.x Age-encrypted backups remain encrypted in storage. T
 
 A: Do not upgrade to v0.5.0+ at this time. Stay on v0.3.x. Monitor the [Litestream releases](https://github.com/benbjohnson/litestream/releases) page for updates on Age encryption restoration.
 
-**Q: When will Age encryption be restored?**
+**Q: When will encryption be restored?**
 
-A: The timeline for restoring Age encryption support is currently uncertain. Check the [GitHub repository](https://github.com/benbjohnson/litestream/issues) for discussions about Age encryption and future plans.
+A: Encryption support will be re-implemented **directly in the LTX format** to support per-page encryption. This is planned work but no timeline has been announced. The implementation is complex and requires careful design to work efficiently with cloud storage providers.
+
+If you need encryption immediately, you can:
+- Stay on v0.3.x with Age encryption
+- Use provider-level encryption (S3 SSE-KMS, GCS encryption, Azure encryption, etc.)
+- Use database-level encryption (SQLCipher)
+
+See [issue #458](https://github.com/benbjohnson/litestream/issues/458) (LTX Support) for the tracking issue on encryption and other planned LTX features.
 
 #### Validation Before Upgrading
 

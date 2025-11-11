@@ -582,7 +582,7 @@ dbs:
 
 ### Encryption
 
-{{< alert icon="⚠️" text="**Age Encryption Temporarily Disabled**: Age encryption is not available in v0.5.0+. Configuration will be explicitly rejected with an error message. If you are using Age encryption with v0.3.x, please review the [migration guide](/docs/migration/#age-encryption-migration) before upgrading." >}}
+{{< alert icon="⚠️" text="**Age Encryption Not Available in v0.5.0+**: Age encryption was removed during the LTX storage layer refactor. Encryption will be re-implemented directly in LTX to support per-page encryption (more efficient for cloud storage). Configuration will be explicitly rejected with an error message. If you are using Age encryption with v0.3.x, please review the [migration guide](/docs/migration/#age-encryption-migration) before upgrading." >}}
 
 {{< since version="0.3.10" >}} Client-side encryption can be enabled per replica by adding an `age` section to
 the replica configuration with corresponding `identities` and `recipients`
