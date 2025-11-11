@@ -115,11 +115,13 @@ Each database supports the following configuration options:
 - `path`—Absolute path to the SQLite database file
 - `meta-path`—Path to store Litestream metadata (defaults to `<path>-litestream`)
 - `monitor-interval`—How often to check for changes (default: `1s`)
-- `checkpoint-interval`—How often to perform WAL checkpoints (default: `1m`)
+- `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
-- `min-checkpoint-page-count`—Minimum pages before checkpointing (default: `1000`)
-- `max-checkpoint-page-count`—Maximum pages before forcing checkpoint (default: `10000`)
+- `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
+- `truncate-page-n`—{{< since version="0.5.0" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocking**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
+
+{{< alert icon="⚠️" text="The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead." >}}
 
 Example with database-level options:
 
@@ -131,7 +133,7 @@ dbs:
     checkpoint-interval: 30s
     busy-timeout: 5s
     min-checkpoint-page-count: 500
-    max-checkpoint-page-count: 5000
+    truncate-page-n: 50000  # ~200MB emergency truncation
     replica:
       url: s3://mybucket/myapp
       sync-interval: 1s

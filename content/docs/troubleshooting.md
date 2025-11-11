@@ -171,6 +171,24 @@ Or let Litestream enable it automatically by ensuring proper database permission
 2. Ensure no long-running transactions are blocking checkpoints
 3. Check for applications holding exclusive locks
 
+### WAL Growth and Checkpoint Blocking
+
+**Symptoms**: WAL file growing excessively large or writes timing out
+
+**Solution**:
+1. Check if you have long-lived read transactions preventing checkpoints
+2. Review checkpoint configuration in your config file
+3. Consider disabling `truncate-page-n` if you have long-running queries:
+   ```yaml
+   dbs:
+     - path: /path/to/db.sqlite
+       truncate-page-n: 0  # Disable blocking checkpoints
+   ```
+4. Monitor WAL file size and disk space
+
+For detailed guidance on checkpoint configuration and trade-offs, see the [WAL
+Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
+
 ### Corruption Detection
 
 **Error**: `database disk image is malformed`

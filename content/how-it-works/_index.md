@@ -52,6 +52,10 @@ consistency. To restore a database, we can simply start from a snapshot of the
 database at some point in time and replay each WAL afterward to get it to the
 current state.
 
+For more information about Litestream's checkpoint strategy and configuration
+options, see the [WAL Truncate Threshold Configuration
+guide](/guides/wal-truncate-threshold).
+
 
 ## Snapshots & generations
 
