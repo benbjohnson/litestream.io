@@ -47,6 +47,11 @@
   identifier = "replica-guides"
   url = "/guides/"
 
+[[docs]]
+  name = "Help"
+  weight = 50
+  identifier = "help"
+  url = "/docs/"
 
 [[docs]]
   name = "Reference"
