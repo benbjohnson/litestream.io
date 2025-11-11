@@ -229,3 +229,8 @@ Litestream was built to run as a background service that you don't need to worry
 about—it just replicates your database all the time. To run Litestream as a
 background service, please refer to the [How-To Guides section](/guides) to
 run on your particular platform.
+
+For security considerations including backup encryption, see the
+[Configuration Reference](/reference/config#encryption) section. Note that Age
+encryption is not available in v0.5.0+. If you are upgrading from v0.3.x with
+Age encryption, please review the [migration guide](/docs/migration/#age-encryption-migration).
