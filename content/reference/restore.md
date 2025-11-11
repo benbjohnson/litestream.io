@@ -60,10 +60,6 @@ litestream restore [arguments] REPLICA_URL
     Determines the number of WAL files downloaded in parallel.
     Defaults to 8
 
--replica NAME
-    Restore from a specific replica.
-    Defaults to replica with latest data.
-
 -generation NAME
     Restore from a specific generation.
     Defaults to generation with latest data.
@@ -128,12 +124,9 @@ The `-if-replica-exists` flag works alongside other restore flags:
   doesn't exist, or has no backups available
 - **-timestamp**: When used with point-in-time restore, the flag will succeed
   gracefully if no backups exist at the specified timestamp
-- **-replica**: The flag applies when checking specific replicas by name
 
 ### Important Notes
 
-- This flag was temporarily removed during the LTX upgrade and restored in
-  version 0.5.x (PR #788)
 - The flag only suppresses the "no backups found" error; other restore errors
   will still return non-zero exit codes
 - When the flag is used and no backups are found, a log message is emitted:
@@ -176,14 +169,6 @@ Restore the `/var/lib/db` database to a specific point-in-time:
 $ litestream restore -timestamp 2020-01-01T00:00:00Z /var/lib/db
 ```
 
-### Filter by replica name
-
-This example will only restore from the `s3` replica:
-
-```
-$ litestream restore -replica s3 /var/lib/db
-```
-
 ### Conditional restore in automation
 
 Use `-if-replica-exists` to allow restore operations to succeed even when no
@@ -205,11 +190,14 @@ restore operations:
 $ litestream restore -if-db-not-exists -if-replica-exists /var/lib/db
 ```
 
-This command will succeed in all scenarios:
+This command will succeed in these scenarios:
 
 - Database exists: exits successfully without overwriting
 - Database doesn't exist, backups available: restores the database
 - Database doesn't exist, no backups: exits successfully without error
+
+Note: Other errors (network failures, permission issues, corruption, etc.) will
+still cause the command to fail with a non-zero exit code.
 
 ### Shell script with error handling
 
@@ -263,7 +251,8 @@ Alternatively, use the flag for simpler logic:
 #!/bin/bash
 set -e
 
-# With -if-replica-exists, this always succeeds
+# With -if-replica-exists, this succeeds when no backups are found
+# (but other errors like network failures will still cause it to fail)
 litestream restore -if-replica-exists /var/lib/db
 
 # Check if we got a database or need to initialize
