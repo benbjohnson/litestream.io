@@ -118,7 +118,7 @@ Each database supports the following configuration options:
 - `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
 - `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
-- `truncate-page-n`—{{< since version="0.5.0" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocking**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
+- `truncate-page-n`—{{< since version="0.5.0" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocks both readers and writers**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
 
 {{< alert icon="⚠️" text="The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead." >}}

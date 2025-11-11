@@ -16,40 +16,17 @@ SQLite's WAL (write-ahead log) grows as database pages are modified. To prevent 
 
 Litestream uses a carefully designed 3-tier checkpoint strategy that balances WAL size management with write availability:
 
-1. **Non-blocking checkpoints** run frequently to keep WAL small under normal operation
-2. **Time-based checkpoints** provide regular cleanup even when WAL is small
-3. **Emergency truncation** prevents unbounded WAL growth at a much higher threshold
+1. **Emergency truncation** (checked first) prevents unbounded WAL growth at a high threshold (~500MB), but will block writers and readers when triggered
+2. **Non-blocking checkpoints** run frequently to keep WAL small under normal operation (~4MB), never blocking the application
+3. **Time-based checkpoints** provide regular cleanup even when WAL is small, also non-blocking
 
-This strategy prioritizes write availability while still managing disk space. The key insight is that blocking checkpoints should be rare, reserved only for exceptional circumstances when the WAL has grown very large.
+This strategy prioritizes catching runaway WAL growth first, then attempts regular non-blocking cleanup. The emergency truncation threshold is set very high so that under normal conditions, the non-blocking checkpoints keep the WAL small and the blocking checkpoint rarely runs.
 
 ## Understanding the 3-Tier Checkpoint Strategy
 
 Litestream uses three complementary checkpoint mechanisms, evaluated in this order after each sync:
 
-### 1. MinCheckpointPageN (PASSIVE, Non-Blocking)
-
-```yaml
-min-checkpoint-page-count: 1000  # Default: ~4MB
-```
-
-- **Trigger:** WAL exceeds 1,000 pages (~4MB)
-- **Mode:** PASSIVE checkpoint via `sqlite3_wal_checkpoint_v2()`
-- **Behavior:** Non-blocking—fails silently if readers or writers are active
-- **Purpose:** Keep WAL small under normal operation
-
-### 2. CheckpointInterval (PASSIVE, Non-Blocking)
-
-```yaml
-checkpoint-interval: 1m  # Default: 1 minute
-```
-
-- **Trigger:** 1 minute elapsed since last checkpoint attempt
-- **Mode:** PASSIVE checkpoint
-- **Behavior:** Non-blocking—fails silently if readers or writers are active
-- **Purpose:** Time-based cleanup even when WAL is small
-- **Condition:** Only runs if WAL has at least 1 page
-
-### 3. TruncatePageN (TRUNCATE, Blocking)
+### 1. TruncatePageN (TRUNCATE, Blocking) - Emergency Brake
 
 ```yaml
 truncate-page-n: 121359  # Default: ~500MB
@@ -57,9 +34,33 @@ truncate-page-n: 121359  # Default: ~500MB
 
 - **Trigger:** WAL exceeds 121,359 pages (~500MB)
 - **Mode:** TRUNCATE checkpoint via `sqlite3_wal_checkpoint_v2()`
-- **Behavior:** **Blocking**—waits for active writers to complete, then truncates WAL
+- **Behavior:** **Blocking**—waits for all active writers AND readers to complete before truncating WAL
 - **Purpose:** Emergency brake to prevent unbounded WAL growth
-- **Safety:** Set much higher than PASSIVE thresholds to minimize blocking risk
+- **Priority:** Checked first to prevent runaway WAL growth
+- **Important:** Inherits RESTART semantics from SQLite, meaning both readers and writers can block this checkpoint
+
+### 2. MinCheckpointPageN (PASSIVE, Non-Blocking)
+
+```yaml
+min-checkpoint-page-count: 1000  # Default: ~4MB
+```
+
+- **Trigger:** WAL exceeds 1,000 pages (~4MB)
+- **Mode:** PASSIVE checkpoint via `sqlite3_wal_checkpoint_v2()`
+- **Behavior:** Non-blocking—returns SQLITE_BUSY if readers or writers are active, which Litestream handles gracefully by logging "passive checkpoint skipped" and continuing without interrupting the application
+- **Purpose:** Keep WAL small under normal operation
+
+### 3. CheckpointInterval (PASSIVE, Non-Blocking)
+
+```yaml
+checkpoint-interval: 1m  # Default: 1 minute
+```
+
+- **Trigger:** 1 minute elapsed since last checkpoint attempt
+- **Mode:** PASSIVE checkpoint
+- **Behavior:** Non-blocking—returns SQLITE_BUSY if readers or writers are active, which Litestream handles gracefully
+- **Purpose:** Time-based cleanup even when WAL is small
+- **Condition:** Only runs if WAL has at least 1 page
 
 ## Configuration
 
@@ -124,10 +125,11 @@ truncate-page-n: 121359
 - Minimal disk space usage
 
 **Disadvantages:**
-- TruncatePageN can block writes if WAL hits ~500MB (rare but possible)
-- May cause brief write pauses in extreme cases
+- TruncatePageN can block writes and readers if WAL hits ~500MB (rare but possible)
+- Long-running read transactions will cause extended blocking until they complete
+- May cause write pauses in extreme cases
 
-**Best for:** Most applications with typical read/write patterns
+**Best for:** Most applications with typical read/write patterns and short-lived transactions
 
 ### Disabling TruncatePageN (Recommended for Long-Read Apps)
 
@@ -287,16 +289,21 @@ sqlite3 /path/to/db "PRAGMA wal_checkpoint(PASSIVE);"
 - Application write timeouts
 - "database is locked" errors
 - Increased write latency
+- Blocking occurs when TRUNCATE checkpoint waits for active readers and writers
 
 **Log Messages:**
 ```
 checkpoint truncate: pages=121359 mode=TRUNCATE
 ```
 
+**Root Cause:**
+TRUNCATE checkpoints inherit RESTART semantics from SQLite, meaning they wait for both all active readers AND writers to complete before truncating the WAL. Long-lived read transactions will cause extended blocking periods.
+
 **Solutions:**
 1. Increase `truncate-page-n` threshold: `truncate-page-n: 250000`
 2. Disable blocking checkpoints: `truncate-page-n: 0`
 3. Reduce read transaction duration in your application
+4. Review application for long-running queries or batch operations
 
 ### Performance Optimization
 
