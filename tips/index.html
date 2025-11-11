@@ -175,6 +175,7 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
   <ul>
     <li><a href="#busy-timeout">Busy timeout</a></li>
     <li><a href="#wal-journal-mode">WAL journal mode</a></li>
+    <li><a href="#foreign-key-constraints">Foreign Key Constraints</a></li>
     <li><a href="#deleting-sqlite-databases">Deleting SQLite databases</a></li>
     <li><a href="#synchronous-pragma">Synchronous PRAGMA</a></li>
     <li><a href="#data-loss-window">Data loss window</a></li>
@@ -207,6 +208,17 @@ blocked on a write. It is recommended to set this to 5 seconds:</p>
 recommended mode for most applications as it generally performs better and
 allows for concurrent read access. Litestream will automatically set the
 database mode to <code>WAL</code> if it has not already been enabled by the application.</p>
+<h2 id="foreign-key-constraints">Foreign Key Constraints<a href="#foreign-key-constraints" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Foreign key constraints are disabled by default in SQLite for backwards
+compatibility. However, foreign keys are an important feature for maintaining
+data integrity and are considered a best practice. It is recommended to enable
+them by setting the <a href="https://www.sqlite.org/pragma.html#pragma_foreign_keys"><code>foreign_keys</code> pragma</a> when you initialize
+your database connection:</p>
+<pre tabindex="0"><code>PRAGMA foreign_keys = ON;
+</code></pre><p>This pragma must be set on each database connection, as it does not persist
+across connections. Enabling foreign key constraints will ensure that your
+application cannot accidentally create orphaned records that violate foreign
+key relationships.</p>
 <h2 id="deleting-sqlite-databases">Deleting SQLite databases<a href="#deleting-sqlite-databases" class="anchor" aria-hidden="true">#</a> </h2>
 <p>If you&rsquo;re deleting and recreating a SQLite database from scratch, there are 3
 files which must be deleted:</p>

@@ -182,6 +182,14 @@
     <li><a href="#replicating-your-database">Replicating your database</a></li>
     <li><a href="#restoring-your-database">Restoring your database</a></li>
     <li><a href="#continuous-replication">Continuous replication</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#the-aws-access-key-id-you-provided-does-not-exist-in-our-records">&ldquo;The AWS Access Key Id you provided does not exist in our records&rdquo;</a></li>
+        <li><a href="#cannot-lookup-region">&ldquo;Cannot lookup region&rdquo;</a></li>
+        <li><a href="#minio-console-shows-empty-bucket-but-replicate-command-ran">MinIO console shows empty bucket but replicate command ran</a></li>
+        <li><a href="#changes-arent-being-replicated">Changes aren&rsquo;t being replicated</a></li>
+      </ul>
+    </li>
     <li><a href="#further-reading">Further reading</a></li>
   </ul>
 </nav>
@@ -221,6 +229,10 @@ and enter the default credentials:</p>
 Password: minioadmin
 </code></pre><p>Next, navigate to &ldquo;Buckets&rdquo;, click the &ldquo;Create Bucket&rdquo; button in the top right corner and then click the
 <em>&ldquo;Save&rdquo;</em> icon. Name your bucket, <code>&quot;mybkt&quot;</code>.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100"><strong>For remote MinIO servers:</strong> If your MinIO instance is running on a different machine (not localhost), skip this tutorial. See the <a href="/reference/config#minio-configuration">MinIO Configuration</a> section in the documentation for setup instructions. This tutorial only covers local MinIO running via Docker.</div>
+</div>
 <h2 id="setting-up-your-database">Setting up your database<a href="#setting-up-your-database" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Now that our MinIO bucket is created, we can replicate data to it. Litestream
 can work with any SQLite database so we&rsquo;ll use the <code>sqlite3</code> command line tool
@@ -273,7 +285,48 @@ to a new <code>fruits3.db</code> file:</p>
 <pre tabindex="0"><code>apple|red
 banana|yellow
 grape|purple
-</code></pre><h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
+</code></pre><h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="the-aws-access-key-id-you-provided-does-not-exist-in-our-records">&ldquo;The AWS Access Key Id you provided does not exist in our records&rdquo;<a href="#the-aws-access-key-id-you-provided-does-not-exist-in-our-records" class="anchor" aria-hidden="true">#</a> </h3>
+<p>This error occurs when Litestream cannot authenticate with MinIO. Common causes:</p>
+<ol>
+<li>
+<p><strong>Wrong credentials</strong>: Verify you&rsquo;re using the correct access key and secret key.
+The default MinIO Docker container uses <code>minioadmin</code> / <code>minioadmin</code>.</p>
+</li>
+<li>
+<p><strong>Missing endpoint for remote MinIO</strong>: If your MinIO server is on a different machine,
+you <strong>must</strong> specify the <code>endpoint</code> parameter in your configuration file. See the
+<a href="/reference/config#minio-configuration">MinIO Configuration</a> section.</p>
+</li>
+<li>
+<p><strong>Environment variable conflicts</strong>: Environment variables take precedence over
+config files. Unset any conflicting environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">unset</span> LITESTREAM_ACCESS_KEY_ID
+</span></span><span class="line"><span class="cl"><span class="nb">unset</span> LITESTREAM_SECRET_ACCESS_KEY
+</span></span><span class="line"><span class="cl"><span class="nb">unset</span> AWS_ACCESS_KEY_ID
+</span></span><span class="line"><span class="cl"><span class="nb">unset</span> AWS_SECRET_ACCESS_KEY
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="cannot-lookup-region">&ldquo;Cannot lookup region&rdquo;<a href="#cannot-lookup-region" class="anchor" aria-hidden="true">#</a> </h3>
+<p>This error typically means the region is missing or invalid. For MinIO, any region
+value works (e.g., <code>us-east-1</code>) since MinIO ignores this parameter but still
+requires it in the configuration.</p>
+<h3 id="minio-console-shows-empty-bucket-but-replicate-command-ran">MinIO console shows empty bucket but replicate command ran<a href="#minio-console-shows-empty-bucket-but-replicate-command-ran" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Check that you specified the correct bucket name in your replication command. The
+URL format is <code>s3://BUCKET_NAME.ENDPOINT/PATH</code>.</p>
+<p>For local MinIO: <code>s3://mybkt.localhost:9000/fruits.db</code></p>
+<p>For remote MinIO: You need a configuration file with the endpoint parameter—see
+the <a href="/reference/config#minio-configuration">MinIO Configuration</a> section.</p>
+<h3 id="changes-arent-being-replicated">Changes aren&rsquo;t being replicated<a href="#changes-arent-being-replicated" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Verify that:</p>
+<ul>
+<li>Litestream is still running in your terminal window</li>
+<li>The MinIO instance is still running</li>
+<li>You can access the MinIO console at the expected address</li>
+</ul>
+<p>If using a config file, ensure credentials are correct and the file is being read
+by passing the <code>-config</code> flag to Litestream.</p>
+<h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream was built to run as a background service that you don&rsquo;t need to worry
 about—it just replicates your database all the time. To run Litestream as a
 background service, please refer to the <a href="/guides">How-To Guides section</a> to
