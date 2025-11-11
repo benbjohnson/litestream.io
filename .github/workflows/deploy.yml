@@ -19,8 +19,8 @@ jobs:
 
       - name: Build v0.5 (latest) documentation
         run: |
-          git fetch origin docs-v0.5
-          git checkout docs-v0.5
+          git fetch origin main
+          git checkout main
           npm run build
           mkdir -p /tmp/public-combined
           cp -r public/* /tmp/public-combined/
