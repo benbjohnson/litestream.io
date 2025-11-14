@@ -82,7 +82,7 @@ file][]. You can configure a replica for your database using the `url` format.
 dbs:
   - path: /path/to/local/db
     replica:
-      url: gcs://BUCKET/PATH
+      url: gs://BUCKET/PATH
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -91,7 +91,7 @@ Or you can expand your configuration into multiple fields:
 dbs:
   - path: /path/to/local/db
     replica:
-      type:   gcs
+      type:   gs
       bucket: BUCKET
       path:   PATH
 ```
