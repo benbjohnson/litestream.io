@@ -24,7 +24,7 @@ space a globally unique name. Then click the _"Create a bucket"_ button at the
 bottom of the screen.
 
 <figure>
-	<img src="scw-create-bucket.png" alt="Screenshot of Scaleway create bucket UI">
+ <img src="scw-create-bucket.png" alt="Screenshot of Scaleway create bucket UI">
 </figure>
 
 After your bucket is created, you'll see the hostname of your bucket in the format `<bucket-name>.s3.<region>.scw.cloud`. You will need the bucket name, the region and the regional endpoint (`s3.<region>.scw.cloud`) for use later when configuring Litestream.

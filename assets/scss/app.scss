@@ -14,6 +14,7 @@
 @import "components/alerts";
 @import "components/buttons";
 @import "components/code";
+
 // @import "components/syntax";
 @import "components/comments";
 @import "components/forms";
@@ -39,7 +40,7 @@ h3 a {
 }
 
 .navbar-brand {
-  color: rgb(12,13,95) !important;
+  color: rgb(12 13 95) !important;
   letter-spacing: -1px;
 }
 

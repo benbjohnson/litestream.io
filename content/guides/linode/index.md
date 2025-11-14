@@ -25,7 +25,7 @@ Enter a globally unique name for your bucket and choose a region. Then click the
 _"Submit"_ button.
 
 <figure>
-	<img src="bucket_0.png" alt="Screenshot of Linode create bucket UI">
+ <img src="bucket_0.png" alt="Screenshot of Linode create bucket UI">
 </figure>
 
 After your bucket is created, you'll see a hostname for the bucket in the format
@@ -41,7 +41,7 @@ console](https://cloud.linode.com/object-storage), click the _Access Keys_ tab
 in the top navigation and then click the _"Create an Access Key"_ button.
 
 Enter a name for your key. You can enable _Limited Access_ if you want to
-restrict the key to only certain buckets. Otherwise, click the _"Submit"_ 
+restrict the key to only certain buckets. Otherwise, click the _"Submit"_
 button.
 
 <figure>

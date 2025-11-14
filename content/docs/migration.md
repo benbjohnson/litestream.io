@@ -26,6 +26,7 @@ This guide covers upgrading Litestream versions, migrating configuration formats
 #### Pre-Upgrade Checklist
 
 1. **Backup your current setup**:
+
    ```bash
    # Stop Litestream
    sudo systemctl stop litestream
@@ -92,7 +93,7 @@ dbs:
       retention: 72h
 ```
 
-2. **Override default settings**:
+1. **Override default settings**:
 
 ```yaml
 # Add MCP support (disabled by default)
@@ -111,17 +112,17 @@ levels:
     retention: 168h
 ```
 
-3. **Update command usage**:
+1. **Update command usage**:
 
 ```bash
 # OLD: Query WAL information
 litestream wal /path/to/db.sqlite
 
-# NEW: Query LTX information  
+# NEW: Query LTX information
 litestream ltx /path/to/db.sqlite
 ```
 
-4. **Restart services**:
+1. **Restart services**:
 
 ```bash
 # Restart Litestream with new configuration
@@ -156,7 +157,7 @@ The feature was not maintained and has been disabled to prevent accidental data 
 
 Choose the option that best fits your situation:
 
-**Option 1: Stay on v0.3.x**
+#### Option 1: Stay on v0.3.x
 
 If you need Age encryption, remain on v0.3.x until the feature is restored:
 
@@ -171,16 +172,18 @@ sudo mv litestream /usr/local/bin/
 sudo systemctl restart litestream
 ```
 
-**Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)**
+#### Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)
 
 If you can migrate away from Age encryption:
 
 1. **Validate your current backups are accessible**:
+
    ```bash
    litestream restore -o /tmp/test-restore.db /var/lib/app.db
    ```
 
 2. **Remove Age encryption from configuration**:
+
    ```yaml
    # REMOVE this entire section from your litestream.yml
    age:
@@ -196,6 +199,7 @@ If you can migrate away from Age encryption:
    ```
 
 3. **Migrate existing encrypted backups** (optional):
+
    ```bash
    # Decrypt and restore from v0.3.x backup
    litestream restore -o /tmp/decrypted.db /var/lib/app.db
@@ -212,6 +216,7 @@ If you can migrate away from Age encryption:
    ```
 
 4. **Verify new backups are working**:
+
    ```bash
    # Wait a few minutes for replication to occur
    litestream databases
@@ -220,7 +225,7 @@ If you can migrate away from Age encryption:
    litestream restore -o /tmp/verify.db /var/lib/app.db
    ```
 
-**Option 3: Use Unencrypted Backups Temporarily**
+#### Option 3: Use Unencrypted Backups Temporarily
 
 While Age encryption is unavailable, use standard unencrypted replication:
 
@@ -233,6 +238,7 @@ dbs:
 ```
 
 For encryption at rest, consider:
+
 - S3 Server-Side Encryption (SSE-S3, SSE-KMS)
 - Google Cloud Storage encryption
 - Azure Blob Storage encryption
@@ -257,6 +263,7 @@ A: Do not upgrade to v0.5.0+ at this time. Stay on v0.3.x. Monitor the [Litestre
 A: Encryption support will be re-implemented **directly in the LTX format** to support per-page encryption. This is planned work but no timeline has been announced. The implementation is complex and requires careful design to work efficiently with cloud storage providers.
 
 If you need encryption immediately, you can:
+
 - Stay on v0.3.x with Age encryption
 - Use provider-level encryption (S3 SSE-KMS, GCS encryption, Azure encryption, etc.)
 - Use database-level encryption (SQLCipher)
@@ -343,6 +350,7 @@ dbs:
 ### Migrating from File to S3
 
 1. **Prepare S3 bucket and credentials**:
+
    ```bash
    # Create S3 bucket
    aws s3 mb s3://my-litestream-backups
@@ -352,6 +360,7 @@ dbs:
    ```
 
 2. **Update configuration**:
+
    ```yaml
    dbs:
      - path: /var/lib/app.db
@@ -366,6 +375,7 @@ dbs:
    ```
 
 3. **Perform initial sync**:
+
    ```bash
    # Stop current replication
    sudo systemctl stop litestream
@@ -380,12 +390,14 @@ dbs:
 ### Migrating from S3 to NATS
 
 1. **Set up NATS server with JetStream**:
+
    ```bash
    # Start NATS with JetStream enabled
    nats-server -js
    ```
 
 2. **Update configuration**:
+
    ```yaml
    dbs:
      - path: /var/lib/app.db
@@ -402,6 +414,7 @@ dbs:
    ```
 
 3. **Create NATS bucket**:
+
    ```bash
    # Create JetStream bucket
    nats stream create my-app-bucket \
@@ -450,6 +463,7 @@ dbs:
 When changing replica types, you may want to preserve existing backups:
 
 1. **Export current backups**:
+
    ```bash
    # List available LTX files
    litestream ltx /var/lib/app.db
@@ -459,6 +473,7 @@ When changing replica types, you may want to preserve existing backups:
    ```
 
 2. **Initialize new replica with existing data**:
+
    ```bash
    # Stop replication
    sudo systemctl stop litestream
@@ -473,6 +488,7 @@ When changing replica types, you may want to preserve existing backups:
 For production systems requiring zero downtime:
 
 1. **Set up parallel replication**:
+
    ```yaml
    dbs:
      # Keep existing replica
@@ -488,12 +504,14 @@ For production systems requiring zero downtime:
    ```
 
 2. **Monitor both replicas**:
+
    ```bash
    # Watch replication status
    watch -n 5 'litestream databases'
    ```
 
 3. **Switch over when new replica is synchronized**:
+
    ```yaml
    dbs:
      # Remove old replica, keep new one
@@ -540,17 +558,20 @@ Update cron jobs and systemd timers:
 After migration, validate your setup:
 
 1. **Verify configuration**:
+
    ```bash
    litestream databases
    ```
 
 2. **Test restore functionality**:
+
    ```bash
    litestream restore -o /tmp/test-restore.db /var/lib/app.db
    sqlite3 /tmp/test-restore.db "PRAGMA integrity_check;"
    ```
 
 3. **Monitor replication**:
+
    ```bash
    # Watch for replication activity
    tail -f /var/log/litestream.log
@@ -561,6 +582,7 @@ After migration, validate your setup:
 Always have a rollback plan:
 
 1. **Keep old binary available**:
+
    ```bash
    # Quick rollback if needed
    sudo cp /usr/local/bin/litestream.backup /usr/local/bin/litestream
@@ -569,6 +591,7 @@ Always have a rollback plan:
    ```
 
 2. **Restore from backup if needed**:
+
    ```bash
    litestream restore -o /var/lib/app-recovered.db /var/lib/app.db
    ```
@@ -601,6 +624,7 @@ Always have a rollback plan:
 ### Professional Services
 
 For complex migrations or production environments, consider:
+
 - Reviewing migration plan with the community
 - Testing in staging environment first
 - Planning maintenance windows for critical systems

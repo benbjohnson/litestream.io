@@ -44,6 +44,7 @@ ul.social-nav.navbar-nav {
   .nav-item:first-child {
     margin-left: 0;
   }
+
   ul.social-nav .nav-item {
     margin-left: 1.25rem;
   }
@@ -62,7 +63,7 @@ ul.social-nav.navbar-nav {
 }
 
 .navbar {
-  background-color: rgba(255, 255, 255, 1);
+  background-color: rgb(255 255 255 / 100%);
   border-bottom: 1px solid $gray-200;
 }
 
@@ -154,7 +155,7 @@ ul.social-nav.navbar-nav {
 }
 
 .algolia-autocomplete .ds-dropdown-menu {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%) !important;
 }
 
 @include media-breakpoint-down(sm) {
