@@ -189,6 +189,7 @@ This error occurs when Litestream cannot authenticate with MinIO. Common causes:
 
 3. **Environment variable conflicts**: Environment variables take precedence over
    config files. Unset any conflicting environment variables:
+
    ```sh
    unset LITESTREAM_ACCESS_KEY_ID
    unset LITESTREAM_SECRET_ACCESS_KEY
@@ -215,6 +216,7 @@ the [MinIO Configuration](/reference/config#minio-configuration) section.
 ### Changes aren't being replicated
 
 Verify that:
+
 - Litestream is still running in your terminal window
 - The MinIO instance is still running
 - You can access the MinIO console at the expected address

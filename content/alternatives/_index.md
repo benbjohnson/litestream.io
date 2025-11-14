@@ -25,7 +25,7 @@ alternative approaches and when they might be appropriate.
 Sometimes Litestream can be overkill for projects with a small database that do
 not have high durability requirements. In these cases, it may be more
 appropriate to simply back up your database daily or hourly. This approach can
-also be used in conjunction with Litestream as a fallback. 
+also be used in conjunction with Litestream as a fallback.
 
 Please see our [guide to running a cron-based backup strategy](/alternatives/cron).
 

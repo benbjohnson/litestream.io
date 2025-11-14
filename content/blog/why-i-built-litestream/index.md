@@ -116,7 +116,6 @@ world and not a production database?
 [single-process]: https://crawshaw.io/blog/one-process-programming-notes
 [willison]: https://simonwillison.net/
 [datasette]: https://datasette.io/
-[sqlite-testing]: https://www.sqlite.org/testing.html
 
 
 

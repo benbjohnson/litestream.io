@@ -9,7 +9,7 @@ weight: 330
 ---
 
 This guide will get you running Litestream on the Windows operating system as
-either a command line tool or as a background Windows Service. 
+either a command line tool or as a background Windows Service.
 
 
 ## Prerequisites
@@ -29,7 +29,7 @@ page][releases]. You'll be presented with a window asking if the app can make
 changes to your device. Click _"Yes"_.
 
 <center>
-	<img src="msi.png" alt="Screenshot of Windows installer">
+ <img src="msi.png" alt="Screenshot of Windows installer">
 </center>
 <br/>
 
@@ -51,7 +51,7 @@ Go to the _Services_ application and select the Litestream service. You should
 see links in the sidebar to _Stop_ and _Restart_ the service.
 
 <figure>
-	<img src="services.png" alt="Screenshot of Windows Services application">
+ <img src="services.png" alt="Screenshot of Windows Services application">
 </figure>
 
 
@@ -81,7 +81,7 @@ PS C:\> Get-EventLog -LogName Application -Source Litestream
 ```
 
 
-## Running from the command line 
+## Running from the command line
 
 If you do not wish to run as a background service or you only need to perform
 a database restore then you can download the Litestream executable and run
