@@ -1,5 +1,5 @@
 ---
-title : "Linux (Debian)"
+title : "Linux"
 date: 2021-02-01T00:00:00Z
 layout: docs
 menu:
@@ -8,24 +8,40 @@ menu:
 weight: 120
 ---
 
-## Download & install
+## Debian/Ubuntu
 
 Debian package files are provided so you can install Litestream and its systemd
 service with a few commands. First, download the latest `.deb` file to your
 local machine:
 
 ```sh
-wget https://github.com/benbjohnson/litestream/releases/download/v{{< version >}}/litestream-v{{< version >}}-linux-amd64.deb
+wget https://github.com/benbjohnson/litestream/releases/download/v{{< version >}}/litestream-{{< version >}}-linux-x86_64.deb
 ```
 
 Then install it using `dpkg`:
 
 ```sh
-sudo dpkg -i litestream-v{{< version >}}-linux-amd64.deb
+sudo dpkg -i litestream-{{< version >}}-linux-x86_64.deb
 ```
 
 You should now be able to run `litestream version` to verify it is installed.
 
+## RHEL/Fedora/CentOS
+
+RPM package files are also available. First, download the latest `.rpm` file to
+your local machine:
+
+```sh
+wget https://github.com/benbjohnson/litestream/releases/download/v{{< version >}}/litestream-{{< version >}}-linux-x86_64.rpm
+```
+
+Then install it using `dnf` (or `yum` on older systems):
+
+```sh
+sudo dnf install litestream-{{< version >}}-linux-x86_64.rpm
+```
+
+You should now be able to run `litestream version` to verify it is installed.
 
 ## Installing as a service
 
@@ -49,4 +65,3 @@ you'll need to restart the service:
 ```sh
 sudo systemctl restart litestream
 ```
-
