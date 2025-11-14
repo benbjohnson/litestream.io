@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Command: restore">
 <meta name="twitter:description" content="The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.
 Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.
-Usage With a database path This command will restore a database specified in the Litestream configuration file to its original location.">
+⚠️ **Age Encryption Note**: Age encryption is not available in v0.5.0&#43;. If you are attempting to restore from an Age-encrypted replica created with v0.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -208,6 +208,10 @@ attempts to restore the latest data. However, it can also restore databases
 to a specific point-in-time if it is covered by the WAL time range.</p>
 <p>Restoration will only run if the output database file does not exist so you
 cannot accidentally overwrite your running database.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">**Age Encryption Note**: Age encryption is not available in v0.5.0+. If you are attempting to restore from an Age-encrypted replica created with v0.3.x, the restore will fail. Please review the [migration guide](/docs/migration/#age-encryption-migration) for upgrade options.</div>
+</div>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="with-a-database-path">With a database path<a href="#with-a-database-path" class="anchor" aria-hidden="true">#</a> </h3>
 <p>This command will restore a database specified in the Litestream configuration
@@ -302,7 +306,7 @@ location:</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.e04ee49e690eded37dc03980e051ea16b5eb8ab2b615fd73ace1ada6e873b5d02f05e3c8aa463936f9bb9377f2096ac5e07deee2d61ec3fd427e14afe7b813b5.js" integrity="sha512-4E7knmkO3tN9wDmA4FHqFrXrirK2Ff1zrOGtpuhztdAvBePIqkY5Nvm7k3fyCWrF4H3u4tYew/1CfhSv57gTtQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.e3e3803f97f54462ce366f49cf0bcd39eb0da7813f5f83acfdc055e2febbd8c20d8c5118f960f3fb655efeec6eda991e881e06cceea7f3583b31475a3ee8dec5.js" integrity="sha512-4&#43;OAP5f1RGLONm9JzwvNOesNp4E/X4Os/cBV4v672MINjFEY&#43;WDz&#43;2Ve/uxu2pkeiB4GzO6n81g7MUdaPujexQ==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

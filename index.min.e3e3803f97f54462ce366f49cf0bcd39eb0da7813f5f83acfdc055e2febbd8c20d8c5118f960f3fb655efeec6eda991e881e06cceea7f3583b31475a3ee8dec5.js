@@ -109,6 +109,117 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </span></span><span class="line"><span class="cl"><span class="c1"># Verify it&#39;s working</span>
 </span></span><span class="line"><span class="cl">sudo systemctl status litestream
 </span></span><span class="line"><span class="cl">litestream databases
+</span></span></code></pre></div><h3 id="age-encryption-migration">Age Encryption Migration</h3>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">**Important**: Age encryption is not available in v0.5.0+. If you are upgrading from v0.3.x with Age encryption configured, your replica will be rejected with an explicit error message.</div>
+</div>
+<h4 id="who-is-affected">Who is Affected</h4>
+<p>If you meet <strong>any</strong> of the following conditions, this section applies to you:</p>
+<ul>
+<li>Running v0.3.x with Age encryption enabled</li>
+<li>Have Age encryption configured in your <code>litestream.yml</code></li>
+<li>Have existing Age-encrypted backups in S3, GCS, Azure, or other storage</li>
+</ul>
+<h4 id="why-age-encryption-was-disabled">Why Age Encryption Was Disabled</h4>
+<p>Age encryption was removed from v0.5.0+ as part of the LTX storage layer refactor. The core issue is that <strong>Age encrypts entire files as a single unit</strong>, which doesn&rsquo;t align with Litestream&rsquo;s new architecture.</p>
+<p>Litestream&rsquo;s v0.5+ uses the LTX format which allows <strong>per-page encryption</strong> - the ability to fetch and decrypt individual pages from storage (S3, GCS, etc.) without needing the entire file. This is more efficient and provides better integration with cloud storage.</p>
+<p>The feature was not maintained and has been disabled to prevent accidental data loss from misconfigured encryption (users believing their data was encrypted when it wasn&rsquo;t being encrypted at all).</p>
+<h4 id="upgrade-options">Upgrade Options</h4>
+<p>Choose the option that best fits your situation:</p>
+<p><strong>Option 1: Stay on v0.3.x</strong></p>
+<p>If you need Age encryption, remain on v0.3.x until the feature is restored:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check your current version</span>
+</span></span><span class="line"><span class="cl">litestream version
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># If you&#39;ve already upgraded to v0.5, downgrade to latest v0.3</span>
+</span></span><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz
+</span></span><span class="line"><span class="cl">tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
+</span></span><span class="line"><span class="cl">sudo mv litestream /usr/local/bin/
+</span></span><span class="line"><span class="cl">sudo systemctl restart litestream
+</span></span></code></pre></div><p><strong>Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)</strong></p>
+<p>If you can migrate away from Age encryption:</p>
+<ol>
+<li>
+<p><strong>Validate your current backups are accessible</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /tmp/test-restore.db /var/lib/app.db
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Remove Age encryption from configuration</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># REMOVE this entire section from your litestream.yml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">age</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">identities</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/litestream/age-identity.txt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">recipients</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">age1xxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Your replica should look like:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># No &#39;age&#39; section</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p><strong>Migrate existing encrypted backups</strong> (optional):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Decrypt and restore from v0.3.x backup</span>
+</span></span><span class="line"><span class="cl">litestream restore -o /tmp/decrypted.db /var/lib/app.db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Stop replication</span>
+</span></span><span class="line"><span class="cl">sudo systemctl stop litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Delete old encrypted replica (careful!)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Example for S3:</span>
+</span></span><span class="line"><span class="cl">aws s3 rm s3://my-bucket/app --recursive
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Update configuration and restart</span>
+</span></span><span class="line"><span class="cl">sudo systemctl start litestream
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Verify new backups are working</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Wait a few minutes for replication to occur</span>
+</span></span><span class="line"><span class="cl">litestream databases
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Test restore functionality</span>
+</span></span><span class="line"><span class="cl">litestream restore -o /tmp/verify.db /var/lib/app.db
+</span></span></code></pre></div></li>
+</ol>
+<p><strong>Option 3: Use Unencrypted Backups Temporarily</strong></p>
+<p>While Age encryption is unavailable, use standard unencrypted replication:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
+</span></span></span></code></pre></div><p>For encryption at rest, consider:</p>
+<ul>
+<li>S3 Server-Side Encryption (SSE-S3, SSE-KMS)</li>
+<li>Google Cloud Storage encryption</li>
+<li>Azure Blob Storage encryption</li>
+<li>Encrypted storage volumes at the provider level</li>
+</ul>
+<h4 id="frequently-asked-questions">Frequently Asked Questions</h4>
+<p><strong>Q: Will my v0.3.x Age-encrypted backups still work with v0.5?</strong></p>
+<p>A: No. If you have v0.3.x Age-encrypted backups and try to restore with v0.5, the restore will fail because Age encryption is not available in v0.5. You must either stay on v0.3.x to restore the backups or decrypt them first while still on v0.3.x.</p>
+<p><strong>Q: Do I need to re-encrypt existing backups?</strong></p>
+<p>A: No, your existing v0.3.x Age-encrypted backups remain encrypted in storage. The issue only affects upgrading to v0.5.0+. If you stay on v0.3.x, your backups continue to work normally.</p>
+<p><strong>Q: What if I&rsquo;m already using Age encryption in production?</strong></p>
+<p>A: Do not upgrade to v0.5.0+ at this time. Stay on v0.3.x. Monitor the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases</a> page for updates on Age encryption restoration.</p>
+<p><strong>Q: When will encryption be restored?</strong></p>
+<p>A: Encryption support will be re-implemented <strong>directly in the LTX format</strong> to support per-page encryption. This is planned work but no timeline has been announced. The implementation is complex and requires careful design to work efficiently with cloud storage providers.</p>
+<p>If you need encryption immediately, you can:</p>
+<ul>
+<li>Stay on v0.3.x with Age encryption</li>
+<li>Use provider-level encryption (S3 SSE-KMS, GCS encryption, Azure encryption, etc.)</li>
+<li>Use database-level encryption (SQLCipher)</li>
+</ul>
+<p>See <a href="https://github.com/benbjohnson/litestream/issues/458">issue #458</a> (LTX Support) for the tracking issue on encryption and other planned LTX features.</p>
+<h4 id="validation-before-upgrading">Validation Before Upgrading</h4>
+<p>Before upgrading to v0.5.0+, if you use Age encryption:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check if you have Age encryption in your config</span>
+</span></span><span class="line"><span class="cl">grep -n <span class="s2">&#34;age:&#34;</span> /etc/litestream.yml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># If the above returns results, you MUST:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 1. Stay on v0.3.x, OR</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Remove Age encryption configuration before upgrading</span>
 </span></span></code></pre></div><h2 id="configuration-migration">Configuration Migration</h2>
 <h3 id="single-replica-vs-multiple-replicas">Single Replica vs Multiple Replicas</h3>
 <p>The new configuration format uses a single <code>replica</code> field instead of a <code>replicas</code> array:</p>
