@@ -1,5 +1,7 @@
 ---
 title : "Linux"
+aliases:
+- /install/debian/
 date: 2021-02-01T00:00:00Z
 layout: docs
 menu:
