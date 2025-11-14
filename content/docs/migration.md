@@ -132,6 +132,150 @@ sudo systemctl status litestream
 litestream databases
 ```
 
+### Age Encryption Migration
+
+{{< alert icon="⚠️" text="**Important**: Age encryption is not available in v0.5.0+. If you are upgrading from v0.3.x with Age encryption configured, your replica will be rejected with an explicit error message." >}}
+
+#### Who is Affected
+
+If you meet **any** of the following conditions, this section applies to you:
+
+- Running v0.3.x with Age encryption enabled
+- Have Age encryption configured in your `litestream.yml`
+- Have existing Age-encrypted backups in S3, GCS, Azure, or other storage
+
+#### Why Age Encryption Was Disabled
+
+Age encryption was removed from v0.5.0+ as part of the LTX storage layer refactor. The core issue is that **Age encrypts entire files as a single unit**, which doesn't align with Litestream's new architecture.
+
+Litestream's v0.5+ uses the LTX format which allows **per-page encryption** - the ability to fetch and decrypt individual pages from storage (S3, GCS, etc.) without needing the entire file. This is more efficient and provides better integration with cloud storage.
+
+The feature was not maintained and has been disabled to prevent accidental data loss from misconfigured encryption (users believing their data was encrypted when it wasn't being encrypted at all).
+
+#### Upgrade Options
+
+Choose the option that best fits your situation:
+
+**Option 1: Stay on v0.3.x**
+
+If you need Age encryption, remain on v0.3.x until the feature is restored:
+
+```bash
+# Check your current version
+litestream version
+
+# If you've already upgraded to v0.5, downgrade to latest v0.3
+wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz
+tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
+sudo mv litestream /usr/local/bin/
+sudo systemctl restart litestream
+```
+
+**Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)**
+
+If you can migrate away from Age encryption:
+
+1. **Validate your current backups are accessible**:
+   ```bash
+   litestream restore -o /tmp/test-restore.db /var/lib/app.db
+   ```
+
+2. **Remove Age encryption from configuration**:
+   ```yaml
+   # REMOVE this entire section from your litestream.yml
+   age:
+     identities:
+       - /etc/litestream/age-identity.txt
+     recipients:
+       - age1xxxxxxxxxxxxx
+
+   # Your replica should look like:
+   replica:
+     url: s3://my-bucket/app
+     # No 'age' section
+   ```
+
+3. **Migrate existing encrypted backups** (optional):
+   ```bash
+   # Decrypt and restore from v0.3.x backup
+   litestream restore -o /tmp/decrypted.db /var/lib/app.db
+
+   # Stop replication
+   sudo systemctl stop litestream
+
+   # Delete old encrypted replica (careful!)
+   # Example for S3:
+   aws s3 rm s3://my-bucket/app --recursive
+
+   # Update configuration and restart
+   sudo systemctl start litestream
+   ```
+
+4. **Verify new backups are working**:
+   ```bash
+   # Wait a few minutes for replication to occur
+   litestream databases
+
+   # Test restore functionality
+   litestream restore -o /tmp/verify.db /var/lib/app.db
+   ```
+
+**Option 3: Use Unencrypted Backups Temporarily**
+
+While Age encryption is unavailable, use standard unencrypted replication:
+
+```yaml
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      url: s3://my-bucket/app
+      retention: 72h
+```
+
+For encryption at rest, consider:
+- S3 Server-Side Encryption (SSE-S3, SSE-KMS)
+- Google Cloud Storage encryption
+- Azure Blob Storage encryption
+- Encrypted storage volumes at the provider level
+
+#### Frequently Asked Questions
+
+**Q: Will my v0.3.x Age-encrypted backups still work with v0.5?**
+
+A: No. If you have v0.3.x Age-encrypted backups and try to restore with v0.5, the restore will fail because Age encryption is not available in v0.5. You must either stay on v0.3.x to restore the backups or decrypt them first while still on v0.3.x.
+
+**Q: Do I need to re-encrypt existing backups?**
+
+A: No, your existing v0.3.x Age-encrypted backups remain encrypted in storage. The issue only affects upgrading to v0.5.0+. If you stay on v0.3.x, your backups continue to work normally.
+
+**Q: What if I'm already using Age encryption in production?**
+
+A: Do not upgrade to v0.5.0+ at this time. Stay on v0.3.x. Monitor the [Litestream releases](https://github.com/benbjohnson/litestream/releases) page for updates on Age encryption restoration.
+
+**Q: When will encryption be restored?**
+
+A: Encryption support will be re-implemented **directly in the LTX format** to support per-page encryption. This is planned work but no timeline has been announced. The implementation is complex and requires careful design to work efficiently with cloud storage providers.
+
+If you need encryption immediately, you can:
+- Stay on v0.3.x with Age encryption
+- Use provider-level encryption (S3 SSE-KMS, GCS encryption, Azure encryption, etc.)
+- Use database-level encryption (SQLCipher)
+
+See [issue #458](https://github.com/benbjohnson/litestream/issues/458) (LTX Support) for the tracking issue on encryption and other planned LTX features.
+
+#### Validation Before Upgrading
+
+Before upgrading to v0.5.0+, if you use Age encryption:
+
+```bash
+# Check if you have Age encryption in your config
+grep -n "age:" /etc/litestream.yml
+
+# If the above returns results, you MUST:
+# 1. Stay on v0.3.x, OR
+# 2. Remove Age encryption configuration before upgrading
+```
+
 ## Configuration Migration
 
 ### Single Replica vs Multiple Replicas
