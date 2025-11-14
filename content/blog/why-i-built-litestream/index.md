@@ -105,7 +105,7 @@ Willison][willison] built a data exploration and publishing tool called
 [Datasette][] that's built on SQLite.
 
 SQLite is known for being bulletproof and having an [absurdly in-depth testing
-suite](sqlite-testing). Its motto is _"Small. Fast. Reliable. Choose any three."_
+suite](https://www.sqlite.org/testing.html). Its motto is _"Small. Fast. Reliable. Choose any three."_
 
 So why is SQLite considered a "toy" database in the application development
 world and not a production database?
