@@ -20,3 +20,7 @@ The `litestream` commands are:
 - [`litestream wal`](/reference/wal) — List available WAL files for a database (deprecated).
 
 
+## VFS extension
+
+- [`litestream-vfs`](/reference/vfs) — Optional read-only VFS that serves replicas directly from object storage.
+

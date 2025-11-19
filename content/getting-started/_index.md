@@ -232,6 +232,9 @@ about—it just replicates your database all the time. To run Litestream as a
 background service, please refer to the [How-To Guides section](/guides) to
 run on your particular platform.
 
+If you want a lightweight read-only copy without restoring to disk, see the
+[VFS Read Replicas guide](/guides/vfs).
+
 For security considerations including backup encryption, see the
 [Configuration Reference](/reference/config#encryption) section. Note that Age
 encryption is not available in v0.5.0+. If you are upgrading from v0.3.x with
