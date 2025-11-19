@@ -100,3 +100,11 @@ Litestream will always ensure there is at least one snapshot retained.
 This two-step process allows for more use cases such as snapshotting every day
 but retaining snapshots for a week.
 
+
+## Read replicas with VFS
+
+For read-only workloads, the optional `litestream-vfs` extension can serve
+queries directly from replica storage without restoring a full database file.
+It builds a page index from LTX files, fetches pages on-demand, and keeps the
+index fresh by polling for new files. See [Read Replicas with VFS](/how-it-works/vfs)
+and the [VFS guide](/guides/vfs) for details.

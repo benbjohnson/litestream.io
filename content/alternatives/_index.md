@@ -61,6 +61,9 @@ concerns from application concerns. However, there are replication solutions
 that allow you to compile replication into your application using the SQLite
 virtual file system:
 
+- Litestream provides its own read-only VFS (`litestream-vfs`) that streams
+  pages directly from replicas without restoring to disk. See the
+  [VFS guide](/guides/vfs) for details.
 - [Verneuil](https://github.com/backtrace-labs/verneuil)
 - [LiteReplica](http://litereplica.io/)
 
@@ -71,5 +74,4 @@ Client/server databases such as [Postgres](https://www.postgresql.org/) and
 [MySQL](https://www.mysql.com/) provide additional replication options such
 as synchronous replication. These can be also be good choices over SQLite
 although these typically have more operational complexity.
-
 
