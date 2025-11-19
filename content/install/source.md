@@ -31,6 +31,7 @@ from object storage. It requires CGO and is built separately from the main
 binary.
 
 ### Prerequisites
+
 - CGO toolchain (gcc/clang)
 - Go 1.24+
 
