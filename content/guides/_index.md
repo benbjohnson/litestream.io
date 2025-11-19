@@ -19,6 +19,7 @@ different platforms.
 ### Replica guides
 
 - [Amazon S3](/guides/s3)
+- [VFS Read Replicas](/guides/vfs)
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)

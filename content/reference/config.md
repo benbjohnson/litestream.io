@@ -85,6 +85,31 @@ logging:
 ```
 
 
+### L0 retention (VFS read replicas)
+
+{{< since version="0.5.0" >}} Litestream can keep recently compacted L0 files
+available so VFS read replicas have time to observe new transactions before
+they move into higher levels. These options are global (store-level):
+
+- `l0-retention` — minimum time to keep L0 files after they've been compacted to L1 (default: `5m`).
+- `l0-retention-check-interval` — how often to enforce the L0 retention window (default: `15s`).
+
+Example:
+
+```yaml
+l0-retention: 1800s                # keep L0 files for 30 minutes
+l0-retention-check-interval: 15s   # check frequently so VFS replicas can catch up
+
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: s3://mybkt/db
+```
+
+Keep `l0-retention` larger than your expected replica lag so the VFS can see
+contiguous LTX files.
+
+
 ## Database settings
 
 Litestream can monitor one or more database files that are specified in the
