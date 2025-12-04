@@ -27,3 +27,4 @@ different platforms.
 - [NATS JetStream](/guides/nats)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)
+- [Tigris (Fly.io)](/guides/tigris)

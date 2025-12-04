@@ -247,6 +247,39 @@ The following settings are specific to S3 replicas:
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
 
+- `sign-payload`—{{< since version="0.5.0" >}} Signs the request payload. Required
+  by some S3-compatible providers like Tigris. Automatically enabled for Tigris
+  endpoints.
+
+- `require-content-md5`—{{< since version="0.5.0" >}} Adds Content-MD5 header to
+  requests. Some S3-compatible providers don't support this header on certain
+  operations. Automatically disabled for Tigris endpoints.
+
+
+### Tigris (Fly.io) Configuration
+
+{{< since version="0.5.0" >}} [Tigris](https://www.tigrisdata.com/) is Fly.io's
+globally distributed S3-compatible object storage. Litestream automatically
+detects Tigris endpoints and applies required configuration settings.
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      type: s3
+      bucket: mybucket
+      endpoint: fly.storage.tigris.dev
+      region: auto
+```
+
+When using the `fly.storage.tigris.dev` endpoint, Litestream automatically
+configures:
+
+- `sign-payload: true` — Required by Tigris for request authentication
+- `require-content-md5: false` — Tigris doesn't support Content-MD5 on DELETE
+
+See the [Tigris Guide]({{< ref "tigris" >}}) for detailed setup instructions.
+
 
 ### MinIO Configuration
 
