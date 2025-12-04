@@ -85,6 +85,71 @@ logging:
 ```
 
 
+### L0 Retention
+
+{{< since version="0.5.0" >}} L0 retention controls how long L0 (level 0) files
+are kept after being compacted into L1 files. This setting is important when
+using VFS (Virtual File System) read replicas, as it prevents race conditions
+where L0 files could be deleted before VFS has time to fetch newly created L1
+files.
+
+**Background**: Litestream uses a tiered compaction system where transaction
+data flows from L0 to higher levels. L0 files contain the most recent
+transactions and are periodically compacted into L1 files. Without retention,
+L0 files would be deleted immediately after compaction, which can cause issues
+for VFS clients that haven't yet discovered the new L1 files.
+
+The defaults are shown below:
+
+```yaml
+l0-retention: 5m
+l0-retention-check-interval: 15s
+```
+
+**Configuration options:**
+
+- `l0-retention`—Minimum time to retain L0 files after they have been compacted
+  into L1. The file must meet both criteria before deletion: it must be
+  compacted into L1 AND the retention period must have elapsed. Defaults to `5m`.
+
+- `l0-retention-check-interval`—How frequently Litestream checks for expired L0
+  files. This should be more frequent than the L1 compaction interval to ensure
+  timely cleanup. Defaults to `15s`.
+
+**When to adjust these values:**
+
+| Scenario | Recommendation |
+|----------|----------------|
+| High-latency VFS clients | Increase `l0-retention` to allow more time for L1 discovery |
+| Storage-constrained environments | Use default or slightly lower retention if VFS latency is low |
+| Frequent database writes | Default values typically sufficient |
+| Infrequent writes with VFS | Consider increasing retention to ensure L1 file availability |
+
+**Example configuration:**
+
+```yaml
+# Extended retention for high-latency VFS environments
+l0-retention: 10m
+l0-retention-check-interval: 30s
+
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      url: s3://mybucket/app
+```
+
+**Monitoring**: When L0 retention is enforced, Litestream logs debug messages.
+Enable debug logging to monitor retention behavior:
+
+```yaml
+logging:
+  level: debug
+
+l0-retention: 5m
+l0-retention-check-interval: 15s
+```
+
+
 ## Database settings
 
 Litestream can monitor one or more database files that are specified in the
@@ -727,6 +792,10 @@ levels:
 snapshot:
   interval: 1h
   retention: 24h
+
+# L0 retention settings (for VFS support)
+l0-retention: 5m
+l0-retention-check-interval: 15s
 
 # Database configurations
 dbs:
