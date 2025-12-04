@@ -27,6 +27,27 @@ can set the `-no-expand-env` flag on any `litestream` command to disable
 expansion.
 
 
+### Supported Environment Variables
+
+Litestream reads the following environment variables:
+
+| Variable | Purpose | Used By |
+|----------|---------|---------|
+| `LITESTREAM_ACCESS_KEY_ID` | S3/S3-compatible access key | S3 replicas |
+| `LITESTREAM_SECRET_ACCESS_KEY` | S3/S3-compatible secret key | S3 replicas |
+| `AWS_ACCESS_KEY_ID` | AWS S3 access key (fallback) | S3 replicas |
+| `AWS_SECRET_ACCESS_KEY` | AWS S3 secret key (fallback) | S3 replicas |
+| `GOOGLE_APPLICATION_CREDENTIALS` | GCS service account key file path | GCS replicas |
+| `AZURE_STORAGE_KEY` | Azure storage account key | ABS replicas |
+| `LITESTREAM_AZURE_ACCOUNT_KEY` | Azure storage account key (alternate) | ABS replicas |
+| `LITESTREAM_CONFIG` | Path to configuration file | CLI |
+
+Litestream checks `LITESTREAM_*` prefixed variables first, then falls back to
+the standard cloud provider variables. This allows you to use Litestream-specific
+credentials when running alongside other applications that may use different
+credentials for the same cloud provider.
+
+
 ## Global settings
 
 ### AWS credentials

@@ -68,6 +68,67 @@ lsof -i :3001
 mcp-addr: ":3002"
 ```
 
+## Managing Credentials Securely
+
+**Issue**: Concerns about storing credentials in configuration files
+
+**Solutions**:
+
+1. **Environment Variable Expansion in Config Files** (Recommended):
+
+   ```yaml
+   dbs:
+     - path: /var/lib/db
+       replica:
+         url: s3://mybucket/db
+         access-key-id: ${AWS_ACCESS_KEY_ID}
+         secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+   ```
+
+   This allows config files to be committed to version control while
+   credentials stay in environment variables.
+
+2. **Kubernetes Secrets**:
+
+   ```yaml
+   env:
+     - name: LITESTREAM_ACCESS_KEY_ID
+       valueFrom:
+         secretKeyRef:
+           name: litestream-secrets
+           key: ACCESS_KEY_ID
+   ```
+
+3. **Docker with Environment Variables**:
+
+   ```bash
+   docker run \
+     -e LITESTREAM_ACCESS_KEY_ID \
+     -e LITESTREAM_SECRET_ACCESS_KEY \
+     -v /path/to/litestream.yml:/etc/litestream.yml \
+     litestream/litestream replicate
+   ```
+
+4. **Command-Line Mode** (for simple cases):
+
+   ```bash
+   export LITESTREAM_ACCESS_KEY_ID="..."
+   export LITESTREAM_SECRET_ACCESS_KEY="..."
+   litestream replicate /var/lib/db.sqlite s3://bucket/db
+   ```
+
+   See the [replicate command reference]({{< ref "/reference/replicate" >}})
+   for limitations of command-line mode.
+
+**Best Practices**:
+
+- Never commit credentials to version control
+- Use secrets management systems (Kubernetes secrets, AWS Secrets Manager,
+  HashiCorp Vault, etc.)
+- Rotate credentials regularly
+- Use IAM roles when possible (EC2, ECS, EKS)
+- Audit access to credential storage
+
 ## Replication Issues
 
 ### S3 Connection Failures
