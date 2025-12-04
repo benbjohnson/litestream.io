@@ -1,6 +1,6 @@
 ---
 title : "Replicating to Alibaba Cloud OSS"
-date: 2021-12-04T00:00:00Z
+date: 2025-12-03T00:00:00Z
 layout: docs
 menu:
   docs:
