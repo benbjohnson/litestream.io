@@ -140,12 +140,13 @@ dbs:
 
 ## Replica settings
 
-Litestream supports six types of replicas:
+Litestream supports seven types of replicas:
 
 - `"abs"` replicates a database to an Azure Blob Storage container.
 - `"file"` replicates a database to another local file path.
 - `"gs"` replicates a database to a Google Cloud Storage bucket.
 - `"nats"` replicates a database to a NATS JetStream Object Store.
+- `"oss"` replicates a database to an Alibaba Cloud OSS bucket.
 - `"s3"` replicates a database to an S3-compatible bucket.
 - `"sftp"` replicates a database to a remote server via SFTP.
 
@@ -505,6 +506,44 @@ The following settings are specific to NATS replicas:
 - `client-key`—Client private key for mutual TLS
 
 See the [NATS Integration Guide]({{< ref "nats" >}}) for detailed setup instructions.
+
+
+### Alibaba Cloud OSS replica
+
+{{< since version="0.5.0" >}} Native Alibaba Cloud OSS support using the official SDK.
+
+OSS replicas can be configured using the `url` field:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: oss://mybucket.oss-cn-hangzhou.aliyuncs.com/db
+```
+
+Or by specifying individual fields:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      type: oss
+      bucket: mybucket
+      region: cn-hangzhou
+      path: db
+```
+
+The following settings are specific to OSS replicas:
+
+- `access-key-id`—Alibaba Cloud AccessKey ID. Can also use `LITESTREAM_OSS_ACCESS_KEY_ID` environment variable.
+- `access-key-secret`—Alibaba Cloud AccessKey Secret. Can also use `LITESTREAM_OSS_ACCESS_KEY_SECRET` environment variable.
+- `bucket`—OSS bucket name
+- `region`—OSS region (e.g., cn-hangzhou, us-west-1)
+- `path`—Path within the bucket
+- `part-size`—Part size for multipart uploads (default: 5MB)
+- `concurrency`—Number of parallel upload workers (default: 1)
+
+See the [Alibaba Cloud OSS Guide]({{< ref "alibaba-oss" >}}) for detailed setup instructions.
 
 
 ### Legacy Multiple Replicas
