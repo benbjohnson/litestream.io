@@ -840,6 +840,55 @@ The following settings are specific to OSS replicas:
 See the [Alibaba Cloud OSS Guide]({{< ref "alibaba-oss" >}}) for detailed setup instructions.
 
 
+### WebDAV replica
+
+{{< since version="0.5.0" >}} WebDAV replicas allow replication to any RFC 4918 compliant WebDAV server,
+including Nextcloud, ownCloud, and Apache mod_dav.
+
+WebDAV replicas can be configured using the `url` field:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: webdavs://user:password@example.com/backup/db
+```
+
+Or with individual fields:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      type: webdav
+      webdav-url: https://example.com/webdav
+      webdav-username: ${WEBDAV_USERNAME}
+      webdav-password: ${WEBDAV_PASSWORD}
+      path: /litestream/backups
+```
+
+The following settings are specific to WebDAV replicas:
+
+- `webdav-url`—WebDAV server URL (use `https://` for production)
+- `webdav-username`—Username for HTTP Basic authentication
+- `webdav-password`—Password for HTTP Basic authentication
+- `path`—Remote path where replica files will be stored
+
+**URL Schemes:**
+
+- `webdav://`—HTTP (not recommended for production)
+- `webdavs://`—HTTPS (recommended for production)
+
+**Environment Variables:**
+
+You can use environment variables with standard Litestream substitution:
+
+- `${WEBDAV_USERNAME}` or `${LITESTREAM_WEBDAV_USERNAME}`
+- `${WEBDAV_PASSWORD}` or `${LITESTREAM_WEBDAV_PASSWORD}`
+
+See the [WebDAV Guide]({{< ref "webdav" >}}) for detailed setup instructions.
+
+
 ### Legacy Multiple Replicas
 
 {{< alert icon="⚠️" text="Multiple replicas per database are deprecated. Use a single replica configuration instead." >}}
