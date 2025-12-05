@@ -466,14 +466,13 @@ dbs:
       bucket: my-bucket
       username: litestream
       password: ${NATS_PASSWORD}
-      
-      # TLS configuration
-      tls: true
+
+      # TLS configuration (auto-enables TLS when specified)
       root-cas:
         - /etc/ssl/certs/nats-ca.crt
       client-cert: /etc/ssl/certs/nats-client.crt
       client-key: /etc/ssl/private/nats-client.key
-      
+
       # Connection tuning
       max-reconnects: -1
       reconnect-wait: 2s
@@ -499,12 +498,15 @@ The following settings are specific to NATS replicas:
 
 **TLS Options:**
 
-- `tls`—Enable TLS encryption
-- `root-cas`—List of CA certificate file paths
-- `client-cert`—Client certificate for mutual TLS
-- `client-key`—Client private key for mutual TLS
+TLS is automatically enabled when `client-cert`/`client-key` or `root-cas` are
+configured. All certificate files must be in PEM format.
 
-See the [NATS Integration Guide]({{< ref "nats" >}}) for detailed setup instructions.
+- `root-cas`—List of CA certificate file paths for server verification
+- `client-cert`—Client certificate file path for mutual TLS authentication
+- `client-key`—Client private key file path for mutual TLS authentication
+  (must be specified with `client-cert`)
+
+See the [NATS Integration Guide]({{< ref "nats" >}}) for detailed TLS setup instructions.
 
 
 ### Legacy Multiple Replicas
@@ -745,16 +747,17 @@ dbs:
         recipients:
           - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   
-  # NATS replica with TLS
+  # NATS replica with mTLS
   - path: /var/lib/app2.db
     replica:
       type: nats
       url: nats://nats.example.com:4222/app2-bucket
       username: litestream
       password: ${NATS_PASSWORD}
-      tls: true
       root-cas:
         - /etc/ssl/certs/nats-ca.crt
+      client-cert: /etc/ssl/certs/litestream-client.crt
+      client-key: /etc/ssl/private/litestream-client.key
       max-reconnects: -1
       reconnect-wait: 2s
       
