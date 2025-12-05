@@ -199,7 +199,22 @@ dbs:
       - url: s3://mybkt.litestream.io/db
 ```
 
-However, you can break this out into separate fields as well:
+{{< since version="0.5.0" >}} You can also use S3 access point ARNs for VPC-only
+configurations and simplified access control:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/database-backups
+```
+
+When using access point ARNs, the region is automatically extracted from the
+ARN. You can override it with an explicit `region` setting if needed. See the
+[S3 Access Points guide]({{< ref "s3#using-s3-access-points" >}}) for detailed
+configuration and IAM policy examples.
+
+You can break this out into separate fields as well:
 
 ```yaml
 dbs:

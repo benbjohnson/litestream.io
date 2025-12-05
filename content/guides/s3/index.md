@@ -133,6 +133,103 @@ dbs:
 {{< since version="0.5.0" >}} Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
 
 
+## Using S3 Access Points
+
+{{< since version="0.5.0" >}} Litestream supports [S3 Access Points](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html),
+which provide dedicated endpoints for accessing shared datasets in S3. Access
+points are useful for VPC-only configurations, simplified access control, and
+improved network performance.
+
+### Benefits
+
+- **VPC-only access**: Route backup traffic through VPC endpoints instead of
+  NAT gateways for improved security and network isolation
+- **Reduced costs**: Eliminate NAT gateway data transfer charges, which can be
+  significant for large databases
+- **Lower latency**: Direct VPC connectivity provides better performance
+- **Simplified access control**: Delegate permissions to access point policies
+  for multi-tenant scenarios
+
+### URL Format
+
+Specify access point ARNs using the `s3://` URL scheme followed by the ARN:
+
+```
+s3://arn:aws:s3:REGION:ACCOUNT-ID:accesspoint/ACCESS-POINT-NAME[/PATH]
+```
+
+The region is automatically extracted from the ARN but can be explicitly
+overridden in the configuration.
+
+### Command Line Usage
+
+```sh
+litestream replicate /path/to/db \
+  s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups
+```
+
+### Configuration File Usage
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      url: s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups/prod
+```
+
+If you need to override the region extracted from the ARN:
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      url: s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups
+      region: us-east-2
+```
+
+### IAM Policy for Access Points
+
+Access points require appropriate IAM permissions on both the access point and
+the underlying bucket. The following policy grants the minimum permissions
+needed for replication through an access point:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/object/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": "arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point"
+        }
+    ]
+}
+```
+
+The underlying bucket must also grant access to the access point. See the
+[AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html)
+for details on configuring access point and bucket policies together.
+
+### VPC Endpoint Configuration
+
+To use VPC-only access points, you must configure a VPC endpoint for S3 in your
+VPC. The access point's network origin must be set to "VPC" when creating it.
+See [Creating access points restricted to a VPC](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html)
+for setup instructions.
+
+
 ## Restrictive IAM Policies
 
 While specifying `AmazonS3FullAccess` is an easy way to get up and running, you
