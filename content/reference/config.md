@@ -439,6 +439,10 @@ The following settings are specific to SFTP replicas:
 - `password`—Password for authentication (not recommended for production)
 - `key-path`—Path to SSH private key file for key-based authentication
 - `path`—Remote path where replica files will be stored
+- `concurrent-writes`—Enables concurrent writes for improved throughput (defaults
+  to `true`). When enabled, failed uploads must restart from the beginning. Set
+  to `false` to allow resuming failed transfers from the last successful chunk.
+  See the [SFTP Guide]({{< ref "sftp" >}}) for guidance on when to disable.
 
 
 ### NATS JetStream Object Store replica

@@ -77,4 +77,55 @@ dbs:
 ```
 
 
+## Concurrent Writes
+
+By default, Litestream enables concurrent writes for SFTP connections, which
+improves upload throughput by allowing multiple write operations to proceed
+simultaneously.
+
+### Trade-offs
+
+Concurrent writes offer better performance but with a trade-off:
+
+- **Enabled (default)**: Higher throughput during replication, but if an upload
+  fails, Litestream must re-upload the entire file from the beginning.
+
+- **Disabled**: Slightly slower uploads, but failed transfers can resume from
+  the last successfully written chunk.
+
+### When to disable concurrent writes
+
+Consider disabling concurrent writes if you have:
+
+- **Unreliable network connections**: If your connection to the SFTP server
+  frequently drops, disabling concurrent writes allows Litestream to resume
+  interrupted uploads rather than starting over.
+
+- **Very large databases**: For databases several gigabytes in size,
+  re-uploading from scratch after a failure can be costly in terms of time
+  and bandwidth.
+
+- **Bandwidth constraints**: In environments where bandwidth is limited or
+  metered, the ability to resume partial uploads may be more important than
+  raw throughput.
+
+### Configuration
+
+To disable concurrent writes, add the `concurrent-writes` option to your
+configuration:
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      type:              sftp
+      host:              HOST:PORT
+      user:              USER
+      password:          PASSWORD
+      path:              PATH
+      concurrent-writes: false
+```
+
+The `concurrent-writes` option accepts `true` (default) or `false`.
+
 [configuration file]: /reference/config
