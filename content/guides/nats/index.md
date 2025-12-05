@@ -136,27 +136,145 @@ replica:
 
 ### TLS Configuration
 
-For secure connections, enable TLS:
+For secure connections to your NATS server, Litestream supports several TLS
+options including custom CA certificates and client certificates for mutual TLS
+(mTLS) authentication.
+
+#### Basic TLS
+
+When connecting to a NATS server with TLS enabled, Litestream will
+automatically enable TLS when you configure client certificates or custom CA
+certificates:
 
 ```yaml
 replica:
   type: nats
   url: nats://secure.nats.example.com:4222/BUCKETNAME
-  tls: true
+  root-cas:
+    - /etc/ssl/certs/nats-ca.crt
 ```
 
-You can also specify custom CA certificates or client certificates:
+#### Custom Root CA Certificates
+
+If your NATS server uses certificates signed by a private or custom Certificate
+Authority (CA), you need to provide the CA certificate so Litestream can verify
+the server's identity:
 
 ```yaml
 replica:
   type: nats
   url: nats://nats.example.com:4222/BUCKETNAME
-  tls: true
   root-cas:
-    - /etc/ssl/certs/nats-ca.crt
-  client-cert: /etc/ssl/certs/litestream.crt
-  client-key: /etc/ssl/private/litestream.key
+    - /etc/ssl/certs/custom-ca.pem
 ```
+
+You can specify multiple CA certificates if needed:
+
+```yaml
+replica:
+  type: nats
+  url: nats://nats.example.com:4222/BUCKETNAME
+  root-cas:
+    - /etc/ssl/certs/ca1.pem
+    - /etc/ssl/certs/ca2.pem
+```
+
+Common scenarios requiring custom CA certificates:
+
+- Self-signed certificates for development or testing
+- Internal PKI with private CA
+- Intermediate CA certificates not in system trust store
+
+#### Client Certificates (Mutual TLS)
+
+For environments requiring mutual TLS (mTLS) authentication, where both the
+client and server verify each other's identity, configure client certificates:
+
+```yaml
+replica:
+  type: nats
+  url: nats://nats.example.com:4222/BUCKETNAME
+  client-cert: /etc/ssl/certs/litestream-client.pem
+  client-key: /etc/ssl/private/litestream-client.key
+```
+
+Both `client-cert` and `client-key` must be specified together. The certificate
+and key files should be in PEM format.
+
+#### Full mTLS Configuration
+
+A complete mutual TLS setup with both client authentication and custom CA:
+
+```yaml
+replica:
+  type: nats
+  url: nats://nats.example.com:4222/BUCKETNAME
+  root-cas:
+    - /etc/ssl/certs/nats-ca.pem
+  client-cert: /etc/ssl/certs/litestream-client.pem
+  client-key: /etc/ssl/private/litestream-client.key
+```
+
+#### Environment Variable Configuration
+
+You can use environment variables for certificate paths:
+
+```yaml
+replica:
+  type: nats
+  url: nats://nats.example.com:4222/BUCKETNAME
+  root-cas:
+    - ${NATS_CA_CERT}
+  client-cert: ${NATS_CLIENT_CERT}
+  client-key: ${NATS_CLIENT_KEY}
+```
+
+#### Certificate Requirements
+
+- **Format**: All certificates must be in PEM format
+- **Permissions**: Certificate files should be readable by the Litestream process
+- **Key permissions**: Private key files should have restricted permissions (e.g., `600`)
+- **Validation**: Both client certificate and key must be provided together
+
+#### NATS Server Configuration
+
+For reference, your NATS server should be configured to require TLS and
+optionally verify client certificates. Example NATS server configuration:
+
+```conf
+# Enable TLS
+tls {
+  cert_file: "/etc/nats/server-cert.pem"
+  key_file: "/etc/nats/server-key.pem"
+  ca_file: "/etc/nats/ca.pem"
+  verify: true  # Require client certificates
+}
+```
+
+See the [NATS TLS documentation](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/tls)
+for complete server configuration options.
+
+#### Troubleshooting TLS
+
+Common TLS issues and solutions:
+
+**Certificate validation errors:**
+
+- Verify the CA certificate matches what signed the server certificate
+- Check certificate expiration dates
+- Ensure hostname in certificate matches the server URL
+
+**Client certificate rejected:**
+
+- Confirm both `client-cert` and `client-key` are specified
+- Verify the client certificate was signed by a CA trusted by the server
+- Check file permissions on the key file
+
+**Connection timeouts:**
+
+- Verify the NATS server is listening on the expected port with TLS enabled
+- Check firewall rules allow the connection
+- Try increasing the `timeout` configuration option
 
 ## Connection Options
 
