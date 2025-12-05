@@ -18,6 +18,7 @@ different platforms.
 
 ### Replica guides
 
+- [Local File Path](/guides/file)
 - [Amazon S3](/guides/s3)
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
