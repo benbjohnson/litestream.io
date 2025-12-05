@@ -27,3 +27,4 @@ different platforms.
 - [NATS JetStream](/guides/nats)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)
+- [WebDAV Server](/guides/webdav)
