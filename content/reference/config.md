@@ -247,6 +247,16 @@ The following settings are specific to S3 replicas:
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
 
+- `part-size`—{{< since version="0.5.0" >}} Size of each part in multipart uploads. Accepts
+  human-readable sizes like `5MB`, `10MB`, or `1GB`. Default is 5 MiB. Minimum
+  is 5 MiB (S3 requirement), maximum is 5 GiB. See the
+  [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
+
+- `concurrency`—{{< since version="0.5.0" >}} Number of parts to upload in parallel during
+  multipart uploads. Default is 5. Higher values improve throughput on fast
+  networks but use more memory. See the
+  [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
+
 
 ### MinIO Configuration
 

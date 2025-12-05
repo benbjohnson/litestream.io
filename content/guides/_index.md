@@ -19,6 +19,7 @@ different platforms.
 ### Replica guides
 
 - [Amazon S3](/guides/s3)
+- [S3 Advanced Configuration](/guides/s3-advanced)
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)
