@@ -94,6 +94,76 @@ dbs:
 You can also use the `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable instead
 of specifying the account key in your configuration file.
 
-{{< since version="0.5.0" >}} Litestream v0.5.0+ uses Azure SDK v2, which maintains compatibility with existing authentication methods.
+{{< since version="0.5.0" >}} Litestream v0.5.0+ uses Azure SDK v2, which maintains compatibility with existing authentication methods and adds support for Azure's default credential chain including Managed Identity. See the [Azure SDK v2 Migration Guide](/docs/migration/#azure-sdk-v2-migration) for details on new authentication options.
+
+## Authentication Methods
+
+### Shared Key (Account Key)
+
+The simplest authentication method uses your storage account key:
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      type: abs
+      account-name: STORAGEACCOUNT
+      account-key: ACCOUNTKEY
+      bucket: CONTAINERNAME
+      path: PATH
+```
+
+Or via environment variable:
+
+```sh
+export LITESTREAM_AZURE_ACCOUNT_KEY=your-account-key
+```
+
+### Managed Identity (Azure Infrastructure)
+
+{{< since version="0.5.0" >}} When running on Azure infrastructure (VMs, App Service, Container Apps, AKS), you can use Managed Identity without any credentials:
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      type: abs
+      account-name: STORAGEACCOUNT
+      bucket: CONTAINERNAME
+      path: PATH
+      # No account-key needed - uses Managed Identity
+```
+
+Ensure your Azure resource has a Managed Identity enabled and has the appropriate role assignment (e.g., "Storage Blob Data Contributor") on the storage account.
+
+### Service Principal
+
+{{< since version="0.5.0" >}} For non-Azure environments or when Managed Identity isn't suitable, use a service principal via environment variables:
+
+```sh
+export AZURE_CLIENT_ID=your-app-id
+export AZURE_TENANT_ID=your-tenant-id
+export AZURE_CLIENT_SECRET=your-client-secret
+```
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      type: abs
+      account-name: STORAGEACCOUNT
+      bucket: CONTAINERNAME
+      path: PATH
+```
+
+### Azure CLI (Local Development)
+
+{{< since version="0.5.0" >}} For local development, authenticate using the Azure CLI:
+
+```sh
+az login
+```
+
+Litestream will automatically use your Azure CLI credentials when no other authentication method is configured.
 
 [configuration file]: /reference/config
