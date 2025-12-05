@@ -140,7 +140,7 @@ dbs:
 
 ## Replica settings
 
-Litestream supports six types of replicas:
+Litestream supports seven types of replicas:
 
 - `"abs"` replicates a database to an Azure Blob Storage container.
 - `"file"` replicates a database to another local file path.
@@ -148,6 +148,7 @@ Litestream supports six types of replicas:
 - `"nats"` replicates a database to a NATS JetStream Object Store.
 - `"s3"` replicates a database to an S3-compatible bucket.
 - `"sftp"` replicates a database to a remote server via SFTP.
+- `"webdav"` replicates a database to a WebDAV server.
 
 All replicas have unique name which is specified by the `"name"` field. If a
 name is not specified then the name defaults to the replica type. The name is
@@ -505,6 +506,55 @@ The following settings are specific to NATS replicas:
 - `client-key`—Client private key for mutual TLS
 
 See the [NATS Integration Guide]({{< ref "nats" >}}) for detailed setup instructions.
+
+
+### WebDAV replica
+
+{{< since version="0.5.0" >}} WebDAV replicas allow replication to any RFC 4918 compliant WebDAV server,
+including Nextcloud, ownCloud, and Apache mod_dav.
+
+WebDAV replicas can be configured using the `url` field:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: webdavs://user:password@example.com/backup/db
+```
+
+Or with individual fields:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      type: webdav
+      webdav-url: https://example.com/webdav
+      webdav-username: ${WEBDAV_USERNAME}
+      webdav-password: ${WEBDAV_PASSWORD}
+      path: /litestream/backups
+```
+
+The following settings are specific to WebDAV replicas:
+
+- `webdav-url`—WebDAV server URL (use `https://` for production)
+- `webdav-username`—Username for HTTP Basic authentication
+- `webdav-password`—Password for HTTP Basic authentication
+- `path`—Remote path where replica files will be stored
+
+**URL Schemes:**
+
+- `webdav://`—HTTP (not recommended for production)
+- `webdavs://`—HTTPS (recommended for production)
+
+**Environment Variables:**
+
+You can use environment variables with standard Litestream substitution:
+
+- `${WEBDAV_USERNAME}` or `${LITESTREAM_WEBDAV_USERNAME}`
+- `${WEBDAV_PASSWORD}` or `${LITESTREAM_WEBDAV_PASSWORD}`
+
+See the [WebDAV Guide]({{< ref "webdav" >}}) for detailed setup instructions.
 
 
 ### Legacy Multiple Replicas
