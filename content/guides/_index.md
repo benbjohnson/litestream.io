@@ -16,6 +16,11 @@ different platforms.
 - [Running as a Systemd service](/guides/systemd)
 - [Running as a Windows service](/guides/windows)
 
+### Configuration guides
+
+- [Directory Replication](/guides/directory)
+- [Local File Path](/guides/file)
+
 ### Replica guides
 
 - [Amazon S3](/guides/s3)
