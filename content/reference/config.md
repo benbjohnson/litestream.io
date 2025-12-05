@@ -449,6 +449,44 @@ prisma migrate deploy     # Prisma
 ```
 
 
+### Directory configuration
+
+{{< since version="0.5.0" >}} Litestream can replicate all SQLite databases in a
+directory using the `directory` field instead of `path`. This is useful for
+multi-tenant applications where each tenant has their own database.
+
+```yaml
+dbs:
+  - directory: /var/lib/tenants
+    pattern: "*.db"
+    recursive: true
+    replica:
+      type: s3
+      bucket: backups
+      path: tenants
+```
+
+Directory configurations support the following options:
+
+- `directory`—Absolute path to the directory containing databases
+- `pattern`—Glob pattern to match database files (default: `*.db`)
+- `recursive`—Scan subdirectories when `true` (default: `false`)
+
+Each discovered database gets a unique replica path by appending its relative
+path from the directory root:
+
+| Local database path | Replica path |
+|---------------------|--------------|
+| `/var/lib/tenants/tenant1.db` | `backups/tenants/tenant1.db/ltx/...` |
+| `/var/lib/tenants/team-a/db2.db` | `backups/tenants/team-a/db2.db/ltx/...` |
+
+Litestream validates the SQLite header of each matched file to ensure only
+actual SQLite databases are replicated.
+
+See the [Directory Replication Guide]({{< ref "directory" >}}) for detailed
+usage examples.
+
+
 ## Replica settings
 
 Litestream supports seven types of replicas:
