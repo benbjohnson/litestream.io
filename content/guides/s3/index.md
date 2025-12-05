@@ -92,6 +92,8 @@ following command.
 litestream restore -o my.db s3://BUCKETNAME/PATHNAME
 ```
 
+{{< alert icon="⚠️" text="The command line URL variant only supports AWS S3 and a limited set of S3-compatible providers that can be auto-detected from the URL hostname. For other S3-compatible services like MinIO or self-hosted solutions, you must use a configuration file with the `endpoint` parameter. See [Custom Endpoints](#custom-endpoints-s3-compatible-services) below." >}}
+
 ### Configuration file usage
 
 Litestream is typically run as a background service which uses a configuration
@@ -217,3 +219,63 @@ bucket by modifying the resource ARNs. For example, to limit access to the
 Thanks to [Martin](https://github.com/maluio) for contributing the original policy and
 to [cariaso](https://github.com/benbjohnson/litestream/issues/76#issuecomment-783926359)
 for additional policy insights.
+
+
+## Custom Endpoints (S3-Compatible Services)
+
+Litestream supports S3-compatible storage services such as MinIO, Backblaze B2,
+DigitalOcean Spaces, and others. However, how you configure these services
+depends on whether Litestream can auto-detect the endpoint from the URL.
+
+### Auto-Detected Providers
+
+When using the command line URL variant (`s3://BUCKET/PATH`), Litestream can
+automatically detect the correct endpoint for these providers based on the URL
+hostname pattern:
+
+- **AWS S3**: Standard `s3://bucket/path` URLs
+- **Backblaze B2**: URLs containing `.backblazeb2.com`
+- **DigitalOcean Spaces**: URLs containing `.digitaloceanspaces.com`
+- **Linode Object Storage**: URLs containing `.linodeobjects.com`
+- **Scaleway**: URLs containing `.scw.cloud`
+
+For these providers, you can use both command line and configuration file approaches.
+
+### Services Requiring Configuration Files
+
+For S3-compatible services that cannot be auto-detected from the URL hostname,
+you **must** use a configuration file with the `endpoint` parameter. This includes:
+
+- MinIO (self-hosted or remote)
+- Self-hosted S3-compatible storage
+- Other S3-compatible providers not in the auto-detected list
+
+Attempting to use the command line URL variant with these services will result
+in Litestream connecting to AWS S3 instead of your intended endpoint, causing
+authentication errors like:
+
+```text
+cannot lookup bucket region: InvalidAccessKeyId: The AWS Access Key Id you
+provided does not exist in our records.
+```
+
+### MinIO Example
+
+For MinIO, always use a configuration file:
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: mydb
+      endpoint: https://minio.example.com:9000
+      region: us-east-1
+      access-key-id: ${MINIO_ACCESS_KEY}
+      secret-access-key: ${MINIO_SECRET_KEY}
+```
+
+For detailed MinIO configuration options, see the
+[MinIO Configuration](/reference/config#minio-configuration) section in the
+configuration reference.
