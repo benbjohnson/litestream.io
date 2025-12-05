@@ -11,6 +11,7 @@ different platforms.
 
 ### Infrastructure guides
 
+- [Directory Watcher](/guides/directory-watcher)
 - [Running in a Docker container](/guides/docker)
 - [Running in a Kubernetes cluster](/guides/kubernetes)
 - [Running as a Systemd service](/guides/systemd)
