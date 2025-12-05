@@ -247,6 +247,48 @@ The following settings are specific to S3 replicas:
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
 
+- `sign-payload`—Enables S3 SigV4 payload signing. Required by some S3-compatible
+  providers (e.g., Tigris). Defaults to `false`.
+
+- `require-content-md5`—Includes Content-MD5 headers on DeleteObjects operations.
+  Required by some providers (e.g., OCI Object Storage). Defaults to `true`. Disable
+  for providers that don't support it.
+
+These options can also be set via URL query parameters:
+
+```
+s3://bucket/path?sign-payload=true&require-content-md5=false
+```
+
+#### S3-Compatible Provider Requirements
+
+Different S3-compatible storage providers have varying requirements for payload
+signing and Content-MD5 headers. The table below shows the recommended settings
+for popular providers:
+
+| Provider | sign-payload | require-content-md5 | Notes |
+|----------|--------------|---------------------|-------|
+| AWS S3 | `false` | `true` | Defaults work |
+| Backblaze B2 | `false` | `true` | Defaults work |
+| Tigris (Fly.io) | `true` | `false` | Requires signed payloads |
+| OCI Object Storage | `false` | `true` | Requires Content-MD5 |
+| Filebase | `false` | `true` | Defaults work |
+| MinIO | `false` | `true` | Defaults work |
+| DigitalOcean Spaces | `false` | `true` | Defaults work |
+
+Example configuration for Tigris:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: s3://mybucket/db
+      endpoint: fly.storage.tigris.dev
+      region: auto
+      sign-payload: true
+      require-content-md5: false
+```
+
 
 ### MinIO Configuration
 
