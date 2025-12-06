@@ -87,14 +87,23 @@ sqlite> .open 'file:prod.db?vfs=litestream'
 sqlite> SELECT count(*) FROM users LIMIT 10;
 ```
 
+> **Note**: The macOS system SQLite has extension loading disabled. Install
+> SQLite via Homebrew (`brew install sqlite3`) and use the Homebrew version,
+> or use the Python/Node.js examples below instead.
+
 ### Python (`sqlite3`)
 
 ```python
 import sqlite3
 
+# Load the VFS extension first (registers the "litestream" VFS globally)
+loader = sqlite3.connect(":memory:")
+loader.enable_load_extension(True)
+loader.load_extension("./dist/litestream-vfs.so", entrypoint="sqlite3_litestreamvfs_init")
+loader.close()
+
+# Now connect using the registered VFS
 conn = sqlite3.connect("file:prod.db?vfs=litestream", uri=True, check_same_thread=False)
-conn.enable_load_extension(True)
-conn.load_extension("./dist/litestream-vfs.so", "sqlite3_litestreamvfs_init")
 
 for row in conn.execute("SELECT name, country FROM customers LIMIT 5"):
     print(row)
