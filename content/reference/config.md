@@ -97,7 +97,7 @@ they move into higher levels. These options are global (store-level):
 Example:
 
 ```yaml
-l0-retention: 1800s                # keep L0 files for 30 minutes
+l0-retention: 30m                  # keep L0 files for 30 minutes
 l0-retention-check-interval: 15s   # check frequently so VFS replicas can catch up
 
 dbs:
