@@ -177,6 +177,67 @@ You can swap the `s3` client for any `ReplicaClient` (GCS, Azure, SFTP, file)
 as long as your application includes the right credentials and uses `-tags vfs`.
 
 
+## Observability & time travel
+
+The VFS extension provides SQL PRAGMAs and functions for monitoring replica
+health and querying historical database states.
+
+### Monitoring PRAGMAs
+
+Check the current state of your VFS replica:
+
+```sql
+-- Get current transaction ID (16-character hex string)
+PRAGMA litestream_txid;
+-- Returns: 0000000000000042
+
+-- Get seconds since last successful poll (useful for alerting)
+PRAGMA litestream_lag;
+-- Returns: 2
+
+-- Get current view timestamp (RFC3339Nano format)
+PRAGMA litestream_time;
+-- Returns: 2024-01-15T10:30:00.123456789Z
+```
+
+### Time travel queries
+
+Query the database as it existed at a specific point in time. This requires
+`l0-retention` to be configured on the primary so historical LTX files remain
+available.
+
+```sql
+-- Set view to a specific timestamp
+PRAGMA litestream_time = '2024-01-15T10:30:00Z';
+
+-- Use relative time expressions
+PRAGMA litestream_time = '5 minutes ago';
+PRAGMA litestream_time = 'yesterday';
+PRAGMA litestream_time = '2 hours ago';
+
+-- Reset to the latest (current) data
+PRAGMA litestream_time = 'latest';
+```
+
+After setting the time, subsequent queries will return data as of that point
+in time. Use `'latest'` to return to real-time data.
+
+### SQL functions
+
+Alternative syntax using SQL functions instead of PRAGMAs:
+
+```sql
+SELECT litestream_txid();           -- Returns current TXID
+SELECT litestream_lag();            -- Returns seconds since last poll
+SELECT litestream_time();           -- Returns current view timestamp
+SELECT litestream_set_time('5 minutes ago');  -- Set time travel point
+```
+
+> **Note**: Time travel requires sufficient L0 retention on the primary. Configure
+> `l0-retention` in your Litestream config to keep historical data available.
+> See the [L0 retention configuration](/reference/config#l0-retention-vfs-read-replicas).
+
+
 ## Performance tuning
 
 - **Cache size** (`CacheSize`, default 10MB): keep frequently read pages near the application.

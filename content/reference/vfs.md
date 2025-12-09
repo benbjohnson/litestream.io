@@ -81,6 +81,85 @@ VFS runtime tuning is set in code (Go) by adjusting `VFS.PollInterval` (default
 `1s`) and `VFS.CacheSize` (default `10MB`).
 
 
+## PRAGMAs & SQL functions
+
+The VFS extension registers custom PRAGMAs and SQL functions for observability
+and time travel queries.
+
+### PRAGMA litestream_txid
+
+Returns the current transaction ID as a 16-character hexadecimal string.
+
+```sql
+PRAGMA litestream_txid;
+-- Returns: 0000000000000042
+```
+
+### PRAGMA litestream_lag
+
+Returns the number of seconds since the last successful poll for new LTX files.
+Useful for monitoring replica freshness and alerting on stale replicas.
+
+```sql
+PRAGMA litestream_lag;
+-- Returns: 2
+```
+
+A value of `-1` indicates the VFS has not completed its initial poll.
+
+### PRAGMA litestream_time
+
+Gets or sets the point-in-time view for time travel queries.
+
+**Get current time:**
+
+```sql
+PRAGMA litestream_time;
+-- Returns: 2024-01-15T10:30:00.123456789Z (RFC3339Nano format)
+```
+
+**Set to specific timestamp:**
+
+```sql
+PRAGMA litestream_time = '2024-01-15T10:30:00Z';
+```
+
+**Set to relative time:**
+
+```sql
+PRAGMA litestream_time = '5 minutes ago';
+PRAGMA litestream_time = 'yesterday';
+PRAGMA litestream_time = '2 hours ago';
+```
+
+**Reset to latest:**
+
+```sql
+PRAGMA litestream_time = 'latest';
+```
+
+> **Note**: Time travel requires `l0-retention` to be configured on the primary
+> so historical LTX files remain available.
+
+### SQL function equivalents
+
+The same functionality is available via SQL functions:
+
+| Function | Description |
+|----------|-------------|
+| `litestream_txid()` | Returns current transaction ID |
+| `litestream_lag()` | Returns seconds since last poll |
+| `litestream_time()` | Returns current view timestamp |
+| `litestream_set_time(value)` | Sets the time travel point |
+
+Example:
+
+```sql
+SELECT litestream_txid(), litestream_lag(), litestream_time();
+SELECT litestream_set_time('10 minutes ago');
+```
+
+
 ## Performance characteristics
 
 - On-demand page fetch with LRU caching sized by `CacheSize` (default 10MB).
