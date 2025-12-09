@@ -29,7 +29,7 @@ LTX files.
 
 - Go 1.25+ with CGO enabled (compiler toolchain installed).
 - A Litestream-managed replica already syncing to object storage.
-- SQLite clients that support loadable extensions (CLI, Python, Node, etc.) or a Go application built with CGO.
+- SQLite clients that support loadable extensions (CLI, Python, etc.) or a Go application built with CGO.
 - Supported page sizes: 512–65536 bytes (auto-detected from LTX headers).
 
 
@@ -90,7 +90,7 @@ sqlite> SELECT count(*) FROM users LIMIT 10;
 
 > **Note**: The macOS system SQLite has extension loading disabled. Install
 > SQLite via Homebrew (`brew install sqlite3`) and use the Homebrew version,
-> or use the Python/Node.js examples below instead.
+> or use the Python example below instead.
 
 ### Python (`sqlite3`)
 
@@ -110,17 +110,9 @@ for row in conn.execute("SELECT name, country FROM customers LIMIT 5"):
     print(row)
 ```
 
-### Node.js (`better-sqlite3`)
-
-```js
-const Database = require("better-sqlite3");
-// better-sqlite3 >= 9 supports loadExtension
-const db = new Database("file:prod.db?vfs=litestream", { fileMustExist: false });
-db.loadExtension("./dist/litestream-vfs", "sqlite3_litestreamvfs_init");
-
-const rows = db.prepare("SELECT COUNT(*) AS n FROM orders").get();
-console.log(rows.n);
-```
+> **Note**: Some Node.js SQLite libraries (e.g., `better-sqlite3`) do not support
+> URI filename mode required for VFS selection. Use the Go example or Python
+> for programmatic access, or the SQLite CLI for ad-hoc queries.
 
 
 ## Using the VFS from Go
