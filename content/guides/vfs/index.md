@@ -13,7 +13,7 @@ directly from object storage without restoring it to local disk first. Queries
 fetch pages on-demand, cache them locally, and stay in sync by polling for new
 LTX files.
 
-{{< alert icon="⚠️" text="The VFS is read-only and requires CGO. Build it separately from the main `litestream` binary with the `-tags vfs` build tag." >}}
+{{< alert icon="⚠️" text="The VFS is read-only and requires CGO. Pre-built binaries are available in [GitHub releases](https://github.com/benbjohnson/litestream/releases), or build from source with the `-tags vfs` build tag." >}}
 
 
 ## When to use the VFS

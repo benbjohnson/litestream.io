@@ -12,6 +12,8 @@ The Litestream VFS provides read-only access to a replicated SQLite database
 directly from object storage. It registers a VFS named `litestream`, fetches
 pages on-demand, and continuously polls the replica for new LTX files. The VFS
 is built separately from the main `litestream` binary and requires CGO.
+Pre-built binaries are available in
+[GitHub releases](https://github.com/benbjohnson/litestream/releases).
 
 
 ## Build requirements
