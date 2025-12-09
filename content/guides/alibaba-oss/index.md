@@ -45,8 +45,8 @@ You can replicate to [Alibaba Cloud OSS][] from the command line by setting
 your credentials via environment variables:
 
 ```sh
-export LITESTREAM_OSS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxx
-export LITESTREAM_OSS_ACCESS_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export OSS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxx
+export OSS_ACCESS_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 You can then specify your replica as a replica URL on the command line. For
@@ -75,7 +75,7 @@ dbs:
     replica:
       url: oss://BUCKET.oss-REGION.aliyuncs.com/PATH
       access-key-id: xxxxxxxxxxxxxxxx
-      access-key-secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Or you can expand your configuration into multiple fields:
@@ -90,9 +90,8 @@ dbs:
       path:   PATH
 ```
 
-You can also use the `LITESTREAM_OSS_ACCESS_KEY_ID` and
-`LITESTREAM_OSS_ACCESS_KEY_SECRET` environment variables instead of specifying
-the credentials in your configuration file.
+You can also use the `OSS_ACCESS_KEY_ID` and `OSS_ACCESS_KEY_SECRET` environment
+variables instead of specifying the credentials in your configuration file.
 
 
 ## Advanced Options

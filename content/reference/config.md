@@ -535,8 +535,8 @@ dbs:
 
 The following settings are specific to OSS replicas:
 
-- `access-key-id`—Alibaba Cloud AccessKey ID. Can also use `LITESTREAM_OSS_ACCESS_KEY_ID` environment variable.
-- `access-key-secret`—Alibaba Cloud AccessKey Secret. Can also use `LITESTREAM_OSS_ACCESS_KEY_SECRET` environment variable.
+- `access-key-id`—Alibaba Cloud AccessKey ID. Can also use `OSS_ACCESS_KEY_ID` environment variable.
+- `secret-access-key`—Alibaba Cloud AccessKey Secret. Can also use `OSS_ACCESS_KEY_SECRET` environment variable.
 - `bucket`—OSS bucket name
 - `region`—OSS region (e.g., cn-hangzhou, us-west-1)
 - `path`—Path within the bucket
