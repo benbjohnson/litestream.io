@@ -42,9 +42,10 @@ Build the shared library that registers the VFS inside SQLite. From the
 # Recommended (handles platform-specific flags)
 make vfs
 
-# Manual build (Linux-style toolchain)
+# Manual build (Linux)
 CGO_ENABLED=1 go build -tags "vfs,SQLITE3VFS_LOADABLE_EXT" -buildmode=c-archive -o dist/litestream-vfs.a ./cmd/litestream-vfs
-gcc -shared -o dist/litestream-vfs.so src/litestream-vfs.c dist/litestream-vfs.a
+cp dist/litestream-vfs.h src/litestream-vfs.h
+gcc -DSQLITE3VFS_LOADABLE_EXT -fPIC -shared -o dist/litestream-vfs.so src/litestream-vfs.c dist/litestream-vfs.a -lpthread -ldl -lm
 ```
 
 - macOS requires the additional frameworks used in `Makefile`; prefer `make vfs`.
