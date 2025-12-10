@@ -84,6 +84,7 @@ mcp-addr: ":3002"
    ```
 
 2. Ensure IAM permissions include required S3 actions:
+
    ```json
    {
      "Version": "2012-10-17",
@@ -110,13 +111,16 @@ mcp-addr: ":3002"
 **Error**: `connection refused` or `authentication failed`
 
 **Solution**:
+
 1. Verify NATS server is running and accessible:
+
    ```bash
    # Test NATS connectivity
    nats server check --server nats://localhost:4222
    ```
 
 2. Check authentication credentials:
+
    ```yaml
    dbs:
      - path: /path/to/db.sqlite
@@ -133,7 +137,9 @@ mcp-addr: ":3002"
 **Symptoms**: High lag between database changes and replica updates
 
 **Solution**:
+
 1. Check sync intervals in configuration:
+
    ```yaml
    dbs:
      - path: /path/to/db.sqlite
@@ -167,6 +173,7 @@ Or let Litestream enable it automatically by ensuring proper database permission
 **Error**: `database is locked` or `SQLITE_BUSY`
 
 **Solution**:
+
 1. Set busy timeout in your application (see above)
 2. Ensure no long-running transactions are blocking checkpoints
 3. Check for applications holding exclusive locks
@@ -194,12 +201,16 @@ Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
 **Error**: `database disk image is malformed`
 
 **Solution**:
+
 1. Stop Litestream replication
 2. Run SQLite integrity check:
+
    ```bash
    sqlite3 /path/to/db.sqlite "PRAGMA integrity_check;"
    ```
+
 3. If corrupted, restore from latest backup:
+
    ```bash
    litestream restore -o /path/to/recovered.db /path/to/db.sqlite
    ```
@@ -211,7 +222,9 @@ Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
 **Symptoms**: Litestream consuming excessive CPU
 
 **Solution**:
+
 1. Increase monitoring intervals:
+
    ```yaml
    dbs:
      - path: /path/to/db.sqlite
@@ -226,8 +239,10 @@ Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
 **Symptoms**: High memory usage or out-of-memory errors
 
 **Solution**:
+
 1. Monitor snapshot sizes and retention policies
 2. Adjust retention settings:
+
    ```yaml
    snapshot:
      interval: 24h
@@ -241,7 +256,9 @@ Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
 **Error**: `connection reset by peer` or `timeout`
 
 **Solution**:
+
 1. Implement retry logic in replica configuration:
+
    ```yaml
    dbs:
      - path: /path/to/db.sqlite
@@ -260,10 +277,13 @@ Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
 **Error**: `no such host` or DNS timeouts
 
 **Solution**:
+
 1. Test DNS resolution:
+
    ```bash
    nslookup s3.amazonaws.com
    ```
+
 2. Use IP addresses instead of hostnames if needed
 3. Check `/etc/resolv.conf` configuration
 
@@ -283,6 +303,7 @@ logging:
 ### Reading Logs
 
 Common log locations:
+
 - **Linux systemd**: `journalctl -u litestream`
 - **Docker**: `docker logs container_name`
 - **Windows Service**: Event Viewer → Application → Litestream
@@ -291,6 +312,7 @@ Common log locations:
 ### Important Log Messages
 
 Look for these key messages:
+
 - `initialized db`: Database successfully loaded
 - `replicating to`: Replica configuration loaded
 - `sync error`: Replication issues
@@ -301,11 +323,13 @@ Look for these key messages:
 ### Point-in-Time Recovery
 
 List available restore points:
+
 ```bash
 litestream ltx /path/to/db.sqlite
 ```
 
 Restore to specific time:
+
 ```bash
 litestream restore -timestamp 2025-01-01T12:00:00Z -o restored.db /path/to/db.sqlite
 ```
@@ -313,6 +337,7 @@ litestream restore -timestamp 2025-01-01T12:00:00Z -o restored.db /path/to/db.sq
 ### Backup Validation
 
 Verify backup integrity:
+
 ```bash
 # Restore to temporary location
 litestream restore -o /tmp/test.db /path/to/db.sqlite
@@ -340,6 +365,7 @@ sqlite3 /tmp/test.db "PRAGMA integrity_check;"
 ### Reporting Issues
 
 When reporting issues on GitHub, the bug report template will ask for:
+
 - **Bug Description**: Clear description of the issue
 - **Environment**: Litestream version, operating system, installation method, storage backend
 - **Steps to Reproduce**: Numbered steps, expected vs actual behavior

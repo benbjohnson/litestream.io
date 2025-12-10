@@ -25,7 +25,7 @@ Enter a name for your user and make sure to enable _Programmatic Access_. Then
 click the _Next_ button.
 
 <figure>
-	<img src="iam_0.png" alt="Screenshot of creating an IAM user">
+ <img src="iam_0.png" alt="Screenshot of creating an IAM user">
 </figure>
 
 On the permissions screen, click on _"Attach existing policies directly"_, then
@@ -33,7 +33,7 @@ search for "S3" and choose `AmazonS3FullAccess`. You can also specify a [more
 restrictive policy](#restrictive-iam-policy) as described later in this guide.
 
 <figure>
-	<img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
+ <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
 </figure>
 
 Then click the _Next_ button twice and then click the _Create user_ button. This
@@ -42,7 +42,7 @@ need to save the _"Access key ID"_ and _"Secret access key"_ for later use
 in this guide.
 
 <figure>
-	<img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
+ <img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
 </figure>
 
 
@@ -55,7 +55,7 @@ You'll need to choose a globally unique bucket name and choose a region to
 store the bucket data.
 
 <figure>
-	<img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
+ <img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
 </figure>
 
 Then click the _"Create bucket"_ button at the bottom of the screen. Your bucket

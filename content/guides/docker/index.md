@@ -124,7 +124,7 @@ If you need to monitor multiple application processes, you can also use [s6][]
 as a process supervisor. s6 provides a simple init system for managing multiple
 processes. It is wrapped by the [s6-overlay] project to provide this service to
 Docker containers. You can find a small example application in the
-[litestream-s6-example][] repository. 
+[litestream-s6-example][] repository.
 
 [fly]: https://fly.io/
 [litestream-docker-example]: https://github.com/benbjohnson/litestream-docker-example

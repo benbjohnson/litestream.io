@@ -26,6 +26,7 @@ This guide covers upgrading Litestream versions, migrating configuration formats
 #### Pre-Upgrade Checklist
 
 1. **Backup your current setup**:
+
    ```bash
    # Stop Litestream
    sudo systemctl stop litestream
@@ -92,7 +93,7 @@ dbs:
       retention: 72h
 ```
 
-2. **Override default settings**:
+1. **Override default settings**:
 
 ```yaml
 # Add MCP support (disabled by default)
@@ -111,17 +112,17 @@ levels:
     retention: 168h
 ```
 
-3. **Update command usage**:
+1. **Update command usage**:
 
 ```bash
 # OLD: Query WAL information
 litestream wal /path/to/db.sqlite
 
-# NEW: Query LTX information  
+# NEW: Query LTX information
 litestream ltx /path/to/db.sqlite
 ```
 
-4. **Restart services**:
+1. **Restart services**:
 
 ```bash
 # Restart Litestream with new configuration
@@ -130,6 +131,156 @@ sudo systemctl restart litestream
 # Verify it's working
 sudo systemctl status litestream
 litestream databases
+```
+
+### Age Encryption Migration
+
+{{< alert icon="⚠️" text="**Important**: Age encryption is not available in v0.5.0+. If you are upgrading from v0.3.x with Age encryption configured, your replica will be rejected with an explicit error message." >}}
+
+#### Who is Affected
+
+If you meet **any** of the following conditions, this section applies to you:
+
+- Running v0.3.x with Age encryption enabled
+- Have Age encryption configured in your `litestream.yml`
+- Have existing Age-encrypted backups in S3, GCS, Azure, or other storage
+
+#### Why Age Encryption Was Disabled
+
+Age encryption was removed from v0.5.0+ as part of the LTX storage layer refactor. The core issue is that **Age encrypts entire files as a single unit**, which doesn't align with Litestream's new architecture.
+
+Litestream's v0.5+ uses the LTX format which allows **per-page encryption** - the ability to fetch and decrypt individual pages from storage (S3, GCS, etc.) without needing the entire file. This is more efficient and provides better integration with cloud storage.
+
+The feature was not maintained and has been disabled to prevent accidental data loss from misconfigured encryption (users believing their data was encrypted when it wasn't being encrypted at all).
+
+#### Upgrade Options
+
+Choose the option that best fits your situation:
+
+#### Option 1: Stay on v0.3.x
+
+If you need Age encryption, remain on v0.3.x until the feature is restored:
+
+```bash
+# Check your current version
+litestream version
+
+# If you've already upgraded to v0.5, downgrade to latest v0.3
+wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz
+tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
+sudo mv litestream /usr/local/bin/
+sudo systemctl restart litestream
+```
+
+#### Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)
+
+If you can migrate away from Age encryption:
+
+1. **Validate your current backups are accessible**:
+
+   ```bash
+   litestream restore -o /tmp/test-restore.db /var/lib/app.db
+   ```
+
+2. **Remove Age encryption from configuration**:
+
+   ```yaml
+   # REMOVE this entire section from your litestream.yml
+   age:
+     identities:
+       - /etc/litestream/age-identity.txt
+     recipients:
+       - age1xxxxxxxxxxxxx
+
+   # Your replica should look like:
+   replica:
+     url: s3://my-bucket/app
+     # No 'age' section
+   ```
+
+3. **Migrate existing encrypted backups** (optional):
+
+   ```bash
+   # Decrypt and restore from v0.3.x backup
+   litestream restore -o /tmp/decrypted.db /var/lib/app.db
+
+   # Stop replication
+   sudo systemctl stop litestream
+
+   # Delete old encrypted replica (careful!)
+   # Example for S3:
+   aws s3 rm s3://my-bucket/app --recursive
+
+   # Update configuration and restart
+   sudo systemctl start litestream
+   ```
+
+4. **Verify new backups are working**:
+
+   ```bash
+   # Wait a few minutes for replication to occur
+   litestream databases
+
+   # Test restore functionality
+   litestream restore -o /tmp/verify.db /var/lib/app.db
+   ```
+
+#### Option 3: Use Unencrypted Backups Temporarily
+
+While Age encryption is unavailable, use standard unencrypted replication:
+
+```yaml
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      url: s3://my-bucket/app
+      retention: 72h
+```
+
+For encryption at rest, consider:
+
+- S3 Server-Side Encryption (SSE-S3, SSE-KMS)
+- Google Cloud Storage encryption
+- Azure Blob Storage encryption
+- Encrypted storage volumes at the provider level
+
+#### Frequently Asked Questions
+
+**Q: Will my v0.3.x Age-encrypted backups still work with v0.5?**
+
+A: No. If you have v0.3.x Age-encrypted backups and try to restore with v0.5, the restore will fail because Age encryption is not available in v0.5. You must either stay on v0.3.x to restore the backups or decrypt them first while still on v0.3.x.
+
+**Q: Do I need to re-encrypt existing backups?**
+
+A: No, your existing v0.3.x Age-encrypted backups remain encrypted in storage. The issue only affects upgrading to v0.5.0+. If you stay on v0.3.x, your backups continue to work normally.
+
+**Q: What if I'm already using Age encryption in production?**
+
+A: Do not upgrade to v0.5.0+ at this time. Stay on v0.3.x. Monitor the [Litestream releases](https://github.com/benbjohnson/litestream/releases) page for updates on Age encryption restoration.
+
+**Q: When will encryption be restored?**
+
+A: Encryption support will be re-implemented **directly in the LTX format** to support per-page encryption. This is planned work but no timeline has been announced. The implementation is complex and requires careful design to work efficiently with cloud storage providers.
+
+If you need encryption immediately, you can:
+
+- Stay on v0.3.x with Age encryption
+- Use provider-level encryption (S3 SSE-KMS, GCS encryption, Azure encryption, etc.)
+- Use database-level encryption (SQLCipher)
+
+See [issue #458](https://github.com/benbjohnson/litestream/issues/458) (LTX Support) for the tracking issue on encryption and other planned LTX features.
+
+#### Validation Before Upgrading
+
+Before upgrading to v0.5.0+, if you use Age encryption:
+
+```bash
+# Check if you have Age encryption in your config
+grep -n "age:" /etc/litestream.yml
+
+# If the above returns results, you MUST:
+# 1. Stay on v0.3.x, OR
+# 2. Remove Age encryption configuration before upgrading
 ```
 
 ## Configuration Migration
@@ -199,6 +350,7 @@ dbs:
 ### Migrating from File to S3
 
 1. **Prepare S3 bucket and credentials**:
+
    ```bash
    # Create S3 bucket
    aws s3 mb s3://my-litestream-backups
@@ -208,6 +360,7 @@ dbs:
    ```
 
 2. **Update configuration**:
+
    ```yaml
    dbs:
      - path: /var/lib/app.db
@@ -222,6 +375,7 @@ dbs:
    ```
 
 3. **Perform initial sync**:
+
    ```bash
    # Stop current replication
    sudo systemctl stop litestream
@@ -236,12 +390,14 @@ dbs:
 ### Migrating from S3 to NATS
 
 1. **Set up NATS server with JetStream**:
+
    ```bash
    # Start NATS with JetStream enabled
    nats-server -js
    ```
 
 2. **Update configuration**:
+
    ```yaml
    dbs:
      - path: /var/lib/app.db
@@ -258,6 +414,7 @@ dbs:
    ```
 
 3. **Create NATS bucket**:
+
    ```bash
    # Create JetStream bucket
    nats stream create my-app-bucket \
@@ -306,6 +463,7 @@ dbs:
 When changing replica types, you may want to preserve existing backups:
 
 1. **Export current backups**:
+
    ```bash
    # List available LTX files
    litestream ltx /var/lib/app.db
@@ -315,6 +473,7 @@ When changing replica types, you may want to preserve existing backups:
    ```
 
 2. **Initialize new replica with existing data**:
+
    ```bash
    # Stop replication
    sudo systemctl stop litestream
@@ -329,6 +488,7 @@ When changing replica types, you may want to preserve existing backups:
 For production systems requiring zero downtime:
 
 1. **Set up parallel replication**:
+
    ```yaml
    dbs:
      # Keep existing replica
@@ -344,12 +504,14 @@ For production systems requiring zero downtime:
    ```
 
 2. **Monitor both replicas**:
+
    ```bash
    # Watch replication status
    watch -n 5 'litestream databases'
    ```
 
 3. **Switch over when new replica is synchronized**:
+
    ```yaml
    dbs:
      # Remove old replica, keep new one
@@ -396,17 +558,20 @@ Update cron jobs and systemd timers:
 After migration, validate your setup:
 
 1. **Verify configuration**:
+
    ```bash
    litestream databases
    ```
 
 2. **Test restore functionality**:
+
    ```bash
    litestream restore -o /tmp/test-restore.db /var/lib/app.db
    sqlite3 /tmp/test-restore.db "PRAGMA integrity_check;"
    ```
 
 3. **Monitor replication**:
+
    ```bash
    # Watch for replication activity
    tail -f /var/log/litestream.log
@@ -417,6 +582,7 @@ After migration, validate your setup:
 Always have a rollback plan:
 
 1. **Keep old binary available**:
+
    ```bash
    # Quick rollback if needed
    sudo cp /usr/local/bin/litestream.backup /usr/local/bin/litestream
@@ -425,6 +591,7 @@ Always have a rollback plan:
    ```
 
 2. **Restore from backup if needed**:
+
    ```bash
    litestream restore -o /var/lib/app-recovered.db /var/lib/app.db
    ```
@@ -457,6 +624,7 @@ Always have a rollback plan:
 ### Professional Services
 
 For complex migrations or production environments, consider:
+
 - Reviewing migration plan with the community
 - Testing in staging environment first
 - Planning maintenance windows for critical systems

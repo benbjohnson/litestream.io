@@ -15,6 +15,8 @@ to a specific point-in-time if it is covered by the WAL time range.
 Restoration will only run if the output database file does not exist so you
 cannot accidentally overwrite your running database.
 
+{{< alert icon="⚠️" text="**Age Encryption Note**: Age encryption is not available in v0.5.0+. If you are attempting to restore from an Age-encrypted replica created with v0.3.x, the restore will fail. Please review the [migration guide](/docs/migration/#age-encryption-migration) for upgrade options." >}}
+
 
 ## Usage
 

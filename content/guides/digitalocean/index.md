@@ -19,17 +19,17 @@ complete this guide.
 
 In the [DigitalOcean Console][console], click on the green _"Create"_ button
 in the top navigation and choose _"Spaces"_. You may need to enable spaces on
-your account if you have not already. 
+your account if you have not already.
 
 On the _"Create a Space"_ screen, you'll need to choose a region and name your
 space a globally unique name. Then click the _"Create a Space"_ button at the
 bottom of the screen.
 
 <figure>
-	<img src="space_0.png" alt="Screenshot of DigitalOcean create space UI">
+ <img src="space_0.png" alt="Screenshot of DigitalOcean create space UI">
 </figure>
 
-After your space is created, you'll see the replica hostname of your space 
+After your space is created, you'll see the replica hostname of your space
 that includes your space name and region followed by `digitaloceanspaces.com`.
 You'll need to use that later when configuring Litestream.
 
@@ -46,7 +46,7 @@ access the space. In the Spaces UI, click the _"Manage Keys"_ button. This will
 bring up the _Applications & API_ screen.
 
 Scroll down to the _Spaces access keys_ section and click the _"Generate New
-Key"_ button. You'll need to provide a name for key and then hit Enter. You'll 
+Key"_ button. You'll need to provide a name for key and then hit Enter. You'll
 be presented with the access key id and secret access key. **You will need to
 copy those for use later.**
 
@@ -129,7 +129,7 @@ dbs:
 It is common to see errors in the Litestream log when using DigitalOcean Spaces.
 Typically, it shows a `send request failed` error followed by a `connection
 reset by peer` error. This seems to be a socket that closes early on
-DigitalOcean's servers. 
+DigitalOcean's servers.
 
 Litestream is built to handle many types of failures so these requests will be
 retried on the next sync attempt which is 1 second later by default. While

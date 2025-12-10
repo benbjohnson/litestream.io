@@ -90,7 +90,7 @@ WAL files.
 
 This process is broken up into two steps. First, a snapshot interval is set to
 re-snapshot the database on a regular basis. This allows you to keep copies of
-your database at multiple points in time. 
+your database at multiple points in time.
 
 The second step is retention enforcement. This periodically runs and removes any
 snapshots older than the retention time as well as remove any WAL files older

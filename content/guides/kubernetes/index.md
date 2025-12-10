@@ -261,7 +261,7 @@ You can specify Litestream as the second container in the
     containerPort: 9090
 ```
 
-Additionally, we open port `9090` to provide Prometheus metrics. 
+Additionally, we open port `9090` to provide Prometheus metrics.
 
 
 ### Applying changes

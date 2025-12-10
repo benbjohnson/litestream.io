@@ -192,6 +192,5 @@ You now use this snapshot file as your application's database file and continue
 replicating it again with Litestream.
 
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
-[s3-replica]: https://litestream.io/reference/config/#s3-replica
 
 
