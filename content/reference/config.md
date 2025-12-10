@@ -39,15 +39,15 @@ overrides. This eliminates configuration duplication across multiple databases.
 See the [Global Replica Defaults Guide]({{< ref "global-defaults" >}}) for
 detailed usage examples and best practices.
 
-**Universal settings** (apply to all replica types):
+**Timing settings** (apply to all replica types):
 
 ```yaml
 sync-interval: 1s
 validation-interval: 6h
-retention: 168h
-retention-check-interval: 1h
-snapshot-interval: 1h
 ```
+
+Note: Snapshot and retention settings are configured separately under the
+`snapshot:` section, not as global replica defaults.
 
 **S3 and S3-compatible settings:**
 
@@ -91,36 +91,25 @@ reconnect-wait: 2s
 timeout: 10s
 ```
 
-**Age encryption settings:**
-
-```yaml
-age:
-  identities:
-    - /etc/litestream/age-identity.txt
-  recipients:
-    - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
 Per-replica settings always override global defaults:
 
 ```yaml
 # Global defaults
 region: us-west-2
-retention: 168h
+sync-interval: 30s
 
 dbs:
   - path: /db1.sqlite
     replica:
       type: s3
       bucket: bucket1
-      # Uses global region (us-west-2) and retention (168h)
+      # Uses global region and sync-interval
 
   - path: /db2.sqlite
     replica:
       type: s3
       bucket: bucket2
       region: us-east-1  # Overrides global region
-      # Still uses global retention (168h)
 ```
 
 ### AWS credentials

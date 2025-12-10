@@ -31,7 +31,6 @@ dbs:
       secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
       region: us-west-2
       endpoint: custom.endpoint.com
-      retention: 168h
       bucket: bucket1
 
   - path: /db2.sqlite
@@ -41,7 +40,6 @@ dbs:
       secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx   # duplicated
       region: us-west-2           # duplicated
       endpoint: custom.endpoint.com # duplicated
-      retention: 168h             # duplicated
       bucket: bucket2
 ```
 
@@ -53,7 +51,6 @@ access-key-id: AKIAxxxxxxxxxxxxxxxx
 secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 region: us-west-2
 endpoint: custom.endpoint.com
-retention: 168h
 
 dbs:
   - path: /db1.sqlite
@@ -72,7 +69,7 @@ dbs:
 Global defaults support settings across all replica types. Settings are applied
 to replicas where they are relevant.
 
-### Universal Settings
+### Timing Settings
 
 These settings apply to all replica types:
 
@@ -80,9 +77,10 @@ These settings apply to all replica types:
 |---------|-------------|---------|
 | `sync-interval` | How often to push frames to replica | `1s` |
 | `validation-interval` | How often to validate replica integrity | disabled |
-| `retention` | How long to keep snapshots and LTX files | `24h` |
-| `retention-check-interval` | How often to check retention | `1h` |
-| `snapshot-interval` | How often to create new snapshots | matches retention |
+
+Note: Snapshot and retention settings (`snapshot.interval`, `snapshot.retention`)
+are configured separately at the top level under the `snapshot:` section. See the
+[Configuration Reference](/reference/config) for details.
 
 ### S3 and S3-Compatible Settings
 
@@ -135,13 +133,6 @@ S3-compatible services:
 | `reconnect-wait` | Wait time between reconnection attempts |
 | `timeout` | Connection timeout |
 
-### Age Encryption Settings
-
-| Setting | Description |
-|---------|-------------|
-| `age.identities` | List of age secret keys or identity file paths |
-| `age.recipients` | List of age public keys |
-
 ## Override Behavior
 
 Individual replicas can override any global default. Per-replica settings always
@@ -150,7 +141,6 @@ take precedence over global defaults.
 ```yaml
 # Global defaults
 region: us-west-2
-retention: 168h
 sync-interval: 30s
 
 dbs:
@@ -173,7 +163,6 @@ dbs:
       type: s3
       bucket: bucket3
       region: eu-west-1
-      retention: 720h    # 30 days instead of 7
       sync-interval: 1s  # More frequent sync
 ```
 
@@ -191,22 +180,21 @@ account-key: ${AZURE_ACCOUNT_KEY}
 host: backup.example.com:22               # Used by SFTP replicas
 user: backupuser
 sync-interval: 1m                         # Used by all replicas
-retention: 168h                           # Used by all replicas
 
 dbs:
-  # S3 replica uses access-key-id, secret-access-key, sync-interval, retention
+  # S3 replica uses access-key-id, secret-access-key, sync-interval
   - path: /app1.sqlite
     replica:
       type: s3
       bucket: s3-backups
 
-  # ABS replica uses account-name, account-key, sync-interval, retention
+  # ABS replica uses account-name, account-key, sync-interval
   - path: /app2.sqlite
     replica:
       type: abs
       bucket: azure-container
 
-  # SFTP replica uses host, user, sync-interval, retention
+  # SFTP replica uses host, user, sync-interval
   - path: /app3.sqlite
     replica:
       type: sftp
@@ -224,7 +212,6 @@ For applications managing multiple tenant databases with shared infrastructure:
 access-key-id: ${AWS_ACCESS_KEY_ID}
 secret-access-key: ${AWS_SECRET_ACCESS_KEY}
 region: us-west-2
-retention: 720h        # 30 days
 sync-interval: 10s
 
 dbs:
@@ -265,34 +252,6 @@ dbs:
       bucket: ${LITESTREAM_BUCKET}
 ```
 
-### Global Encryption
-
-Apply encryption consistently across all replicas:
-
-```yaml
-age:
-  identities:
-    - /etc/litestream/age-identity.txt
-  recipients:
-    - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-retention: 168h
-sync-interval: 1s
-
-dbs:
-  - path: /db1.sqlite
-    replica:
-      type: s3
-      bucket: encrypted-backups
-      path: db1
-
-  - path: /db2.sqlite
-    replica:
-      type: s3
-      bucket: encrypted-backups
-      path: db2
-```
-
 ## Best Practices
 
 ### Use environment variables for credentials
@@ -312,7 +271,7 @@ in the replica configuration:
 ```yaml
 # Good: Shared settings are global
 region: us-west-2
-retention: 168h
+sync-interval: 10s
 
 dbs:
   - path: /db1.sqlite
@@ -335,8 +294,6 @@ secret-access-key: ${AWS_SECRET_ACCESS_KEY}
 region: us-west-2
 
 # Global timing settings
-# 7-day retention with hourly sync
-retention: 168h
 sync-interval: 1h
 
 dbs:
