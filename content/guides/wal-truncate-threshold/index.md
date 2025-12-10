@@ -85,27 +85,16 @@ dbs:
 
 ### Disabling Checkpoints
 
-Set any checkpoint to `0` to disable:
+You can disable time-based and emergency checkpoints by setting them to `0`:
 
 ```yaml
 dbs:
   - path: /path/to/db
-    min-checkpoint-page-count: 0      # Disable PASSIVE checkpoints
     checkpoint-interval: 0             # Disable time-based checkpoints
     truncate-page-n: 0                 # Disable TRUNCATE checkpoints
 ```
 
-### CLI Flags
-
-Checkpoints can also be configured via command-line flags:
-
-```sh
-litestream replicate \
-  -min-checkpoint-page-count=1000 \
-  -checkpoint-interval=1m \
-  -truncate-page-n=121359 \
-  /path/to/db s3://mybucket/db
-```
+**Note:** The `min-checkpoint-page-count` option cannot be set to `0`—Litestream requires a minimum value of at least `1`. PASSIVE checkpoints based on page count are always enabled.
 
 ## Trade-offs
 
@@ -157,16 +146,15 @@ truncate-page-n: 0  # Disable blocking checkpoints
 - Zero-tolerance for write blocking
 - Environments with ample disk space
 
-### Disabling All Checkpoints
+### Disabling Time-Based and Emergency Checkpoints
 
 **Configuration:**
 ```yaml
-min-checkpoint-page-count: 0
 checkpoint-interval: 0
 truncate-page-n: 0
 ```
 
-**Not recommended.** This configuration disables all Litestream-initiated checkpoints. Only use if:
+**Not recommended for most use cases.** This configuration disables time-based and emergency checkpoints, leaving only page-count-based PASSIVE checkpoints active. Only use if:
 - Your application manages checkpoints explicitly
 - You have external monitoring for WAL growth
 - You understand the risks of unbounded WAL growth
@@ -208,7 +196,15 @@ Example monitoring script:
 
 ```sh
 #!/bin/bash
-WAL_SIZE=$(stat -f%z /path/to/db-wal 2>/dev/null || echo 0)
+WAL_FILE="/path/to/db-wal"
+
+# Cross-platform file size (works on Linux and macOS)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  WAL_SIZE=$(stat -f%z "$WAL_FILE" 2>/dev/null || echo 0)
+else
+  WAL_SIZE=$(stat -c%s "$WAL_FILE" 2>/dev/null || echo 0)
+fi
+
 WAL_SIZE_MB=$((WAL_SIZE / 1024 / 1024))
 
 if [ $WAL_SIZE_MB -gt 5000 ]; then
