@@ -39,6 +39,234 @@ dbs:
       url: s3://bucket/path
 ```
 
+## Managing Credentials Securely
+
+Properly securing credentials is critical for Litestream deployments. This section
+covers best practices for credential management across different deployment scenarios.
+
+### Best Practices
+
+1. **Never commit credentials to version control** — Use `.gitignore` to exclude
+   configuration files containing sensitive data
+2. **Prefer environment variables** — Litestream supports environment variable
+   expansion in configuration files
+3. **Use secret management systems** — For production, use Kubernetes Secrets,
+   Docker Secrets, or HashiCorp Vault
+4. **Minimize credential exposure** — Provide only the permissions needed for your
+   use case (principle of least privilege)
+5. **Rotate credentials regularly** — Update access keys and secrets periodically
+6. **Audit access** — Monitor credential usage through cloud provider logs
+
+### Environment Variable Expansion
+
+Litestream automatically expands `$VAR` and `${VAR}` references in configuration files.
+This is the simplest way to pass credentials without embedding them in files:
+
+```yaml
+dbs:
+  - path: /var/lib/mydb.db
+    replica:
+      url: s3://mybucket/db
+      access-key-id: ${AWS_ACCESS_KEY_ID}
+      secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+```
+
+```bash
+# Set environment variables before running Litestream
+export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+litestream replicate
+```
+
+To disable environment variable expansion if it conflicts with your values:
+```bash
+litestream replicate -no-expand-env
+```
+
+### Kubernetes Secrets
+
+For Kubernetes deployments, mount credentials as environment variables from Secrets:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: litestream-aws-credentials
+type: Opaque
+stringData:
+  access-key-id: AKIAIOSFODNN7EXAMPLE
+  secret-access-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: myapp:latest
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: litestream-aws-credentials
+              key: access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litestream-aws-credentials
+              key: secret-access-key
+        volumeMounts:
+        - name: litestream-config
+          mountPath: /etc/litestream
+          readOnly: true
+      volumes:
+      - name: litestream-config
+        configMap:
+          name: litestream-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litestream-config
+data:
+  litestream.yml: |
+    dbs:
+      - path: /data/myapp.db
+        replica:
+          url: s3://mybucket/myapp
+          access-key-id: ${AWS_ACCESS_KEY_ID}
+          secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+```
+
+For GCS with workload identity (recommended for Kubernetes on GKE):
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: litestream-sa
+  annotations:
+    iam.gke.io/gcp-service-account: litestream@your-project.iam.gserviceaccount.com
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  template:
+    spec:
+      serviceAccountName: litestream-sa
+      containers:
+      - name: app
+        image: myapp:latest
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/run/secrets/cloud.google.com/service_account/key.json
+```
+
+### Docker Secrets
+
+For Docker Swarm deployments, use Docker Secrets:
+
+```yaml
+version: '3.8'
+services:
+  myapp:
+    image: myapp:latest
+    environment:
+      AWS_ACCESS_KEY_ID_FILE: /run/secrets/aws_access_key_id
+      AWS_SECRET_ACCESS_KEY_FILE: /run/secrets/aws_secret_access_key
+    secrets:
+      - aws_access_key_id
+      - aws_secret_access_key
+    configs:
+      - source: litestream_config
+        target: /etc/litestream.yml
+
+configs:
+  litestream_config:
+    file: ./litestream.yml
+
+secrets:
+  aws_access_key_id:
+    external: true
+  aws_secret_access_key:
+    external: true
+```
+
+Then read these in your startup script:
+
+```bash
+#!/bin/sh
+export AWS_ACCESS_KEY_ID=$(cat /run/secrets/aws_access_key_id)
+export AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/aws_secret_access_key)
+exec litestream replicate
+```
+
+### Azure with Managed Identity
+
+For Azure deployments, use managed identity instead of shared keys:
+
+```yaml
+# Pod with Azure managed identity
+apiVersion: aad.banzaicloud.com/v1
+kind: AzureIdentity
+metadata:
+  name: litestream-identity
+spec:
+  type: 0  # Managed Service Identity
+  resourceID: /subscriptions/{subscription}/resourcegroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/litestream
+  clientID: {client-id}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  template:
+    metadata:
+      labels:
+        aadpodidbinding: litestream-identity
+    spec:
+      containers:
+      - name: app
+        image: myapp:latest
+        volumeMounts:
+        - name: litestream-config
+          mountPath: /etc/litestream
+          readOnly: true
+      volumes:
+      - name: litestream-config
+        configMap:
+          name: litestream-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litestream-config
+data:
+  litestream.yml: |
+    dbs:
+      - path: /data/myapp.db
+        replica:
+          url: abs://account@myaccount.blob.core.windows.net/container/db
+          # Managed identity authentication (no keys needed)
+```
+
+### Credential Security Checklist
+
+- ✅ Credentials stored in environment variables or secret management systems
+- ✅ Configuration files never committed to version control with credentials
+- ✅ Credentials have minimal required permissions
+- ✅ Access is logged and auditable
+- ✅ Credentials rotated on a regular schedule
+- ✅ Development and production credentials are separate
+- ✅ Database backup location is restricted to authorized users
+- ✅ Network access to cloud storage is restricted to necessary services
+
 ### Database Path Issues
 
 **Error**: `no such file or directory` or `database is locked`
@@ -238,21 +466,18 @@ Or let Litestream enable it automatically by ensuring proper database permission
 **Error**: `connection reset by peer` or `timeout`
 
 **Solution**:
-
-1. Implement retry logic in replica configuration:
-
+1. Adjust sync interval to reduce frequency of requests during outages:
    ```yaml
    dbs:
      - path: /path/to/db.sqlite
        replica:
          url: s3://bucket/path
-         # Add connection tuning
          sync-interval: 10s
-         retention: 168h
    ```
 
 2. Check network stability and firewall rules
 3. Consider using regional endpoints for cloud storage
+4. For production, use a configuration file to persist your settings (see [Configuration Reference]({{< ref "config" >}}))
 
 ### DNS Resolution Issues
 

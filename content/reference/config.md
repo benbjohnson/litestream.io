@@ -26,6 +26,88 @@ dollar sign followed by characters—for example, a password. In this case, you
 can set the `-no-expand-env` flag on any `litestream` command to disable
 expansion.
 
+### Environment Variables
+
+Litestream supports environment variables for configuring authentication credentials.
+There are two types:
+
+1. **Auto-read variables** — Automatically read and applied by Litestream
+2. **Expansion-only variables** — Must be explicitly referenced in config using `${VAR}` syntax
+
+This distinction avoids the need to embed sensitive data in configuration files, which is
+especially useful in containerized environments, Kubernetes, and secret management systems.
+
+#### Auto-read Environment Variables
+
+Litestream automatically reads and applies these variables without config changes:
+
+| Variable | Purpose | Notes |
+|----------|---------|-------|
+| `AWS_ACCESS_KEY_ID` | AWS S3 access key | Standard AWS SDK variable |
+| `AWS_SECRET_ACCESS_KEY` | AWS S3 secret key | Standard AWS SDK variable |
+| `LITESTREAM_ACCESS_KEY_ID` | AWS S3 access key | Sets `AWS_ACCESS_KEY_ID` if unset; config file takes precedence |
+| `LITESTREAM_SECRET_ACCESS_KEY` | AWS S3 secret key | Sets `AWS_SECRET_ACCESS_KEY` if unset; config file takes precedence |
+| `LITESTREAM_AZURE_ACCOUNT_KEY` | Azure Blob Storage key | Read by ABS replica if not specified in config |
+| `LITESTREAM_CONFIG` | Config file path | Overrides default `/etc/litestream.yml` |
+
+**AWS Credential Precedence (highest to lowest):**
+1. Credentials in config file (replica-level or global)
+2. `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` environment variables
+3. `LITESTREAM_ACCESS_KEY_ID` / `LITESTREAM_SECRET_ACCESS_KEY` environment variables
+
+#### Expansion-only Variables (must use `${VAR}` syntax)
+
+These variables are **not** automatically read. To use them, explicitly reference them
+in your config file using `${VAR}` syntax. Litestream will expand them before parsing
+the configuration:
+
+**Examples:**
+
+```yaml
+dbs:
+  - path: /var/lib/mydb.db
+    replica:
+      type: nats
+      url: nats://nats.example.com:4222/my-bucket
+      username: litestream
+      password: ${NATS_PASSWORD}
+
+  - path: /var/lib/mydb2.db
+    replica:
+      type: sftp
+      host: backup.example.com:22
+      user: backup
+      password: ${SFTP_PASSWORD}
+      path: /backups/mydb2
+
+  - path: /var/lib/mydb3.db
+    replica:
+      url: s3://mybucket/mydb3
+      access-key-id: ${AWS_ACCESS_KEY_ID}
+      secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+```
+
+Set the variables before running Litestream:
+
+```bash
+export NATS_PASSWORD=your-nats-password
+export SFTP_PASSWORD=your-sftp-password
+export AWS_ACCESS_KEY_ID=your-key-id
+export AWS_SECRET_ACCESS_KEY=your-secret-key
+litestream replicate
+```
+
+#### Google Cloud Storage Authentication
+
+GCS authentication uses Google's [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) chain.
+The `GOOGLE_APPLICATION_CREDENTIALS` environment variable is **optional** — use it only when explicitly providing a service account key file.
+
+ADC automatically supports:
+- GKE workload identity (recommended for Kubernetes)
+- Metadata server (for Google Compute Engine instances)
+- `gcloud auth application-default login` (local development)
+- Service account key file (via `GOOGLE_APPLICATION_CREDENTIALS`)
+
 
 ## Global settings
 
@@ -140,7 +222,7 @@ dbs:
 
 ## Replica settings
 
-Litestream supports six types of replicas:
+Litestream supports seven types of replicas:
 
 - `"abs"` replicates a database to an Azure Blob Storage container.
 - `"file"` replicates a database to another local file path.
@@ -148,44 +230,22 @@ Litestream supports six types of replicas:
 - `"nats"` replicates a database to a NATS JetStream Object Store.
 - `"s3"` replicates a database to an S3-compatible bucket.
 - `"sftp"` replicates a database to a remote server via SFTP.
+- `"webdav"` replicates a database to a WebDAV server.
 
-All replicas have unique name which is specified by the `"name"` field. If a
-name is not specified then the name defaults to the replica type. The name is
-only needed when using multiple replicas of the same type on a database.
+{{< since version="0.5.0" >}} Each database now supports only a single replica. The `name` field
+is deprecated legacy from v0.3.x where multiple replicas were supported.
 
-The following replica settings are also available for all replica types:
+The following replica settings are available for all replica types:
 
 - `url`—Short-hand form of specifying a replica location. Setting this field
   will apply changes to multiples fields including `bucket`, `path`, `region`, etc.
-
-- `retention`—The amount of time that snapshot & LTX files will be kept. After
-  the retention period, a new snapshot will be created and the old one will be
-  removed. LTX files that exist before the oldest snapshot will also be removed.
-  Defaults to `24h`.
-
-- `retention-check-interval`—Specifies how often Litestream will check if
-  retention needs to be enforced. Defaults to `1h`.
-
-- `snapshot-interval`—Specifies how often new snapshots will be created. This is
-  used to reduce the time to restore since newer snapshots will have fewer LTX
-  frames to apply. Retention still applies to these snapshots.
-
-  If you do not set a snapshot interval then a new snapshot will be created
-  whenever retention is performed. Retention occurs every 24 hours by default.
-
-
-- `validation-interval`—When specified, Litestream will automatically restore
-  and validate that the data on the replica matches the local copy. Disabled by
-  default. Enabling this will significantly increase the cost of running
-  Litestream as S3 services charge for downloads.
 
 - `sync-interval`—Frequency in which frames are pushed to the replica. Defaults
   to `1s`. Decreasing this value (increasing sync frequency) can significantly
   increase cloud storage costs due to more frequent PUT requests. See the
   [Cost Considerations](#cost-considerations) section below for details.
 
-- `age`—Client-side encryption with [age](https://age-encryption.org), see
-  [Encryption](#encryption) for configuration details. Defaults to off.
+- `validation-interval`—{{< alert icon="⚠️" text="Currently non-functional in v0.5.x. When enabled in future versions, Litestream will automatically restore and validate that replica data matches the local copy. This will significantly increase cloud storage costs due to restore downloads." >}}
 
 
 ### S3 replica
@@ -195,8 +255,8 @@ The easiest way to configure an S3 replica is to use the `url` field:
 ```yaml
 dbs:
   - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
+    replica:
+      url: s3://mybkt.litestream.io/db
 ```
 
 However, you can break this out into separate fields as well:
@@ -204,22 +264,22 @@ However, you can break this out into separate fields as well:
 ```yaml
 dbs:
   - path: /var/lib/db
-    replicas:
-      - type:   s3
-        bucket: mybkt.litestream.io
-        path:   db
+    replica:
+      type: s3
+      bucket: mybkt.litestream.io
+      path: db
 ```
 
-In addition, you can specify the region and AWS credentials per-replica:
+In addition, you can specify the region and AWS credentials:
 
 ```yaml
 dbs:
   - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        region: us-east-1
-        access-key-id: AKIAxxxxxxxxxxxxxxxx
-        secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+    replica:
+      url: s3://mybkt.litestream.io/db
+      region: us-east-1
+      access-key-id: AKIAxxxxxxxxxxxxxxxx
+      secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 ```
 
 The following settings are specific to S3 replicas:
@@ -276,9 +336,9 @@ litestream replicate mydb.db s3://mybkt.localhost:9000/mydb.db
 #### Remote MinIO Server
 
 For remote MinIO servers, you **must** use a configuration file and specify the
-`endpoint` parameter. Environment variables take precedence over config file
-values, so ensure any conflicting environment variables are unset before running
-Litestream.
+`endpoint` parameter. Config file values take precedence over environment variables,
+so credentials specified in the config file will override any `AWS_*` or `LITESTREAM_*`
+environment variables.
 
 Configuration file example with remote MinIO:
 
@@ -324,9 +384,10 @@ dbs:
 4. **TLS Certificate**: If using self-signed certificates, add `skip-verify: true`
    to your replica configuration (not recommended for production).
 
-5. **Environment Variables**: Environment variables take precedence over config
-   file values. If you're using a config file with inline credentials, unset any
-   conflicting `LITESTREAM_*` or `AWS_*` environment variables first.
+5. **Environment Variables**: Config file values take precedence over environment
+   variables. If you specify credentials in the config file (like `access-key-id`),
+   they will override any `LITESTREAM_*` or `AWS_*` environment variables. To use
+   environment variables instead, leave the config fields empty.
 
 
 ### File replica
@@ -336,8 +397,8 @@ File replicas can be configured using the `"path"` field:
 ```yaml
 dbs:
   - path: /var/lib/db
-    replicas:
-      - path: /backup/db
+    replica:
+      path: /backup/db
 ```
 
 If no `"type"` field is specified and a `"url"` is not used then `"file"` is
@@ -401,7 +462,7 @@ dbs:
 The following settings are specific to ABS replicas:
 
 - `account-name`—Azure storage account name
-- `account-key`—Azure storage account key or use `AZURE_STORAGE_KEY` environment variable
+- `account-key`—Azure storage account key. Can be set via `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable or injected via `${VAR}` syntax in config
 - `bucket`—Container name within the storage account
 - `path`—Path within the container
 - `endpoint`—Custom endpoint URL (optional)
@@ -542,20 +603,12 @@ cross-region replication features or multiple Litestream instances.
 ### Retention period
 
 Replicas maintain a snapshot of the database as well as a contiguous sequence of
-SQLite WAL page updates. These updates take up space so new snapshots are
-created and old WAL files are dropped through a process called "retention".
+LTX page updates. These updates take up space so new snapshots are created and
+old LTX files are dropped through a process called "retention".
 
-The default retention period is `24h`. You can change that with the `retention`
-field. Retention is enforced periodically and defaults to every `1h`. This can
-be changed with the `retention-check-interval` field.
-
-```
-dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        retention: 4h
-```
+Retention is controlled globally via the `snapshot.retention` field in the root
+configuration, not per-replica. See the [Global snapshot settings](#global-snapshot-settings)
+section for configuration details.
 
 Duration values can be specified using second (`s`), minute (`m`), or hour (`h`)
 but days, weeks, & years are not supported.
@@ -563,22 +616,7 @@ but days, weeks, & years are not supported.
 
 ### Validation interval
 
-Because Litestream performs physical replication, the resulting database files
-restored from replicas will match byte-for-byte. Litestream has an option to
-periodically validate replicas by restoring them and comparing their checksum
-to the primary database's checksum.
-
-_Please note that frequently restoring from S3 can be expensive._
-
-It can be enabled by setting the `validation-interval` field:
-
-```
-dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        validation-interval: 6h
-```
+{{< alert icon="⚠️" text="The `validation-interval` field is currently non-functional in v0.5.x. It is defined in the configuration schema but has no effect. When this feature is implemented in a future release, it will periodically restore replicas and compare checksums to the primary database, but this will significantly increase costs due to restore downloads." >}}
 
 ### Encryption
 
@@ -730,7 +768,7 @@ snapshot:
 
 # Database configurations
 dbs:
-  # S3 replica with encryption
+  # S3 replica
   - path: /var/lib/app1.db
     monitor-interval: 1s
     checkpoint-interval: 1m
@@ -738,13 +776,7 @@ dbs:
       url: s3://mybucket/app1
       region: us-east-1
       sync-interval: 1s
-      retention: 72h
-      age:
-        identities:
-          - /etc/litestream/age-identity.txt
-        recipients:
-          - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  
+
   # NATS replica with TLS
   - path: /var/lib/app2.db
     replica:
@@ -757,12 +789,11 @@ dbs:
         - /etc/ssl/certs/nats-ca.crt
       max-reconnects: -1
       reconnect-wait: 2s
-      
+
   # File replica for local backup
   - path: /var/lib/app3.db
     replica:
       path: /backup/app3
-      retention: 168h  # 1 week
 ```
 
 ## Migration from v0.3.x
