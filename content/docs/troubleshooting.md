@@ -79,6 +79,7 @@ litestream replicate
 ```
 
 To disable environment variable expansion if it conflicts with your values:
+
 ```bash
 litestream replicate -no-expand-env
 ```
@@ -466,7 +467,9 @@ Or let Litestream enable it automatically by ensuring proper database permission
 **Error**: `connection reset by peer` or `timeout`
 
 **Solution**:
+
 1. Adjust sync interval to reduce frequency of requests during outages:
+
    ```yaml
    dbs:
      - path: /path/to/db.sqlite

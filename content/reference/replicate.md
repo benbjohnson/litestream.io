@@ -39,12 +39,14 @@ litestream replicate [arguments] DB_PATH REPLICA_URL
 #### When to use command-line mode
 
 Command-line mode is convenient for:
+
 - Simple deployments with a single database
 - Development and testing
 - Container environments where you prefer environment variables over config files
 - CI/CD pipelines with dynamically generated credentials
 
 **Not recommended for production** because:
+
 - Only supports a single database (use config file for multiple databases)
 - Limited configuration options (no retention tuning, snapshot intervals, etc.)
 - All configuration is command-line only (harder to track in version control)

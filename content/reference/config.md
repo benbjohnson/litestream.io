@@ -51,6 +51,7 @@ Litestream automatically reads and applies these variables without config change
 | `LITESTREAM_CONFIG` | Config file path | Overrides default `/etc/litestream.yml` |
 
 **AWS Credential Precedence (highest to lowest):**
+
 1. Credentials in config file (replica-level or global)
 2. `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` environment variables
 3. `LITESTREAM_ACCESS_KEY_ID` / `LITESTREAM_SECRET_ACCESS_KEY` environment variables
@@ -103,6 +104,7 @@ GCS authentication uses Google's [Application Default Credentials (ADC)](https:/
 The `GOOGLE_APPLICATION_CREDENTIALS` environment variable is **optional** — use it only when explicitly providing a service account key file.
 
 ADC automatically supports:
+
 - GKE workload identity (recommended for Kubernetes)
 - Metadata server (for Google Compute Engine instances)
 - `gcloud auth application-default login` (local development)
@@ -607,8 +609,8 @@ LTX page updates. These updates take up space so new snapshots are created and
 old LTX files are dropped through a process called "retention".
 
 Retention is controlled globally via the `snapshot.retention` field in the root
-configuration, not per-replica. See the [Global snapshot settings](#global-snapshot-settings)
-section for configuration details.
+configuration, not per-replica. See the [Complete Configuration Example](#complete-configuration-example)
+section for an example of how to configure snapshot settings.
 
 Duration values can be specified using second (`s`), minute (`m`), or hour (`h`)
 but days, weeks, & years are not supported.
