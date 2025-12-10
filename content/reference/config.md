@@ -268,6 +268,7 @@ dbs:
     replica:
       type: s3
       bucket: mybucket
+      path:   db
       endpoint: fly.storage.tigris.dev
       region: auto
 ```

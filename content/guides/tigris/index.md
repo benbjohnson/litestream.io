@@ -99,6 +99,7 @@ dbs:
     replica:
       type: s3
       bucket: BUCKETNAME
+      path:   db
       endpoint: fly.storage.tigris.dev
       region: auto
 ```
@@ -111,6 +112,7 @@ dbs:
     replica:
       type: s3
       bucket: BUCKETNAME
+      path:   db
       endpoint: fly.storage.tigris.dev
       region: auto
       access-key-id: tid_xxxxxxxxxxxxxxxxxxxx
@@ -142,6 +144,7 @@ dbs:
     replica:
       type: s3
       bucket: BUCKETNAME
+      path:   db
       endpoint: fly.storage.tigris.dev
       region: auto
       sign-payload: true
