@@ -110,7 +110,7 @@ dbs:
       type: s3
       bucket:   BUCKETNAME
       path:     db
-      endpoint: https://us-east-1.linodeobjects.com
+      endpoint: us-east-1.linodeobjects.com
       region:   us-east-1   # set to your region
 ```
 
