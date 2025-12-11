@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "replica-guides"
-weight: 470
+weight: 480
 ---
 
 This guide will show you how to use Litestream to replicate to a remote WebDAV
