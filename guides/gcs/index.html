@@ -240,10 +240,10 @@ location and set an environment variable pointing to its path:</p>
 <p>You can specify your replica as a replica URL on the command line. For example,
 you can replicate a database to your bucket. <em>Replace the placeholders with your
 bucket &amp; path.</em></p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db gcs://BUCKET/PATH
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db gs://BUCKET/PATH
 </span></span></code></pre></div><p>You can later restore your database from Google Cloud Storage to a local <code>my.db</code>
 path with the following command.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db gcs://BUCKET/PATH
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db gs://BUCKET/PATH
 </span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
 file</a>. You can configure a replica for your database using the <code>url</code> format.</p>
