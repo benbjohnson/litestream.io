@@ -14,15 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Running as a Windows Service - Litestream</title>
+  <title>Replicating to Alibaba Cloud OSS - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/guides/windows/">
+<link rel="canonical" href="https://litestream.io/guides/alibaba-oss/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Running as a Windows Service">
-<meta name="twitter:description" content="This guide will get you running Litestream on the Windows operating system as either a command line tool or as a background Windows Service.
-Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.
-Running as a Windows Service Running Litestream as a Windows Service means that it will run in the background and continuously monitor and replicate your databases.">
+<meta name="twitter:title" content="Replicating to Alibaba Cloud OSS">
+<meta name="twitter:description" content="v0.5.0 This guide will show you how to use Litestream&rsquo;s native Alibaba Cloud OSS support to replicate your database. You will need an Alibaba Cloud account to complete this guide.
+Setup Create a bucket In the OSS Console, click the &ldquo;Create Bucket&rdquo; button. Enter a unique bucket name and select your preferred region (e.g., cn-hangzhou, us-west-1). Remember your bucket name and region as you&rsquo;ll need those later.
+Create access credentials From the RAM Console, navigate to &ldquo;AccessKey Management&rdquo; under your account.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -46,8 +46,8 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Windows",
-        "item": "https:\/\/litestream.io\/guides\/windows\/"
+        "name": "Alibaba Oss",
+        "item": "https:\/\/litestream.io\/guides\/alibaba-oss\/"
     }]
 }
 </script>
@@ -135,7 +135,7 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/guides/">Replica Guides</a>
@@ -143,7 +143,7 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
-    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
@@ -184,89 +184,101 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#prerequisites">Prerequisites</a></li>
-    <li><a href="#running-as-a-windows-service">Running as a Windows Service</a>
+    <li><a href="#setup">Setup</a>
       <ul>
-        <li><a href="#managing-the-service">Managing the service</a></li>
-        <li><a href="#viewing-the-event-log">Viewing the event log</a></li>
+        <li><a href="#create-a-bucket">Create a bucket</a></li>
+        <li><a href="#create-access-credentials">Create access credentials</a></li>
       </ul>
     </li>
-    <li><a href="#running-from-the-command-line">Running from the command line</a></li>
+    <li><a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#command-line-usage">Command line usage</a></li>
+        <li><a href="#configuration-file-usage">Configuration file usage</a></li>
+      </ul>
+    </li>
+    <li><a href="#advanced-options">Advanced Options</a></li>
   </ul>
 </nav>
   </div>
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Running as a Windows Service</h1>
+		<h1>Replicating to Alibaba Cloud OSS</h1>
 			<p class="lead"></p>
-			<p>This guide will get you running Litestream on the Windows operating system as
-either a command line tool or as a background Windows Service.</p>
-<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
-<p>This guide assumes you have read the <a href="/getting-started"><em>Getting Started</em></a>
-tutorial already. Please read that to understand the basic operation of Litestream.</p>
-<h2 id="running-as-a-windows-service">Running as a Windows Service<a href="#running-as-a-windows-service" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Running Litestream as a Windows Service means that it will run in the background
-and continuously monitor and replicate your databases. This is the recommended
-way to run Litestream.</p>
-<p>To install, download and run the <code>.msi</code> installer from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
-page</a>. You&rsquo;ll be presented with a window asking if the app can make
-changes to your device. Click <em>&ldquo;Yes&rdquo;</em>.</p>
-<center>
- <img src="msi.png" alt="Screenshot of Windows installer">
-</center>
-<br/>
-<p>Once the installer is done, your Litesteam service will be running. The
-<a href="/reference/config">configuration file</a> for Litestream is installed at:</p>
-<pre tabindex="0"><code>C:\Litestream\litestream.yml
-</code></pre><h3 id="managing-the-service">Managing the service<a href="#managing-the-service" class="anchor" aria-hidden="true">#</a> </h3>
-<p>When you first install Litestream, it will run using an empty <a href="/reference/config">configuration
-file</a>. Whenever you update this file, you&rsquo;ll need to restart
-the service.</p>
-<p>Go to the <em>Services</em> application and select the Litestream service. You should
-see links in the sidebar to <em>Stop</em> and <em>Restart</em> the service.</p>
-<figure>
- <img src="services.png" alt="Screenshot of Windows Services application">
-</figure>
-<h3 id="viewing-the-event-log">Viewing the event log<a href="#viewing-the-event-log" class="anchor" aria-hidden="true">#</a> </h3>
-<p>The Litestream service logs informational and error messages to the Windows
-Event Log during operation. You can view these events in either the <em>Event
-Viewer</em> application or you can view them from PowerShell.</p>
-<p>In PowerShell, you can execute the following:</p>
-<pre tabindex="0"><code>Get-EventLog -LogName Application -Source Litestream
-</code></pre><p>This will show events in reverse chronological order:</p>
-<pre tabindex="0"><code>PS C:\&gt; Get-EventLog -LogName Application -Source Litestream
-
-   Index Time          EntryType   Source                 InstanceID Message
-   ----- ----          ---------   ------                 ---------- -------
-    8894 Jan 01 00:00  Information Litestream                      1 replicating to: name=&#34;s3&#34; type=&#34;s3&#34; bucket=&#34;dev...
-    8892 Jan 01 00:00  Information Litestream                      1 initialized db: C:\my.db...
-    8891 Jan 01 00:00  Information Litestream                      1 litestream v0.5.2...
-    8890 Jan 01 00:00  Information Litestream                      1 Litestream service starting...
-</code></pre><h2 id="running-from-the-command-line">Running from the command line<a href="#running-from-the-command-line" class="anchor" aria-hidden="true">#</a> </h2>
-<p>If you do not wish to run as a background service or you only need to perform
-a database restore then you can download the Litestream executable and run
-from the command line.</p>
-<p>You&rsquo;ll need to download the <code>litestream.exe</code> file from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
-page</a> and install it within your Windows <code>%PATH%</code>. The executable will
-use <code>C:\Litestream\litestream.yml</code> as the default configuration path but you
-can override that with the <code>-config</code> flag.</p>
-<p>All logging messages will go to the terminal window when running from the
-command line and the Event Log is not used.</p>
-
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ This guide will show you how to use Litestream&rsquo;s
+native <a href="https://www.alibabacloud.com/product/object-storage-service">Alibaba Cloud OSS</a> support to replicate your database. You will need
+an <a href="https://www.alibabacloud.com/">Alibaba Cloud</a> account to complete this guide.</p>
+<h2 id="setup">Setup<a href="#setup" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="create-a-bucket">Create a bucket<a href="#create-a-bucket" class="anchor" aria-hidden="true">#</a> </h3>
+<p>In the <a href="https://oss.console.aliyun.com/">OSS Console</a>, click the <em>&ldquo;Create Bucket&rdquo;</em> button. Enter a unique
+bucket name and select your preferred region (e.g., <code>cn-hangzhou</code>, <code>us-west-1</code>).
+Remember your bucket name and region as you&rsquo;ll need those later.</p>
+<h3 id="create-access-credentials">Create access credentials<a href="#create-access-credentials" class="anchor" aria-hidden="true">#</a> </h3>
+<p>From the <a href="https://ram.console.aliyun.com/">RAM Console</a>, navigate to <em>&ldquo;AccessKey Management&rdquo;</em> under your
+account. Click <em>&ldquo;Create AccessKey&rdquo;</em> to generate a new key pair. You will need
+to save the <em>&ldquo;AccessKey ID&rdquo;</em> and <em>&ldquo;AccessKey Secret&rdquo;</em> for later use in this
+guide.</p>
+<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can replicate to <a href="https://www.alibabacloud.com/product/object-storage-service">Alibaba Cloud OSS</a> from the command line by setting
+your credentials via environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">OSS_ACCESS_KEY_ID</span><span class="o">=</span>xxxxxxxxxxxxxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">OSS_ACCESS_KEY_SECRET</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</span></span></code></pre></div><p>You can then specify your replica as a replica URL on the command line. For
+example, you can replicate a database to your bucket with the following
+command. <em>Replace the placeholders for your bucket, region, &amp; path.</em></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db oss://BUCKET.oss-REGION.aliyuncs.com/PATH
+</span></span></code></pre></div><p>You can later restore your database from Alibaba Cloud OSS to a local <code>my.db</code>
+path with the following command.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db oss://BUCKET.oss-REGION.aliyuncs.com/PATH
+</span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
+file</a>. You can configure a replica for your database using the <code>url</code> format.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">oss://BUCKET.oss-REGION.aliyuncs.com/PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><p>Or you can expand your configuration into multiple fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">oss</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKET</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">REGION</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">PATH</span><span class="w">
+</span></span></span></code></pre></div><p>You can also use the <code>OSS_ACCESS_KEY_ID</code> and <code>OSS_ACCESS_KEY_SECRET</code> environment
+variables instead of specifying the credentials in your configuration file.</p>
+<h2 id="advanced-options">Advanced Options<a href="#advanced-options" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Alibaba Cloud OSS replicas support additional configuration options for
+multipart uploads:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">        </span><span class="l">oss</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w">      </span><span class="l">BUCKET</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w">      </span><span class="l">REGION</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">        </span><span class="l">PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">part-size</span><span class="p">:</span><span class="w">   </span><span class="m">10485760</span><span class="w">  </span><span class="c"># 10MB part size for multipart uploads</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">concurrency</span><span class="p">:</span><span class="w"> </span><span class="m">5</span><span class="w">         </span><span class="c"># Number of parallel upload workers</span><span class="w">
+</span></span></span></code></pre></div>
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/guides/systemd/">
+	<a href="https://litestream.io/guides/aws-sdk-v2/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Running as a Systemd service
+					&larr; AWS SDK v2 Migration
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/guides/s3/">
+	<a class="ml-auto" href="https://litestream.io/guides/s3-advanced/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Replicating to Amazon S3 &rarr;
+					S3 Advanced Configuration &rarr;
 				</div>
 			</div>
 		</a>

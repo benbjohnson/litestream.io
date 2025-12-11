@@ -44,6 +44,13 @@
     </url>
     
     <url>
+      <loc>https://litestream.io/guides/alibaba-oss/</loc>
+      <lastmod>2025-12-03T00:00:00+00:00</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.5</priority>
+    </url>
+    
+    <url>
       <loc>https://litestream.io/guides/s3-advanced/</loc>
       <lastmod>2025-12-03T00:00:00+00:00</lastmod>
       <changefreq>weekly</changefreq>

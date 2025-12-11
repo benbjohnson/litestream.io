@@ -51,6 +51,13 @@
       <description>Litestream v0.5.0 uses AWS SDK for Go v2 for all S3 operations. This upgrade brings improved performance, better reliability, and enhanced configuration options while maintaining full backward compatibility with existing configurations.&#xA;What Changed? The upgrade from AWS SDK v1 to v2 introduces several improvements:&#xA;Connection pooling reduces latency for subsequent requests Adaptive retry mode with up to 10 attempts for better resilience CRC32 checksum validation ensures data integrity automatically Modern credential chain with improved IAM role support 24-hour HTTP timeout for long-running operations on large databases Configurable multipart uploads for better upload performance Backward Compatibility All existing Litestream configurations continue to work without modification.</description>
     </item>
     <item>
+      <title>Replicating to Alibaba Cloud OSS</title>
+      <link>https://litestream.io/guides/alibaba-oss/</link>
+      <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/alibaba-oss/</guid>
+      <description>v0.5.0 This guide will show you how to use Litestream&amp;rsquo;s native Alibaba Cloud OSS support to replicate your database. You will need an Alibaba Cloud account to complete this guide.&#xA;Setup Create a bucket In the OSS Console, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a unique bucket name and select your preferred region (e.g., cn-hangzhou, us-west-1). Remember your bucket name and region as you&amp;rsquo;ll need those later.&#xA;Create access credentials From the RAM Console, navigate to &amp;ldquo;AccessKey Management&amp;rdquo; under your account.</description>
+    </item>
+    <item>
       <title>S3 Advanced Configuration</title>
       <link>https://litestream.io/guides/s3-advanced/</link>
       <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>

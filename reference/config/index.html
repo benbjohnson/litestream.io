@@ -143,6 +143,7 @@ Variable expansion By default, Litestream will perform environment variable expa
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
@@ -211,6 +212,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#azure-blob-storage-abs-replica">Azure Blob Storage (ABS) replica</a></li>
         <li><a href="#sftp-replica">SFTP replica</a></li>
         <li><a href="#nats-jetstream-object-store-replica">NATS JetStream Object Store replica</a></li>
+        <li><a href="#alibaba-cloud-oss-replica">Alibaba Cloud OSS replica</a></li>
         <li><a href="#legacy-multiple-replicas">Legacy Multiple Replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
         <li><a href="#validation-interval">Validation interval</a></li>
@@ -329,12 +331,13 @@ by their absolute path.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/myapp</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
 </span></span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Litestream supports six types of replicas:</p>
+<p>Litestream supports seven types of replicas:</p>
 <ul>
 <li><code>&quot;abs&quot;</code> replicates a database to an Azure Blob Storage container.</li>
 <li><code>&quot;file&quot;</code> replicates a database to another local file path.</li>
 <li><code>&quot;gs&quot;</code> replicates a database to a Google Cloud Storage bucket.</li>
 <li><code>&quot;nats&quot;</code> replicates a database to a NATS JetStream Object Store.</li>
+<li><code>&quot;oss&quot;</code> replicates a database to an Alibaba Cloud OSS bucket.</li>
 <li><code>&quot;s3&quot;</code> replicates a database to an S3-compatible bucket.</li>
 <li><code>&quot;sftp&quot;</code> replicates a database to a remote server via SFTP.</li>
 </ul>
@@ -762,6 +765,35 @@ account key file, or use workload identity in GKE environments.</p>
 <li><code>client-key</code>—Client private key for mutual TLS</li>
 </ul>
 <p>See the <a href="https://litestream.io/guides/nats/">NATS Integration Guide</a> for detailed setup instructions.</p>
+<h3 id="alibaba-cloud-oss-replica">Alibaba Cloud OSS replica<a href="#alibaba-cloud-oss-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Native Alibaba Cloud OSS support using the official SDK.</p>
+<p>OSS replicas can be configured using the <code>url</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">oss://mybucket.oss-cn-hangzhou.aliyuncs.com/db</span><span class="w">
+</span></span></span></code></pre></div><p>Or by specifying individual fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">oss</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">cn-hangzhou</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to OSS replicas:</p>
+<ul>
+<li><code>access-key-id</code>—Alibaba Cloud AccessKey ID. Can also use <code>OSS_ACCESS_KEY_ID</code> environment variable.</li>
+<li><code>secret-access-key</code>—Alibaba Cloud AccessKey Secret. Can also use <code>OSS_ACCESS_KEY_SECRET</code> environment variable.</li>
+<li><code>bucket</code>—OSS bucket name</li>
+<li><code>region</code>—OSS region (e.g., cn-hangzhou, us-west-1)</li>
+<li><code>path</code>—Path within the bucket</li>
+<li><code>part-size</code>—Part size for multipart uploads (default: 5MB)</li>
+<li><code>concurrency</code>—Number of parallel upload workers (default: 1)</li>
+</ul>
+<p>See the <a href="https://litestream.io/guides/alibaba-oss/">Alibaba Cloud OSS Guide</a> for detailed setup instructions.</p>
 <h3 id="legacy-multiple-replicas">Legacy Multiple Replicas<a href="#legacy-multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>
