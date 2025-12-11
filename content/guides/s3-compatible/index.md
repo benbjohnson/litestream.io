@@ -484,8 +484,8 @@ replica:
   concurrency: 10
 ```
 
-See the [S3 Advanced Configuration Guide](/guides/s3-advanced/) for detailed
-tuning recommendations.
+See the [Configuration Reference](/reference/config/#s3-replica) for all
+available S3 replica options.
 
 ## Troubleshooting
 
