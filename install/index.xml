@@ -27,7 +27,7 @@
       <link>https://litestream.io/install/source/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/install/source/</guid>
-      <description>Installation Most users should follow the steps above to install prebuilt binaries but you can also install from source if a binary is not provided for your operating system or architecture. First, install the Go toolchain.&#xA;Next, download the source code and run the following command:&#xA;go install ./cmd/litestream This will install litestream into your $GOPATH/bin directory.</description>
+      <description>Installation Most users should follow the steps above to install prebuilt binaries but you can also install from source if a binary is not provided for your operating system or architecture. First, install the Go toolchain.&#xA;Next, download the source code and run the following command:&#xA;go install ./cmd/litestream This will install litestream into your $GOPATH/bin directory.&#xA;Building litestream-vfs (Optional) The VFS extension provides read-only access to replicated databases directly from object storage.</description>
     </item>
   </channel>
 </rss>

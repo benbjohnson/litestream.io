@@ -52,6 +52,13 @@
   </url>
   
   <url>
+    <loc>https://litestream.io/how-it-works/vfs/</loc>
+    <lastmod>2025-11-20T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://litestream.io/alternatives/</loc>
     <lastmod>2022-04-17T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -117,6 +124,13 @@
   <url>
     <loc>https://litestream.io/guides/s3-advanced/</loc>
     <lastmod>2025-12-03T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://litestream.io/guides/vfs/</loc>
+    <lastmod>2025-11-20T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -236,6 +250,13 @@
   <url>
     <loc>https://litestream.io/reference/restore/</loc>
     <lastmod>2021-02-01T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://litestream.io/reference/vfs/</loc>
+    <lastmod>2025-11-20T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

@@ -72,6 +72,13 @@
       <description>This guide covers advanced S3 configuration options for tuning multipart upload performance. These settings control how Litestream uploads data to S3 and S3-compatible storage services.&#xA;v0.5.0 Part size and concurrency configuration options were added in Litestream v0.5.0.&#xA;Overview When Litestream uploads files to S3, it uses multipart uploads for efficient data transfer. Two key settings control this behavior:&#xA;Part Size: The size of each chunk uploaded to S3 Concurrency: The number of parts uploaded simultaneously Understanding these settings helps you optimize performance for your specific network conditions, storage provider, and resource constraints.</description>
     </item>
     <item>
+      <title>VFS Read Replicas</title>
+      <link>https://litestream.io/guides/vfs/</link>
+      <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/vfs/</guid>
+      <description>Litestream&amp;rsquo;s Virtual File System (VFS) lets you read a replicated database directly from object storage without restoring it to local disk first. Queries fetch pages on-demand, cache them locally, and stay in sync by polling for new LTX files.&#xA;⚠️ The VFS is read-only and requires CGO. Pre-built binaries are available in [GitHub releases](https://github.com/benbjohnson/litestream/releases), or build from source with the `-tags vfs` build tag. When to use the VFS Serve read-only workloads from a remote replica (analytics, dashboards, reporting).</description>
+    </item>
+    <item>
       <title>Replicating to S3-Compatible Services</title>
       <link>https://litestream.io/guides/s3-compatible/</link>
       <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>

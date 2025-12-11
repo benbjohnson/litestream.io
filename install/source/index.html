@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.e980b35a627c7e2b3fcf335f9b79d730c9b9abac737b3cdc4fd2d51bd39bcfd56927f7606f28da16d49b34259aea50f6a0e7e53d4f2ee1ea46d3eb6124a7c6fe.css" integrity="sha512-6YCzWmJ8fis/zzNfm3nXMMm5q6xzezzcT9LVG9Obz9VpJ/dgbyjaFtSbNCWa6lD2oOflPU8u4epG0&#43;thJKfG/g==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -22,7 +22,8 @@
 <meta name="twitter:title" content="Build from Source">
 <meta name="twitter:description" content="Installation Most users should follow the steps above to install prebuilt binaries but you can also install from source if a binary is not provided for your operating system or architecture. First, install the Go toolchain.
 Next, download the source code and run the following command:
-go install ./cmd/litestream This will install litestream into your $GOPATH/bin directory.">
+go install ./cmd/litestream This will install litestream into your $GOPATH/bin directory.
+Building litestream-vfs (Optional) The VFS extension provides read-only access to replicated databases directly from object storage.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -126,6 +127,7 @@ go install ./cmd/litestream This will install litestream into your $GOPATH/bin d
     <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
     <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
     <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
     <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
     </ul>
   <h3>
@@ -146,6 +148,7 @@ go install ./cmd/litestream This will install litestream into your $GOPATH/bin d
     <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
@@ -176,6 +179,7 @@ go install ./cmd/litestream This will install litestream into your $GOPATH/bin d
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -188,6 +192,12 @@ go install ./cmd/litestream This will install litestream into your $GOPATH/bin d
     <nav id="TableOfContents">
   <ul>
     <li><a href="#installation">Installation</a></li>
+    <li><a href="#building-litestream-vfs-optional">Building litestream-vfs (Optional)</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#build-command">Build command</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
@@ -204,6 +214,24 @@ system or architecture. First, <a href="https://golang.org/dl/">install the Go t
 run the following command:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">go install ./cmd/litestream
 </span></span></code></pre></div><p>This will install <code>litestream</code> into your <code>$GOPATH/bin</code> directory.</p>
+<h2 id="building-litestream-vfs-optional">Building litestream-vfs (Optional)<a href="#building-litestream-vfs-optional" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The VFS extension provides read-only access to replicated databases directly
+from object storage. It requires CGO and is built separately from the main
+binary.</p>
+<h3 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li>CGO toolchain (gcc/clang)</li>
+<li>Go 1.25+</li>
+</ul>
+<h3 id="build-command">Build command<a href="#build-command" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">make vfs   <span class="c1"># builds dist/litestream-vfs.so (preferred)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Manual Linux build:</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span> go build -tags <span class="s2">&#34;vfs,SQLITE3VFS_LOADABLE_EXT&#34;</span> -buildmode<span class="o">=</span>c-archive -o dist/litestream-vfs.a ./cmd/litestream-vfs
+</span></span><span class="line"><span class="cl">cp dist/litestream-vfs.h src/litestream-vfs.h
+</span></span><span class="line"><span class="cl">gcc -DSQLITE3VFS_LOADABLE_EXT -fPIC -shared -o dist/litestream-vfs.so src/litestream-vfs.c dist/litestream-vfs.a -lpthread -ldl -lm
+</span></span></code></pre></div><p>Use <code>.dylib</code> (macOS) or <code>.dll</code> (Windows) if your platform expects it. See the
+<a href="/guides/vfs">VFS guide</a> for usage and language-specific examples.</p>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	

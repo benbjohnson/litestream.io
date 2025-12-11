@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.e980b35a627c7e2b3fcf335f9b79d730c9b9abac737b3cdc4fd2d51bd39bcfd56927f7606f28da16d49b34259aea50f6a0e7e53d4f2ee1ea46d3eb6124a7c6fe.css" integrity="sha512-6YCzWmJ8fis/zzNfm3nXMMm5q6xzezzcT9LVG9Obz9VpJ/dgbyjaFtSbNCWa6lD2oOflPU8u4epG0&#43;thJKfG/g==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>VFS Read Replicas - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/vfs/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="VFS Read Replicas">
+<meta name="twitter:description" content="Litestream&rsquo;s Virtual File System (VFS) lets you read a replicated database directly from object storage without restoring it to local disk first. Queries fetch pages on-demand, cache them locally, and stay in sync by polling for new LTX files.
+⚠️ The VFS is read-only and requires CGO. Pre-built binaries are available in [GitHub releases](https://github.com/benbjohnson/litestream/releases), or build from source with the `-tags vfs` build tag. When to use the VFS Serve read-only workloads from a remote replica (analytics, dashboards, reporting).">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Vfs",
+        "item": "https:\/\/litestream.io\/guides\/vfs\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#when-to-use-the-vfs">When to use the VFS</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#build-the-litestream-vfs-extension">Build the <code>litestream-vfs</code> extension</a></li>
+    <li><a href="#configure-the-replica-target">Configure the replica target</a></li>
+    <li><a href="#using-the-vfs-as-a-loadable-extension">Using the VFS as a loadable extension</a>
+      <ul>
+        <li><a href="#sqlite-cli">SQLite CLI</a></li>
+        <li><a href="#python-sqlite3">Python (<code>sqlite3</code>)</a></li>
+      </ul>
+    </li>
+    <li><a href="#using-the-vfs-from-go">Using the VFS from Go</a></li>
+    <li><a href="#observability--time-travel">Observability &amp; time travel</a>
+      <ul>
+        <li><a href="#monitoring-pragmas">Monitoring PRAGMAs</a></li>
+        <li><a href="#time-travel-queries">Time travel queries</a></li>
+        <li><a href="#sql-functions">SQL functions</a></li>
+      </ul>
+    </li>
+    <li><a href="#performance-tuning">Performance tuning</a></li>
+    <li><a href="#limitations--constraints">Limitations &amp; constraints</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#common-use-cases">Common use cases</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>VFS Read Replicas</h1>
+			<p class="lead"></p>
+			<p>Litestream&rsquo;s Virtual File System (VFS) lets you read a replicated database
+directly from object storage without restoring it to local disk first. Queries
+fetch pages on-demand, cache them locally, and stay in sync by polling for new
+LTX files.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The VFS is read-only and requires CGO. Pre-built binaries are available in [GitHub releases](https://github.com/benbjohnson/litestream/releases), or build from source with the `-tags vfs` build tag.</div>
+</div>
+<h2 id="when-to-use-the-vfs">When to use the VFS<a href="#when-to-use-the-vfs" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Serve read-only workloads from a remote replica (analytics, dashboards, reporting).</li>
+<li>Distribute read replicas near users without copying the full database.</li>
+<li>Validate backups or run ad-hoc queries without restoring a full copy.</li>
+<li>Keep warm replicas on ephemeral compute where local disk is limited.</li>
+<li>Avoid when you need low-latency high-concurrency writes—the VFS is read-only and network-bound.</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Go 1.25+ with CGO enabled (compiler toolchain installed).</li>
+<li>A Litestream-managed replica already syncing to object storage.</li>
+<li>SQLite clients that support loadable extensions (CLI, Python, etc.) or a Go application built with CGO.</li>
+<li>Supported page sizes: 512–65536 bytes (auto-detected from LTX headers).</li>
+</ul>
+<h2 id="build-the-litestream-vfs-extension">Build the <code>litestream-vfs</code> extension<a href="#build-the-litestream-vfs-extension" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Build the shared library that registers the VFS inside SQLite. From the
+<code>litestream</code> repository root:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Recommended (handles platform-specific flags)</span>
+</span></span><span class="line"><span class="cl">make vfs
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Manual build (Linux)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span> go build -tags <span class="s2">&#34;vfs,SQLITE3VFS_LOADABLE_EXT&#34;</span> -buildmode<span class="o">=</span>c-archive -o dist/litestream-vfs.a ./cmd/litestream-vfs
+</span></span><span class="line"><span class="cl">cp dist/litestream-vfs.h src/litestream-vfs.h
+</span></span><span class="line"><span class="cl">gcc -DSQLITE3VFS_LOADABLE_EXT -fPIC -shared -o dist/litestream-vfs.so src/litestream-vfs.c dist/litestream-vfs.a -lpthread -ldl -lm
+</span></span></code></pre></div><ul>
+<li>macOS requires the additional frameworks used in <code>Makefile</code>; prefer <code>make vfs</code>.</li>
+<li>Use <code>.dylib</code> on macOS or <code>.dll</code> on Windows if your environment expects it.</li>
+<li>The output registers a VFS called <code>litestream</code>. Keep the <code>.so/.dylib/.dll</code> near your application.</li>
+<li>The loadable extension currently ships with the S3 replica client (including S3-compatible endpoints).</li>
+</ul>
+<p>The SQLite entrypoint symbol is <code>sqlite3_litestreamvfs_init</code>; pass this when
+loading the extension if your client requires it.</p>
+<h2 id="configure-the-replica-target">Configure the replica target<a href="#configure-the-replica-target" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Set the storage connection for the VFS. The extension uses the AWS SDK, so any
+standard AWS credential sources are supported in addition to these variables:</p>
+<ul>
+<li><code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code> — optional; falls back to the AWS default chain.</li>
+<li><code>LITESTREAM_S3_BUCKET</code> (required) — bucket containing the replica.</li>
+<li><code>LITESTREAM_S3_PATH</code> (required) — prefix/path to the database replica.</li>
+<li><code>LITESTREAM_S3_REGION</code> — defaults to the bucket&rsquo;s region (or <code>us-east-1</code> with a custom endpoint).</li>
+<li><code>LITESTREAM_S3_ENDPOINT</code> — for S3-compatible stores (MinIO, R2, etc).</li>
+<li><code>LITESTREAM_S3_FORCE_PATH_STYLE</code> — <code>true</code> for path-style URLs (default: <code>false</code>).</li>
+<li><code>LITESTREAM_S3_SKIP_VERIFY</code> — <code>true</code> to skip TLS verification for testing (default: <code>false</code>).</li>
+<li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
+</ul>
+<h2 id="using-the-vfs-as-a-loadable-extension">Using the VFS as a loadable extension<a href="#using-the-vfs-as-a-loadable-extension" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="sqlite-cli">SQLite CLI<a href="#sqlite-cli" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_S3_BUCKET</span><span class="o">=</span>my-backups
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_S3_PATH</span><span class="o">=</span>prod.db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sqlite3
+</span></span><span class="line"><span class="cl">sqlite&gt; .load ./dist/litestream-vfs sqlite3_litestreamvfs_init
+</span></span><span class="line"><span class="cl">sqlite&gt; .open <span class="s1">&#39;file:prod.db?vfs=litestream&#39;</span>
+</span></span><span class="line"><span class="cl">sqlite&gt; SELECT count<span class="o">(</span>*<span class="o">)</span> FROM users LIMIT 10<span class="p">;</span>
+</span></span></code></pre></div><blockquote>
+<p><strong>Note</strong>: The macOS system SQLite has extension loading disabled. Install
+SQLite via Homebrew (<code>brew install sqlite3</code>) and use the Homebrew version,
+or use the Python example below instead.</p>
+</blockquote>
+<h3 id="python-sqlite3">Python (<code>sqlite3</code>)<a href="#python-sqlite3" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sqlite3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Load the VFS extension first (registers the &#34;litestream&#34; VFS globally)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;:memory:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span><span class="o">.</span><span class="n">enable_load_extension</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span><span class="o">.</span><span class="n">load_extension</span><span class="p">(</span><span class="s2">&#34;./dist/litestream-vfs.so&#34;</span><span class="p">,</span> <span class="n">entrypoint</span><span class="o">=</span><span class="s2">&#34;sqlite3_litestreamvfs_init&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Now connect using the registered VFS</span>
+</span></span><span class="line"><span class="cl"><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;file:prod.db?vfs=litestream&#34;</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check_same_thread</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&#34;SELECT name, country FROM customers LIMIT 5&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span></span></code></pre></div><blockquote>
+<p><strong>Note</strong>: Some Node.js SQLite libraries (e.g., <code>better-sqlite3</code>) do not support
+URI filename mode required for VFS selection. Use the Go example or Python
+for programmatic access, or the SQLite CLI for ad-hoc queries.</p>
+</blockquote>
+<h2 id="using-the-vfs-from-go">Using the VFS from Go<a href="#using-the-vfs-from-go" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Use the VFS directly in a Go application (CGO-enabled, using <code>github.com/mattn/go-sqlite3</code>):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;context&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;database/sql&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;log/slog&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;os&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">_</span> <span class="s">&#34;github.com/mattn/go-sqlite3&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/psanford/sqlite3vfs&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/benbjohnson/litestream&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/benbjohnson/litestream/s3&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">client</span> <span class="o">:=</span> <span class="nx">s3</span><span class="p">.</span><span class="nf">NewReplicaClient</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">client</span><span class="p">.</span><span class="nx">AccessKeyID</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_ACCESS_KEY_ID&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">client</span><span class="p">.</span><span class="nx">SecretAccessKey</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_SECRET_ACCESS_KEY&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">client</span><span class="p">.</span><span class="nx">Region</span> <span class="p">=</span> <span class="s">&#34;us-east-1&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">client</span><span class="p">.</span><span class="nx">Bucket</span> <span class="p">=</span> <span class="s">&#34;my-backups&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">client</span><span class="p">.</span><span class="nx">Path</span> <span class="p">=</span> <span class="s">&#34;prod.db&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">client</span><span class="p">.</span><span class="nf">Init</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">());</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">logger</span> <span class="o">:=</span> <span class="nx">slog</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="nx">slog</span><span class="p">.</span><span class="nf">NewTextHandler</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span><span class="p">,</span> <span class="kc">nil</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">vfs</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewVFS</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="nx">logger</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">vfs</span><span class="p">.</span><span class="nx">PollInterval</span> <span class="p">=</span> <span class="mi">500</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">vfs</span><span class="p">.</span><span class="nx">CacheSize</span> <span class="p">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sqlite3vfs</span><span class="p">.</span><span class="nf">RegisterVFS</span><span class="p">(</span><span class="s">&#34;litestream&#34;</span><span class="p">,</span> <span class="nx">vfs</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">db</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite3&#34;</span><span class="p">,</span> <span class="s">&#34;file:prod.db?vfs=litestream&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">defer</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">_</span> <span class="p">=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">QueryRow</span><span class="p">(</span><span class="s">&#34;SELECT COUNT(*) FROM users&#34;</span><span class="p">).</span><span class="nf">Scan</span><span class="p">(</span><span class="nb">new</span><span class="p">(</span><span class="kt">int</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>You can swap the <code>s3</code> client for any <code>ReplicaClient</code> (GCS, Azure, SFTP, file)
+as long as your application includes the right credentials and uses <code>-tags vfs</code>.</p>
+<h2 id="observability--time-travel">Observability &amp; time travel<a href="#observability--time-travel" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The VFS extension provides SQL PRAGMAs and functions for monitoring replica
+health and querying historical database states.</p>
+<h3 id="monitoring-pragmas">Monitoring PRAGMAs<a href="#monitoring-pragmas" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Check the current state of your VFS replica:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Get current transaction ID (16-character hex string)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_txid</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 0000000000000042
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Get seconds since last successful poll (useful for alerting)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_lag</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Get current view timestamp (RFC3339Nano format)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_time</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 2024-01-15T10:30:00.123456789Z
+</span></span></span></code></pre></div><h3 id="time-travel-queries">Time travel queries<a href="#time-travel-queries" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Query the database as it existed at a specific point in time. This requires
+<code>l0-retention</code> to be configured on the primary so historical LTX files remain
+available.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Set view to a specific timestamp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2024-01-15T10:30:00Z&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Use relative time expressions
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;5 minutes ago&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;yesterday&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2 hours ago&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Reset to the latest (current) data
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;latest&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>After setting the time, subsequent queries will return data as of that point
+in time. Use <code>'latest'</code> to return to real-time data.</p>
+<h3 id="sql-functions">SQL functions<a href="#sql-functions" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Alternative syntax using SQL functions instead of PRAGMAs:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_txid</span><span class="p">();</span><span class="w">           </span><span class="c1">-- Returns current TXID
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_lag</span><span class="p">();</span><span class="w">            </span><span class="c1">-- Returns seconds since last poll
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_time</span><span class="p">();</span><span class="w">           </span><span class="c1">-- Returns current view timestamp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_set_time</span><span class="p">(</span><span class="s1">&#39;5 minutes ago&#39;</span><span class="p">);</span><span class="w">  </span><span class="c1">-- Set time travel point
+</span></span></span></code></pre></div><blockquote>
+<p><strong>Note</strong>: Time travel requires sufficient L0 retention on the primary. Configure
+<code>l0-retention</code> in your Litestream config to keep historical data available.
+See the <a href="/reference/config#l0-retention-vfs-read-replicas">L0 retention configuration</a>.</p>
+</blockquote>
+<h2 id="performance-tuning">Performance tuning<a href="#performance-tuning" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><strong>Cache size</strong> (<code>CacheSize</code>, default 10MB): keep frequently read pages near the application.
+<ul>
+<li>Small DBs (&lt;100MB): 5–10MB</li>
+<li>Medium (100MB–1GB): 10–50MB</li>
+<li>Large (&gt;1GB): 50–100MB+</li>
+</ul>
+</li>
+<li><strong>Poll interval</strong> (<code>PollInterval</code>, default 1s): how often to fetch new LTX files.
+<ul>
+<li>100–500ms for low-latency reads; expect more API calls.</li>
+<li>5–10s to reduce API calls; expect higher lag before new writes appear.</li>
+</ul>
+</li>
+<li><strong>Placement</strong>: run the VFS client in the same region as the replica to avoid cross-region latency.</li>
+<li><strong>Query shapes</strong>: indexed point/lookups &amp; repeated reads are fastest; large table scans incur extra storage I/O.</li>
+</ul>
+<h2 id="limitations--constraints">Limitations &amp; constraints<a href="#limitations--constraints" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Read-only: write attempts fail with <code>litestream is a read only vfs</code>.</li>
+<li>CGO-only: requires <code>-tags vfs</code> and a CGO-enabled SQLite driver.</li>
+<li>Network-bound latency: first access to a page incurs storage/network latency before it is cached.</li>
+<li>High concurrency: designed for modest fan-out; very high reader counts will increase object-store requests.</li>
+<li>Consistency: requires contiguous LTX files. Missing L0 files (e.g., after aggressive retention) will surface errors until new compactions appear.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><strong>&ldquo;page not found&rdquo; / non-contiguous errors</strong>: ensure VFS retention is configured on the primary (<code>l0-retention</code> long enough) and the replica has no gaps.</li>
+<li><strong>Slow queries</strong>: reduce poll interval, enlarge cache, or run closer to the object store endpoint.</li>
+<li><strong>TLS/endpoint issues with S3-compatible stores</strong>: set <code>LITESTREAM_S3_ENDPOINT</code> and, if needed for testing only, <code>LITESTREAM_S3_SKIP_VERIFY=true</code>.</li>
+<li><strong>No data visible</strong>: VFS waits for an initial snapshot; confirm replication is running and the replica path is correct.</li>
+</ul>
+<h2 id="common-use-cases">Common use cases<a href="#common-use-cases" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Low-touch read replicas for BI/reporting without managing extra disks.</li>
+<li>Geographic fan-out of read-only endpoints near users.</li>
+<li>Backup verification and disaster-recovery drills without restores.</li>
+<li>Inspecting historical data while the primary continues to accept writes.</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/s3-advanced/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; S3 Advanced Configuration
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/s3-compatible/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Replicating to S3-Compatible Services &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.5f006c1e933825818ff356c507feee61f15379f3b3f254dae663666fe709aa07044ce01c8bd4d3bd408222b5b71c1cb035a14906d362015d028d8dd85e44a746.js" integrity="sha512-XwBsHpM4JYGP81bFB/7uYfFTefOz8lTa5mNmb&#43;cJqgcETOAci9TTvUCCIrW3HBywNaFJBtNiAV0CjY3YXkSnRg==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

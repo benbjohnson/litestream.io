@@ -14,15 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Command: databases - Litestream</title>
+  <title>Read Replicas with VFS - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/reference/databases/">
+<link rel="canonical" href="https://litestream.io/how-it-works/vfs/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Command: databases">
-<meta name="twitter:description" content="The databases command lists all databases in the configuration file as well as list their associated replicas.
-Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -no-expand-env Disables environment variable expansion in configuration file. Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &quot;file&quot; and &quot;s3&quot;:
-$ litestream databases path replicas /var/lib/db file,s3 ">
+<meta name="twitter:title" content="Read Replicas with VFS">
+<meta name="twitter:description" content="The Litestream VFS serves SQLite reads directly from replica storage instead of restoring a full database file. It builds an index from LTX files, fetches pages on-demand, and keeps a cached view in sync by polling for new frames.
+Replica layout &amp; restore plan Replicas store snapshots plus incremental LTX files on two levels:
+L0: raw transactional files generated during replication. L1&#43;: compacted LTX files that merge older L0 segments. The VFS computes a restore plan before opening a connection.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -41,13 +41,13 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Reference",
-        "item": "https:\/\/litestream.io\/reference\/"
+        "name": "How It Works",
+        "item": "https:\/\/litestream.io\/how-it-works\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Databases",
-        "item": "https:\/\/litestream.io\/reference\/databases\/"
+        "name": "Vfs",
+        "item": "https:\/\/litestream.io\/how-it-works\/vfs\/"
     }]
 }
 </script>
@@ -59,7 +59,7 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="reference single">
+  <body class="how-it-works single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -125,8 +125,8 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
     <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
-    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
-    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
     <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
     </ul>
   <h3>
@@ -173,7 +173,7 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
   </h3>
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
@@ -190,51 +190,73 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#arguments">Arguments</a></li>
-    <li><a href="#example">Example</a></li>
+    <li><a href="#replica-layout--restore-plan">Replica layout &amp; restore plan</a></li>
+    <li><a href="#page-based-access">Page-based access</a></li>
+    <li><a href="#polling--l0l1-coordination">Polling &amp; L0/L1 coordination</a></li>
+    <li><a href="#two-index-transaction-isolation">Two-index transaction isolation</a></li>
+    <li><a href="#performance-model">Performance model</a></li>
+    <li><a href="#compared-to-restore-first-workflows">Compared to restore-first workflows</a></li>
   </ul>
 </nav>
   </div>
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Command: databases</h1>
+		<h1>Read Replicas with VFS</h1>
 			<p class="lead"></p>
-			<p>The <code>databases</code> command lists all databases in the configuration file as well
-as list their associated replicas.</p>
-<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>litestream databases [arguments]
-</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>-config PATH
-    Specifies the configuration file.
-    Defaults to /etc/litestream.yml
+			<p>The Litestream VFS serves SQLite reads directly from replica storage instead of
+restoring a full database file. It builds an index from LTX files, fetches pages
+on-demand, and keeps a cached view in sync by polling for new frames.</p>
+<h2 id="replica-layout--restore-plan">Replica layout &amp; restore plan<a href="#replica-layout--restore-plan" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Replicas store snapshots plus incremental LTX files on two levels:</p>
+<ul>
+<li><strong>L0</strong>: raw transactional files generated during replication.</li>
+<li><strong>L1+</strong>: compacted LTX files that merge older L0 segments.</li>
+</ul>
+<p>The VFS computes a restore plan before opening a connection. It looks for a
+contiguous LTX sequence, fails fast on gaps, and waits if no snapshot exists
+yet. The database page size (512–65536 bytes) is detected from LTX headers.</p>
+<h2 id="page-based-access">Page-based access<a href="#page-based-access" class="anchor" aria-hidden="true">#</a> </h2>
+<p>For each LTX file in the plan, the VFS reads the page index and builds an
+in-memory map of page number to LTX offset. Reads consult the map, fetch the
+page bytes from storage, and cache them in an LRU cache sized by <code>CacheSize</code>
+(default 10MB). The first page is rewritten to present <code>DELETE</code> journal mode so
+SQLite treats the replica as a read-only rollback-journal database.</p>
+<h2 id="polling--l0l1-coordination">Polling &amp; L0/L1 coordination<a href="#polling--l0l1-coordination" class="anchor" aria-hidden="true">#</a> </h2>
+<p>A polling loop (default every 1s) scans for new LTX files:</p>
+<ul>
+<li>L0 is checked first; gaps at L0 are tolerated by deferring to higher levels.</li>
+<li>L1 compactions replace the page index when commits shrink (e.g., after vacuum).</li>
+<li>File descriptor &amp; network usage stay bounded by closing LTX streams after page
+indexes are ingested.</li>
+</ul>
+<p>Retention of recent L0 files on the primary (<code>l0-retention</code>) is important so VFS
+replicas can see fresh writes before they are compacted.</p>
+<h2 id="two-index-transaction-isolation">Two-index transaction isolation<a href="#two-index-transaction-isolation" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The VFS maintains a main index and a pending index. When readers hold shared
+locks, new LTX pages are staged in the pending index; once locks drop, pending
+entries replace or merge into the main index and cached pages are invalidated.
+This ensures long-running readers see a consistent snapshot while newer commits
+become visible to subsequent connections.</p>
+<h2 id="performance-model">Performance model<a href="#performance-model" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>First access to a page incurs network/object-store latency; hot pages are
+served from the VFS cache.</li>
+<li>Polling frequency controls replication lag versus API call volume.</li>
+<li>Sequential scans across large tables will generate sustained remote reads;
+indexed lookups and repeated queries benefit most from caching.</li>
+<li>Placing the VFS client in the same region as the replica minimizes added
+latency (typically 5–50ms over local disk).</li>
+</ul>
+<h2 id="compared-to-restore-first-workflows">Compared to restore-first workflows<a href="#compared-to-restore-first-workflows" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The <code>restore</code> command downloads a full snapshot plus WAL/ltx chain, trading
+startup time and disk space for local performance. The VFS avoids the download
+and disk cost but introduces network latency and relies on contiguous replica
+history. Choose VFS for light-weight read replicas and rapid spin-up; choose
+restore for low-latency, write-capable workloads on local disk.</p>
 
--no-expand-env
-    Disables environment variable expansion in configuration file.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<p>This example shows a single database <code>/var/lib/db</code> defined in the configuration
-file with two replicas named <code>&quot;file&quot;</code> and <code>&quot;s3&quot;</code>:</p>
-<pre tabindex="0"><code>$ litestream databases
-path         replicas
-/var/lib/db  file,s3
-</code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/reference/config/">
-			<div class="card my-1">
-				<div class="card-body py-2">
-					&larr; Configuration File
-				</div>
-			</div>
-		</a>
-	<a class="ml-auto" href="https://litestream.io/reference/mcp/">
-			<div class="card my-1">
-				<div class="card-body py-2">
-					Command: mcp &rarr;
-				</div>
-			</div>
-		</a>
 	</div>
 
 		</main>
