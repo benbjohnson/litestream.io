@@ -198,6 +198,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#metrics">Metrics</a></li>
         <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
         <li><a href="#logging">Logging</a></li>
+        <li><a href="#l0-retention">L0 Retention</a></li>
       </ul>
     </li>
     <li><a href="#database-settings">Database settings</a>
@@ -347,6 +348,79 @@ Logging <code>level</code> can be set to &ldquo;debug&rdquo;, &ldquo;info&rdquo;
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">info</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div><h3 id="l0-retention">L0 Retention<a href="#l0-retention" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ L0 retention controls how long L0 (level 0) files
+are kept after being compacted into L1 files. This setting is important when
+using VFS (Virtual File System) read replicas, as it prevents race conditions
+where L0 files could be deleted before VFS has time to fetch newly created L1
+files.</p>
+<p><strong>Background</strong>: Litestream uses a tiered compaction system where transaction
+data flows from L0 to higher levels. L0 files contain the most recent
+transactions and are periodically compacted into L1 files. Without retention,
+L0 files would be deleted immediately after compaction, which can cause issues
+for VFS clients that haven&rsquo;t yet discovered the new L1 files.</p>
+<p>The defaults are shown below:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">15s</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Configuration options:</strong></p>
+<ul>
+<li>
+<p><code>l0-retention</code>—Minimum time to retain L0 files after they have been compacted
+into L1. The file must meet both criteria before deletion: it must be
+compacted into L1 AND the retention period must have elapsed. Defaults to <code>5m</code>.</p>
+</li>
+<li>
+<p><code>l0-retention-check-interval</code>—How frequently Litestream checks for expired L0
+files. This should be more frequent than the L1 compaction interval to ensure
+timely cleanup. Defaults to <code>15s</code>.</p>
+</li>
+</ul>
+<p><strong>When to adjust these values:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High-latency VFS clients</td>
+<td>Increase <code>l0-retention</code> to allow more time for L1 discovery</td>
+</tr>
+<tr>
+<td>Storage-constrained environments</td>
+<td>Use default or slightly lower retention if VFS latency is low</td>
+</tr>
+<tr>
+<td>Frequent database writes</td>
+<td>Default values typically sufficient</td>
+</tr>
+<tr>
+<td>Infrequent writes with VFS</td>
+<td>Consider increasing retention to ensure L1 file availability</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Extended retention for high-latency VFS environments</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">10m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/app</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Monitoring</strong>: When L0 retention is enforced, Litestream logs debug messages.
+Enable debug logging to monitor retention behavior:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">15s</span><span class="w">
 </span></span></span></code></pre></div><h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream can monitor one or more database files that are specified in the
 configuration file. Database files are also referenced in <code>litestream</code> commands
@@ -1041,6 +1115,10 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># L0 retention settings (for VFS support)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">15s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Database configurations</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
