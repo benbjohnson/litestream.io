@@ -193,13 +193,24 @@ Restoration will only run if the output database file does not exist so you cann
       </ul>
     </li>
     <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#conditional-restore-behavior">Conditional Restore Behavior</a>
+      <ul>
+        <li><a href="#using--if-replica-exists">Using -if-replica-exists</a></li>
+        <li><a href="#exit-code-behavior">Exit Code Behavior</a></li>
+        <li><a href="#interaction-with-other-flags">Interaction with Other Flags</a></li>
+        <li><a href="#important-notes">Important Notes</a></li>
+      </ul>
+    </li>
     <li><a href="#examples">Examples</a>
       <ul>
         <li><a href="#database-restore">Database restore</a></li>
         <li><a href="#replica-url-restore">Replica URL restore</a></li>
         <li><a href="#restore-to-new-path">Restore to new path</a></li>
         <li><a href="#point-in-time-restore">Point-in-time restore</a></li>
-        <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
+        <li><a href="#conditional-restore-in-automation">Conditional restore in automation</a></li>
+        <li><a href="#idempotent-deployment-script">Idempotent deployment script</a></li>
+        <li><a href="#shell-script-with-error-handling">Shell script with error handling</a></li>
+        <li><a href="#automation-with-explicit-error-checking">Automation with explicit error checking</a></li>
       </ul>
     </li>
   </ul>
@@ -238,15 +249,13 @@ as on a development machine.</p>
     Returns exit code of 0 if the database already exists.
 
 -if-replica-exists
-    Returns exit code of 0 if no backups found.
+    Returns exit code of 0 if no backups are found. This flag allows the restore
+    command to succeed gracefully when no matching backup files are available,
+    which is useful for automation and conditional restore scenarios.
 
 -parallelism NUM
     Determines the number of WAL files downloaded in parallel.
     Defaults to 8
-
--replica NAME
-    Restore from a specific replica.
-    Defaults to replica with latest data.
 
 -generation NAME
     Restore from a specific generation.
@@ -266,7 +275,71 @@ as on a development machine.</p>
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
-</code></pre><h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+</code></pre><h2 id="conditional-restore-behavior">Conditional Restore Behavior<a href="#conditional-restore-behavior" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="using--if-replica-exists">Using -if-replica-exists<a href="#using--if-replica-exists" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The <code>-if-replica-exists</code> flag modifies the restore command&rsquo;s behavior when no
+backup files are found. Without this flag, the command will fail with a
+non-zero exit code if no matching backups exist. With the flag enabled, the
+command succeeds (exit code 0) and logs &ldquo;no matching backups found&rdquo; instead.</p>
+<p>This flag is particularly useful for:</p>
+<ul>
+<li><strong>Automation scripts</strong>: Prevent automated restore processes from failing when
+backups don&rsquo;t exist yet</li>
+<li><strong>Conditional operations</strong>: Create scripts that attempt restoration but
+continue with alternative logic if no backups are available</li>
+<li><strong>Idempotent deployments</strong>: Build deployment scripts that can safely run
+restore operations without breaking when backups aren&rsquo;t present</li>
+<li><strong>Testing environments</strong>: Allow test environments to attempt restoration
+without failing if the backup source hasn&rsquo;t been populated</li>
+</ul>
+<h3 id="exit-code-behavior">Exit Code Behavior<a href="#exit-code-behavior" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The command returns different exit codes based on the presence of backups:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Without flag</th>
+<th>With -if-replica-exists</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backups found and restored</td>
+<td>Exit 0</td>
+<td>Exit 0</td>
+</tr>
+<tr>
+<td>No backups found</td>
+<td>Exit 1 (error)</td>
+<td>Exit 0 (success)</td>
+</tr>
+<tr>
+<td>Other errors</td>
+<td>Exit 1 (error)</td>
+<td>Exit 1 (error)</td>
+</tr>
+</tbody>
+</table>
+<p>Note that this flag only affects the behavior when <code>ErrTxNotAvailable</code> is
+returned (no matching backup files). Other errors will still result in a
+non-zero exit code.</p>
+<h3 id="interaction-with-other-flags">Interaction with Other Flags<a href="#interaction-with-other-flags" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The <code>-if-replica-exists</code> flag works alongside other restore flags:</p>
+<ul>
+<li><strong>-if-db-not-exists</strong>: Combined with <code>-if-replica-exists</code>, you can create
+truly idempotent restore operations that succeed whether the database exists,
+doesn&rsquo;t exist, or has no backups available</li>
+<li><strong>-timestamp</strong>: When used with point-in-time restore, the flag will succeed
+gracefully if no backups exist at the specified timestamp</li>
+</ul>
+<h3 id="important-notes">Important Notes<a href="#important-notes" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li>The flag only suppresses the &ldquo;no backups found&rdquo; error; other restore errors
+will still return non-zero exit codes</li>
+<li>When the flag is used and no backups are found, a log message is emitted:
+&ldquo;no matching backups found&rdquo;</li>
+</ul>
+<h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="database-restore">Database restore<a href="#database-restore" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Restore the latest replica for the <code>/var/lib/db</code> database to its original
 location:</p>
@@ -280,10 +353,76 @@ location:</p>
 </code></pre><h3 id="point-in-time-restore">Point-in-time restore<a href="#point-in-time-restore" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Restore the <code>/var/lib/db</code> database to a specific point-in-time:</p>
 <pre tabindex="0"><code>$ litestream restore -timestamp 2020-01-01T00:00:00Z /var/lib/db
-</code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This example will only restore from the <code>s3</code> replica:</p>
-<pre tabindex="0"><code>$ litestream restore -replica s3 /var/lib/db
-</code></pre>
+</code></pre><h3 id="conditional-restore-in-automation">Conditional restore in automation<a href="#conditional-restore-in-automation" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Use <code>-if-replica-exists</code> to allow restore operations to succeed even when no
+backups are available:</p>
+<pre tabindex="0"><code>$ litestream restore -if-replica-exists /var/lib/db
+</code></pre><p>If backups exist, the database is restored. If no backups are found, the
+command exits successfully (exit code 0) with a log message.</p>
+<h3 id="idempotent-deployment-script">Idempotent deployment script<a href="#idempotent-deployment-script" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Combine <code>-if-db-not-exists</code> and <code>-if-replica-exists</code> for fully idempotent
+restore operations:</p>
+<pre tabindex="0"><code>$ litestream restore -if-db-not-exists -if-replica-exists /var/lib/db
+</code></pre><p>This command will succeed in these scenarios:</p>
+<ul>
+<li>Database exists: exits successfully without overwriting</li>
+<li>Database doesn&rsquo;t exist, backups available: restores the database</li>
+<li>Database doesn&rsquo;t exist, no backups: exits successfully without error</li>
+</ul>
+<p>Note: Other errors (network failures, permission issues, corruption, etc.) will
+still cause the command to fail with a non-zero exit code.</p>
+<h3 id="shell-script-with-error-handling">Shell script with error handling<a href="#shell-script-with-error-handling" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Example script that attempts restoration with fallback logic:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="nb">set</span> -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Attempt to restore from backup</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> litestream restore -if-replica-exists -o /var/lib/app.db s3://mybkt/app.db<span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;Restore completed or no backups found&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1"># Check if database exists after restore attempt</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="o">[</span> ! -f /var/lib/app.db <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">echo</span> <span class="s2">&#34;No backups available, initializing new database&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Initialize new database</span>
+</span></span><span class="line"><span class="cl">    sqlite3 /var/lib/app.db &lt; schema.sql
+</span></span><span class="line"><span class="cl">  <span class="k">fi</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;Restore failed with error&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">exit</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Start application</span>
+</span></span><span class="line"><span class="cl">./start-app.sh
+</span></span></code></pre></div><h3 id="automation-with-explicit-error-checking">Automation with explicit error checking<a href="#automation-with-explicit-error-checking" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Script that distinguishes between &ldquo;no backups&rdquo; and actual errors:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Attempt restore without the flag to detect actual errors</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> litestream restore /var/lib/db 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> grep -q <span class="s2">&#34;no matching backup files&#34;</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;No backups found, proceeding with empty database&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1"># Initialize database or take alternative action</span>
+</span></span><span class="line"><span class="cl"><span class="k">elif</span> <span class="o">[</span> <span class="nv">$?</span> -eq <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;Database restored successfully&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;Restore failed with error&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">exit</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span></code></pre></div><p>Alternatively, use the flag for simpler logic:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="nb">set</span> -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># With -if-replica-exists, this succeeds when no backups are found</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># (but other errors like network failures will still cause it to fail)</span>
+</span></span><span class="line"><span class="cl">litestream restore -if-replica-exists /var/lib/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Check if we got a database or need to initialize</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> -f /var/lib/db <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;Database restored from backup&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;No backups found, initializing new database&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1"># Initialize database</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span></code></pre></div>
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	<a href="https://litestream.io/reference/ltx/">
