@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.6b1b8740d9d3d1c9f37138879a5cb29ec186c056723f6421dd21deb4e18504eb68df0e73df56491b24c90d1ac9de080e4d991034742630feac126b345b419f04.css" integrity="sha512-axuHQNnT0cnzcTiHmlyynsGGwFZyP2Qh3SHetOGFBOto3w5z31ZJGyTJDRrJ3ggOTZkQNHQmMP6sEms0W0GfBA==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -141,10 +141,14 @@ Setup Create an IAM user You will need to set up a user with programmatic access
   </h3>
   <ul class="list-unstyled">
     <li><a class="docs-link active" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
@@ -190,11 +194,28 @@ Setup Create an IAM user You will need to set up a user with programmatic access
         <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
+    <li><a href="#using-s3-access-points">Using S3 Access Points</a>
+      <ul>
+        <li><a href="#benefits">Benefits</a></li>
+        <li><a href="#url-format">URL Format</a></li>
+        <li><a href="#command-line-usage-1">Command Line Usage</a></li>
+        <li><a href="#configuration-file-usage-1">Configuration File Usage</a></li>
+        <li><a href="#iam-policy-for-access-points">IAM Policy for Access Points</a></li>
+        <li><a href="#vpc-endpoint-configuration">VPC Endpoint Configuration</a></li>
+      </ul>
+    </li>
     <li><a href="#restrictive-iam-policies">Restrictive IAM Policies</a>
       <ul>
         <li><a href="#replication-policy-read-write">Replication Policy (Read-Write)</a></li>
         <li><a href="#restoration-policy-read-only">Restoration Policy (Read-Only)</a></li>
         <li><a href="#path-specific-policies">Path-Specific Policies</a></li>
+      </ul>
+    </li>
+    <li><a href="#custom-endpoints-s3-compatible-services">Custom Endpoints (S3-Compatible Services)</a>
+      <ul>
+        <li><a href="#auto-detected-providers">Auto-Detected Providers</a></li>
+        <li><a href="#services-requiring-configuration-files">Services Requiring Configuration Files</a></li>
+        <li><a href="#minio-example">MinIO Example</a></li>
       </ul>
     </li>
   </ul>
@@ -217,20 +238,20 @@ button.</p>
 <p>Enter a name for your user and make sure to enable <em>Programmatic Access</em>. Then
 click the <em>Next</em> button.</p>
 <figure>
-	<img src="iam_0.png" alt="Screenshot of creating an IAM user">
+ <img src="iam_0.png" alt="Screenshot of creating an IAM user">
 </figure>
 <p>On the permissions screen, click on <em>&ldquo;Attach existing policies directly&rdquo;</em>, then
 search for &ldquo;S3&rdquo; and choose <code>AmazonS3FullAccess</code>. You can also specify a <a href="#restrictive-iam-policy">more
 restrictive policy</a> as described later in this guide.</p>
 <figure>
-	<img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
+ <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
 </figure>
 <p>Then click the <em>Next</em> button twice and then click the <em>Create user</em> button. This
 will create the user and display credentials for programmatic access. You will
 need to save the <em>&ldquo;Access key ID&rdquo;</em> and <em>&ldquo;Secret access key&rdquo;</em> for later use
 in this guide.</p>
 <figure>
-	<img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
+ <img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
 </figure>
 <h3 id="create-a-bucket">Create a bucket<a href="#create-a-bucket" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Once you have a user created, go to the <a href="https://s3.console.aws.amazon.com/">S3 service</a>
@@ -238,7 +259,7 @@ in the AWS Console. Click the <em>&ldquo;Create bucket&rdquo;</em> button.</p>
 <p>You&rsquo;ll need to choose a globally unique bucket name and choose a region to
 store the bucket data.</p>
 <figure>
-	<img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
+ <img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
 </figure>
 <p>Then click the <em>&ldquo;Create bucket&rdquo;</em> button at the bottom of the screen. Your bucket
 has now been created.</p>
@@ -257,7 +278,11 @@ you want to store your replica within your bucket.</p>
 </span></span></code></pre></div><p>You can later restore your database from S3 to a local <code>my.db</code> path with the
 following command.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db s3://BUCKETNAME/PATHNAME
-</span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+</span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The command line URL variant only supports AWS S3 and a limited set of S3-compatible providers that can be auto-detected from the URL hostname. For other S3-compatible services like MinIO or self-hosted solutions, you must use a configuration file with the `endpoint` parameter. See [Custom Endpoints](#custom-endpoints-s3-compatible-services) below.</div>
+</div>
+<h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream is typically run as a background service which uses a configuration
 file. You can configure a replica for your database using the <code>url</code> format:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
@@ -286,6 +311,77 @@ file. You can configure a replica for your database using the <code>url</code> f
     v0.5.0
 </span>
  Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.</p>
+<h2 id="using-s3-access-points">Using S3 Access Points<a href="#using-s3-access-points" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream supports <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html">S3 Access Points</a>,
+which provide dedicated endpoints for accessing shared datasets in S3. Access
+points are useful for VPC-only configurations, simplified access control, and
+improved network performance.</p>
+<h3 id="benefits">Benefits<a href="#benefits" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li><strong>VPC-only access</strong>: Route backup traffic through VPC endpoints instead of
+NAT gateways for improved security and network isolation</li>
+<li><strong>Reduced costs</strong>: Eliminate NAT gateway data transfer charges, which can be
+significant for large databases</li>
+<li><strong>Lower latency</strong>: Direct VPC connectivity provides better performance</li>
+<li><strong>Simplified access control</strong>: Delegate permissions to access point policies
+for multi-tenant scenarios</li>
+</ul>
+<h3 id="url-format">URL Format<a href="#url-format" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Specify access point ARNs using the <code>s3://</code> URL scheme followed by the ARN:</p>
+<pre tabindex="0"><code>s3://arn:aws:s3:REGION:ACCOUNT-ID:accesspoint/ACCESS-POINT-NAME[/PATH]
+</code></pre><p>The region is automatically extracted from the ARN but can be explicitly
+overridden in the configuration.</p>
+<h3 id="command-line-usage-1">Command Line Usage<a href="#command-line-usage-1" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups
+</span></span></code></pre></div><h3 id="configuration-file-usage-1">Configuration File Usage<a href="#configuration-file-usage-1" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups/prod</span><span class="w">
+</span></span></span></code></pre></div><p>If you need to override the region extracted from the ARN:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-2</span><span class="w">
+</span></span></span></code></pre></div><h3 id="iam-policy-for-access-points">IAM Policy for Access Points<a href="#iam-policy-for-access-points" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Access points require appropriate IAM permissions on both the access point and
+the underlying bucket. The following policy grants the minimum permissions
+needed for replication through an access point:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetBucketLocation&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:ListBucket&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="s2">&#34;arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:PutObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:DeleteObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetObject&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="s2">&#34;arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/object/*&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The underlying bucket must also grant access to the access point. See the
+<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html">AWS documentation</a>
+for details on configuring access point and bucket policies together.</p>
+<h3 id="vpc-endpoint-configuration">VPC Endpoint Configuration<a href="#vpc-endpoint-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>To use VPC-only access points, you must configure a VPC endpoint for S3 in your
+VPC. The access point&rsquo;s network origin must be set to &ldquo;VPC&rdquo; when creating it.
+See <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html">Creating access points restricted to a VPC</a>
+for setup instructions.</p>
 <h2 id="restrictive-iam-policies">Restrictive IAM Policies<a href="#restrictive-iam-policies" class="anchor" aria-hidden="true">#</a> </h2>
 <p>While specifying <code>AmazonS3FullAccess</code> is an easy way to get up and running, you
 may want to specify a more restrictive policy in order to limit abuse if your
@@ -353,6 +449,50 @@ bucket by modifying the resource ARNs. For example, to limit access to the
 </span></span></code></pre></div><p>Thanks to <a href="https://github.com/maluio">Martin</a> for contributing the original policy and
 to <a href="https://github.com/benbjohnson/litestream/issues/76#issuecomment-783926359">cariaso</a>
 for additional policy insights.</p>
+<h2 id="custom-endpoints-s3-compatible-services">Custom Endpoints (S3-Compatible Services)<a href="#custom-endpoints-s3-compatible-services" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream supports S3-compatible storage services such as MinIO, Backblaze B2,
+DigitalOcean Spaces, and others. However, how you configure these services
+depends on whether Litestream can auto-detect the endpoint from the URL.</p>
+<h3 id="auto-detected-providers">Auto-Detected Providers<a href="#auto-detected-providers" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When using the command line URL variant (<code>s3://BUCKET/PATH</code>), Litestream can
+automatically detect the correct endpoint for these providers based on the URL
+hostname pattern:</p>
+<ul>
+<li><strong>AWS S3</strong>: Standard <code>s3://bucket/path</code> URLs</li>
+<li><strong>Backblaze B2</strong>: URLs containing <code>.backblazeb2.com</code></li>
+<li><strong>DigitalOcean Spaces</strong>: URLs containing <code>.digitaloceanspaces.com</code></li>
+<li><strong>Linode Object Storage</strong>: URLs containing <code>.linodeobjects.com</code></li>
+<li><strong>Scaleway</strong>: URLs containing <code>.scw.cloud</code></li>
+</ul>
+<p>For these providers, you can use both command line and configuration file approaches.</p>
+<h3 id="services-requiring-configuration-files">Services Requiring Configuration Files<a href="#services-requiring-configuration-files" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For S3-compatible services that cannot be auto-detected from the URL hostname,
+you <strong>must</strong> use a configuration file with the <code>endpoint</code> parameter. This includes:</p>
+<ul>
+<li>MinIO (self-hosted or remote)</li>
+<li>Self-hosted S3-compatible storage</li>
+<li>Other S3-compatible providers not in the auto-detected list</li>
+</ul>
+<p>Attempting to use the command line URL variant with these services will result
+in Litestream connecting to AWS S3 instead of your intended endpoint, causing
+authentication errors like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">cannot lookup bucket region: InvalidAccessKeyId: The AWS Access Key Id you
+</span></span><span class="line"><span class="cl">provided does not exist in our records.
+</span></span></code></pre></div><h3 id="minio-example">MinIO Example<a href="#minio-example" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For MinIO, always use a configuration file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://minio.example.com:9000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${MINIO_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${MINIO_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p>For detailed MinIO configuration options, see the
+<a href="/reference/config#minio-configuration">MinIO Configuration</a> section in the
+configuration reference.</p>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
@@ -363,10 +503,10 @@ for additional policy insights.</p>
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/guides/azure/">
+	<a class="ml-auto" href="https://litestream.io/guides/aws-sdk-v2/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Replicating to Azure Blob Storage &rarr;
+					AWS SDK v2 Migration &rarr;
 				</div>
 			</div>
 		</a>
@@ -383,7 +523,7 @@ for additional policy insights.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.e3e3803f97f54462ce366f49cf0bcd39eb0da7813f5f83acfdc055e2febbd8c20d8c5118f960f3fb655efeec6eda991e881e06cceea7f3583b31475a3ee8dec5.js" integrity="sha512-4&#43;OAP5f1RGLONm9JzwvNOesNp4E/X4Os/cBV4v672MINjFEY&#43;WDz&#43;2Ve/uxu2pkeiB4GzO6n81g7MUdaPujexQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

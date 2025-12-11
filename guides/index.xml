@@ -44,6 +44,27 @@
       <description>This guide will show you how to use Amazon S3 as a database replica path for Litestream. You will need an Amazon AWS account to complete this guide.&#xA;Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Add User button.</description>
     </item>
     <item>
+      <title>AWS SDK v2 Migration</title>
+      <link>https://litestream.io/guides/aws-sdk-v2/</link>
+      <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/aws-sdk-v2/</guid>
+      <description>Litestream v0.5.0 uses AWS SDK for Go v2 for all S3 operations. This upgrade brings improved performance, better reliability, and enhanced configuration options while maintaining full backward compatibility with existing configurations.&#xA;What Changed? The upgrade from AWS SDK v1 to v2 introduces several improvements:&#xA;Connection pooling reduces latency for subsequent requests Adaptive retry mode with up to 10 attempts for better resilience CRC32 checksum validation ensures data integrity automatically Modern credential chain with improved IAM role support 24-hour HTTP timeout for long-running operations on large databases Configurable multipart uploads for better upload performance Backward Compatibility All existing Litestream configurations continue to work without modification.</description>
+    </item>
+    <item>
+      <title>S3 Advanced Configuration</title>
+      <link>https://litestream.io/guides/s3-advanced/</link>
+      <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/s3-advanced/</guid>
+      <description>This guide covers advanced S3 configuration options for tuning multipart upload performance. These settings control how Litestream uploads data to S3 and S3-compatible storage services.&#xA;v0.5.0 Part size and concurrency configuration options were added in Litestream v0.5.0.&#xA;Overview When Litestream uploads files to S3, it uses multipart uploads for efficient data transfer. Two key settings control this behavior:&#xA;Part Size: The size of each chunk uploaded to S3 Concurrency: The number of parts uploaded simultaneously Understanding these settings helps you optimize performance for your specific network conditions, storage provider, and resource constraints.</description>
+    </item>
+    <item>
+      <title>Replicating to S3-Compatible Services</title>
+      <link>https://litestream.io/guides/s3-compatible/</link>
+      <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/s3-compatible/</guid>
+      <description>This guide covers how to use Litestream with S3-compatible storage providers beyond Amazon S3. Many cloud providers and self-hosted solutions implement the S3 API, allowing you to use Litestream&amp;rsquo;s S3 replica type with minimal configuration changes.&#xA;Overview S3-compatible services implement Amazon&amp;rsquo;s S3 API, enabling tools built for AWS S3 to work with alternative storage providers. Litestream supports these services through the endpoint configuration option, which redirects API requests to your chosen provider.</description>
+    </item>
+    <item>
       <title>Replicating to Azure Blob Storage</title>
       <link>https://litestream.io/guides/azure/</link>
       <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
@@ -70,6 +91,13 @@
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/digitalocean/</guid>
       <description>This guide will show you how to use DigitalOcean Spaces as a database replica path for Litestream. You will need a DigitalOcean account to complete this guide.&#xA;Setup Create a space In the DigitalOcean Console, click on the green &amp;ldquo;Create&amp;rdquo; button in the top navigation and choose &amp;ldquo;Spaces&amp;rdquo;. You may need to enable spaces on your account if you have not already.&#xA;On the &amp;ldquo;Create a Space&amp;rdquo; screen, you&amp;rsquo;ll need to choose a region and name your space a globally unique name.</description>
+    </item>
+    <item>
+      <title>Replicating to Tigris (Fly.io)</title>
+      <link>https://litestream.io/guides/tigris/</link>
+      <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/tigris/</guid>
+      <description>This guide will show you how to use Tigris as a database replica path for Litestream. Tigris is Fly.io&amp;rsquo;s globally distributed S3-compatible object storage. You will need a Fly.io account to complete this guide.&#xA;v0.5.0 Litestream automatically detects Tigris endpoints and configures the required settings for you.&#xA;Setup Install the Fly CLI If you haven&amp;rsquo;t already, install the Fly CLI by following the installation instructions. Once installed, authenticate with your account:</description>
     </item>
     <item>
       <title>Replicating to Google Cloud Storage</title>

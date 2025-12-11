@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>AWS SDK v2 Migration - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/aws-sdk-v2/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="AWS SDK v2 Migration">
+<meta name="twitter:description" content="Litestream v0.5.0 uses AWS SDK for Go v2 for all S3 operations. This upgrade brings improved performance, better reliability, and enhanced configuration options while maintaining full backward compatibility with existing configurations.
+What Changed? The upgrade from AWS SDK v1 to v2 introduces several improvements:
+Connection pooling reduces latency for subsequent requests Adaptive retry mode with up to 10 attempts for better resilience CRC32 checksum validation ensures data integrity automatically Modern credential chain with improved IAM role support 24-hour HTTP timeout for long-running operations on large databases Configurable multipart uploads for better upload performance Backward Compatibility All existing Litestream configurations continue to work without modification.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Aws Sdk V2",
+        "item": "https:\/\/litestream.io\/guides\/aws-sdk-v2\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-changed">What Changed?</a></li>
+    <li><a href="#backward-compatibility">Backward Compatibility</a>
+      <ul>
+        <li><a href="#what-still-works">What Still Works</a></li>
+      </ul>
+    </li>
+    <li><a href="#new-configuration-options">New Configuration Options</a>
+      <ul>
+        <li><a href="#multipart-upload-settings">Multipart Upload Settings</a></li>
+      </ul>
+    </li>
+    <li><a href="#authentication">Authentication</a>
+      <ul>
+        <li><a href="#iam-roles-recommended">IAM Roles (Recommended)</a></li>
+        <li><a href="#environment-variables">Environment Variables</a></li>
+        <li><a href="#configuration-file">Configuration File</a></li>
+      </ul>
+    </li>
+    <li><a href="#performance-improvements">Performance Improvements</a>
+      <ul>
+        <li><a href="#connection-pooling">Connection Pooling</a></li>
+        <li><a href="#adaptive-retry-mode">Adaptive Retry Mode</a></li>
+        <li><a href="#checksum-validation">Checksum Validation</a></li>
+      </ul>
+    </li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#timeout-errors">Timeout Errors</a></li>
+        <li><a href="#region-detection-issues">Region Detection Issues</a></li>
+        <li><a href="#multipart-upload-failures">Multipart Upload Failures</a></li>
+        <li><a href="#s3-compatible-services">S3-Compatible Services</a></li>
+      </ul>
+    </li>
+    <li><a href="#breaking-changes">Breaking Changes</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>AWS SDK v2 Migration</h1>
+			<p class="lead"></p>
+			<p>Litestream v0.5.0 uses <a href="https://aws.github.io/aws-sdk-go-v2/">AWS SDK for Go v2</a> for all S3 operations.
+This upgrade brings improved performance, better reliability, and enhanced
+configuration options while maintaining full backward compatibility with
+existing configurations.</p>
+<h2 id="what-changed">What Changed?<a href="#what-changed" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The upgrade from AWS SDK v1 to v2 introduces several improvements:</p>
+<ul>
+<li><strong>Connection pooling</strong> reduces latency for subsequent requests</li>
+<li><strong>Adaptive retry mode</strong> with up to 10 attempts for better resilience</li>
+<li><strong>CRC32 checksum validation</strong> ensures data integrity automatically</li>
+<li><strong>Modern credential chain</strong> with improved IAM role support</li>
+<li><strong>24-hour HTTP timeout</strong> for long-running operations on large databases</li>
+<li><strong>Configurable multipart uploads</strong> for better upload performance</li>
+</ul>
+<h2 id="backward-compatibility">Backward Compatibility<a href="#backward-compatibility" class="anchor" aria-hidden="true">#</a> </h2>
+<p>All existing Litestream configurations continue to work without modification.
+The SDK upgrade is transparent to users with standard configurations.</p>
+<h3 id="what-still-works">What Still Works<a href="#what-still-works" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li>Environment variable authentication (<code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>)</li>
+<li>Configuration file credentials (<code>access-key-id</code>, <code>secret-access-key</code>)</li>
+<li>IAM roles on EC2, ECS, and Lambda</li>
+<li>S3-compatible storage providers (MinIO, DigitalOcean Spaces, Backblaze B2)</li>
+<li>All existing replica URL formats</li>
+</ul>
+<h2 id="new-configuration-options">New Configuration Options<a href="#new-configuration-options" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ The following configuration options are new in v0.5.0:</p>
+<h3 id="multipart-upload-settings">Multipart Upload Settings<a href="#multipart-upload-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For large databases, you can tune multipart upload behavior:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">part-size: 10485760    # 10MB per part (default</span><span class="p">:</span><span class="w"> </span><span class="l">5MB)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">concurrency: 10        # Concurrent part uploads (default</span><span class="p">:</span><span class="w"> </span><span class="m">5</span><span class="l">)</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li>
+<p><strong><code>part-size</code></strong> — Size of each part in multipart uploads in bytes. Minimum is
+5MB (5242880 bytes). Larger parts can improve throughput for high-bandwidth
+connections.</p>
+</li>
+<li>
+<p><strong><code>concurrency</code></strong> — Number of concurrent parts to upload. Higher values use
+more memory but can improve upload speed.</p>
+</li>
+</ul>
+<p><strong>Memory considerations:</strong> Multipart uploads buffer data in memory. Required
+memory is approximately <code>part-size × concurrency</code>. For example, 10MB parts with
+10 concurrent uploads requires ~100MB of memory.</p>
+<h2 id="authentication">Authentication<a href="#authentication" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The SDK v2 credential chain looks for credentials in this order:</p>
+<ol>
+<li>Explicit credentials in configuration file</li>
+<li>Environment variables (<code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>)</li>
+<li>Shared credentials file (<code>~/.aws/credentials</code>)</li>
+<li>Shared config file (<code>~/.aws/config</code>)</li>
+<li>ECS task IAM role</li>
+<li>EC2 instance IAM role</li>
+</ol>
+<h3 id="iam-roles-recommended">IAM Roles (Recommended)<a href="#iam-roles-recommended" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When running on AWS infrastructure, the SDK automatically uses IAM roles:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># No credentials needed - uses IAM role</span><span class="w">
+</span></span></span></code></pre></div><h3 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxxxxxxxxxxxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_REGION</span><span class="o">=</span>us-east-1
+</span></span></code></pre></div><h3 id="configuration-file">Configuration File<a href="#configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Per-replica credentials:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span></code></pre></div><p>Global credentials:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb</span><span class="w">
+</span></span></span></code></pre></div><h2 id="performance-improvements">Performance Improvements<a href="#performance-improvements" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="connection-pooling">Connection Pooling<a href="#connection-pooling" class="anchor" aria-hidden="true">#</a> </h3>
+<p>SDK v2 maintains a pool of HTTP connections, eliminating connection setup
+overhead for subsequent requests. This is especially beneficial during
+continuous replication.</p>
+<h3 id="adaptive-retry-mode">Adaptive Retry Mode<a href="#adaptive-retry-mode" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The SDK uses adaptive retry mode with up to 10 attempts. This automatically
+handles transient failures with exponential backoff, improving reliability
+during network issues or service throttling.</p>
+<h3 id="checksum-validation">Checksum Validation<a href="#checksum-validation" class="anchor" aria-hidden="true">#</a> </h3>
+<p>All uploads automatically include CRC32 checksums. S3 validates these during
+upload, ensuring data integrity without additional configuration.</p>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="timeout-errors">Timeout Errors<a href="#timeout-errors" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Large database operations may require extended timeouts. Litestream uses a
+24-hour HTTP timeout by default, but very large databases or slow connections
+may still encounter issues.</p>
+<p>If you see timeout errors, verify:</p>
+<ul>
+<li>Network connectivity to S3 endpoint</li>
+<li>Bucket region matches your configuration</li>
+<li>No firewall blocking long-lived connections</li>
+</ul>
+<h3 id="region-detection-issues">Region Detection Issues<a href="#region-detection-issues" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If the SDK can&rsquo;t determine the bucket region:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1 </span><span class="w"> </span><span class="c"># Explicitly specify</span><span class="w">
+</span></span></span></code></pre></div><h3 id="multipart-upload-failures">Multipart Upload Failures<a href="#multipart-upload-failures" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For large databases with upload failures:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">part-size</span><span class="p">:</span><span class="w"> </span><span class="m">10485760</span><span class="w">  </span><span class="c"># Increase to 10MB</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">concurrency</span><span class="p">:</span><span class="w"> </span><span class="m">3</span><span class="w">       </span><span class="c"># Reduce concurrent uploads</span><span class="w">
+</span></span></span></code></pre></div><p>Reducing concurrency can help on constrained networks. Increasing part size
+reduces the total number of parts (S3 limits uploads to 10,000 parts).</p>
+<h3 id="s3-compatible-services">S3-Compatible Services<a href="#s3-compatible-services" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When using S3-compatible services like MinIO, you may see checksum warnings.
+Some services don&rsquo;t fully implement AWS checksum features. These warnings are
+informational and don&rsquo;t indicate data corruption.</p>
+<h2 id="breaking-changes">Breaking Changes<a href="#breaking-changes" class="anchor" aria-hidden="true">#</a> </h2>
+<p>There are no breaking changes. All v0.3.x configurations work with v0.5.0
+without modification.</p>
+<h2 id="references">References<a href="#references" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="https://aws.github.io/aws-sdk-go-v2/">AWS SDK for Go v2 Documentation</a></li>
+<li><a href="/guides/s3">Amazon S3 Guide</a></li>
+<li><a href="/reference/config">Configuration Reference</a></li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/s3/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Replicating to Amazon S3
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/s3-advanced/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					S3 Advanced Configuration &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

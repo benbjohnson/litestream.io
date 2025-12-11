@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Replicating to S3-Compatible Services - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/s3-compatible/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Replicating to S3-Compatible Services">
+<meta name="twitter:description" content="This guide covers how to use Litestream with S3-compatible storage providers beyond Amazon S3. Many cloud providers and self-hosted solutions implement the S3 API, allowing you to use Litestream&rsquo;s S3 replica type with minimal configuration changes.
+Overview S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools built for AWS S3 to work with alternative storage providers. Litestream supports these services through the endpoint configuration option, which redirects API requests to your chosen provider.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "S3 Compatible",
+        "item": "https:\/\/litestream.io\/guides\/s3-compatible\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#configuration-methods">Configuration Methods</a>
+      <ul>
+        <li><a href="#url-format-with-endpoint-parameter">URL Format with Endpoint Parameter</a></li>
+        <li><a href="#explicit-configuration-fields">Explicit Configuration Fields</a></li>
+        <li><a href="#default-https-behavior">Default HTTPS Behavior</a></li>
+      </ul>
+    </li>
+    <li><a href="#provider-specific-configuration">Provider-Specific Configuration</a>
+      <ul>
+        <li><a href="#minio">MinIO</a></li>
+        <li><a href="#backblaze-b2">Backblaze B2</a></li>
+        <li><a href="#wasabi">Wasabi</a></li>
+        <li><a href="#cloudflare-r2">Cloudflare R2</a></li>
+        <li><a href="#digitalocean-spaces">DigitalOcean Spaces</a></li>
+        <li><a href="#linode-object-storage">Linode Object Storage</a></li>
+        <li><a href="#oci-object-storage">OCI Object Storage</a></li>
+        <li><a href="#vultr-object-storage">Vultr Object Storage</a></li>
+        <li><a href="#scaleway-object-storage">Scaleway Object Storage</a></li>
+        <li><a href="#filebase">Filebase</a></li>
+      </ul>
+    </li>
+    <li><a href="#provider-compatibility-matrix">Provider Compatibility Matrix</a></li>
+    <li><a href="#advanced-configuration-options">Advanced Configuration Options</a>
+      <ul>
+        <li><a href="#force-path-style">force-path-style</a></li>
+        <li><a href="#skip-verify">skip-verify</a></li>
+        <li><a href="#performance-tuning">Performance Tuning</a></li>
+      </ul>
+    </li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#authentication-errors">Authentication Errors</a></li>
+        <li><a href="#connection-errors">Connection Errors</a></li>
+        <li><a href="#invalid-endpoint">Invalid Endpoint</a></li>
+        <li><a href="#region-mismatch">Region Mismatch</a></li>
+        <li><a href="#connection-resets">Connection Resets</a></li>
+      </ul>
+    </li>
+    <li><a href="#environment-variables">Environment Variables</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Replicating to S3-Compatible Services</h1>
+			<p class="lead"></p>
+			<p>This guide covers how to use Litestream with S3-compatible storage providers
+beyond Amazon S3. Many cloud providers and self-hosted solutions implement the
+S3 API, allowing you to use Litestream&rsquo;s S3 replica type with minimal
+configuration changes.</p>
+<h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
+<p>S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools built for AWS
+S3 to work with alternative storage providers. Litestream supports these
+services through the <code>endpoint</code> configuration option, which redirects API
+requests to your chosen provider.</p>
+<p>Key benefits of S3-compatible storage:</p>
+<ul>
+<li><strong>Cost savings</strong>: Many providers offer lower prices than AWS S3</li>
+<li><strong>Data sovereignty</strong>: Choose where your data is stored</li>
+<li><strong>No vendor lock-in</strong>: Switch providers without changing your workflow</li>
+<li><strong>Self-hosted options</strong>: Run your own object storage with MinIO</li>
+</ul>
+<h2 id="configuration-methods">Configuration Methods<a href="#configuration-methods" class="anchor" aria-hidden="true">#</a> </h2>
+<p>You can configure S3-compatible replicas using either URL parameters or explicit
+configuration fields.</p>
+<h3 id="url-format-with-endpoint-parameter">URL Format with Endpoint Parameter<a href="#url-format-with-endpoint-parameter" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The simplest approach uses the <code>endpoint</code> query parameter in the replica URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db?endpoint=s3.us-west-1.wasabisys.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="explicit-configuration-fields">Explicit Configuration Fields<a href="#explicit-configuration-fields" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For more control, specify each field separately:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.us-west-1.wasabisys.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="default-https-behavior">Default HTTPS Behavior<a href="#default-https-behavior" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream uses HTTPS by default when connecting to endpoints. If your endpoint
+URL doesn&rsquo;t include a scheme, HTTPS is assumed:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># These are equivalent:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.provider.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://s3.provider.com</span><span class="w">
+</span></span></span></code></pre></div><p>For local development with HTTP (not recommended for production):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">http://localhost:9000</span><span class="w">
+</span></span></span></code></pre></div><h2 id="provider-specific-configuration">Provider-Specific Configuration<a href="#provider-specific-configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Each S3-compatible provider has unique requirements. The sections below provide
+configuration examples and notes for popular providers.</p>
+<h3 id="minio">MinIO<a href="#minio" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://min.io/">MinIO</a> is a high-performance, self-hosted object storage
+server. It&rsquo;s ideal for development, testing, or running your own S3-compatible
+infrastructure.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://minio.example.com:9000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${MINIO_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${MINIO_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Create access keys in the MinIO Console before configuring Litestream</li>
+<li>The <code>region</code> field is required but MinIO ignores the value; use <code>us-east-1</code></li>
+<li>For self-signed certificates, add <code>skip-verify: true</code> (not for production)</li>
+<li>Default credentials for new installations are <code>minioadmin</code>/<code>minioadmin</code></li>
+</ul>
+<p>See the <a href="/reference/config/#minio-configuration">Configuration Reference</a> for
+detailed MinIO setup instructions.</p>
+<h3 id="backblaze-b2">Backblaze B2<a href="#backblaze-b2" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.backblaze.com/cloud-storage">Backblaze B2</a> offers affordable cloud
+storage with S3-compatible API access. B2 charges only for storage and downloads,
+with free uploads.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${B2_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${B2_APPLICATION_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">my-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.us-west-004.backblazeb2.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-004</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">force-path-style</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Endpoint format: <code>s3.&lt;region&gt;.backblazeb2.com</code></li>
+<li>The <code>region</code> must match your bucket&rsquo;s region exactly</li>
+<li>Always set <code>force-path-style: true</code> for B2</li>
+<li>Create application keys with access limited to specific buckets for security</li>
+<li>B2 requires minimum 5 MB part sizes for multipart uploads (Litestream default)</li>
+</ul>
+<p>See the <a href="/guides/backblaze/">Backblaze B2 Guide</a> for detailed setup instructions.</p>
+<h3 id="wasabi">Wasabi<a href="#wasabi" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://wasabi.com/">Wasabi</a> provides S3-compatible storage with no egress fees
+and predictable pricing.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.us-east-1.wasabisys.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${WASABI_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${WASABI_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Regional Endpoints:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>US East 1 (N. Virginia)</td>
+<td><code>s3.us-east-1.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>US East 2 (N. Virginia)</td>
+<td><code>s3.us-east-2.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>US West 1 (Oregon)</td>
+<td><code>s3.us-west-1.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>EU Central 1 (Amsterdam)</td>
+<td><code>s3.eu-central-1.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>EU Central 2 (Frankfurt)</td>
+<td><code>s3.eu-central-2.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>EU West 1 (London)</td>
+<td><code>s3.eu-west-1.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>EU West 2 (Paris)</td>
+<td><code>s3.eu-west-2.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>AP Northeast 1 (Tokyo)</td>
+<td><code>s3.ap-northeast-1.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>AP Northeast 2 (Osaka)</td>
+<td><code>s3.ap-northeast-2.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>AP Southeast 1 (Singapore)</td>
+<td><code>s3.ap-southeast-1.wasabisys.com</code></td>
+</tr>
+<tr>
+<td>AP Southeast 2 (Sydney)</td>
+<td><code>s3.ap-southeast-2.wasabisys.com</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Use the endpoint matching your bucket&rsquo;s region</li>
+<li>Wasabi is 100% S3 API compatible</li>
+<li>No egress fees make it cost-effective for frequent restores</li>
+</ul>
+<h3 id="cloudflare-r2">Cloudflare R2<a href="#cloudflare-r2" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://developers.cloudflare.com/r2/">Cloudflare R2</a> provides S3-compatible
+object storage with zero egress fees and global distribution.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">${CF_ACCOUNT_ID}.r2.cloudflarestorage.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">auto</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${R2_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${R2_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Find your Account ID in the Cloudflare dashboard under R2</li>
+<li>Region should be set to <code>auto</code> (or <code>us-east-1</code> for compatibility)</li>
+<li>Create API tokens in the R2 section with &ldquo;Object Read &amp; Write&rdquo; permissions</li>
+<li>R2 supports both path-style and virtual-hosted style addressing</li>
+<li>Jurisdiction-specific endpoints available for EU data residency:
+<code>${ACCOUNT_ID}.eu.r2.cloudflarestorage.com</code></li>
+</ul>
+<h3 id="digitalocean-spaces">DigitalOcean Spaces<a href="#digitalocean-spaces" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.digitalocean.com/products/spaces/">DigitalOcean Spaces</a> provides
+simple, scalable object storage with a CDN included.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">my-space</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">nyc3.digitaloceanspaces.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">nyc3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${DO_SPACES_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${DO_SPACES_SECRET}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Regional Endpoints:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New York 3</td>
+<td><code>nyc3.digitaloceanspaces.com</code></td>
+</tr>
+<tr>
+<td>San Francisco 3</td>
+<td><code>sfo3.digitaloceanspaces.com</code></td>
+</tr>
+<tr>
+<td>Amsterdam 3</td>
+<td><code>ams3.digitaloceanspaces.com</code></td>
+</tr>
+<tr>
+<td>Singapore 1</td>
+<td><code>sgp1.digitaloceanspaces.com</code></td>
+</tr>
+<tr>
+<td>Frankfurt 1</td>
+<td><code>fra1.digitaloceanspaces.com</code></td>
+</tr>
+<tr>
+<td>Sydney 1</td>
+<td><code>syd1.digitaloceanspaces.com</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Generate Spaces access keys in the API section of the DigitalOcean console</li>
+<li>Connection resets may appear in logs; Litestream handles these automatically</li>
+</ul>
+<p>See the <a href="/guides/digitalocean/">DigitalOcean Spaces Guide</a> for detailed setup.</p>
+<h3 id="linode-object-storage">Linode Object Storage<a href="#linode-object-storage" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.linode.com/products/object-storage/">Linode Object Storage</a>
+provides S3-compatible storage across multiple regions.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1.linodeobjects.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${LINODE_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${LINODE_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Regional Endpoints:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Newark, NJ</td>
+<td><code>us-east-1.linodeobjects.com</code></td>
+</tr>
+<tr>
+<td>Atlanta, GA</td>
+<td><code>us-southeast-1.linodeobjects.com</code></td>
+</tr>
+<tr>
+<td>Dallas, TX</td>
+<td><code>us-central-1.linodeobjects.com</code></td>
+</tr>
+<tr>
+<td>Frankfurt, DE</td>
+<td><code>eu-central-1.linodeobjects.com</code></td>
+</tr>
+<tr>
+<td>Singapore, SG</td>
+<td><code>ap-south-1.linodeobjects.com</code></td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="/guides/linode/">Linode Guide</a> for detailed setup instructions.</p>
+<h3 id="oci-object-storage">OCI Object Storage<a href="#oci-object-storage" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://docs.oracle.com/en-us/iaas/Content/Object/home.htm">Oracle Cloud Infrastructure Object Storage</a>
+provides S3-compatible API access to OCI buckets.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">${OCI_NAMESPACE}.compat.objectstorage.${OCI_REGION}.oraclecloud.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${OCI_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${OCI_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Find your namespace in the OCI Console under Tenancy Details</li>
+<li>Create Customer Secret Keys for S3 compatibility (not standard API keys)</li>
+<li>Set region to <code>us-east-1</code> or leave blank if your client doesn&rsquo;t support OCI
+region identifiers</li>
+<li>Endpoint format includes your namespace:
+<code>&lt;namespace&gt;.compat.objectstorage.&lt;region&gt;.oraclecloud.com</code></li>
+</ul>
+<p><strong>Example Endpoints:</strong></p>
+<ul>
+<li>US Phoenix: <code>&lt;namespace&gt;.compat.objectstorage.us-phoenix-1.oraclecloud.com</code></li>
+<li>US Ashburn: <code>&lt;namespace&gt;.compat.objectstorage.us-ashburn-1.oraclecloud.com</code></li>
+<li>EU Frankfurt: <code>&lt;namespace&gt;.compat.objectstorage.eu-frankfurt-1.oraclecloud.com</code></li>
+</ul>
+<h3 id="vultr-object-storage">Vultr Object Storage<a href="#vultr-object-storage" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.vultr.com/products/object-storage/">Vultr Object Storage</a> provides
+S3-compatible storage with simple, predictable pricing (no API request charges).</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">ewr1.vultrobjects.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">ewr1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${VULTR_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${VULTR_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Regional Endpoints:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New Jersey</td>
+<td><code>ewr1.vultrobjects.com</code></td>
+</tr>
+<tr>
+<td>Los Angeles</td>
+<td><code>lax1.vultrobjects.com</code></td>
+</tr>
+<tr>
+<td>Singapore</td>
+<td><code>sgp1.vultrobjects.com</code></td>
+</tr>
+<tr>
+<td>Amsterdam</td>
+<td><code>ams1.vultrobjects.com</code></td>
+</tr>
+<tr>
+<td>Bangalore</td>
+<td><code>blr1.vultrobjects.com</code></td>
+</tr>
+<tr>
+<td>Delhi NCR</td>
+<td><code>del1.vultrobjects.com</code></td>
+</tr>
+<tr>
+<td>Honolulu</td>
+<td><code>hnl1.vultrobjects.com</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>No charges for API requests, only storage and egress</li>
+<li>HTTPS required for all connections</li>
+<li>Virtual-hosted style addressing preferred</li>
+</ul>
+<h3 id="scaleway-object-storage">Scaleway Object Storage<a href="#scaleway-object-storage" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.scaleway.com/en/object-storage/">Scaleway Object Storage</a> provides
+S3-compatible storage in European data centers.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.fr-par.scw.cloud</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">fr-par</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${SCW_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${SCW_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Regional Endpoints:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Paris</td>
+<td><code>s3.fr-par.scw.cloud</code></td>
+</tr>
+<tr>
+<td>Amsterdam</td>
+<td><code>s3.nl-ams.scw.cloud</code></td>
+</tr>
+<tr>
+<td>Warsaw</td>
+<td><code>s3.pl-waw.scw.cloud</code></td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="/guides/scaleway/">Scaleway Guide</a> for detailed setup instructions.</p>
+<h3 id="filebase">Filebase<a href="#filebase" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://filebase.com/">Filebase</a> provides S3-compatible access to decentralized
+storage networks including IPFS and Sia.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.filebase.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${FILEBASE_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${FILEBASE_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Single global endpoint: <code>s3.filebase.com</code></li>
+<li>Region must be set to <code>us-east-1</code></li>
+<li>Only supports AWS Signature Version 4</li>
+<li>Rate limit of 100 requests per second</li>
+<li>Provides decentralized storage with IPFS pinning</li>
+</ul>
+<h2 id="provider-compatibility-matrix">Provider Compatibility Matrix<a href="#provider-compatibility-matrix" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The following table summarizes configuration requirements for each provider:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Endpoint Required</th>
+<th>Region</th>
+<th>force-path-style</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS S3</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>Native support</td>
+</tr>
+<tr>
+<td>MinIO</td>
+<td>Yes</td>
+<td>Optional</td>
+<td>Auto</td>
+<td>Self-hosted</td>
+</tr>
+<tr>
+<td>Backblaze B2</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Min 5MB parts</td>
+</tr>
+<tr>
+<td>Wasabi</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No egress fees</td>
+</tr>
+<tr>
+<td>Cloudflare R2</td>
+<td>Yes</td>
+<td><code>auto</code></td>
+<td>No</td>
+<td>No egress fees</td>
+</tr>
+<tr>
+<td>DigitalOcean Spaces</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>CDN included</td>
+</tr>
+<tr>
+<td>Linode</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>—</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>Yes</td>
+<td><code>us-east-1</code></td>
+<td>No</td>
+<td>Namespace in endpoint</td>
+</tr>
+<tr>
+<td>Vultr</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No request fees</td>
+</tr>
+<tr>
+<td>Scaleway</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>EU regions</td>
+</tr>
+<tr>
+<td>Filebase</td>
+<td>Yes</td>
+<td><code>us-east-1</code></td>
+<td>No</td>
+<td>Decentralized</td>
+</tr>
+</tbody>
+</table>
+<h2 id="advanced-configuration-options">Advanced Configuration Options<a href="#advanced-configuration-options" class="anchor" aria-hidden="true">#</a> </h2>
+<p>These options help with compatibility across different S3 implementations:</p>
+<h3 id="force-path-style">force-path-style<a href="#force-path-style" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Some providers require path-style URLs instead of virtual-hosted style. This is
+automatically enabled when you set an <code>endpoint</code>, but can be explicitly
+controlled:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.provider.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">force-path-style</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><h3 id="skip-verify">skip-verify<a href="#skip-verify" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Disable TLS certificate verification for self-signed certificates (development
+only):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://minio.local:9000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">skip-verify</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Warning:</strong> Never use <code>skip-verify: true</code> in production environments.</p>
+<h3 id="performance-tuning">Performance Tuning<a href="#performance-tuning" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For large databases or high-throughput scenarios, tune multipart upload settings:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.provider.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">part-size</span><span class="p">:</span><span class="w"> </span><span class="l">10MB</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">concurrency</span><span class="p">:</span><span class="w"> </span><span class="m">10</span><span class="w">
+</span></span></span></code></pre></div><p>See the <a href="/reference/config/#s3-replica">Configuration Reference</a> for all
+available S3 replica options.</p>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="authentication-errors">Authentication Errors<a href="#authentication-errors" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptom:</strong> <code>AccessDenied</code> or <code>SignatureDoesNotMatch</code> errors</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Verify access key and secret key are correct</li>
+<li>Check that credentials have appropriate bucket permissions</li>
+<li>Ensure your system clock is synchronized (signatures are time-sensitive)</li>
+<li>Confirm the region matches your bucket&rsquo;s actual region</li>
+</ol>
+<h3 id="connection-errors">Connection Errors<a href="#connection-errors" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptom:</strong> <code>connection refused</code> or timeout errors</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Verify the endpoint URL is correct</li>
+<li>Check that HTTPS is supported (or use <code>http://</code> for local development)</li>
+<li>Ensure firewall rules allow outbound connections on port 443</li>
+<li>For self-hosted services, confirm the service is running</li>
+</ol>
+<h3 id="invalid-endpoint">Invalid Endpoint<a href="#invalid-endpoint" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptom:</strong> <code>InvalidEndpoint</code> or hostname resolution errors</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Remove the scheme from the endpoint if specifying separately</li>
+<li>Include the port number if using a non-standard port</li>
+<li>Verify DNS resolution for the endpoint hostname</li>
+</ol>
+<h3 id="region-mismatch">Region Mismatch<a href="#region-mismatch" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptom:</strong> <code>PermanentRedirect</code> or <code>AuthorizationHeaderMalformed</code> errors</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Ensure the <code>region</code> field matches the bucket&rsquo;s actual region</li>
+<li>For providers that ignore region, try <code>us-east-1</code></li>
+<li>Check provider documentation for region identifiers</li>
+</ol>
+<h3 id="connection-resets">Connection Resets<a href="#connection-resets" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptom:</strong> <code>connection reset by peer</code> errors in logs</p>
+<p><strong>Solutions:</strong></p>
+<p>Some providers (notably DigitalOcean Spaces) may reset connections occasionally.
+Litestream handles these automatically through retries. If you see these errors
+but replication continues, no action is needed.</p>
+<h2 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Use environment variables to keep credentials out of configuration files:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">${BUCKET_NAME}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">${S3_ENDPOINT}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">${S3_REGION}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${S3_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${S3_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p>Standard AWS environment variables are also supported:</p>
+<ul>
+<li><code>AWS_ACCESS_KEY_ID</code> or <code>LITESTREAM_ACCESS_KEY_ID</code></li>
+<li><code>AWS_SECRET_ACCESS_KEY</code> or <code>LITESTREAM_SECRET_ACCESS_KEY</code></li>
+</ul>
+<p>Litestream-specific variables take precedence over AWS variables.</p>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/s3-advanced/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; S3 Advanced Configuration
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/azure/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Replicating to Azure Blob Storage &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

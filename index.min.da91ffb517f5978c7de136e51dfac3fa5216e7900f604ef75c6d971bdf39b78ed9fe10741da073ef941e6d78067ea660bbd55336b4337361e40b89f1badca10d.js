@@ -75,7 +75,7 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
-</span></span></span></code></pre></div><ol start="2">
+</span></span></span></code></pre></div><ol>
 <li><strong>Override default settings</strong>:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Add MCP support (disabled by default)</span><span class="w">
@@ -92,15 +92,15 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h</span><span class="w">
-</span></span></span></code></pre></div><ol start="3">
+</span></span></span></code></pre></div><ol>
 <li><strong>Update command usage</strong>:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># OLD: Query WAL information</span>
 </span></span><span class="line"><span class="cl">litestream wal /path/to/db.sqlite
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># NEW: Query LTX information  </span>
+</span></span><span class="line"><span class="cl"><span class="c1"># NEW: Query LTX information</span>
 </span></span><span class="line"><span class="cl">litestream ltx /path/to/db.sqlite
-</span></span></code></pre></div><ol start="4">
+</span></span></code></pre></div><ol>
 <li><strong>Restart services</strong>:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Restart Litestream with new configuration</span>
@@ -127,7 +127,7 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <p>The feature was not maintained and has been disabled to prevent accidental data loss from misconfigured encryption (users believing their data was encrypted when it wasn&rsquo;t being encrypted at all).</p>
 <h4 id="upgrade-options">Upgrade Options</h4>
 <p>Choose the option that best fits your situation:</p>
-<p><strong>Option 1: Stay on v0.3.x</strong></p>
+<h4 id="option-1-stay-on-v03x">Option 1: Stay on v0.3.x</h4>
 <p>If you need Age encryption, remain on v0.3.x until the feature is restored:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check your current version</span>
 </span></span><span class="line"><span class="cl">litestream version
@@ -137,7 +137,7 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </span></span><span class="line"><span class="cl">tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
 </span></span><span class="line"><span class="cl">sudo mv litestream /usr/local/bin/
 </span></span><span class="line"><span class="cl">sudo systemctl restart litestream
-</span></span></code></pre></div><p><strong>Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)</strong></p>
+</span></span></code></pre></div><h4 id="option-2-upgrade-to-v050-remove-age-encryption">Option 2: Upgrade to v0.5.0+ (Remove Age Encryption)</h4>
 <p>If you can migrate away from Age encryption:</p>
 <ol>
 <li>
@@ -182,7 +182,7 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </span></span><span class="line"><span class="cl">litestream restore -o /tmp/verify.db /var/lib/app.db
 </span></span></code></pre></div></li>
 </ol>
-<p><strong>Option 3: Use Unencrypted Backups Temporarily</strong></p>
+<h4 id="option-3-use-unencrypted-backups-temporarily">Option 3: Use Unencrypted Backups Temporarily</h4>
 <p>While Age encryption is unavailable, use standard unencrypted replication:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
@@ -631,11 +631,15 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <p><strong>Error</strong>: <code>database disk image is malformed</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
-<li>Stop Litestream replication</li>
-<li>Run SQLite integrity check:
+<li>
+<p>Stop Litestream replication</p>
+</li>
+<li>
+<p>Run SQLite integrity check:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sqlite3 /path/to/db.sqlite <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
 </span></span></code></pre></div></li>
-<li>If corrupted, restore from latest backup:
+<li>
+<p>If corrupted, restore from latest backup:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /path/to/recovered.db /path/to/db.sqlite
 </span></span></code></pre></div></li>
 </ol>
@@ -661,8 +665,11 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <p><strong>Symptoms</strong>: High memory usage or out-of-memory errors</p>
 <p><strong>Solution</strong>:</p>
 <ol>
-<li>Monitor snapshot sizes and retention policies</li>
-<li>Adjust retention settings:
+<li>
+<p>Monitor snapshot sizes and retention policies</p>
+</li>
+<li>
+<p>Adjust retention settings:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">snapshot</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h </span><span class="w"> </span><span class="c"># Keep fewer snapshots</span><span class="w">
@@ -694,11 +701,16 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <p><strong>Error</strong>: <code>no such host</code> or DNS timeouts</p>
 <p><strong>Solution</strong>:</p>
 <ol>
-<li>Test DNS resolution:
+<li>
+<p>Test DNS resolution:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">nslookup s3.amazonaws.com
 </span></span></code></pre></div></li>
-<li>Use IP addresses instead of hostnames if needed</li>
-<li>Check <code>/etc/resolv.conf</code> configuration</li>
+<li>
+<p>Use IP addresses instead of hostnames if needed</p>
+</li>
+<li>
+<p>Check <code>/etc/resolv.conf</code> configuration</p>
+</li>
 </ol>
 <h2 id="logging-and-debugging">Logging and Debugging</h2>
 <h3 id="enabling-debug-logging">Enabling Debug Logging</h3>

@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.6b1b8740d9d3d1c9f37138879a5cb29ec186c056723f6421dd21deb4e18504eb68df0e73df56491b24c90d1ac9de080e4d991034742630feac126b345b419f04.css" integrity="sha512-axuHQNnT0cnzcTiHmlyynsGGwFZyP2Qh3SHetOGFBOto3w5z31ZJGyTJDRrJ3ggOTZkQNHQmMP6sEms0W0GfBA==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -142,10 +142,14 @@ Variable expansion By default, Litestream will perform environment variable expa
   </h3>
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
@@ -200,6 +204,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a href="#replica-settings">Replica settings</a>
       <ul>
         <li><a href="#s3-replica">S3 replica</a></li>
+        <li><a href="#tigris-flyio-configuration">Tigris (Fly.io) Configuration</a></li>
         <li><a href="#minio-configuration">MinIO Configuration</a></li>
         <li><a href="#file-replica">File replica</a></li>
         <li><a href="#google-cloud-storage-gcs-replica">Google Cloud Storage (GCS) replica</a></li>
@@ -382,7 +387,20 @@ increase cloud storage costs due to more frequent PUT requests. See the
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
-</span></span></span></code></pre></div><p>However, you can break this out into separate fields as well:</p>
+</span></span></span></code></pre></div><p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ You can also use S3 access point ARNs for VPC-only
+configurations and simplified access control:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/database-backups</span><span class="w">
+</span></span></span></code></pre></div><p>When using access point ARNs, the region is automatically extracted from the
+ARN. You can override it with an explicit <code>region</code> setting if needed. See the
+<a href="https://litestream.io/guides/s3/#using-s3-access-points">S3 Access Points guide</a> for detailed
+configuration and IAM policy examples.</p>
+<p>You can break this out into separate fields as well:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
@@ -430,7 +448,123 @@ This is automatically enabled if <code>endpoint</code> is set.</p>
 <p><code>skip-verify</code>—Disables TLS verification. This is useful when testing against
 a local node such as MinIO and you are using self-signed certificates.</p>
 </li>
+<li>
+<p><code>part-size</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Size of each part in multipart uploads. Accepts
+human-readable sizes like <code>5MB</code>, <code>10MB</code>, or <code>1GB</code>. Default is 5 MiB. Minimum
+is 5 MiB (S3 requirement), maximum is 5 GiB. See the
+<a href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration Guide</a> for tuning recommendations.</p>
+</li>
+<li>
+<p><code>concurrency</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Number of parts to upload in parallel during
+multipart uploads. Default is 5. Higher values improve throughput on fast
+networks but use more memory. See the
+<a href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration Guide</a> for tuning recommendations.</p>
+</li>
+<li>
+<p><code>sign-payload</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Signs the request payload. Required
+by some S3-compatible providers like Tigris. Automatically enabled for Tigris
+endpoints. Defaults to <code>false</code>.</p>
+</li>
+<li>
+<p><code>require-content-md5</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Adds Content-MD5 header to
+requests. Some S3-compatible providers don&rsquo;t support this header on certain
+operations. Automatically disabled for Tigris endpoints. Defaults to <code>true</code>.</p>
+</li>
 </ul>
+<p>These options can also be set via URL query parameters:</p>
+<pre tabindex="0"><code>s3://bucket/path?sign-payload=true&amp;require-content-md5=false
+</code></pre><h4 id="s3-compatible-provider-requirements">S3-Compatible Provider Requirements<a href="#s3-compatible-provider-requirements" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Different S3-compatible storage providers have varying requirements for payload
+signing and Content-MD5 headers. The table below shows the recommended settings
+for popular providers:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>sign-payload</th>
+<th>require-content-md5</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS S3</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>Defaults work</td>
+</tr>
+<tr>
+<td>Backblaze B2</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>Defaults work</td>
+</tr>
+<tr>
+<td>Tigris (Fly.io)</td>
+<td><code>true</code></td>
+<td><code>false</code></td>
+<td>Requires signed payloads</td>
+</tr>
+<tr>
+<td>OCI Object Storage</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>Requires Content-MD5</td>
+</tr>
+<tr>
+<td>Filebase</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>Defaults work</td>
+</tr>
+<tr>
+<td>MinIO</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>Defaults work</td>
+</tr>
+<tr>
+<td>DigitalOcean Spaces</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>Defaults work</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tigris-flyio-configuration">Tigris (Fly.io) Configuration<a href="#tigris-flyio-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ <a href="https://www.tigrisdata.com/">Tigris</a> is Fly.io&rsquo;s
+globally distributed S3-compatible object storage. Litestream automatically
+detects Tigris endpoints and applies required configuration settings.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">fly.storage.tigris.dev</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">auto</span><span class="w">
+</span></span></span></code></pre></div><p>When using the <code>fly.storage.tigris.dev</code> endpoint, Litestream automatically
+configures:</p>
+<ul>
+<li><code>sign-payload: true</code> — Required by Tigris for request authentication</li>
+<li><code>require-content-md5: false</code> — Tigris doesn&rsquo;t support Content-MD5 on DELETE</li>
+</ul>
+<p>See the <a href="https://litestream.io/guides/tigris/">Tigris Guide</a> for detailed setup instructions.</p>
 <h3 id="minio-configuration">MinIO Configuration<a href="#minio-configuration" class="anchor" aria-hidden="true">#</a> </h3>
 <p>MinIO is an S3-compatible object storage service. The main difference from AWS S3
 is that MinIO requires specifying an <code>endpoint</code> parameter pointing to your MinIO
@@ -876,7 +1010,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.e3e3803f97f54462ce366f49cf0bcd39eb0da7813f5f83acfdc055e2febbd8c20d8c5118f960f3fb655efeec6eda991e881e06cceea7f3583b31475a3ee8dec5.js" integrity="sha512-4&#43;OAP5f1RGLONm9JzwvNOesNp4E/X4Os/cBV4v672MINjFEY&#43;WDz&#43;2Ve/uxu2pkeiB4GzO6n81g7MUdaPujexQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
