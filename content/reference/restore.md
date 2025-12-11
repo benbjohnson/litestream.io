@@ -52,15 +52,13 @@ litestream restore [arguments] REPLICA_URL
     Returns exit code of 0 if the database already exists.
 
 -if-replica-exists
-    Returns exit code of 0 if no backups found.
+    Returns exit code of 0 if no backups are found. This flag allows the restore
+    command to succeed gracefully when no matching backup files are available,
+    which is useful for automation and conditional restore scenarios.
 
 -parallelism NUM
     Determines the number of WAL files downloaded in parallel.
     Defaults to 8
-
--replica NAME
-    Restore from a specific replica.
-    Defaults to replica with latest data.
 
 -generation NAME
     Restore from a specific generation.
@@ -81,6 +79,58 @@ litestream restore [arguments] REPLICA_URL
 -no-expand-env
     Disables environment variable expansion in configuration file.
 ```
+
+
+## Conditional Restore Behavior
+
+### Using -if-replica-exists
+
+The `-if-replica-exists` flag modifies the restore command's behavior when no
+backup files are found. Without this flag, the command will fail with a
+non-zero exit code if no matching backups exist. With the flag enabled, the
+command succeeds (exit code 0) and logs "no matching backups found" instead.
+
+This flag is particularly useful for:
+
+- **Automation scripts**: Prevent automated restore processes from failing when
+  backups don't exist yet
+- **Conditional operations**: Create scripts that attempt restoration but
+  continue with alternative logic if no backups are available
+- **Idempotent deployments**: Build deployment scripts that can safely run
+  restore operations without breaking when backups aren't present
+- **Testing environments**: Allow test environments to attempt restoration
+  without failing if the backup source hasn't been populated
+
+### Exit Code Behavior
+
+The command returns different exit codes based on the presence of backups:
+
+| Scenario | Without flag | With -if-replica-exists |
+|----------|-------------|------------------------|
+| Backups found and restored | Exit 0 | Exit 0 |
+| No backups found | Exit 1 (error) | Exit 0 (success) |
+| Other errors | Exit 1 (error) | Exit 1 (error) |
+
+Note that this flag only affects the behavior when `ErrTxNotAvailable` is
+returned (no matching backup files). Other errors will still result in a
+non-zero exit code.
+
+### Interaction with Other Flags
+
+The `-if-replica-exists` flag works alongside other restore flags:
+
+- **-if-db-not-exists**: Combined with `-if-replica-exists`, you can create
+  truly idempotent restore operations that succeed whether the database exists,
+  doesn't exist, or has no backups available
+- **-timestamp**: When used with point-in-time restore, the flag will succeed
+  gracefully if no backups exist at the specified timestamp
+
+### Important Notes
+
+- The flag only suppresses the "no backups found" error; other restore errors
+  will still return non-zero exit codes
+- When the flag is used and no backups are found, a log message is emitted:
+  "no matching backups found"
 
 
 ## Examples
@@ -119,11 +169,98 @@ Restore the `/var/lib/db` database to a specific point-in-time:
 $ litestream restore -timestamp 2020-01-01T00:00:00Z /var/lib/db
 ```
 
-### Filter by replica name
+### Conditional restore in automation
 
-This example will only restore from the `s3` replica:
+Use `-if-replica-exists` to allow restore operations to succeed even when no
+backups are available:
 
 ```
-$ litestream restore -replica s3 /var/lib/db
+$ litestream restore -if-replica-exists /var/lib/db
+```
+
+If backups exist, the database is restored. If no backups are found, the
+command exits successfully (exit code 0) with a log message.
+
+### Idempotent deployment script
+
+Combine `-if-db-not-exists` and `-if-replica-exists` for fully idempotent
+restore operations:
+
+```
+$ litestream restore -if-db-not-exists -if-replica-exists /var/lib/db
+```
+
+This command will succeed in these scenarios:
+
+- Database exists: exits successfully without overwriting
+- Database doesn't exist, backups available: restores the database
+- Database doesn't exist, no backups: exits successfully without error
+
+Note: Other errors (network failures, permission issues, corruption, etc.) will
+still cause the command to fail with a non-zero exit code.
+
+### Shell script with error handling
+
+Example script that attempts restoration with fallback logic:
+
+```sh
+#!/bin/bash
+set -e
+
+# Attempt to restore from backup
+if litestream restore -if-replica-exists -o /var/lib/app.db s3://mybkt/app.db; then
+  echo "Restore completed or no backups found"
+
+  # Check if database exists after restore attempt
+  if [ ! -f /var/lib/app.db ]; then
+    echo "No backups available, initializing new database"
+    # Initialize new database
+    sqlite3 /var/lib/app.db < schema.sql
+  fi
+else
+  echo "Restore failed with error"
+  exit 1
+fi
+
+# Start application
+./start-app.sh
+```
+
+### Automation with explicit error checking
+
+Script that distinguishes between "no backups" and actual errors:
+
+```sh
+#!/bin/bash
+
+# Attempt restore without the flag to detect actual errors
+if litestream restore /var/lib/db 2>&1 | grep -q "no matching backup files"; then
+  echo "No backups found, proceeding with empty database"
+  # Initialize database or take alternative action
+elif [ $? -eq 0 ]; then
+  echo "Database restored successfully"
+else
+  echo "Restore failed with error"
+  exit 1
+fi
+```
+
+Alternatively, use the flag for simpler logic:
+
+```sh
+#!/bin/bash
+set -e
+
+# With -if-replica-exists, this succeeds when no backups are found
+# (but other errors like network failures will still cause it to fail)
+litestream restore -if-replica-exists /var/lib/db
+
+# Check if we got a database or need to initialize
+if [ -f /var/lib/db ]; then
+  echo "Database restored from backup"
+else
+  echo "No backups found, initializing new database"
+  # Initialize database
+fi
 ```
 
