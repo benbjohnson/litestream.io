@@ -151,6 +151,14 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
     </ul>
   <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
     <a href="https://litestream.io/reference/">Reference</a>
   </h3>
   <ul class="list-unstyled">
@@ -162,13 +170,6 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
-    </ul>
-  <h3>
-    <a href="https://litestream.io/">help</a>
-  </h3>
-  <ul class="list-unstyled">
-    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
-    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
     </ul>
   
 			</nav>        
@@ -291,7 +292,10 @@ generation and take a full snapshot to ensure consistency.</p>
 autocheckpointing disabled. To do this, run the following PRAGMA when you
 open your SQLite connection:</p>
 <pre tabindex="0"><code>PRAGMA wal_autocheckpoint = 0;
-</code></pre><h2 id="multiple-applications-replicating-into-location-can-corrupt">Multiple applications replicating into location can corrupt<a href="#multiple-applications-replicating-into-location-can-corrupt" class="anchor" aria-hidden="true">#</a> </h2>
+</code></pre><p>For more information about Litestream&rsquo;s checkpoint strategy and configuring
+WAL truncate thresholds, see the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Configuration
+guide</a>.</p>
+<h2 id="multiple-applications-replicating-into-location-can-corrupt">Multiple applications replicating into location can corrupt<a href="#multiple-applications-replicating-into-location-can-corrupt" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Multiple applications replicating into the same bucket &amp; path can cause situations
 where you will be unable to restore. It is <em>your</em> responsibility to ensure you
 do not have multiple applications replicating concurrently. In the off-chance
@@ -322,7 +326,7 @@ replicating it again with Litestream.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

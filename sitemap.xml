@@ -248,6 +248,13 @@
   </url>
   
   <url>
+    <loc>https://litestream.io/guides/wal-truncate-threshold/</loc>
+    <lastmod>2025-01-15T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://litestream.io/docs/troubleshooting/</loc>
     <lastmod>2025-08-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>

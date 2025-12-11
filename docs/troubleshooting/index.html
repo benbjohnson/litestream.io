@@ -237,6 +237,28 @@
 <li>Ensure no long-running transactions are blocking checkpoints</li>
 <li>Check for applications holding exclusive locks</li>
 </ol>
+<h3 id="wal-growth-and-checkpoint-blocking">WAL Growth and Checkpoint Blocking</h3>
+<p><strong>Symptoms</strong>: WAL file growing excessively large or writes timing out</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Check if you have long-lived read transactions preventing checkpoints</p>
+</li>
+<li>
+<p>Review checkpoint configuration in your config file</p>
+</li>
+<li>
+<p>Consider disabling <code>truncate-page-n</code> if you have long-running queries:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">  </span><span class="c"># Disable blocking checkpoints</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>Monitor WAL file size and disk space</p>
+</li>
+</ol>
+<p>For detailed guidance on checkpoint configuration and trade-offs, see the <a href="/guides/wal-truncate-threshold">WAL
+Truncate Threshold Configuration guide</a>.</p>
 <h3 id="corruption-detection">Corruption Detection</h3>
 <p><strong>Error</strong>: <code>database disk image is malformed</code></p>
 <p><strong>Solution</strong>:</p>
@@ -445,7 +467,7 @@
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

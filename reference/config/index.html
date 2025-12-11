@@ -157,6 +157,14 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
     </ul>
   <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
     <a href="https://litestream.io/reference/">Reference</a>
   </h3>
   <ul class="list-unstyled">
@@ -168,13 +176,6 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
-    </ul>
-  <h3>
-    <a href="https://litestream.io/">help</a>
-  </h3>
-  <ul class="list-unstyled">
-    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
-    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
     </ul>
   
 			</nav>        
@@ -312,12 +313,19 @@ by their absolute path.</p>
 <li><code>path</code>—Absolute path to the SQLite database file</li>
 <li><code>meta-path</code>—Path to store Litestream metadata (defaults to <code>&lt;path&gt;-litestream</code>)</li>
 <li><code>monitor-interval</code>—How often to check for changes (default: <code>1s</code>)</li>
-<li><code>checkpoint-interval</code>—How often to perform WAL checkpoints (default: <code>1m</code>)</li>
+<li><code>checkpoint-interval</code>—How often to perform WAL checkpoints using PASSIVE mode (default: <code>1m</code>, non-blocking)</li>
 <li><code>busy-timeout</code>—SQLite busy timeout (default: <code>1s</code>)</li>
-<li><code>min-checkpoint-page-count</code>—Minimum pages before checkpointing (default: <code>1000</code>)</li>
-<li><code>max-checkpoint-page-count</code>—Maximum pages before forcing checkpoint (default: <code>10000</code>)</li>
+<li><code>min-checkpoint-page-count</code>—Minimum pages before PASSIVE checkpoint (default: <code>1000</code>, ~4MB, non-blocking)</li>
+<li><code>truncate-page-n</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Emergency threshold for TRUNCATE checkpoint (default: <code>121359</code>, ~500MB, <strong>blocks both readers and writers</strong>). Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
 <li><code>replica</code>—Single replica configuration (replaces deprecated <code>replicas</code> array)</li>
 </ul>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead.</div>
+</div>
 <p>Example with database-level options:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp.db</span><span class="w">
@@ -326,7 +334,7 @@ by their absolute path.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">busy-timeout</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">500</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">max-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">5000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">50000</span><span class="w">  </span><span class="c"># ~200MB emergency truncation</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/myapp</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
@@ -1042,7 +1050,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.da91ffb517f5978c7de136e51dfac3fa5216e7900f604ef75c6d971bdf39b78ed9fe10741da073ef941e6d78067ea660bbd55336b4337361e40b89f1badca10d.js" integrity="sha512-2pH/tRf1l4x94TblHfrD&#43;lIW55APYE73XG2XG985t47Z/hB0HaBz75QebXgGfqZgu9VTNrQzc2HkC4nxutyhDQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

@@ -627,6 +627,28 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <li>Ensure no long-running transactions are blocking checkpoints</li>
 <li>Check for applications holding exclusive locks</li>
 </ol>
+<h3 id="wal-growth-and-checkpoint-blocking">WAL Growth and Checkpoint Blocking</h3>
+<p><strong>Symptoms</strong>: WAL file growing excessively large or writes timing out</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Check if you have long-lived read transactions preventing checkpoints</p>
+</li>
+<li>
+<p>Review checkpoint configuration in your config file</p>
+</li>
+<li>
+<p>Consider disabling <code>truncate-page-n</code> if you have long-running queries:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">  </span><span class="c"># Disable blocking checkpoints</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>Monitor WAL file size and disk space</p>
+</li>
+</ol>
+<p>For detailed guidance on checkpoint configuration and trade-offs, see the <a href="/guides/wal-truncate-threshold">WAL
+Truncate Threshold Configuration guide</a>.</p>
 <h3 id="corruption-detection">Corruption Detection</h3>
 <p><strong>Error</strong>: <code>database disk image is malformed</code></p>
 <p><strong>Solution</strong>:</p>

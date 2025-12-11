@@ -134,5 +134,12 @@
       <guid>https://litestream.io/guides/nats/</guid>
       <description>This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.&#xA;Setup Install NATS Server Using Docker:&#xA;# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:&#xA;# Download and install NATS server curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip unzip nats-server.</description>
     </item>
+    <item>
+      <title>WAL Truncate Threshold Configuration</title>
+      <link>https://litestream.io/guides/wal-truncate-threshold/</link>
+      <pubDate>Wed, 15 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/wal-truncate-threshold/</guid>
+      <description>This guide explains Litestream&amp;rsquo;s 3-tier checkpoint strategy and how to configure WAL truncate thresholds to prevent write blocking while managing disk space. Understanding these settings is critical for production deployments, especially applications with long-lived read transactions.&#xA;Background SQLite&amp;rsquo;s WAL (write-ahead log) grows as database pages are modified. To prevent unbounded growth, the WAL must be periodically truncated through checkpointing. However, aggressive checkpointing can block database writes when read transactions are active.</description>
+    </item>
   </channel>
 </rss>

@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>WAL Truncate Threshold Configuration - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/wal-truncate-threshold/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="WAL Truncate Threshold Configuration">
+<meta name="twitter:description" content="This guide explains Litestream&rsquo;s 3-tier checkpoint strategy and how to configure WAL truncate thresholds to prevent write blocking while managing disk space. Understanding these settings is critical for production deployments, especially applications with long-lived read transactions.
+Background SQLite&rsquo;s WAL (write-ahead log) grows as database pages are modified. To prevent unbounded growth, the WAL must be periodically truncated through checkpointing. However, aggressive checkpointing can block database writes when read transactions are active.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Wal Truncate Threshold",
+        "item": "https:\/\/litestream.io\/guides\/wal-truncate-threshold\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#background">Background</a></li>
+    <li><a href="#understanding-the-3-tier-checkpoint-strategy">Understanding the 3-Tier Checkpoint Strategy</a>
+      <ul>
+        <li><a href="#1-truncatepagen-truncate-blocking---emergency-brake">1. TruncatePageN (TRUNCATE, Blocking) - Emergency Brake</a></li>
+        <li><a href="#2-mincheckpointpagen-passive-non-blocking">2. MinCheckpointPageN (PASSIVE, Non-Blocking)</a></li>
+        <li><a href="#3-checkpointinterval-passive-non-blocking">3. CheckpointInterval (PASSIVE, Non-Blocking)</a></li>
+      </ul>
+    </li>
+    <li><a href="#configuration">Configuration</a>
+      <ul>
+        <li><a href="#yaml-configuration">YAML Configuration</a></li>
+        <li><a href="#disabling-checkpoints">Disabling Checkpoints</a></li>
+      </ul>
+    </li>
+    <li><a href="#trade-offs">Trade-offs</a>
+      <ul>
+        <li><a href="#default-settings-all-enabled">Default Settings (All Enabled)</a></li>
+        <li><a href="#disabling-truncatepagen-recommended-for-long-read-apps">Disabling TruncatePageN (Recommended for Long-Read Apps)</a></li>
+        <li><a href="#disabling-time-based-and-emergency-checkpoints">Disabling Time-Based and Emergency Checkpoints</a></li>
+      </ul>
+    </li>
+    <li><a href="#when-to-disable-truncatepagen">When to Disable TruncatePageN</a>
+      <ul>
+        <li><a href="#long-lived-read-transactions">Long-Lived Read Transactions</a></li>
+        <li><a href="#zero-write-blocking-tolerance">Zero Write-Blocking Tolerance</a></li>
+        <li><a href="#disk-space-monitoring">Disk Space Monitoring</a></li>
+      </ul>
+    </li>
+    <li><a href="#upgrading-to-v050">Upgrading to v0.5.0</a>
+      <ul>
+        <li><a href="#configuration-changes">Configuration Changes</a></li>
+        <li><a href="#verification">Verification</a></li>
+      </ul>
+    </li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#detecting-wal-growth-issues">Detecting WAL Growth Issues</a></li>
+        <li><a href="#detecting-write-blocking">Detecting Write Blocking</a></li>
+        <li><a href="#performance-optimization">Performance Optimization</a></li>
+      </ul>
+    </li>
+    <li><a href="#further-reading">Further Reading</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>WAL Truncate Threshold Configuration</h1>
+			<p class="lead"></p>
+			<p>This guide explains Litestream&rsquo;s 3-tier checkpoint strategy and how to configure WAL truncate thresholds to prevent write blocking while managing disk space. Understanding these settings is critical for production deployments, especially applications with long-lived read transactions.</p>
+<h2 id="background">Background<a href="#background" class="anchor" aria-hidden="true">#</a> </h2>
+<p>SQLite&rsquo;s WAL (write-ahead log) grows as database pages are modified. To prevent unbounded growth, the WAL must be periodically truncated through checkpointing. However, aggressive checkpointing can block database writes when read transactions are active.</p>
+<p>Litestream uses a carefully designed 3-tier checkpoint strategy that balances WAL size management with write availability:</p>
+<ol>
+<li><strong>Emergency truncation</strong> (checked first) prevents unbounded WAL growth at a high threshold (~500MB), but will block writers and readers when triggered</li>
+<li><strong>Non-blocking checkpoints</strong> run frequently to keep WAL small under normal operation (~4MB), never blocking the application</li>
+<li><strong>Time-based checkpoints</strong> provide regular cleanup even when WAL is small, also non-blocking</li>
+</ol>
+<p>This strategy prioritizes catching runaway WAL growth first, then attempts regular non-blocking cleanup. The emergency truncation threshold is set very high so that under normal conditions, the non-blocking checkpoints keep the WAL small and the blocking checkpoint rarely runs.</p>
+<h2 id="understanding-the-3-tier-checkpoint-strategy">Understanding the 3-Tier Checkpoint Strategy<a href="#understanding-the-3-tier-checkpoint-strategy" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream uses three complementary checkpoint mechanisms, evaluated in this order after each sync:</p>
+<h3 id="1-truncatepagen-truncate-blocking---emergency-brake">1. TruncatePageN (TRUNCATE, Blocking) - Emergency Brake<a href="#1-truncatepagen-truncate-blocking---emergency-brake" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">truncate-page-n: 121359  # Default</span><span class="p">:</span><span class="w"> </span><span class="l">~500MB</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><strong>Trigger:</strong> WAL exceeds 121,359 pages (~500MB)</li>
+<li><strong>Mode:</strong> TRUNCATE checkpoint via <code>sqlite3_wal_checkpoint_v2()</code></li>
+<li><strong>Behavior:</strong> <strong>Blocking</strong>—waits for all active writers AND readers to complete before truncating WAL</li>
+<li><strong>Purpose:</strong> Emergency brake to prevent unbounded WAL growth</li>
+<li><strong>Priority:</strong> Checked first to prevent runaway WAL growth</li>
+<li><strong>Important:</strong> Inherits RESTART semantics from SQLite, meaning both readers and writers can block this checkpoint</li>
+</ul>
+<h3 id="2-mincheckpointpagen-passive-non-blocking">2. MinCheckpointPageN (PASSIVE, Non-Blocking)<a href="#2-mincheckpointpagen-passive-non-blocking" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">min-checkpoint-page-count: 1000  # Default</span><span class="p">:</span><span class="w"> </span><span class="l">~4MB</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><strong>Trigger:</strong> WAL exceeds 1,000 pages (~4MB)</li>
+<li><strong>Mode:</strong> PASSIVE checkpoint via <code>sqlite3_wal_checkpoint_v2()</code></li>
+<li><strong>Behavior:</strong> Non-blocking—returns SQLITE_BUSY if readers or writers are active, which Litestream handles gracefully by logging &ldquo;passive checkpoint skipped&rdquo; and continuing without interrupting the application</li>
+<li><strong>Purpose:</strong> Keep WAL small under normal operation</li>
+</ul>
+<h3 id="3-checkpointinterval-passive-non-blocking">3. CheckpointInterval (PASSIVE, Non-Blocking)<a href="#3-checkpointinterval-passive-non-blocking" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">checkpoint-interval: 1m  # Default</span><span class="p">:</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="l">minute</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><strong>Trigger:</strong> 1 minute elapsed since last checkpoint attempt</li>
+<li><strong>Mode:</strong> PASSIVE checkpoint</li>
+<li><strong>Behavior:</strong> Non-blocking—returns SQLITE_BUSY if readers or writers are active, which Litestream handles gracefully</li>
+<li><strong>Purpose:</strong> Time-based cleanup even when WAL is small</li>
+<li><strong>Condition:</strong> Only runs if WAL has at least 1 page</li>
+</ul>
+<h2 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="yaml-configuration">YAML Configuration<a href="#yaml-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># Regular non-blocking checkpoint (~4MB threshold)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">1000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># Time-based non-blocking checkpoint (every 1 minute)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># Emergency blocking checkpoint (~500MB threshold)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">121359</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db</span><span class="w">
+</span></span></span></code></pre></div><h3 id="disabling-checkpoints">Disabling Checkpoints<a href="#disabling-checkpoints" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can disable time-based and emergency checkpoints by setting them to <code>0</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">             </span><span class="c"># Disable time-based checkpoints</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">                 </span><span class="c"># Disable TRUNCATE checkpoints</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Note:</strong> The <code>min-checkpoint-page-count</code> option cannot be set to <code>0</code>—Litestream requires a minimum value of at least <code>1</code>. PASSIVE checkpoints based on page count are always enabled.</p>
+<h2 id="trade-offs">Trade-offs<a href="#trade-offs" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="default-settings-all-enabled">Default Settings (All Enabled)<a href="#default-settings-all-enabled" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">1000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">121359</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Advantages:</strong></p>
+<ul>
+<li>Prevents unbounded WAL growth</li>
+<li>Regular PASSIVE checkpoints keep WAL small (~4MB typical)</li>
+<li>Fast restore times (smaller WAL)</li>
+<li>Minimal disk space usage</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>TruncatePageN can block writes and readers if WAL hits ~500MB (rare but possible)</li>
+<li>Long-running read transactions will cause extended blocking until they complete</li>
+<li>May cause write pauses in extreme cases</li>
+</ul>
+<p><strong>Best for:</strong> Most applications with typical read/write patterns and short-lived transactions</p>
+<h3 id="disabling-truncatepagen-recommended-for-long-read-apps">Disabling TruncatePageN (Recommended for Long-Read Apps)<a href="#disabling-truncatepagen-recommended-for-long-read-apps" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">1000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">  </span><span class="c"># Disable blocking checkpoints</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Advantages:</strong></p>
+<ul>
+<li>Never blocks writes under any circumstances</li>
+<li>Safe for applications with long-lived read transactions (minutes to hours)</li>
+<li>Eliminates &ldquo;priority inversion&rdquo; risk</li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul>
+<li>WAL can grow unbounded if read transactions prevent checkpointing</li>
+<li>Requires disk space monitoring and alerting</li>
+<li>Slower restore times if WAL grows large</li>
+<li>Increased storage costs</li>
+</ul>
+<p><strong>Best for:</strong></p>
+<ul>
+<li>Applications with long-lived read transactions</li>
+<li>Analytics workloads with long queries</li>
+<li>Zero-tolerance for write blocking</li>
+<li>Environments with ample disk space</li>
+</ul>
+<h3 id="disabling-time-based-and-emergency-checkpoints">Disabling Time-Based and Emergency Checkpoints<a href="#disabling-time-based-and-emergency-checkpoints" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Not recommended for most use cases.</strong> This configuration disables time-based and emergency checkpoints, leaving only page-count-based PASSIVE checkpoints active. Only use if:</p>
+<ul>
+<li>Your application manages checkpoints explicitly</li>
+<li>You have external monitoring for WAL growth</li>
+<li>You understand the risks of unbounded WAL growth</li>
+</ul>
+<h2 id="when-to-disable-truncatepagen">When to Disable TruncatePageN<a href="#when-to-disable-truncatepagen" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Consider setting <code>truncate-page-n: 0</code> if your application has:</p>
+<h3 id="long-lived-read-transactions">Long-Lived Read Transactions<a href="#long-lived-read-transactions" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Applications that hold read transactions for extended periods:</p>
+<ul>
+<li>Analytics queries (minutes to hours)</li>
+<li>Batch processing with long-running reads</li>
+<li>Reporting dashboards with complex queries</li>
+<li>Data export operations</li>
+</ul>
+<p><strong>Why it matters:</strong> TRUNCATE checkpoints will block writes until all read transactions complete. Long-lived readers cause extended write outages.</p>
+<h3 id="zero-write-blocking-tolerance">Zero Write-Blocking Tolerance<a href="#zero-write-blocking-tolerance" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Mission-critical write paths that cannot tolerate any blocking:</p>
+<ul>
+<li>Real-time data ingestion</li>
+<li>High-frequency trading systems</li>
+<li>IoT sensor data collection</li>
+<li>Live monitoring systems</li>
+</ul>
+<p><strong>Trade-off:</strong> Accept unbounded WAL growth in exchange for guaranteed write availability.</p>
+<h3 id="disk-space-monitoring">Disk Space Monitoring<a href="#disk-space-monitoring" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If you disable TruncatePageN, you <strong>must</strong> implement:</p>
+<ol>
+<li><strong>Disk space monitoring</strong> - Alert when WAL size exceeds thresholds</li>
+<li><strong>WAL size tracking</strong> - Monitor <code>&lt;database&gt;-wal</code> file size</li>
+<li><strong>Automated cleanup</strong> - Stop long-lived read transactions or restart application</li>
+<li><strong>Capacity planning</strong> - Provision disk space for worst-case WAL growth</li>
+</ol>
+<p>Example monitoring script:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="nv">WAL_FILE</span><span class="o">=</span><span class="s2">&#34;/path/to/db-wal&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Cross-platform file size (works on Linux and macOS)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[[</span> <span class="s2">&#34;</span><span class="nv">$OSTYPE</span><span class="s2">&#34;</span> <span class="o">==</span> <span class="s2">&#34;darwin&#34;</span>* <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">WAL_SIZE</span><span class="o">=</span><span class="k">$(</span>stat -f%z <span class="s2">&#34;</span><span class="nv">$WAL_FILE</span><span class="s2">&#34;</span> 2&gt;/dev/null <span class="o">||</span> <span class="nb">echo</span> 0<span class="k">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="nv">WAL_SIZE</span><span class="o">=</span><span class="k">$(</span>stat -c%s <span class="s2">&#34;</span><span class="nv">$WAL_FILE</span><span class="s2">&#34;</span> 2&gt;/dev/null <span class="o">||</span> <span class="nb">echo</span> 0<span class="k">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">WAL_SIZE_MB</span><span class="o">=</span><span class="k">$((</span>WAL_SIZE <span class="o">/</span> <span class="m">1024</span> <span class="o">/</span> <span class="m">1024</span><span class="k">))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> <span class="nv">$WAL_SIZE_MB</span> -gt <span class="m">5000</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;CRITICAL: WAL size is </span><span class="si">${</span><span class="nv">WAL_SIZE_MB</span><span class="si">}</span><span class="s2">MB&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1"># Alert or take action</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span></code></pre></div><h2 id="upgrading-to-v050">Upgrading to v0.5.0<a href="#upgrading-to-v050" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="configuration-changes">Configuration Changes<a href="#configuration-changes" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream v0.5.0 replaces the <code>max-checkpoint-page-count</code> field with <code>truncate-page-n</code> for better control over blocking checkpoints.</p>
+<p><strong>If you have <code>max-checkpoint-page-count</code> in your configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># ❌ This field no longer exists</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">max-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">10000</span><span class="w">  </span><span class="c"># Remove this line</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Update to the new configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">1000</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">121359</span><span class="w">  </span><span class="c"># Higher threshold (~500MB)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c"># Or set to 0 to disable blocking checkpoints entirely</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Choose your configuration based on your needs:</strong></p>
+<ul>
+<li><strong>Applications with long-lived read transactions:</strong> Set <code>truncate-page-n: 0</code></li>
+<li><strong>Need to limit WAL size:</strong> Use default <code>truncate-page-n: 121359</code></li>
+<li><strong>Zero tolerance for write blocking:</strong> Set <code>truncate-page-n: 0</code></li>
+</ul>
+<h3 id="verification">Verification<a href="#verification" class="anchor" aria-hidden="true">#</a> </h3>
+<p>After upgrading, verify checkpoint behavior:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Check Litestream logs for checkpoint activity</span>
+</span></span><span class="line"><span class="cl">tail -f /var/log/litestream.log <span class="p">|</span> grep checkpoint
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Monitor WAL file size</span>
+</span></span><span class="line"><span class="cl">watch -n <span class="m">5</span> <span class="s1">&#39;ls -lh /path/to/db-wal&#39;</span>
+</span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="detecting-wal-growth-issues">Detecting WAL Growth Issues<a href="#detecting-wal-growth-issues" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>WAL file continuously growing</li>
+<li>Disk space warnings</li>
+<li>Slow restore times</li>
+</ul>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Check WAL size</span>
+</span></span><span class="line"><span class="cl">ls -lh /path/to/db-wal
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Check for long-lived read transactions (if you have SQLite access)</span>
+</span></span><span class="line"><span class="cl">sqlite3 /path/to/db <span class="s2">&#34;PRAGMA wal_checkpoint(PASSIVE);&#34;</span>
+</span></span></code></pre></div><p><strong>Solutions:</strong></p>
+<ol>
+<li>If WAL is large but not growing: Wait for read transactions to complete</li>
+<li>If WAL continuously grows: Set <code>truncate-page-n: 121359</code> (or lower)</li>
+<li>If you have long-lived reads: Keep <code>truncate-page-n: 0</code> and monitor disk</li>
+</ol>
+<h3 id="detecting-write-blocking">Detecting Write Blocking<a href="#detecting-write-blocking" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Application write timeouts</li>
+<li>&ldquo;database is locked&rdquo; errors</li>
+<li>Increased write latency</li>
+<li>Blocking occurs when TRUNCATE checkpoint waits for active readers and writers</li>
+</ul>
+<p><strong>Log Messages:</strong></p>
+<pre tabindex="0"><code>checkpoint truncate: pages=121359 mode=TRUNCATE
+</code></pre><p><strong>Root Cause:</strong>
+TRUNCATE checkpoints inherit RESTART semantics from SQLite, meaning they wait for both all active readers AND writers to complete before truncating the WAL. Long-lived read transactions will cause extended blocking periods.</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Increase <code>truncate-page-n</code> threshold: <code>truncate-page-n: 250000</code></li>
+<li>Disable blocking checkpoints: <code>truncate-page-n: 0</code></li>
+<li>Reduce read transaction duration in your application</li>
+<li>Review application for long-running queries or batch operations</li>
+</ol>
+<h3 id="performance-optimization">Performance Optimization<a href="#performance-optimization" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Too many PASSIVE checkpoint attempts:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Increase threshold to reduce checkpoint frequency</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">5000</span><span class="w">  </span><span class="c"># ~20MB</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m         </span><span class="w"> </span><span class="c"># Every 5 minutes</span><span class="w">
+</span></span></span></code></pre></div><p><strong>WAL growing too large:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Decrease thresholds for more aggressive checkpointing</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">min-checkpoint-page-count</span><span class="p">:</span><span class="w"> </span><span class="m">500</span><span class="w">   </span><span class="c"># ~2MB</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s        </span><span class="w"> </span><span class="c"># Every 30 seconds</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">truncate-page-n</span><span class="p">:</span><span class="w"> </span><span class="m">50000</span><span class="w">           </span><span class="c"># ~200MB emergency threshold</span><span class="w">
+</span></span></span></code></pre></div><h2 id="further-reading">Further Reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="/reference/config">Configuration Reference</a> - All configuration options</li>
+<li><a href="/how-it-works">How It Works</a> - Litestream architecture and checkpointing</li>
+<li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
+<li><a href="https://www.sqlite.org/wal.html">SQLite WAL Mode</a> - Understanding WAL internals</li>
+<li><a href="https://www.sqlite.org/c3ref/wal_checkpoint_v2.html">SQLite Checkpointing</a> - Checkpoint modes explained</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/nats/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Replicating to NATS JetStream
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
