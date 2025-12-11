@@ -23,3 +23,28 @@ go install ./cmd/litestream
 
 This will install `litestream` into your `$GOPATH/bin` directory.
 
+
+## Building litestream-vfs (Optional)
+
+The VFS extension provides read-only access to replicated databases directly
+from object storage. It requires CGO and is built separately from the main
+binary.
+
+### Prerequisites
+
+- CGO toolchain (gcc/clang)
+- Go 1.25+
+
+### Build command
+
+```sh
+make vfs   # builds dist/litestream-vfs.so (preferred)
+
+# Manual Linux build:
+CGO_ENABLED=1 go build -tags "vfs,SQLITE3VFS_LOADABLE_EXT" -buildmode=c-archive -o dist/litestream-vfs.a ./cmd/litestream-vfs
+cp dist/litestream-vfs.h src/litestream-vfs.h
+gcc -DSQLITE3VFS_LOADABLE_EXT -fPIC -shared -o dist/litestream-vfs.so src/litestream-vfs.c dist/litestream-vfs.a -lpthread -ldl -lm
+```
+
+Use `.dylib` (macOS) or `.dll` (Windows) if your platform expects it. See the
+[VFS guide](/guides/vfs) for usage and language-specific examples.

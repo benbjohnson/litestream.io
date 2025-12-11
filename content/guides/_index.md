@@ -30,6 +30,7 @@ different platforms.
 - [Amazon S3](/guides/s3)
 - [S3 Advanced Configuration](/guides/s3-advanced)
 - [S3-Compatible Services](/guides/s3-compatible)
+- [VFS Read Replicas](/guides/vfs)
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)
