@@ -156,6 +156,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/docs/">Help</a>
@@ -218,6 +219,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#sftp-replica">SFTP replica</a></li>
         <li><a href="#nats-jetstream-object-store-replica">NATS JetStream Object Store replica</a></li>
         <li><a href="#alibaba-cloud-oss-replica">Alibaba Cloud OSS replica</a></li>
+        <li><a href="#webdav-replica">WebDAV replica</a></li>
         <li><a href="#legacy-multiple-replicas">Legacy Multiple Replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
         <li><a href="#validation-interval">Validation interval</a></li>
@@ -1020,6 +1022,45 @@ account key file, or use workload identity in GKE environments.</p>
 <li><code>concurrency</code>—Number of parallel upload workers (default: 1)</li>
 </ul>
 <p>See the <a href="https://litestream.io/guides/alibaba-oss/">Alibaba Cloud OSS Guide</a> for detailed setup instructions.</p>
+<h3 id="webdav-replica">WebDAV replica<a href="#webdav-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ WebDAV replicas allow replication to any RFC 4918 compliant WebDAV server,
+including Nextcloud, ownCloud, and Apache mod_dav.</p>
+<p>WebDAV replicas can be configured using the <code>url</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">webdavs://user:password@example.com/backup/db</span><span class="w">
+</span></span></span></code></pre></div><p>Or with individual fields:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-url</span><span class="p">:</span><span class="w"> </span><span class="l">https://example.com/webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-username</span><span class="p">:</span><span class="w"> </span><span class="l">${WEBDAV_USERNAME}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-password</span><span class="p">:</span><span class="w"> </span><span class="l">${WEBDAV_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/litestream/backups</span><span class="w">
+</span></span></span></code></pre></div><p>The following settings are specific to WebDAV replicas:</p>
+<ul>
+<li><code>webdav-url</code>—WebDAV server URL (use <code>https://</code> for production)</li>
+<li><code>webdav-username</code>—Username for HTTP Basic authentication</li>
+<li><code>webdav-password</code>—Password for HTTP Basic authentication</li>
+<li><code>path</code>—Remote path where replica files will be stored</li>
+</ul>
+<p><strong>URL Schemes:</strong></p>
+<ul>
+<li><code>webdav://</code>—HTTP (not recommended for production)</li>
+<li><code>webdavs://</code>—HTTPS (recommended for production)</li>
+</ul>
+<p><strong>Environment Variables:</strong></p>
+<p>You can use environment variables with standard Litestream substitution:</p>
+<ul>
+<li><code>${WEBDAV_USERNAME}</code> or <code>${LITESTREAM_WEBDAV_USERNAME}</code></li>
+<li><code>${WEBDAV_PASSWORD}</code> or <code>${LITESTREAM_WEBDAV_PASSWORD}</code></li>
+</ul>
+<p>See the <a href="https://litestream.io/guides/webdav/">WebDAV Guide</a> for detailed setup instructions.</p>
 <h3 id="legacy-multiple-replicas">Legacy Multiple Replicas<a href="#legacy-multiple-replicas" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>

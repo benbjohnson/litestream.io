@@ -14,14 +14,14 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Replicating to an SFTP Server - Litestream</title>
+  <title>Replicating to a WebDAV Server - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/guides/sftp/">
+<link rel="canonical" href="https://litestream.io/guides/webdav/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Replicating to an SFTP Server">
-<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running.
-Usage Command line usage You can specify your SFTP replica using a replica URL on the command line. For example, you can replicate a database to an SFTP server with the following command. Replace the placeholders with your username, password, server, &amp; path.">
+<meta name="twitter:title" content="Replicating to a WebDAV Server">
+<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to a remote WebDAV server. WebDAV is a widely-supported protocol that allows you to store backups on services like Nextcloud, ownCloud, or any RFC 4918 compliant WebDAV server.
+Usage Command line usage You can specify your WebDAV replica using a replica URL on the command line. For example, you can replicate a database to a WebDAV server with the following command.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -45,8 +45,8 @@ Usage Command line usage You can specify your SFTP replica using a replica URL o
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Sftp",
-        "item": "https:\/\/litestream.io\/guides\/sftp\/"
+        "name": "Webdav",
+        "item": "https:\/\/litestream.io\/guides\/webdav\/"
     }]
 }
 </script>
@@ -153,9 +153,9 @@ Usage Command line usage You can specify your SFTP replica using a replica URL o
     <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
-    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
     </ul>
   <h3>
     <a href="https://litestream.io/docs/">Help</a>
@@ -192,68 +192,171 @@ Usage Command line usage You can specify your SFTP replica using a replica URL o
         <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
+    <li><a href="#url-schemes">URL schemes</a></li>
+    <li><a href="#supported-webdav-servers">Supported WebDAV servers</a></li>
+    <li><a href="#nextcloud-setup">Nextcloud setup</a>
+      <ul>
+        <li><a href="#1-create-an-app-password">1. Create an app password</a></li>
+        <li><a href="#2-find-your-webdav-url">2. Find your WebDAV URL</a></li>
+        <li><a href="#3-configure-litestream">3. Configure Litestream</a></li>
+      </ul>
+    </li>
+    <li><a href="#owncloud-setup">ownCloud setup</a></li>
+    <li><a href="#security-best-practices">Security best practices</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#connection-errors">Connection errors</a></li>
+        <li><a href="#testing-connectivity">Testing connectivity</a></li>
+        <li><a href="#debug-logging">Debug logging</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Replicating to an SFTP Server</h1>
+		<h1>Replicating to a WebDAV Server</h1>
 			<p class="lead"></p>
-			<p>This guide will show you how to use Litestream to replicate to a remote SFTP
-server. You will need to have an SFTP server already set up and running.</p>
+			<p>This guide will show you how to use Litestream to replicate to a remote WebDAV
+server. WebDAV is a widely-supported protocol that allows you to store backups
+on services like Nextcloud, ownCloud, or any RFC 4918 compliant WebDAV server.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
-<p>You can specify your SFTP replica using a replica URL on the command line. For
-example, you can replicate a database to an SFTP server with the following
+<p>You can specify your WebDAV replica using a replica URL on the command line.
+For example, you can replicate a database to a WebDAV server with the following
 command. <em>Replace the placeholders with your username, password, server, &amp; path.</em></p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db sftp://USER:PASSWORD@HOST:PORT/PATH
-</span></span></code></pre></div><p>You can later restore your database from SFTP to a local <code>my.db</code> path with the
-following command.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db sftp://USER:PASSWORD@HOST:PORT/PATH
-</span></span></code></pre></div><p>Note that the port is optional if you are using the default SSH port (<code>22</code>).
-Also note that that the <code>PATH</code> should be an absolute path and not relative to
-the present working directory. If you need to use a relative path, you must use
-a configuration file.</p>
-<h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db webdav://USER:PASSWORD@HOST/PATH
+</span></span></code></pre></div><p>For HTTPS connections (recommended for production), use the <code>webdavs://</code> scheme:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db webdavs://USER:PASSWORD@HOST/PATH
+</span></span></code></pre></div><p>You can later restore your database from WebDAV to a local <code>my.db</code> path with
+the following command:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db webdavs://USER:PASSWORD@HOST/PATH
+</span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
-file</a>. You can configure a replica for your database using the <code>url</code> format.</p>
+file</a>. You can configure a replica for your database using the <code>url</code> format:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER:PASSWORD@HOST:PORT/PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">webdavs://USER:PASSWORD@HOST/PATH</span><span class="w">
 </span></span></span></code></pre></div><p>Or you can expand your configuration into multiple fields:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">     </span><span class="l">sftp</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">host</span><span class="p">:</span><span class="w">     </span><span class="l">HOST:PORT</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">user</span><span class="p">:</span><span class="w">     </span><span class="l">USER</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">PATH</span><span class="w">
-</span></span></span></code></pre></div><p>The <code>path</code> is treated as a relative path from the present working directory
-unless there is a leading slash.</p>
-<p>You can also specify an SSH key file path instead of using a password The key
-file path should point to your private key.</p>
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">           </span><span class="l">webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-url</span><span class="p">:</span><span class="w">     </span><span class="l">https://example.com/webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-username</span><span class="p">:</span><span class="w"> </span><span class="l">USER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">           </span><span class="l">/litestream/backups</span><span class="w">
+</span></span></span></code></pre></div><p>Using environment variables for credentials is recommended:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER@HOST:PORT/PATH</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/id_rsa</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">            </span><span class="l">webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-url</span><span class="p">:</span><span class="w">      </span><span class="l">https://example.com/webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-username</span><span class="p">:</span><span class="w"> </span><span class="l">${WEBDAV_USERNAME}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-password</span><span class="p">:</span><span class="w"> </span><span class="l">${WEBDAV_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">            </span><span class="l">/litestream/backups</span><span class="w">
+</span></span></span></code></pre></div><h2 id="url-schemes">URL schemes<a href="#url-schemes" class="anchor" aria-hidden="true">#</a> </h2>
+<p>WebDAV replicas support two URL schemes:</p>
+<ul>
+<li><code>webdav://</code> — HTTP (not recommended for production)</li>
+<li><code>webdavs://</code> — HTTPS (recommended for production)</li>
+</ul>
+<p>Always use <code>webdavs://</code> in production to encrypt data in transit.</p>
+<h2 id="supported-webdav-servers">Supported WebDAV servers<a href="#supported-webdav-servers" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The following servers are tested and fully supported:</p>
+<ul>
+<li><strong>Nextcloud</strong> — See <a href="#nextcloud-setup">Nextcloud setup</a> below</li>
+<li><strong>ownCloud</strong> — Similar configuration to Nextcloud</li>
+<li><strong>Apache mod_dav</strong> — Standard WebDAV module for Apache</li>
+</ul>
+<p>The following servers are expected to work with any RFC 4918 compliant WebDAV
+implementation:</p>
+<ul>
+<li>Nginx with ngx_http_dav_module</li>
+<li>Caddy with webdav plugin</li>
+<li>Synology NAS WebDAV Server</li>
+<li>Other self-hosted WebDAV servers</li>
+</ul>
+<h2 id="nextcloud-setup">Nextcloud setup<a href="#nextcloud-setup" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Nextcloud provides WebDAV access to your files. To configure Litestream with
+Nextcloud:</p>
+<h3 id="1-create-an-app-password">1. Create an app password<a href="#1-create-an-app-password" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For security and performance, use an app password instead of your main account
+password:</p>
+<ol>
+<li>Log into your Nextcloud instance</li>
+<li>Go to <strong>Settings</strong> → <strong>Security</strong> → <strong>Devices &amp; sessions</strong></li>
+<li>Enter a name like &ldquo;Litestream&rdquo; and click <strong>Create new app password</strong></li>
+<li>Save the generated password securely</li>
+</ol>
+<h3 id="2-find-your-webdav-url">2. Find your WebDAV URL<a href="#2-find-your-webdav-url" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The WebDAV URL format for Nextcloud is:</p>
+<pre tabindex="0"><code>https://your-nextcloud.com/remote.php/dav/files/USERNAME/
+</code></pre><p>You can also find this URL in Nextcloud by clicking the gear icon in the
+lower-left corner of the Files app.</p>
+<h3 id="3-configure-litestream">3. Configure Litestream<a href="#3-configure-litestream" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Create a backup directory in Nextcloud (e.g., <code>litestream-backups</code>), then
+configure Litestream:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">            </span><span class="l">webdav</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-url</span><span class="p">:</span><span class="w">      </span><span class="l">https://cloud.example.com/remote.php/dav/files/myuser</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-username</span><span class="p">:</span><span class="w"> </span><span class="l">${NEXTCLOUD_USERNAME}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">webdav-password</span><span class="p">:</span><span class="w"> </span><span class="l">${NEXTCLOUD_APP_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">            </span><span class="l">/litestream-backups</span><span class="w">
+</span></span></span></code></pre></div><p>Set your environment variables before starting Litestream:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">NEXTCLOUD_USERNAME</span><span class="o">=</span><span class="s2">&#34;myuser&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">NEXTCLOUD_APP_PASSWORD</span><span class="o">=</span><span class="s2">&#34;xxxxx-xxxxx-xxxxx-xxxxx-xxxxx&#34;</span>
+</span></span><span class="line"><span class="cl">litestream replicate -config /etc/litestream.yml
+</span></span></code></pre></div><h2 id="owncloud-setup">ownCloud setup<a href="#owncloud-setup" class="anchor" aria-hidden="true">#</a> </h2>
+<p>ownCloud uses the same WebDAV URL format as Nextcloud:</p>
+<pre tabindex="0"><code>https://your-owncloud.com/remote.php/dav/files/USERNAME/
+</code></pre><p>Follow the same steps as Nextcloud to create an app password and configure
+Litestream.</p>
+<h2 id="security-best-practices">Security best practices<a href="#security-best-practices" class="anchor" aria-hidden="true">#</a> </h2>
+<ol>
+<li><strong>Always use HTTPS</strong> — Use the <code>webdavs://</code> scheme to encrypt data in transit</li>
+<li><strong>Use environment variables</strong> — Never commit credentials to configuration files</li>
+<li><strong>Use app-specific passwords</strong> — For Nextcloud/ownCloud, create dedicated app
+passwords rather than using your main account password</li>
+<li><strong>Restrict permissions</strong> — Litestream only needs write access to its backup
+directory; limit access accordingly</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="connection-errors">Connection errors<a href="#connection-errors" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li><strong>&ldquo;webdav url required&rdquo;</strong> — The WebDAV URL is not specified in the configuration</li>
+<li><strong>&ldquo;cannot connect to server&rdquo;</strong> — Verify the URL, check network connectivity
+and firewall rules</li>
+<li><strong>Authentication failures</strong> — Verify username and password; check server logs
+for details</li>
+<li><strong>TLS/SSL errors</strong> — Ensure the server certificate is valid; use <code>webdavs://</code>
+for HTTPS</li>
+</ul>
+<h3 id="testing-connectivity">Testing connectivity<a href="#testing-connectivity" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can test WebDAV connectivity using curl:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">curl -u username:password https://example.com/webdav/
+</span></span></code></pre></div><h3 id="debug-logging">Debug logging<a href="#debug-logging" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Enable debug logging in Litestream to see detailed request information:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
 </span></span></span></code></pre></div>
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/guides/linode/">
+	<a href="https://litestream.io/guides/nats/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Replicating to Linode Object Storage
+					&larr; Replicating to NATS JetStream
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/guides/nats/">
+	<a class="ml-auto" href="https://litestream.io/guides/wal-truncate-threshold/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Replicating to NATS JetStream &rarr;
+					WAL Truncate Threshold Configuration &rarr;
 				</div>
 			</div>
 		</a>
