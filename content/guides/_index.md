@@ -16,6 +16,10 @@ different platforms.
 - [Running as a Systemd service](/guides/systemd)
 - [Running as a Windows service](/guides/windows)
 
+### Configuration guides
+
+- [Global Replica Defaults](/guides/global-defaults)
+
 ### Migration guides
 
 - [AWS SDK v2 Migration](/guides/aws-sdk-v2)

@@ -29,6 +29,89 @@ expansion.
 
 ## Global settings
 
+### Global replica defaults
+
+{{< since version="0.5.0" >}} Global replica defaults allow you to set default
+settings at the top level of your configuration file. These defaults are
+automatically inherited by all replicas while still allowing per-replica
+overrides. This eliminates configuration duplication across multiple databases.
+
+See the [Global Replica Defaults Guide]({{< ref "global-defaults" >}}) for
+detailed usage examples and best practices.
+
+**Timing settings** (apply to all replica types):
+
+```yaml
+sync-interval: 1s
+validation-interval: 6h
+```
+
+Note: Snapshot and retention settings are configured separately under the
+`snapshot:` section, not as global replica defaults.
+
+**S3 and S3-compatible settings:**
+
+```yaml
+access-key-id: AKIAxxxxxxxxxxxxxxxx
+secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+region: us-west-2
+endpoint: https://custom.endpoint.com
+bucket: default-bucket
+force-path-style: false
+skip-verify: false
+```
+
+**Azure Blob Storage settings:**
+
+```yaml
+account-name: myazureaccount
+account-key: ${AZURE_ACCOUNT_KEY}
+```
+
+**SFTP settings:**
+
+```yaml
+host: backup.example.com:22
+user: backupuser
+password: ${SFTP_PASSWORD}
+key-path: /etc/litestream/sftp_key
+concurrent-writes: 4
+```
+
+**NATS JetStream settings:**
+
+```yaml
+username: litestream
+password: ${NATS_PASSWORD}
+tls: true
+root-cas:
+  - /etc/ssl/certs/nats-ca.crt
+max-reconnects: -1
+reconnect-wait: 2s
+timeout: 10s
+```
+
+Per-replica settings always override global defaults:
+
+```yaml
+# Global defaults
+region: us-west-2
+sync-interval: 30s
+
+dbs:
+  - path: /db1.sqlite
+    replica:
+      type: s3
+      bucket: bucket1
+      # Uses global region and sync-interval
+
+  - path: /db2.sqlite
+    replica:
+      type: s3
+      bucket: bucket2
+      region: us-east-1  # Overrides global region
+```
+
 ### AWS credentials
 
 If you are using AWS S3 replication, it can be useful to specify your
