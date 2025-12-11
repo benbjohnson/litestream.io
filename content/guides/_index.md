@@ -39,3 +39,4 @@ different platforms.
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)
 - [Tigris (Fly.io)](/guides/tigris)
+- [WebDAV Server](/guides/webdav)
