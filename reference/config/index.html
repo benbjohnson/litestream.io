@@ -189,6 +189,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li>
       <ul>
         <li><a href="#variable-expansion">Variable expansion</a></li>
+        <li><a href="#environment-variables">Environment Variables</a></li>
       </ul>
     </li>
     <li><a href="#global-settings">Global settings</a>
@@ -254,6 +255,106 @@ is set then it will be replaced with an empty string.</p>
 dollar sign followed by characters—for example, a password. In this case, you
 can set the <code>-no-expand-env</code> flag on any <code>litestream</code> command to disable
 expansion.</p>
+<h3 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream supports environment variables for configuring authentication credentials.
+There are two types:</p>
+<ol>
+<li><strong>Auto-read variables</strong> — Automatically read and applied by Litestream</li>
+<li><strong>Expansion-only variables</strong> — Must be explicitly referenced in config using <code>${VAR}</code> syntax</li>
+</ol>
+<p>This distinction avoids the need to embed sensitive data in configuration files, which is
+especially useful in containerized environments, Kubernetes, and secret management systems.</p>
+<h4 id="auto-read-environment-variables">Auto-read Environment Variables<a href="#auto-read-environment-variables" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Litestream automatically reads and applies these variables without config changes:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AWS_ACCESS_KEY_ID</code></td>
+<td>AWS S3 access key</td>
+<td>Standard AWS SDK variable</td>
+</tr>
+<tr>
+<td><code>AWS_SECRET_ACCESS_KEY</code></td>
+<td>AWS S3 secret key</td>
+<td>Standard AWS SDK variable</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_ACCESS_KEY_ID</code></td>
+<td>AWS S3 access key</td>
+<td>Sets <code>AWS_ACCESS_KEY_ID</code> if unset; config file takes precedence</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_SECRET_ACCESS_KEY</code></td>
+<td>AWS S3 secret key</td>
+<td>Sets <code>AWS_SECRET_ACCESS_KEY</code> if unset; config file takes precedence</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_AZURE_ACCOUNT_KEY</code></td>
+<td>Azure Blob Storage key</td>
+<td>Read by ABS replica if not specified in config</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_CONFIG</code></td>
+<td>Config file path</td>
+<td>Overrides default <code>/etc/litestream.yml</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>AWS Credential Precedence (highest to lowest):</strong></p>
+<ol>
+<li>Credentials in config file (replica-level or global)</li>
+<li><code>AWS_ACCESS_KEY_ID</code> / <code>AWS_SECRET_ACCESS_KEY</code> environment variables</li>
+<li><code>LITESTREAM_ACCESS_KEY_ID</code> / <code>LITESTREAM_SECRET_ACCESS_KEY</code> environment variables</li>
+</ol>
+<h4 id="expansion-only-variables-must-use-var-syntax">Expansion-only Variables (must use <code>${VAR}</code> syntax)<a href="#expansion-only-variables-must-use-var-syntax" class="anchor" aria-hidden="true">#</a> </h4>
+<p>These variables are <strong>not</strong> automatically read. To use them, explicitly reference them
+in your config file using <code>${VAR}</code> syntax. Litestream will expand them before parsing
+the configuration:</p>
+<p><strong>Examples:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/mydb.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/my-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/mydb2.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">sftp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">backup.example.com:22</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l">backup</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${SFTP_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backups/mydb2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/mydb3.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p>Set the variables before running Litestream:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">NATS_PASSWORD</span><span class="o">=</span>your-nats-password
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">SFTP_PASSWORD</span><span class="o">=</span>your-sftp-password
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>your-key-id
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-key
+</span></span><span class="line"><span class="cl">litestream replicate
+</span></span></code></pre></div><h4 id="google-cloud-storage-authentication">Google Cloud Storage Authentication<a href="#google-cloud-storage-authentication" class="anchor" aria-hidden="true">#</a> </h4>
+<p>GCS authentication uses Google&rsquo;s <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials (ADC)</a> chain.
+The <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable is <strong>optional</strong> — use it only when explicitly providing a service account key file.</p>
+<p>ADC automatically supports:</p>
+<ul>
+<li>GKE workload identity (recommended for Kubernetes)</li>
+<li>Metadata server (for Google Compute Engine instances)</li>
+<li><code>gcloud auth application-default login</code> (local development)</li>
+<li>Service account key file (via <code>GOOGLE_APPLICATION_CREDENTIALS</code>)</li>
+</ul>
 <h2 id="global-settings">Global settings<a href="#global-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="global-replica-defaults">Global replica defaults<a href="#global-replica-defaults" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
@@ -482,38 +583,18 @@ by their absolute path.</p>
 <li><code>&quot;oss&quot;</code> replicates a database to an Alibaba Cloud OSS bucket.</li>
 <li><code>&quot;s3&quot;</code> replicates a database to an S3-compatible bucket.</li>
 <li><code>&quot;sftp&quot;</code> replicates a database to a remote server via SFTP.</li>
+<li><code>&quot;webdav&quot;</code> replicates a database to a WebDAV server.</li>
 </ul>
-<p>All replicas have unique name which is specified by the <code>&quot;name&quot;</code> field. If a
-name is not specified then the name defaults to the replica type. The name is
-only needed when using multiple replicas of the same type on a database.</p>
-<p>The following replica settings are also available for all replica types:</p>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Each database now supports only a single replica. The <code>name</code> field
+is deprecated legacy from v0.3.x where multiple replicas were supported.</p>
+<p>The following replica settings are available for all replica types:</p>
 <ul>
 <li>
 <p><code>url</code>—Short-hand form of specifying a replica location. Setting this field
 will apply changes to multiples fields including <code>bucket</code>, <code>path</code>, <code>region</code>, etc.</p>
-</li>
-<li>
-<p><code>retention</code>—The amount of time that snapshot &amp; LTX files will be kept. After
-the retention period, a new snapshot will be created and the old one will be
-removed. LTX files that exist before the oldest snapshot will also be removed.
-Defaults to <code>24h</code>.</p>
-</li>
-<li>
-<p><code>retention-check-interval</code>—Specifies how often Litestream will check if
-retention needs to be enforced. Defaults to <code>1h</code>.</p>
-</li>
-<li>
-<p><code>snapshot-interval</code>—Specifies how often new snapshots will be created. This is
-used to reduce the time to restore since newer snapshots will have fewer LTX
-frames to apply. Retention still applies to these snapshots.</p>
-<p>If you do not set a snapshot interval then a new snapshot will be created
-whenever retention is performed. Retention occurs every 24 hours by default.</p>
-</li>
-<li>
-<p><code>validation-interval</code>—When specified, Litestream will automatically restore
-and validate that the data on the replica matches the local copy. Disabled by
-default. Enabling this will significantly increase the cost of running
-Litestream as S3 services charge for downloads.</p>
 </li>
 <li>
 <p><code>sync-interval</code>—Frequency in which frames are pushed to the replica. Defaults
@@ -522,16 +603,18 @@ increase cloud storage costs due to more frequent PUT requests. See the
 <a href="#cost-considerations">Cost Considerations</a> section below for details.</p>
 </li>
 <li>
-<p><code>age</code>—Client-side encryption with <a href="https://age-encryption.org">age</a>, see
-<a href="#encryption">Encryption</a> for configuration details. Defaults to off.</p>
+<p><code>validation-interval</code>—<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Currently non-functional in v0.5.x. When enabled in future versions, Litestream will automatically restore and validate that replica data matches the local copy. This will significantly increase cloud storage costs due to restore downloads.</div>
+</div></p>
 </li>
 </ul>
 <h3 id="s3-replica">S3 replica<a href="#s3-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
 </span></span></span></code></pre></div><p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
 </span>
@@ -548,18 +631,18 @@ configuration and IAM policy examples.</p>
 <p>You can break this out into separate fields as well:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">s3</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybkt.litestream.io</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
-</span></span></span></code></pre></div><p>In addition, you can specify the region and AWS credentials per-replica:</p>
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybkt.litestream.io</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span></code></pre></div><p>In addition, you can specify the region and AWS credentials:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
 </span></span></span></code></pre></div><p>The following settings are specific to S3 replicas:</p>
 <ul>
 <li>
@@ -726,9 +809,9 @@ command-line environment variables:</p>
 </span></span><span class="line"><span class="cl">litestream replicate mydb.db s3://mybkt.localhost:9000/mydb.db
 </span></span></code></pre></div><h4 id="remote-minio-server">Remote MinIO Server<a href="#remote-minio-server" class="anchor" aria-hidden="true">#</a> </h4>
 <p>For remote MinIO servers, you <strong>must</strong> use a configuration file and specify the
-<code>endpoint</code> parameter. Environment variables take precedence over config file
-values, so ensure any conflicting environment variables are unset before running
-Litestream.</p>
+<code>endpoint</code> parameter. Config file values take precedence over environment variables,
+so credentials specified in the config file will override any <code>AWS_*</code> or <code>LITESTREAM_*</code>
+environment variables.</p>
 <p>Configuration file example with remote MinIO:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/mydb.db</span><span class="w">
@@ -770,17 +853,18 @@ change these credentials in production.</p>
 to your replica configuration (not recommended for production).</p>
 </li>
 <li>
-<p><strong>Environment Variables</strong>: Environment variables take precedence over config
-file values. If you&rsquo;re using a config file with inline credentials, unset any
-conflicting <code>LITESTREAM_*</code> or <code>AWS_*</code> environment variables first.</p>
+<p><strong>Environment Variables</strong>: Config file values take precedence over environment
+variables. If you specify credentials in the config file (like <code>access-key-id</code>),
+they will override any <code>LITESTREAM_*</code> or <code>AWS_*</code> environment variables. To use
+environment variables instead, leave the config fields empty.</p>
 </li>
 </ol>
 <h3 id="file-replica">File replica<a href="#file-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>File replicas can be configured using the <code>&quot;path&quot;</code> field:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/db</span><span class="w">
 </span></span></span></code></pre></div><p>If no <code>&quot;type&quot;</code> field is specified and a <code>&quot;url&quot;</code> is not used then <code>&quot;file&quot;</code> is
 assumed.</p>
 <h3 id="google-cloud-storage-gcs-replica">Google Cloud Storage (GCS) replica<a href="#google-cloud-storage-gcs-replica" class="anchor" aria-hidden="true">#</a> </h3>
@@ -822,7 +906,7 @@ account key file, or use workload identity in GKE environments.</p>
 </span></span></span></code></pre></div><p>The following settings are specific to ABS replicas:</p>
 <ul>
 <li><code>account-name</code>—Azure storage account name</li>
-<li><code>account-key</code>—Azure storage account key or use <code>AZURE_STORAGE_KEY</code> environment variable</li>
+<li><code>account-key</code>—Azure storage account key. Can be set via <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable or injected via <code>${VAR}</code> syntax in config</li>
 <li><code>bucket</code>—Container name within the storage account</li>
 <li><code>path</code>—Path within the container</li>
 <li><code>endpoint</code>—Custom endpoint URL (optional)</li>
@@ -960,31 +1044,19 @@ This has been simplified to use a single <code>replica</code> field:</p>
 cross-region replication features or multiple Litestream instances.</p>
 <h3 id="retention-period">Retention period<a href="#retention-period" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Replicas maintain a snapshot of the database as well as a contiguous sequence of
-SQLite WAL page updates. These updates take up space so new snapshots are
-created and old WAL files are dropped through a process called &ldquo;retention&rdquo;.</p>
-<p>The default retention period is <code>24h</code>. You can change that with the <code>retention</code>
-field. Retention is enforced periodically and defaults to every <code>1h</code>. This can
-be changed with the <code>retention-check-interval</code> field.</p>
-<pre tabindex="0"><code>dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        retention: 4h
-</code></pre><p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
+LTX page updates. These updates take up space so new snapshots are created and
+old LTX files are dropped through a process called &ldquo;retention&rdquo;.</p>
+<p>Retention is controlled globally via the <code>snapshot.retention</code> field in the root
+configuration, not per-replica. See the <a href="#complete-configuration-example">Complete Configuration Example</a>
+section for an example of how to configure snapshot settings.</p>
+<p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
 but days, weeks, &amp; years are not supported.</p>
 <h3 id="validation-interval">Validation interval<a href="#validation-interval" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Because Litestream performs physical replication, the resulting database files
-restored from replicas will match byte-for-byte. Litestream has an option to
-periodically validate replicas by restoring them and comparing their checksum
-to the primary database&rsquo;s checksum.</p>
-<p><em>Please note that frequently restoring from S3 can be expensive.</em></p>
-<p>It can be enabled by setting the <code>validation-interval</code> field:</p>
-<pre tabindex="0"><code>dbs:
-  - path: /var/lib/db
-    replicas:
-      - url: s3://mybkt.litestream.io/db
-        validation-interval: 6h
-</code></pre><h3 id="encryption">Encryption<a href="#encryption" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The `validation-interval` field is currently non-functional in v0.5.x. It is defined in the configuration schema but has no effect. When this feature is implemented in a future release, it will periodically restore replicas and compare checksums to the primary database, but this will significantly increase costs due to restore downloads.</div>
+</div>
+<h3 id="encryption">Encryption<a href="#encryption" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>
   <div class="w-100">**Age Encryption Not Available in v0.5.0+**: Age encryption was removed during the LTX storage layer refactor. Encryption will be re-implemented directly in LTX to support per-page encryption (more efficient for cloud storage). Configuration will be explicitly rejected with an error message. If you are using Age encryption with v0.3.x, please review the [migration guide](/docs/migration/#age-encryption-migration) before upgrading.</div>
@@ -1122,7 +1194,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Database configurations</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># S3 replica with encryption</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># S3 replica</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app1.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
@@ -1130,13 +1202,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/app1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">age</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">identities</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">/etc/litestream/age-identity.txt</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">recipients</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">          </span>- <span class="l">age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  
+</span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># NATS replica with TLS</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app2.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
@@ -1149,12 +1215,11 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      
+</span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># File replica for local backup</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app3.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/app3</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h </span><span class="w"> </span><span class="c"># 1 week</span><span class="w">
 </span></span></span></code></pre></div><h2 id="migration-from-v03x">Migration from v0.3.x<a href="#migration-from-v03x" class="anchor" aria-hidden="true">#</a> </h2>
 <p>If you&rsquo;re upgrading from Litestream v0.3.x, note these breaking changes:</p>
 <ol>
@@ -1188,7 +1253,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.5f006c1e933825818ff356c507feee61f15379f3b3f254dae663666fe709aa07044ce01c8bd4d3bd408222b5b71c1cb035a14906d362015d028d8dd85e44a746.js" integrity="sha512-XwBsHpM4JYGP81bFB/7uYfFTefOz8lTa5mNmb&#43;cJqgcETOAci9TTvUCCIrW3HBywNaFJBtNiAV0CjY3YXkSnRg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

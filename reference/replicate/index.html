@@ -20,9 +20,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: replicate">
-<meta name="twitter:description" content="The replicate command starts a server to monitor &amp; continuously replicate SQLite databases. You can specify your database &amp; replicas in a configuration file or you can replicate a single database file by specifying its path and its replicas in the command line arguments.
+<meta name="twitter:description" content="The replicate command starts a server to monitor &amp; continuously replicate SQLite databases. You can specify your database &amp; replica in a configuration file or you can replicate a single database file by specifying its path and its replica in the command line arguments.
 Usage Using a configuration file This command format will read all options from the configuration file. This is the recommended approach for production systems.
-litestream replicate [arguments] Replicate a single file This command format sets up replication for a single database file DB_PATH and replicates it to one or more replica URLs.">
+litestream replicate [arguments] Replicate a single file (Command-line mode) This command format sets up replication for a single database file DB_PATH to a single replica URL without a configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -189,7 +189,7 @@ litestream replicate [arguments] Replicate a single file This command format set
     <li><a href="#usage">Usage</a>
       <ul>
         <li><a href="#using-a-configuration-file">Using a configuration file</a></li>
-        <li><a href="#replicate-a-single-file">Replicate a single file</a></li>
+        <li><a href="#replicate-a-single-file-command-line-mode">Replicate a single file (Command-line mode)</a></li>
       </ul>
     </li>
     <li><a href="#arguments">Arguments</a></li>
@@ -202,20 +202,149 @@ litestream replicate [arguments] Replicate a single file This command format set
 		<h1>Command: replicate</h1>
 			<p class="lead"></p>
 			<p>The <code>replicate</code> command starts a server to monitor &amp; continuously replicate
-SQLite databases. You can specify your database &amp; replicas in a configuration
+SQLite databases. You can specify your database &amp; replica in a configuration
 file or you can replicate a single database file by specifying its path and its
-replicas in the command line arguments.</p>
+replica in the command line arguments.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="using-a-configuration-file">Using a configuration file<a href="#using-a-configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
 <p>This command format will read all options from the configuration file. This
 is the recommended approach for production systems.</p>
 <pre tabindex="0"><code>litestream replicate [arguments]
-</code></pre><h3 id="replicate-a-single-file">Replicate a single file<a href="#replicate-a-single-file" class="anchor" aria-hidden="true">#</a> </h3>
+</code></pre><h3 id="replicate-a-single-file-command-line-mode">Replicate a single file (Command-line mode)<a href="#replicate-a-single-file-command-line-mode" class="anchor" aria-hidden="true">#</a> </h3>
 <p>This command format sets up replication for a single database file <code>DB_PATH</code>
-and replicates it to one or more replica URLs. This is useful for testing
-Litestream but is not recommended for production use.</p>
-<pre tabindex="0"><code>litestream replicate [arguments] DB_PATH REPLICA_URL [REPLICA_URL...]
-</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
+to a single replica URL without a configuration file. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Multiple replicas per database are no longer supported in command-line mode.
+Credentials must be passed via environment variables.</p>
+<pre tabindex="0"><code>litestream replicate [arguments] DB_PATH REPLICA_URL
+</code></pre><h4 id="when-to-use-command-line-mode">When to use command-line mode<a href="#when-to-use-command-line-mode" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Command-line mode is convenient for:</p>
+<ul>
+<li>Simple deployments with a single database</li>
+<li>Development and testing</li>
+<li>Container environments where you prefer environment variables over config files</li>
+<li>CI/CD pipelines with dynamically generated credentials</li>
+</ul>
+<p><strong>Not recommended for production</strong> because:</p>
+<ul>
+<li>Only supports a single database (use config file for multiple databases)</li>
+<li>Limited configuration options (no retention tuning, snapshot intervals, etc.)</li>
+<li>All configuration is command-line only (harder to track in version control)</li>
+<li>Config file mode offers better operational visibility</li>
+</ul>
+<h4 id="command-line-mode-examples">Command-line mode examples<a href="#command-line-mode-examples" class="anchor" aria-hidden="true">#</a> </h4>
+<p><strong>Basic S3 replication:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>your-access-key
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-key
+</span></span><span class="line"><span class="cl">litestream replicate /var/lib/mydb.db s3://mybucket/mydb
+</span></span></code></pre></div><p><strong>With Litestream-specific AWS credentials:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>your-access-key
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-key
+</span></span><span class="line"><span class="cl">litestream replicate /var/lib/mydb.db s3://mybucket/mydb
+</span></span></code></pre></div><p><strong>Google Cloud Storage with Application Default Credentials:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">GOOGLE_APPLICATION_CREDENTIALS</span><span class="o">=</span>/path/to/service-account-key.json
+</span></span><span class="line"><span class="cl">litestream replicate /var/lib/mydb.db gs://mybucket/mydb
+</span></span></code></pre></div><p><strong>Azure Blob Storage:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_AZURE_ACCOUNT_KEY</span><span class="o">=</span>your-account-key
+</span></span><span class="line"><span class="cl">litestream replicate /var/lib/mydb.db abs://account@myaccount.blob.core.windows.net/container/mydb
+</span></span></code></pre></div><p><strong>Kubernetes with secret injection:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Pod</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">containers</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">app</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">myapp:latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">AWS_ACCESS_KEY_ID</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">aws-credentials</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">access-key-id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">AWS_SECRET_ACCESS_KEY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">valueFrom</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">aws-credentials</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l">secret-access-key</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">LITESTREAM_REPLICA_URL</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/mydb</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">DATABASE_PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l">/data/mydb.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">sh</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- -<span class="l">c</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="s2">&#34;litestream replicate $DATABASE_PATH $LITESTREAM_REPLICA_URL &amp; exec myapp&#34;</span><span class="w">
+</span></span></span></code></pre></div><h4 id="configuration-file-mode-vs-command-line-mode">Configuration file mode vs command-line mode<a href="#configuration-file-mode-vs-command-line-mode" class="anchor" aria-hidden="true">#</a> </h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Config File</th>
+<th>Command-line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recommended for</strong></td>
+<td>Production</td>
+<td>Development/Testing</td>
+</tr>
+<tr>
+<td><strong>Number of databases</strong></td>
+<td>Multiple</td>
+<td>Single only</td>
+</tr>
+<tr>
+<td><strong>Retention configuration</strong></td>
+<td>Full control</td>
+<td>Not supported</td>
+</tr>
+<tr>
+<td><strong>Snapshot intervals</strong></td>
+<td>Customizable</td>
+<td>Default only</td>
+</tr>
+<tr>
+<td><strong>Metrics endpoint</strong></td>
+<td>Configurable</td>
+<td>Not supported</td>
+</tr>
+<tr>
+<td><strong>Multiple replicas per DB</strong></td>
+<td>Single replica</td>
+<td>Not supported</td>
+</tr>
+<tr>
+<td><strong>Credential management</strong></td>
+<td>File + env vars</td>
+<td>Environment variables only</td>
+</tr>
+<tr>
+<td><strong>Operability</strong></td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td><strong>Restart behavior</strong></td>
+<td>Persistent config</td>
+<td>Command-line only</td>
+</tr>
+</tbody>
+</table>
+<h4 id="passing-credentials-to-command-line-mode">Passing credentials to command-line mode<a href="#passing-credentials-to-command-line-mode" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Command-line mode <strong>only</strong> supports authentication via environment variables.
+You cannot embed credentials in the replica URL for security reasons.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># ✓ Correct: Credentials via environment variables</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>key
+</span></span><span class="line"><span class="cl">litestream replicate /var/lib/db.db s3://bucket/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># ✗ Wrong: Credentials in URL won&#39;t work</span>
+</span></span><span class="line"><span class="cl">litestream replicate /var/lib/db.db s3://key:secret@bucket/db
+</span></span></code></pre></div><p>For complex deployments with multiple databases or advanced configuration,
+use a <a href="https://litestream.io/reference/config/">configuration file</a> instead.</p>
+<h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>-config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
@@ -256,7 +385,7 @@ Litestream but is not recommended for production use.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.5f006c1e933825818ff356c507feee61f15379f3b3f254dae663666fe709aa07044ce01c8bd4d3bd408222b5b71c1cb035a14906d362015d028d8dd85e44a746.js" integrity="sha512-XwBsHpM4JYGP81bFB/7uYfFTefOz8lTa5mNmb&#43;cJqgcETOAci9TTvUCCIrW3HBywNaFJBtNiAV0CjY3YXkSnRg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

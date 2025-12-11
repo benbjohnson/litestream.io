@@ -20,7 +20,7 @@
       <link>https://litestream.io/docs/troubleshooting/</link>
       <pubDate>Thu, 21 Aug 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/docs/troubleshooting/</guid>
-      <description>Configuration Issues Invalid Configuration File Error: yaml: unmarshal errors or cannot parse config&#xA;Solution: Validate your YAML syntax:&#xA;Check indentation (use spaces, not tabs) Ensure proper nesting of configuration sections Validate string values are properly quoted when containing special characters # ❌ Invalid - mixed tabs and spaces dbs: - path: /path/to/db.sqlite replica: url: s3://bucket/path # ✅ Valid - consistent spacing dbs: - path: /path/to/db.sqlite replica: url: s3://bucket/path Database Path Issues Error: no such file or directory or database is locked</description>
+      <description>Configuration Issues Invalid Configuration File Error: yaml: unmarshal errors or cannot parse config&#xA;Solution: Validate your YAML syntax:&#xA;Check indentation (use spaces, not tabs) Ensure proper nesting of configuration sections Validate string values are properly quoted when containing special characters # ❌ Invalid - mixed tabs and spaces dbs: - path: /path/to/db.sqlite replica: url: s3://bucket/path # ✅ Valid - consistent spacing dbs: - path: /path/to/db.sqlite replica: url: s3://bucket/path Managing Credentials Securely Properly securing credentials is critical for Litestream deployments.</description>
     </item>
   </channel>
 </rss>
