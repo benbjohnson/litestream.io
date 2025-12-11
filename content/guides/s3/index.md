@@ -92,6 +92,8 @@ following command.
 litestream restore -o my.db s3://BUCKETNAME/PATHNAME
 ```
 
+{{< alert icon="⚠️" text="The command line URL variant only supports AWS S3 and a limited set of S3-compatible providers that can be auto-detected from the URL hostname. For other S3-compatible services like MinIO or self-hosted solutions, you must use a configuration file with the `endpoint` parameter. See [Custom Endpoints](#custom-endpoints-s3-compatible-services) below." >}}
+
 ### Configuration file usage
 
 Litestream is typically run as a background service which uses a configuration
@@ -131,6 +133,103 @@ dbs:
 ```
 
 {{< since version="0.5.0" >}} Litestream v0.5.0+ uses AWS SDK v2, which maintains compatibility with existing authentication methods.
+
+
+## Using S3 Access Points
+
+{{< since version="0.5.0" >}} Litestream supports [S3 Access Points](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points.html),
+which provide dedicated endpoints for accessing shared datasets in S3. Access
+points are useful for VPC-only configurations, simplified access control, and
+improved network performance.
+
+### Benefits
+
+- **VPC-only access**: Route backup traffic through VPC endpoints instead of
+  NAT gateways for improved security and network isolation
+- **Reduced costs**: Eliminate NAT gateway data transfer charges, which can be
+  significant for large databases
+- **Lower latency**: Direct VPC connectivity provides better performance
+- **Simplified access control**: Delegate permissions to access point policies
+  for multi-tenant scenarios
+
+### URL Format
+
+Specify access point ARNs using the `s3://` URL scheme followed by the ARN:
+
+```
+s3://arn:aws:s3:REGION:ACCOUNT-ID:accesspoint/ACCESS-POINT-NAME[/PATH]
+```
+
+The region is automatically extracted from the ARN but can be explicitly
+overridden in the configuration.
+
+### Command Line Usage
+
+```sh
+litestream replicate /path/to/db \
+  s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups
+```
+
+### Configuration File Usage
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      url: s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups/prod
+```
+
+If you need to override the region extracted from the ARN:
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      url: s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups
+      region: us-east-2
+```
+
+### IAM Policy for Access Points
+
+Access points require appropriate IAM permissions on both the access point and
+the underlying bucket. The following policy grants the minimum permissions
+needed for replication through an access point:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/object/*"
+        }
+    ]
+}
+```
+
+The underlying bucket must also grant access to the access point. See the
+[AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html)
+for details on configuring access point and bucket policies together.
+
+### VPC Endpoint Configuration
+
+To use VPC-only access points, you must configure a VPC endpoint for S3 in your
+VPC. The access point's network origin must be set to "VPC" when creating it.
+See [Creating access points restricted to a VPC](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html)
+for setup instructions.
 
 
 ## Restrictive IAM Policies
@@ -217,3 +316,63 @@ bucket by modifying the resource ARNs. For example, to limit access to the
 Thanks to [Martin](https://github.com/maluio) for contributing the original policy and
 to [cariaso](https://github.com/benbjohnson/litestream/issues/76#issuecomment-783926359)
 for additional policy insights.
+
+
+## Custom Endpoints (S3-Compatible Services)
+
+Litestream supports S3-compatible storage services such as MinIO, Backblaze B2,
+DigitalOcean Spaces, and others. However, how you configure these services
+depends on whether Litestream can auto-detect the endpoint from the URL.
+
+### Auto-Detected Providers
+
+When using the command line URL variant (`s3://BUCKET/PATH`), Litestream can
+automatically detect the correct endpoint for these providers based on the URL
+hostname pattern:
+
+- **AWS S3**: Standard `s3://bucket/path` URLs
+- **Backblaze B2**: URLs containing `.backblazeb2.com`
+- **DigitalOcean Spaces**: URLs containing `.digitaloceanspaces.com`
+- **Linode Object Storage**: URLs containing `.linodeobjects.com`
+- **Scaleway**: URLs containing `.scw.cloud`
+
+For these providers, you can use both command line and configuration file approaches.
+
+### Services Requiring Configuration Files
+
+For S3-compatible services that cannot be auto-detected from the URL hostname,
+you **must** use a configuration file with the `endpoint` parameter. This includes:
+
+- MinIO (self-hosted or remote)
+- Self-hosted S3-compatible storage
+- Other S3-compatible providers not in the auto-detected list
+
+Attempting to use the command line URL variant with these services will result
+in Litestream connecting to AWS S3 instead of your intended endpoint, causing
+authentication errors like:
+
+```text
+cannot lookup bucket region: InvalidAccessKeyId: The AWS Access Key Id you
+provided does not exist in our records.
+```
+
+### MinIO Example
+
+For MinIO, always use a configuration file:
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: mydb
+      endpoint: https://minio.example.com:9000
+      region: us-east-1
+      access-key-id: ${MINIO_ACCESS_KEY}
+      secret-access-key: ${MINIO_SECRET_KEY}
+```
+
+For detailed MinIO configuration options, see the
+[MinIO Configuration](/reference/config#minio-configuration) section in the
+configuration reference.

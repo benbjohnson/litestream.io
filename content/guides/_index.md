@@ -16,9 +16,15 @@ different platforms.
 - [Running as a Systemd service](/guides/systemd)
 - [Running as a Windows service](/guides/windows)
 
+### Migration guides
+
+- [AWS SDK v2 Migration](/guides/aws-sdk-v2)
+
 ### Replica guides
 
 - [Amazon S3](/guides/s3)
+- [S3 Advanced Configuration](/guides/s3-advanced)
+- [S3-Compatible Services](/guides/s3-compatible)
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)
@@ -27,3 +33,4 @@ different platforms.
 - [NATS JetStream](/guides/nats)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)
+- [Tigris (Fly.io)](/guides/tigris)

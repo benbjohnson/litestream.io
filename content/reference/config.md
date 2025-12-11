@@ -199,7 +199,22 @@ dbs:
       - url: s3://mybkt.litestream.io/db
 ```
 
-However, you can break this out into separate fields as well:
+{{< since version="0.5.0" >}} You can also use S3 access point ARNs for VPC-only
+configurations and simplified access control:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/database-backups
+```
+
+When using access point ARNs, the region is automatically extracted from the
+ARN. You can override it with an explicit `region` setting if needed. See the
+[S3 Access Points guide]({{< ref "s3#using-s3-access-points" >}}) for detailed
+configuration and IAM policy examples.
+
+You can break this out into separate fields as well:
 
 ```yaml
 dbs:
@@ -246,6 +261,72 @@ The following settings are specific to S3 replicas:
 
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
+
+- `part-size`—{{< since version="0.5.0" >}} Size of each part in multipart uploads. Accepts
+  human-readable sizes like `5MB`, `10MB`, or `1GB`. Default is 5 MiB. Minimum
+  is 5 MiB (S3 requirement), maximum is 5 GiB. See the
+  [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
+
+- `concurrency`—{{< since version="0.5.0" >}} Number of parts to upload in parallel during
+  multipart uploads. Default is 5. Higher values improve throughput on fast
+  networks but use more memory. See the
+  [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
+
+- `sign-payload`—{{< since version="0.5.0" >}} Signs the request payload. Required
+  by some S3-compatible providers like Tigris. Automatically enabled for Tigris
+  endpoints. Defaults to `false`.
+
+- `require-content-md5`—{{< since version="0.5.0" >}} Adds Content-MD5 header to
+  requests. Some S3-compatible providers don't support this header on certain
+  operations. Automatically disabled for Tigris endpoints. Defaults to `true`.
+
+These options can also be set via URL query parameters:
+
+```
+s3://bucket/path?sign-payload=true&require-content-md5=false
+```
+
+#### S3-Compatible Provider Requirements
+
+Different S3-compatible storage providers have varying requirements for payload
+signing and Content-MD5 headers. The table below shows the recommended settings
+for popular providers:
+
+| Provider | sign-payload | require-content-md5 | Notes |
+|----------|--------------|---------------------|-------|
+| AWS S3 | `false` | `true` | Defaults work |
+| Backblaze B2 | `false` | `true` | Defaults work |
+| Tigris (Fly.io) | `true` | `false` | Requires signed payloads |
+| OCI Object Storage | `false` | `true` | Requires Content-MD5 |
+| Filebase | `false` | `true` | Defaults work |
+| MinIO | `false` | `true` | Defaults work |
+| DigitalOcean Spaces | `false` | `true` | Defaults work |
+
+
+### Tigris (Fly.io) Configuration
+
+{{< since version="0.5.0" >}} [Tigris](https://www.tigrisdata.com/) is Fly.io's
+globally distributed S3-compatible object storage. Litestream automatically
+detects Tigris endpoints and applies required configuration settings.
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path:   db
+      endpoint: fly.storage.tigris.dev
+      region: auto
+```
+
+When using the `fly.storage.tigris.dev` endpoint, Litestream automatically
+configures:
+
+- `sign-payload: true` — Required by Tigris for request authentication
+- `require-content-md5: false` — Tigris doesn't support Content-MD5 on DELETE
+
+See the [Tigris Guide]({{< ref "tigris" >}}) for detailed setup instructions.
 
 
 ### MinIO Configuration
