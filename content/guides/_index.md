@@ -22,6 +22,7 @@ different platforms.
 
 ### Replica guides
 
+- [Alibaba Cloud OSS](/guides/alibaba-oss)
 - [Amazon S3](/guides/s3)
 - [S3 Advanced Configuration](/guides/s3-advanced)
 - [S3-Compatible Services](/guides/s3-compatible)
