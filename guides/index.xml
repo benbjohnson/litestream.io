@@ -37,6 +37,13 @@
       <description>This guide will get you running Litestream on the Windows operating system as either a command line tool or as a background Windows Service.&#xA;Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.&#xA;Running as a Windows Service Running Litestream as a Windows Service means that it will run in the background and continuously monitor and replicate your databases.</description>
     </item>
     <item>
+      <title>Global Replica Defaults</title>
+      <link>https://litestream.io/guides/global-defaults/</link>
+      <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/global-defaults/</guid>
+      <description>v0.5.0 Global replica defaults eliminate configuration duplication by allowing you to set default settings at the top level of your configuration file. These defaults are automatically inherited by all replicas while still allowing per-replica overrides.&#xA;Overview When managing multiple databases with Litestream, you often need the same credentials, regions, and timing settings across all replicas. Previously, this required duplicating settings for each database entry. Global defaults solve this by letting you define shared settings once.</description>
+    </item>
+    <item>
       <title>Replicating to Amazon S3</title>
       <link>https://litestream.io/guides/s3/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>

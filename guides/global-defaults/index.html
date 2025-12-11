@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.b4d95f6f22f834a2ed05c437298487f41fb66b38bd43833486bec8baac5d9c06c24709bceaa9ab1497c7fa0d0894aea836f3223005fbd3335b3994451f46d403.css" integrity="sha512-tNlfbyL4NKLtBcQ3KYSH9B&#43;2azi9Q4M0hr7IuqxdnAbCRwm86qmrFJfH&#43;g0IlK6oNvMiMAX70zNbOZRFH0bUAw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Global Replica Defaults - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/global-defaults/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Global Replica Defaults">
+<meta name="twitter:description" content="v0.5.0 Global replica defaults eliminate configuration duplication by allowing you to set default settings at the top level of your configuration file. These defaults are automatically inherited by all replicas while still allowing per-replica overrides.
+Overview When managing multiple databases with Litestream, you often need the same credentials, regions, and timing settings across all replicas. Previously, this required duplicating settings for each database entry. Global defaults solve this by letting you define shared settings once.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Global Defaults",
+        "item": "https:\/\/litestream.io\/guides\/global-defaults\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link active" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a>
+      <ul>
+        <li><a href="#before-verbose-configuration-with-duplication">Before: Verbose configuration with duplication</a></li>
+        <li><a href="#after-clean-configuration-with-global-defaults">After: Clean configuration with global defaults</a></li>
+      </ul>
+    </li>
+    <li><a href="#supported-global-settings">Supported Global Settings</a>
+      <ul>
+        <li><a href="#timing-settings">Timing Settings</a></li>
+        <li><a href="#s3-and-s3-compatible-settings">S3 and S3-Compatible Settings</a></li>
+        <li><a href="#azure-blob-storage-settings">Azure Blob Storage Settings</a></li>
+        <li><a href="#sftp-settings">SFTP Settings</a></li>
+        <li><a href="#nats-jetstream-settings">NATS JetStream Settings</a></li>
+      </ul>
+    </li>
+    <li><a href="#override-behavior">Override Behavior</a></li>
+    <li><a href="#multi-replica-type-configuration">Multi-Replica-Type Configuration</a></li>
+    <li><a href="#common-use-cases">Common Use Cases</a>
+      <ul>
+        <li><a href="#multi-tenant-deployments">Multi-Tenant Deployments</a></li>
+        <li><a href="#development-and-production-environments">Development and Production Environments</a></li>
+      </ul>
+    </li>
+    <li><a href="#best-practices">Best Practices</a>
+      <ul>
+        <li><a href="#use-environment-variables-for-credentials">Use environment variables for credentials</a></li>
+        <li><a href="#keep-replica-specific-settings-with-the-replica">Keep replica-specific settings with the replica</a></li>
+        <li><a href="#document-your-configuration">Document your configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#backward-compatibility">Backward Compatibility</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#verifying-global-defaults-are-applied">Verifying global defaults are applied</a></li>
+        <li><a href="#understanding-override-precedence">Understanding override precedence</a></li>
+        <li><a href="#common-mistakes">Common mistakes</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Global Replica Defaults</h1>
+			<p class="lead"></p>
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Global replica defaults eliminate configuration
+duplication by allowing you to set default settings at the top level of your
+configuration file. These defaults are automatically inherited by all replicas
+while still allowing per-replica overrides.</p>
+<h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When managing multiple databases with Litestream, you often need the same
+credentials, regions, and timing settings across all replicas. Previously, this
+required duplicating settings for each database entry. Global defaults solve
+this by letting you define shared settings once.</p>
+<h3 id="before-verbose-configuration-with-duplication">Before: Verbose configuration with duplication<a href="#before-verbose-configuration-with-duplication" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db1.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">custom.endpoint.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db2.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx     </span><span class="w"> </span><span class="c"># duplicated</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx  </span><span class="w"> </span><span class="c"># duplicated</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2          </span><span class="w"> </span><span class="c"># duplicated</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">custom.endpoint.com</span><span class="w"> </span><span class="c"># duplicated</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket2</span><span class="w">
+</span></span></span></code></pre></div><h3 id="after-clean-configuration-with-global-defaults">After: Clean configuration with global defaults<a href="#after-clean-configuration-with-global-defaults" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global defaults inherited by all replicas</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">custom.endpoint.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db1.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db2.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket2</span><span class="w">
+</span></span></span></code></pre></div><h2 id="supported-global-settings">Supported Global Settings<a href="#supported-global-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Global defaults support settings across all replica types. Settings are applied
+to replicas where they are relevant.</p>
+<h3 id="timing-settings">Timing Settings<a href="#timing-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<p>These settings apply to all replica types:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sync-interval</code></td>
+<td>How often to push frames to replica</td>
+<td><code>1s</code></td>
+</tr>
+<tr>
+<td><code>validation-interval</code></td>
+<td>How often to validate replica integrity</td>
+<td>disabled</td>
+</tr>
+</tbody>
+</table>
+<p>Note: Snapshot and retention settings (<code>snapshot.interval</code>, <code>snapshot.retention</code>)
+are configured separately at the top level under the <code>snapshot:</code> section. See the
+<a href="/reference/config">Configuration Reference</a> for details.</p>
+<h3 id="s3-and-s3-compatible-settings">S3 and S3-Compatible Settings<a href="#s3-and-s3-compatible-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<p>These settings apply to S3, Backblaze B2, DigitalOcean Spaces, and other
+S3-compatible services:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>access-key-id</code></td>
+<td>AWS access key or equivalent</td>
+</tr>
+<tr>
+<td><code>secret-access-key</code></td>
+<td>AWS secret key or equivalent</td>
+</tr>
+<tr>
+<td><code>region</code></td>
+<td>Bucket region</td>
+</tr>
+<tr>
+<td><code>endpoint</code></td>
+<td>Custom endpoint URL for S3-compatible services</td>
+</tr>
+<tr>
+<td><code>bucket</code></td>
+<td>Default bucket name</td>
+</tr>
+<tr>
+<td><code>force-path-style</code></td>
+<td>Use path-style URLs instead of virtual-hosted</td>
+</tr>
+<tr>
+<td><code>skip-verify</code></td>
+<td>Disable TLS verification</td>
+</tr>
+</tbody>
+</table>
+<h3 id="azure-blob-storage-settings">Azure Blob Storage Settings<a href="#azure-blob-storage-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>account-name</code></td>
+<td>Azure storage account name</td>
+</tr>
+<tr>
+<td><code>account-key</code></td>
+<td>Azure storage account key</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sftp-settings">SFTP Settings<a href="#sftp-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>host</code></td>
+<td>SFTP server hostname and port</td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td>Username for authentication</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td>Password for authentication</td>
+</tr>
+<tr>
+<td><code>key-path</code></td>
+<td>Path to SSH private key file</td>
+</tr>
+<tr>
+<td><code>concurrent-writes</code></td>
+<td>Number of concurrent upload operations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nats-jetstream-settings">NATS JetStream Settings<a href="#nats-jetstream-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>jwt</code></td>
+<td>JWT token for NATS 2.0 authentication</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>Seed for NATS 2.0 authentication</td>
+</tr>
+<tr>
+<td><code>creds</code></td>
+<td>Path to NATS credentials file</td>
+</tr>
+<tr>
+<td><code>nkey</code></td>
+<td>NKey for signature-based authentication</td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td>Username for basic authentication</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td>Password for basic authentication</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td>Token for simple authentication</td>
+</tr>
+<tr>
+<td><code>tls</code></td>
+<td>Enable TLS encryption</td>
+</tr>
+<tr>
+<td><code>root-cas</code></td>
+<td>List of CA certificate file paths</td>
+</tr>
+<tr>
+<td><code>client-cert</code></td>
+<td>Client certificate for mutual TLS</td>
+</tr>
+<tr>
+<td><code>client-key</code></td>
+<td>Client private key for mutual TLS</td>
+</tr>
+<tr>
+<td><code>max-reconnects</code></td>
+<td>Maximum reconnection attempts</td>
+</tr>
+<tr>
+<td><code>reconnect-wait</code></td>
+<td>Wait time between reconnection attempts</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>Connection timeout</td>
+</tr>
+</tbody>
+</table>
+<h2 id="override-behavior">Override Behavior<a href="#override-behavior" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Individual replicas can override any global default. Per-replica settings always
+take precedence over global defaults.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global defaults</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># This replica uses all global defaults</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db1.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># This replica overrides region but keeps other defaults</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db2.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1 </span><span class="w"> </span><span class="c"># Overrides global region</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># This replica overrides multiple settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db3.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">eu-west-1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s </span><span class="w"> </span><span class="c"># More frequent sync</span><span class="w">
+</span></span></span></code></pre></div><h2 id="multi-replica-type-configuration">Multi-Replica-Type Configuration<a href="#multi-replica-type-configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Global defaults work seamlessly when you have databases replicating to different
+storage backends. Each replica type uses the global settings relevant to it.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global settings apply to appropriate replica types</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx      </span><span class="w"> </span><span class="c"># Used by S3 replicas</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">myazureaccount             </span><span class="w"> </span><span class="c"># Used by ABS replicas</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">account-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AZURE_ACCOUNT_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">backup.example.com:22              </span><span class="w"> </span><span class="c"># Used by SFTP replicas</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l">backupuser</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m                        </span><span class="w"> </span><span class="c"># Used by all replicas</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># S3 replica uses access-key-id, secret-access-key, sync-interval</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/app1.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">s3-backups</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># ABS replica uses account-name, account-key, sync-interval</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/app2.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">azure-container</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># SFTP replica uses host, user, sync-interval</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/app3.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">sftp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/app3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream/sftp_key</span><span class="w">
+</span></span></span></code></pre></div><h2 id="common-use-cases">Common Use Cases<a href="#common-use-cases" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="multi-tenant-deployments">Multi-Tenant Deployments<a href="#multi-tenant-deployments" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For applications managing multiple tenant databases with shared infrastructure:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/tenant1.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">backups</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">tenant1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/tenant2.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">backups</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">tenant2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/tenant3.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">backups</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">tenant3</span><span class="w">
+</span></span></span></code></pre></div><h3 id="development-and-production-environments">Development and Production Environments<a href="#development-and-production-environments" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Use environment variables with global defaults for environment-specific
+configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${LITESTREAM_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${LITESTREAM_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">${LITESTREAM_REGION}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">${LITESTREAM_ENDPOINT} </span><span class="w"> </span><span class="c"># Empty in production, set for local MinIO</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">${LITESTREAM_BUCKET}</span><span class="w">
+</span></span></span></code></pre></div><h2 id="best-practices">Best Practices<a href="#best-practices" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="use-environment-variables-for-credentials">Use environment variables for credentials<a href="#use-environment-variables-for-credentials" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Avoid hardcoding credentials in configuration files:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="keep-replica-specific-settings-with-the-replica">Keep replica-specific settings with the replica<a href="#keep-replica-specific-settings-with-the-replica" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Settings like <code>bucket</code> and <code>path</code> that are unique to each replica should remain
+in the replica configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Good: Shared settings are global</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db1.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket1  </span><span class="w"> </span><span class="c"># Unique to this replica</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db1        </span><span class="w"> </span><span class="c"># Unique to this replica</span><span class="w">
+</span></span></span></code></pre></div><h3 id="document-your-configuration">Document your configuration<a href="#document-your-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When using global defaults, add comments to clarify which settings are global
+and why:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global S3 settings for all database replicas</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># All databases use the same AWS account and region</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global timing settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># ...</span><span class="w">
+</span></span></span></code></pre></div><h2 id="backward-compatibility">Backward Compatibility<a href="#backward-compatibility" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Existing Litestream configurations continue to work unchanged. Global defaults
+are purely additive. If you have per-replica settings defined, they continue to
+take precedence.</p>
+<p>The legacy <code>replicas:</code> array format also continues to work, though single
+<code>replica</code> configuration is recommended for new deployments.</p>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="verifying-global-defaults-are-applied">Verifying global defaults are applied<a href="#verifying-global-defaults-are-applied" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Run Litestream with debug logging to see resolved configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate -config /etc/litestream.yml -log-level debug
+</span></span></code></pre></div><h3 id="understanding-override-precedence">Understanding override precedence<a href="#understanding-override-precedence" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Settings are applied in this order (later values override earlier):</p>
+<ol>
+<li>Built-in defaults</li>
+<li>Global configuration settings</li>
+<li>Per-replica settings</li>
+</ol>
+<h3 id="common-mistakes">Common mistakes<a href="#common-mistakes" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Missing type field</strong>: When using global defaults, ensure each replica still
+specifies its <code>type</code> or uses a <code>url</code> that implies the type:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Wrong: No type specified</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Correct: Type specified</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Also correct: URL implies type</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db</span><span class="w">
+</span></span></span></code></pre></div>
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/windows/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Running as a Windows Service
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/s3/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Replicating to Amazon S3 &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.c161f585f6cd7f352d96494f7263c2994f9f37630b1737ded103321cbe313cdd269b38ff56d030b628305ebec47f0c55edc20877a596310fdb56f180a0bb9d5e.js" integrity="sha512-wWH1hfbNfzUtlklPcmPCmU&#43;fN2MLFzfe0QMyHL4xPN0mmzj/VtAwtigwXr7EfwxV7cIId6WWMQ/bVvGAoLudXg==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

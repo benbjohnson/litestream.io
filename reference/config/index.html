@@ -141,6 +141,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <a href="https://litestream.io/guides/">Replica Guides</a>
   </h3>
   <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
@@ -192,6 +193,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     </li>
     <li><a href="#global-settings">Global settings</a>
       <ul>
+        <li><a href="#global-replica-defaults">Global replica defaults</a></li>
         <li><a href="#aws-credentials">AWS credentials</a></li>
         <li><a href="#metrics">Metrics</a></li>
         <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
@@ -252,7 +254,65 @@ dollar sign followed by characters—for example, a password. In this case, you
 can set the <code>-no-expand-env</code> flag on any <code>litestream</code> command to disable
 expansion.</p>
 <h2 id="global-settings">Global settings<a href="#global-settings" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="aws-credentials">AWS credentials<a href="#aws-credentials" class="anchor" aria-hidden="true">#</a> </h3>
+<h3 id="global-replica-defaults">Global replica defaults<a href="#global-replica-defaults" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Global replica defaults allow you to set default
+settings at the top level of your configuration file. These defaults are
+automatically inherited by all replicas while still allowing per-replica
+overrides. This eliminates configuration duplication across multiple databases.</p>
+<p>See the <a href="https://litestream.io/guides/global-defaults/">Global Replica Defaults Guide</a> for
+detailed usage examples and best practices.</p>
+<p><strong>Timing settings</strong> (apply to all replica types):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">validation-interval</span><span class="p">:</span><span class="w"> </span><span class="l">6h</span><span class="w">
+</span></span></span></code></pre></div><p>Note: Snapshot and retention settings are configured separately under the
+<code>snapshot:</code> section, not as global replica defaults.</p>
+<p><strong>S3 and S3-compatible settings:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">https://custom.endpoint.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">default-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">force-path-style</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">skip-verify</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Azure Blob Storage settings:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">myazureaccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">account-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AZURE_ACCOUNT_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>SFTP settings:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l">backup.example.com:22</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l">backupuser</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${SFTP_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/litestream/sftp_key</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">concurrent-writes</span><span class="p">:</span><span class="w"> </span><span class="m">4</span><span class="w">
+</span></span></span></code></pre></div><p><strong>NATS JetStream settings:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span></code></pre></div><p>Per-replica settings always override global defaults:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global defaults</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db1.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Uses global region and sync-interval</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/db2.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">bucket2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1 </span><span class="w"> </span><span class="c"># Overrides global region</span><span class="w">
+</span></span></span></code></pre></div><h3 id="aws-credentials">AWS credentials<a href="#aws-credentials" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you are using AWS S3 replication, it can be useful to specify your
 credentials in one place instead of for each replica:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w">     </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
