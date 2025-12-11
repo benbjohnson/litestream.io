@@ -30,7 +30,7 @@ click the _Next_ button.
 
 On the permissions screen, click on _"Attach existing policies directly"_, then
 search for "S3" and choose `AmazonS3FullAccess`. You can also specify a [more
-restrictive policy](#restrictive-iam-policy) as described later in this guide.
+restrictive policy](#restrictive-iam-policies) as described later in this guide.
 
 <figure>
  <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
