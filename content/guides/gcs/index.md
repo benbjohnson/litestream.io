@@ -63,14 +63,14 @@ you can replicate a database to your bucket. _Replace the placeholders with your
 bucket & path._
 
 ```sh
-litestream replicate /path/to/db gcs://BUCKET/PATH
+litestream replicate /path/to/db gs://BUCKET/PATH
 ```
 
 You can later restore your database from Google Cloud Storage to a local `my.db`
 path with the following command.
 
 ```sh
-litestream restore -o my.db gcs://BUCKET/PATH
+litestream restore -o my.db gs://BUCKET/PATH
 ```
 
 ### Configuration file usage
