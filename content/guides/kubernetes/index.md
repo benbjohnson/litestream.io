@@ -190,12 +190,12 @@ This `initContainers` block does several things. First, it uses the [official
 Litestream Docker image][image] and executes the following command:
 
 ```sh
-litestream restore -if-db-not-exists -if-replica-exists -v /var/lib/myapp/db
+litestream restore -if-db-not-exists -if-replica-exists /var/lib/myapp/db
 ```
 
-This restores the database `/var/lib/myapp/db` specified in our config file,
-however, it will skip the restore if the database already exists or if there
-are no replicas. It also enables verbose logging.
+This restores the database `/var/lib/myapp/db` specified in our config file.
+The `-if-db-not-exists` flag skips the restore if the database already exists.
+The `-if-replica-exists` flag skips the restore if there are no replicas available.
 
 Next, it specifies volume mounts to the data directory from our PVC and to the
 configuration directory from our ConfigMap.
