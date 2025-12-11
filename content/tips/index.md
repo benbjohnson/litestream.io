@@ -161,6 +161,10 @@ open your SQLite connection:
 PRAGMA wal_autocheckpoint = 0;
 ```
 
+For more information about Litestream's checkpoint strategy and configuring
+WAL truncate thresholds, see the [WAL Truncate Threshold Configuration
+guide](/guides/wal-truncate-threshold).
+
 ## Multiple applications replicating into location can corrupt
 
 Multiple applications replicating into the same bucket & path can cause situations
