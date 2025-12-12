@@ -25,9 +25,9 @@
     <item>
       <title>Command: mcp</title>
       <link>https://litestream.io/reference/mcp/</link>
-      <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/mcp/</guid>
-      <description>The mcp server provides Model Context Protocol integration, allowing AI assistants to interact with Litestream databases and replicas through a standardized HTTP API.&#xA;Configuration Enable the MCP server by adding the mcp-addr setting to your configuration file:&#xA;mcp-addr: &amp;#34;:3001&amp;#34; Security For production deployments, bind to localhost only:&#xA;mcp-addr: &amp;#34;127.0.0.1:3001&amp;#34; Available Tools The MCP server exposes these tools for AI assistants:&#xA;litestream_info Get system status and configuration information.&#xA;litestream_databases List all configured databases and their replica status.</description>
+      <description>The mcp server provides Model Context Protocol integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.&#xA;Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems. Litestream&amp;rsquo;s MCP server exposes tools that allow AI assistants to:&#xA;View database and replica status List generations and snapshots List available transaction log (LTX) files Restore databases to specific points in time Monitor replication health This integration enables natural language interaction with your Litestream deployment, making it easier to inspect backups, troubleshoot issues, and perform restores through conversational AI interfaces.</description>
     </item>
     <item>
       <title>Command: replicate</title>

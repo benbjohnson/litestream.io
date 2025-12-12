@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.e980b35a627c7e2b3fcf335f9b79d730c9b9abac737b3cdc4fd2d51bd39bcfd56927f7606f28da16d49b34259aea50f6a0e7e53d4f2ee1ea46d3eb6124a7c6fe.css" integrity="sha512-6YCzWmJ8fis/zzNfm3nXMMm5q6xzezzcT9LVG9Obz9VpJ/dgbyjaFtSbNCWa6lD2oOflPU8u4epG0&#43;thJKfG/g==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.3d00da4403468933e125edaaa0fd3f1c4dacf6d970d5130de45fa62f952af339aa6f9f622f4a35891e84d43de4e54156ed6fad0512598680291fb62f17e96153.css" integrity="sha512-PQDaRANGiTPhJe2qoP0/HE2s9tlw1RMN5F&#43;mL5Uq8zmqb59iL0o1iR6E1D3k5UFW7W&#43;tBRJZhoApH7YvF&#43;lhUw==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -20,12 +20,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: mcp">
-<meta name="twitter:description" content="The mcp server provides Model Context Protocol integration, allowing AI assistants to interact with Litestream databases and replicas through a standardized HTTP API.
-Configuration Enable the MCP server by adding the mcp-addr setting to your configuration file:
-mcp-addr: &#34;:3001&#34; Security For production deployments, bind to localhost only:
-mcp-addr: &#34;127.0.0.1:3001&#34; Available Tools The MCP server exposes these tools for AI assistants:
-litestream_info Get system status and configuration information.
-litestream_databases List all configured databases and their replica status.">
+<meta name="twitter:description" content="The mcp server provides Model Context Protocol integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.
+Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems. Litestream&rsquo;s MCP server exposes tools that allow AI assistants to:
+View database and replica status List generations and snapshots List available transaction log (LTX) files Restore databases to specific points in time Monitor replication health This integration enables natural language interaction with your Litestream deployment, making it easier to inspect backups, troubleshoot issues, and perform restores through conversational AI interfaces.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -194,19 +191,45 @@ litestream_databases List all configured databases and their replica status.">
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#configuration">Configuration</a></li>
-    <li><a href="#security">Security</a></li>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#configuration">Configuration</a>
+      <ul>
+        <li><a href="#security-considerations">Security Considerations</a></li>
+      </ul>
+    </li>
     <li><a href="#available-tools">Available Tools</a>
       <ul>
         <li><a href="#litestream_info">litestream_info</a></li>
         <li><a href="#litestream_databases">litestream_databases</a></li>
+        <li><a href="#litestream_generations">litestream_generations</a></li>
+        <li><a href="#litestream_snapshots">litestream_snapshots</a></li>
         <li><a href="#litestream_ltx">litestream_ltx</a></li>
         <li><a href="#litestream_restore">litestream_restore</a></li>
-        <li><a href="#litestream_ltx-1">litestream_ltx</a></li>
       </ul>
     </li>
-    <li><a href="#ai-assistant-setup">AI Assistant Setup</a></li>
-    <li><a href="#example">Example</a></li>
+    <li><a href="#ai-client-configuration">AI Client Configuration</a>
+      <ul>
+        <li><a href="#local-configuration">Local Configuration</a></li>
+        <li><a href="#remote-configuration-with-flyio">Remote Configuration with Fly.io</a></li>
+        <li><a href="#other-ai-clients">Other AI Clients</a></li>
+      </ul>
+    </li>
+    <li><a href="#example-use-cases">Example Use Cases</a>
+      <ul>
+        <li><a href="#checking-replication-status">Checking Replication Status</a></li>
+        <li><a href="#investigating-backup-history">Investigating Backup History</a></li>
+        <li><a href="#performing-a-restore">Performing a Restore</a></li>
+        <li><a href="#troubleshooting-replication">Troubleshooting Replication</a></li>
+      </ul>
+    </li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#connection-refused">Connection Refused</a></li>
+        <li><a href="#tools-not-appearing">Tools Not Appearing</a></li>
+        <li><a href="#remote-connection-issues">Remote Connection Issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#api-reference">API Reference</a></li>
   </ul>
 </nav>
   </div>
@@ -215,60 +238,474 @@ litestream_databases List all configured databases and their replica status.">
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
 		<h1>Command: mcp</h1>
 			<p class="lead"></p>
-			<p>The <code>mcp</code> server provides Model Context Protocol integration, allowing AI assistants
-to interact with Litestream databases and replicas through a standardized HTTP API.</p>
+			<p>The <code>mcp</code> server provides <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
+integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact
+with Litestream databases and replicas through a standardized HTTP API.</p>
+<h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ The Model Context Protocol (MCP) is an open standard
+that enables AI applications to connect with external systems. Litestream&rsquo;s MCP server
+exposes tools that allow AI assistants to:</p>
+<ul>
+<li>View database and replica status</li>
+<li>List generations and snapshots</li>
+<li>List available transaction log (LTX) files</li>
+<li>Restore databases to specific points in time</li>
+<li>Monitor replication health</li>
+</ul>
+<p>This integration enables natural language interaction with your Litestream deployment,
+making it easier to inspect backups, troubleshoot issues, and perform restores through
+conversational AI interfaces.</p>
 <h2 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Enable the MCP server by adding the <code>mcp-addr</code> setting to your configuration file:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
-</span></span></span></code></pre></div><h2 id="security">Security<a href="#security" class="anchor" aria-hidden="true">#</a> </h2>
-<p>For production deployments, bind to localhost only:</p>
+</span></span></span></code></pre></div><p>The server starts automatically alongside the <code>replicate</code> command when this setting
+is configured.</p>
+<h3 id="security-considerations">Security Considerations<a href="#security-considerations" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The MCP server provides access to database information and restore capabilities.
+Follow these guidelines to secure your deployment:</p>
+<p><strong>Bind to localhost for local access:</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;127.0.0.1:3001&#34;</span><span class="w">
-</span></span></span></code></pre></div><h2 id="available-tools">Available Tools<a href="#available-tools" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><p><strong>Never expose directly to the public internet.</strong> The MCP server does not include
+built-in authentication. For remote access, use one of these approaches:</p>
+<ul>
+<li>SSH tunneling to forward the port securely</li>
+<li>A reverse proxy (Caddy, Nginx, Traefik) with authentication</li>
+<li>VPN or private networking</li>
+<li>Platform-specific proxies like Fly.io&rsquo;s <code>flyctl mcp proxy</code></li>
+</ul>
+<p><strong>Network isolation:</strong> Run the MCP server on an internal network segment that only
+authorized clients can access.</p>
+<p><strong>Credential exposure:</strong> The MCP server may expose replica URLs and connection
+details. Ensure your deployment environment restricts access to authorized users.</p>
+<h2 id="available-tools">Available Tools<a href="#available-tools" class="anchor" aria-hidden="true">#</a> </h2>
 <p>The MCP server exposes these tools for AI assistants:</p>
 <h3 id="litestream_info">litestream_info<a href="#litestream_info" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Get system status and configuration information.</p>
-<h3 id="litestream_databases">litestream_databases<a href="#litestream_databases" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all configured databases and their replica status.</p>
-<h3 id="litestream_ltx">litestream_ltx<a href="#litestream_ltx" class="anchor" aria-hidden="true">#</a> </h3>
-<p>View available LTX files for a specific database.</p>
+<p>Returns a comprehensive summary of Litestream&rsquo;s current status including version,
+configured databases, generations, and snapshots.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example output:</strong></p>
+<pre tabindex="0"><code>=== Litestream Status Report ===
+
+Version Information:
+v0.5.0
+
+Current Config Path:
+/etc/litestream.yml
+
+Databases:
+path                 replica
+/var/lib/myapp.db    s3
+
+Generations:
+Database: /var/lib/myapp.db
+name        generation          updated
+s3          abc123def456...     2025-01-15T10:30:00Z
+
+Snapshots:
+Database: /var/lib/myapp.db
+replica  generation        index  size    created
+s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
+</code></pre><h3 id="litestream_databases">litestream_databases<a href="#litestream_databases" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Lists all configured databases and their replica status.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example output:</strong></p>
+<pre tabindex="0"><code>path                 replica
+/var/lib/myapp.db    s3
+/var/lib/other.db    file
+</code></pre><h3 id="litestream_generations">litestream_generations<a href="#litestream_generations" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Lists all generations for a database or replica.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Database file path or replica URL</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>No</td>
+<td>Replica name to filter by</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example output:</strong></p>
+<pre tabindex="0"><code>name  generation        updated
+s3    abc123def456...   2025-01-15T10:30:00Z
+</code></pre><h3 id="litestream_snapshots">litestream_snapshots<a href="#litestream_snapshots" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Lists all snapshots for a database or replica.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Database file path or replica URL</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>No</td>
+<td>Replica name to filter by</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example output:</strong></p>
+<pre tabindex="0"><code>replica  generation        index  size    created
+s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
+s3       abc123def456...   1      2048    2025-01-15T10:15:00Z
+</code></pre><h3 id="litestream_ltx">litestream_ltx<a href="#litestream_ltx" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Lists available LTX (Litestream Transaction Log) files for a database or replica.
+Use this to inspect available restore points.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Database file path or replica URL</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>No</td>
+<td>Replica name to filter by</td>
+</tr>
+<tr>
+<td><code>generation</code></td>
+<td>No</td>
+<td>Generation name to filter by</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example output:</strong></p>
+<pre tabindex="0"><code>min_txid          max_txid          size  created
+0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
+0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
+0000000000000003  0000000000000003  663   2025-01-15T10:30:00Z
+</code></pre><h3 id="litestream_restore">litestream_restore<a href="#litestream_restore" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Restores a database to a specific point in time.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Source database path or replica URL</td>
+</tr>
+<tr>
+<td><code>o</code></td>
+<td>No</td>
+<td>Output file path (default: original path)</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>No</td>
+<td>Replica name to restore from</td>
+</tr>
+<tr>
+<td><code>generation</code></td>
+<td>No</td>
+<td>Generation name to restore from</td>
+</tr>
+<tr>
+<td><code>index</code></td>
+<td>No</td>
+<td>Restore up to specific WAL index</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>No</td>
+<td>Restore to specific point-in-time (RFC3339 format)</td>
+</tr>
+<tr>
+<td><code>parallelism</code></td>
+<td>No</td>
+<td>Number of WAL files to download in parallel</td>
+</tr>
+<tr>
+<td><code>if_db_not_exists</code></td>
+<td>No</td>
+<td>Skip if database already exists</td>
+</tr>
+<tr>
+<td><code>if_replica_exists</code></td>
+<td>No</td>
+<td>Skip if no backups found</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong> To restore to a specific timestamp, call the tool with:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;/var/lib/myapp.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;o&#34;</span><span class="p">:</span> <span class="s2">&#34;/tmp/restored.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;timestamp&#34;</span><span class="p">:</span> <span class="s2">&#34;2025-01-15T10:00:00Z&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h2 id="ai-client-configuration">AI Client Configuration<a href="#ai-client-configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<p>MCP is an open standard supported by many AI assistants and development tools.
+This section covers configuration for popular clients.</p>
+<h3 id="local-configuration">Local Configuration<a href="#local-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For a Litestream instance running on your local machine, AI clients connect
+directly via HTTP.</p>
+<h4 id="claude-desktop">Claude Desktop<a href="#claude-desktop" class="anchor" aria-hidden="true">#</a> </h4>
+<p><a href="https://claude.ai/download">Claude Desktop</a> uses a JSON configuration file.</p>
+<p><strong>1. Locate the configuration file:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>macOS</td>
+<td><code>~/Library/Application Support/Claude/claude_desktop_config.json</code></td>
+</tr>
+<tr>
+<td>Windows</td>
+<td><code>%APPDATA%\Claude\claude_desktop_config.json</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>2. Add the Litestream MCP server:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;mcpServers&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;litestream&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;url&#34;</span><span class="p">:</span> <span class="s2">&#34;http://localhost:3001&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>3. Restart Claude Desktop</strong> to load the new configuration.</p>
+<h4 id="claude-code-cli">Claude Code (CLI)<a href="#claude-code-cli" class="anchor" aria-hidden="true">#</a> </h4>
+<p><a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> supports adding MCP
+servers via command line:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude mcp add litestream --transport http --url http://localhost:3001
+</span></span></code></pre></div><p>To verify the server was added:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">claude mcp list
+</span></span></code></pre></div><h4 id="vs-code--github-copilot">VS Code / GitHub Copilot<a href="#vs-code--github-copilot" class="anchor" aria-hidden="true">#</a> </h4>
+<p>VS Code with GitHub Copilot supports MCP servers through settings.</p>
+<p>Using the command line:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">code --add-mcp <span class="s1">&#39;{&#34;name&#34;:&#34;litestream&#34;,&#34;type&#34;:&#34;http&#34;,&#34;url&#34;:&#34;http://localhost:3001&#34;}&#39;</span> --profile default
+</span></span></code></pre></div><p>Or through the Settings UI:</p>
+<ol>
+<li>Open VS Code Settings (Cmd/Ctrl + ,)</li>
+<li>Search for &ldquo;MCP&rdquo;</li>
+<li>Add a new MCP server with:
 <ul>
-<li><strong>Required</strong>: <code>path</code> - Database file path or replica URL</li>
-<li><strong>Optional</strong>: <code>config</code> - Path to configuration file</li>
-<li><strong>Optional</strong>: <code>replica</code> - Replica name to filter by</li>
+<li>Name: <code>litestream</code></li>
+<li>URL: <code>http://localhost:3001</code></li>
 </ul>
-<h3 id="litestream_restore">litestream_restore<a href="#litestream_restore" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Restore a database to a specific point in time.</p>
+</li>
+</ol>
+<h4 id="cursor">Cursor<a href="#cursor" class="anchor" aria-hidden="true">#</a> </h4>
+<p><a href="https://cursor.sh">Cursor</a> has built-in MCP support.</p>
+<ol>
+<li>Open Cursor Settings</li>
+<li>Navigate to <strong>Features</strong> → <strong>MCP Servers</strong></li>
+<li>Click <strong>Add Server</strong></li>
+<li>Configure:
 <ul>
-<li><strong>Required</strong>: <code>path</code> - Source database path or replica URL</li>
-<li><strong>Optional</strong>: <code>o</code> - Output file path</li>
-<li><strong>Optional</strong>: <code>config</code> - Path to configuration file</li>
-<li><strong>Optional</strong>: <code>replica</code> - Replica name to restore from</li>
-<li><strong>Optional</strong>: <code>generation</code> - Generation name to restore from</li>
-<li><strong>Optional</strong>: <code>index</code> - Restore up to specific WAL index</li>
-<li><strong>Optional</strong>: <code>timestamp</code> - Restore to specific point-in-time (RFC3339)</li>
-<li><strong>Optional</strong>: <code>parallelism</code> - Number of WAL files to download in parallel</li>
-<li><strong>Optional</strong>: <code>if_db_not_exists</code> - Return 0 if database already exists</li>
-<li><strong>Optional</strong>: <code>if_replica_exists</code> - Return 0 if no backups found</li>
+<li>Name: <code>litestream</code></li>
+<li>Type: HTTP</li>
+<li>URL: <code>http://localhost:3001</code></li>
 </ul>
-<h3 id="litestream_ltx-1">litestream_ltx<a href="#litestream_ltx-1" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all LTX (transaction log) files for a database or replica.</p>
+</li>
+</ol>
+<h4 id="codex-chatgpt">Codex (ChatGPT)<a href="#codex-chatgpt" class="anchor" aria-hidden="true">#</a> </h4>
+<p>OpenAI&rsquo;s <a href="https://github.com/openai/codex">Codex CLI</a> supports MCP servers:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">codex mcp add litestream --url http://localhost:3001
+</span></span></code></pre></div><p>Or configure manually in your Codex configuration file.</p>
+<h3 id="remote-configuration-with-flyio">Remote Configuration with Fly.io<a href="#remote-configuration-with-flyio" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When Litestream runs on a remote server like <a href="https://fly.io">Fly.io</a>, use a
+secure proxy to avoid exposing the MCP server publicly.</p>
+<p><strong>1. Deploy Litestream to Fly.io</strong> with MCP enabled in your <code>fly.toml</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">http_service</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">internal_port</span> <span class="p">=</span> <span class="mi">3001</span>
+</span></span></code></pre></div><p><strong>2. Configure your AI client</strong> to use the Fly.io proxy.</p>
+<p>For Claude Desktop:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;mcpServers&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;litestream&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;command&#34;</span><span class="p">:</span> <span class="s2">&#34;flyctl&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;args&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;mcp&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;proxy&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;--app&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;your-app-name&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;--stream&#34;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Replace <code>your-app-name</code> with your actual Fly.io app name.</p>
+<p><strong>Why use a proxy?</strong> The Fly.io proxy creates an authenticated tunnel using your
+Fly.io credentials, eliminating the need to expose the MCP endpoint publicly or
+manage additional authentication.</p>
+<h3 id="other-ai-clients">Other AI Clients<a href="#other-ai-clients" class="anchor" aria-hidden="true">#</a> </h3>
+<p>MCP is an open standard with growing support. For clients not listed above,
+the general configuration pattern is:</p>
 <ul>
-<li><strong>Required</strong>: <code>path</code> - Database file path or replica URL</li>
-<li><strong>Optional</strong>: <code>config</code> - Path to configuration file</li>
-<li><strong>Optional</strong>: <code>replica</code> - Replica name to filter by</li>
-<li><strong>Optional</strong>: <code>generation</code> - Generation name to filter by</li>
+<li><strong>Transport type:</strong> HTTP</li>
+<li><strong>URL:</strong> <code>http://localhost:3001</code> (local) or use a proxy for remote</li>
+<li><strong>No authentication required</strong> (Litestream MCP doesn&rsquo;t have built-in auth)</li>
 </ul>
-<h2 id="ai-assistant-setup">AI Assistant Setup<a href="#ai-assistant-setup" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Most modern AI assistants support MCP integration. Refer to <a href="https://modelcontextprotocol.io">modelcontextprotocol.io</a> for setup instructions with your specific AI assistant.</p>
-<h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Start Litestream with MCP enabled:</p>
+<p>Refer to <a href="https://modelcontextprotocol.io">modelcontextprotocol.io</a> for setup
+instructions with other compatible clients.</p>
+<h2 id="example-use-cases">Example Use Cases<a href="#example-use-cases" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="checking-replication-status">Checking Replication Status<a href="#checking-replication-status" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Ask your AI assistant:</p>
+<blockquote>
+<p>&ldquo;What&rsquo;s the replication status of my databases?&rdquo;</p>
+</blockquote>
+<p>The assistant uses <code>litestream_databases</code> to retrieve and summarize the current
+state of all configured replicas.</p>
+<h3 id="investigating-backup-history">Investigating Backup History<a href="#investigating-backup-history" class="anchor" aria-hidden="true">#</a> </h3>
+<blockquote>
+<p>&ldquo;Show me the available restore points for myapp.db from the last 24 hours.&rdquo;</p>
+</blockquote>
+<p>The assistant uses <code>litestream_ltx</code> to list transaction log files and presents
+them in a readable format.</p>
+<h3 id="performing-a-restore">Performing a Restore<a href="#performing-a-restore" class="anchor" aria-hidden="true">#</a> </h3>
+<blockquote>
+<p>&ldquo;Restore myapp.db to how it was yesterday at 2pm.&rdquo;</p>
+</blockquote>
+<p>The assistant uses <code>litestream_restore</code> with the appropriate timestamp parameter
+to restore the database.</p>
+<h3 id="troubleshooting-replication">Troubleshooting Replication<a href="#troubleshooting-replication" class="anchor" aria-hidden="true">#</a> </h3>
+<blockquote>
+<p>&ldquo;Why might my S3 replica be behind? What should I check?&rdquo;</p>
+</blockquote>
+<p>The assistant combines information from <code>litestream_info</code> and <code>litestream_databases</code>
+with its knowledge of Litestream to provide troubleshooting guidance.</p>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="connection-refused">Connection Refused<a href="#connection-refused" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If your AI client cannot connect to the MCP server:</p>
+<ol>
+<li>
+<p>Verify Litestream is running with MCP enabled:</p>
 <pre tabindex="0"><code>$ litestream replicate -config litestream.yml
 INFO litestream version=v0.5.0
 INFO Starting MCP server addr=:3001
-INFO initialized db path=/var/lib/myapp.db
-</code></pre><p>Test MCP connectivity:</p>
-<pre tabindex="0"><code>$ curl http://localhost:3001/mcp/tools
-</code></pre>
+</code></pre></li>
+<li>
+<p>Ensure the port matches your configuration.</p>
+</li>
+<li>
+<p>Check that the MCP server is listening on the expected address.</p>
+</li>
+</ol>
+<h3 id="tools-not-appearing">Tools Not Appearing<a href="#tools-not-appearing" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If tools don&rsquo;t appear in your AI client:</p>
+<ol>
+<li>Completely restart the AI client application.</li>
+<li>Verify the configuration file syntax is valid.</li>
+<li>Check client-specific logs or developer tools for error messages.</li>
+<li>Ensure the Litestream MCP server is running and accessible.</li>
+</ol>
+<h3 id="remote-connection-issues">Remote Connection Issues<a href="#remote-connection-issues" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For remote deployments:</p>
+<ol>
+<li>Verify the proxy command is correct and required CLI tools are installed.</li>
+<li>Ensure you&rsquo;re authenticated with your hosting platform.</li>
+<li>Check that the remote app is running and healthy.</li>
+</ol>
+<h2 id="api-reference">API Reference<a href="#api-reference" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The MCP server implements the <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
+over HTTP using JSON-RPC 2.0 at the root endpoint (<code>/</code>).</p>
+<p><strong>Session workflow:</strong></p>
+<ol>
+<li>Send a POST request to <code>/</code> with <code>Content-Type: application/json</code></li>
+<li>Initialize a session with <code>{&quot;method&quot;: &quot;initialize&quot;, ...}</code></li>
+<li>Use the returned <code>Mcp-Session-Id</code> header for subsequent requests</li>
+<li>List tools with <code>{&quot;method&quot;: &quot;tools/list&quot;, ...}</code></li>
+<li>Call tools with <code>{&quot;method&quot;: &quot;tools/call&quot;, &quot;params&quot;: {&quot;name&quot;: &quot;tool_name&quot;, &quot;arguments&quot;: {...}}, ...}</code></li>
+</ol>
+<p><strong>Protocol version:</strong> The server implements MCP specification version 2024-11-05.</p>
+<p>For complete protocol details, see the
+<a href="https://modelcontextprotocol.io/specification">MCP specification</a>.</p>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	<a href="https://litestream.io/reference/databases/">
