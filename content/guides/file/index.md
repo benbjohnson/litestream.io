@@ -22,10 +22,10 @@ to another file on your local filesystem. File-based replication is useful for:
 ### Command line usage
 
 You can replicate to a local file path from the command line by specifying both
-the source database and the destination path:
+the source database and the destination URL using the `file://` scheme:
 
 ```sh
-litestream replicate /path/to/db /path/to/replica
+litestream replicate /path/to/db file:///path/to/replica
 ```
 
 The replica path should be a directory where Litestream will store its
@@ -35,7 +35,7 @@ stores WAL segments and snapshots that allow point-in-time recovery.
 You can later restore your database from the file replica to a new location:
 
 ```sh
-litestream restore -o /path/to/restored.db /path/to/replica
+litestream restore -o /path/to/restored.db file:///path/to/replica
 ```
 
 
@@ -47,8 +47,8 @@ file][]. You can configure a file replica by specifying a local path:
 ```yaml
 dbs:
   - path: /var/lib/myapp/data.db
-    replicas:
-      - path: /backup/litestream/data
+    replica:
+      path: /backup/litestream/data
 ```
 
 If no `type` field is specified and a `url` is not used, Litestream assumes the
@@ -59,27 +59,10 @@ You can also explicitly specify the type:
 ```yaml
 dbs:
   - path: /var/lib/myapp/data.db
-    replicas:
-      - type: file
-        path: /backup/litestream/data
+    replica:
+      type: file
+      path: /backup/litestream/data
 ```
-
-
-## Multiple replicas
-
-File replicas can be combined with cloud storage replicas to provide both local
-and offsite backups:
-
-```yaml
-dbs:
-  - path: /var/lib/myapp/data.db
-    replicas:
-      - path: /backup/litestream/data
-      - url: s3://mybucket/data
-```
-
-This configuration replicates to both a local file path and Amazon S3,
-providing redundancy across different storage types.
 
 
 ## Use cases
@@ -91,8 +74,8 @@ To protect against disk failure, replicate to a different physical disk:
 ```yaml
 dbs:
   - path: /mnt/primary/app.db
-    replicas:
-      - path: /mnt/backup/litestream/app
+    replica:
+      path: /mnt/backup/litestream/app
 ```
 
 ### Network-attached storage (NAS)
@@ -102,8 +85,8 @@ Replicate to a mounted NAS for centralized backup:
 ```yaml
 dbs:
   - path: /var/lib/app/data.db
-    replicas:
-      - path: /mnt/nas/backups/litestream/data
+    replica:
+      path: /mnt/nas/backups/litestream/data
 ```
 
 ### Development and testing
@@ -113,11 +96,11 @@ before deploying to production with cloud storage:
 
 ```sh
 # Start replication
-litestream replicate ./dev.db ./replica
+litestream replicate ./dev.db file://./replica
 
 # In another terminal, make changes to dev.db
 # Then test restoration
-litestream restore -o ./restored.db ./replica
+litestream restore -o ./restored.db file://./replica
 ```
 
 
