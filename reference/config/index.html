@@ -210,6 +210,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a href="#database-settings">Database settings</a>
       <ul>
         <li><a href="#database-configuration-options">Database configuration options</a></li>
+        <li><a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a></li>
       </ul>
     </li>
     <li><a href="#replica-settings">Replica settings</a>
@@ -551,7 +552,13 @@ by their absolute path.</p>
 </span></span></span></code></pre></div><h3 id="database-configuration-options">Database configuration options<a href="#database-configuration-options" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Each database supports the following configuration options:</p>
 <ul>
-<li><code>path</code>—Absolute path to the SQLite database file</li>
+<li><code>path</code>—Absolute path to the SQLite database file. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+
+Litestream automatically strips <code>sqlite://</code> and <code>sqlite3://</code> prefixes, allowing
+you to use the same <code>DATABASE_URL</code> with Litestream and other SQLite tools. See
+<a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a> below.</li>
 <li><code>meta-path</code>—Path to store Litestream metadata (defaults to <code>&lt;path&gt;-litestream</code>)</li>
 <li><code>monitor-interval</code>—How often to check for changes (default: <code>1s</code>)</li>
 <li><code>checkpoint-interval</code>—How often to perform WAL checkpoints using PASSIVE mode (default: <code>1m</code>, non-blocking)</li>
@@ -579,7 +586,33 @@ by their absolute path.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/myapp</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
-</span></span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><h3 id="sqlite-connection-string-prefixes">SQLite Connection String Prefixes<a href="#sqlite-connection-string-prefixes" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream automatically strips <code>sqlite://</code> and
+<code>sqlite3://</code> prefixes from database paths. This allows you to use a single
+<code>DATABASE_URL</code> environment variable across Litestream and other SQLite tools
+that require the protocol prefix.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># All of these path values are equivalent:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#   /data/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#   sqlite:///data/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#   sqlite3:///data/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">sqlite3:///data/app.db</span><span class="w">
+</span></span></span></code></pre></div><p>This is particularly useful when working with tools like Django, Prisma, or
+other ORMs that expect connection string URLs:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Set once, use everywhere</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">DATABASE_URL</span><span class="o">=</span>sqlite3:///data/app.db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Works with Litestream</span>
+</span></span><span class="line"><span class="cl">litestream replicate <span class="nv">$DATABASE_URL</span> s3://backup-bucket/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Also works with other tools expecting the prefix</span>
+</span></span><span class="line"><span class="cl">python manage.py migrate  <span class="c1"># Django</span>
+</span></span><span class="line"><span class="cl">prisma migrate deploy     <span class="c1"># Prisma</span>
+</span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream supports seven types of replicas:</p>
 <ul>
 <li><code>&quot;abs&quot;</code> replicates a database to an Azure Blob Storage container.</li>
