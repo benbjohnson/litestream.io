@@ -198,6 +198,14 @@
       </ul>
     </li>
     <li><a href="#running-in-the-same-container">Running in the same container</a></li>
+    <li><a href="#volume-storage-considerations">Volume storage considerations</a>
+      <ul>
+        <li><a href="#supported-configurations">Supported configurations</a></li>
+        <li><a href="#unsupported-configurations">Unsupported configurations</a></li>
+        <li><a href="#why-sidecar-containers-work">Why sidecar containers work</a></li>
+        <li><a href="#best-practices">Best practices</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
@@ -279,6 +287,85 @@ as a process supervisor. s6 provides a simple init system for managing multiple
 processes. It is wrapped by the <a href="https://github.com/just-containers/s6-overlay">s6-overlay</a> project to provide this service to
 Docker containers. You can find a small example application in the
 <a href="https://github.com/benbjohnson/litestream-s6-example">litestream-s6-example</a> repository.</p>
+<h2 id="volume-storage-considerations">Volume storage considerations<a href="#volume-storage-considerations" class="anchor" aria-hidden="true">#</a> </h2>
+<p>SQLite uses <a href="https://sqlite.org/wal.html">WAL mode</a> for concurrent read access and durability. WAL mode
+relies on shared memory (<code>mmap</code>) and file locking to coordinate between
+processes. This has important implications for how you configure Docker volumes.</p>
+<h3 id="supported-configurations">Supported configurations<a href="#supported-configurations" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Local volumes (recommended)</strong>: Docker volumes backed by local storage on the
+host machine work correctly with SQLite and Litestream. This includes:</p>
+<ul>
+<li>Named volumes (<code>docker volume create mydata</code>)</li>
+<li>Bind mounts to local directories (<code>-v /local/path:/container/path</code>)</li>
+<li>Block storage devices (AWS EBS, GCE Persistent Disk, etc.)</li>
+</ul>
+<p><strong>Same-kernel containers</strong>: When running Docker on Linux, multiple containers
+sharing a volume will work correctly because they share the same kernel and can
+coordinate locks properly. This is the standard sidecar pattern—your application
+and Litestream containers both mount the same volume and access the same
+database file.</p>
+<h3 id="unsupported-configurations">Unsupported configurations<a href="#unsupported-configurations" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Network filesystems and cross-OS volumes can cause database corruption. Avoid these configurations.</div>
+</div>
+<p><strong>Network-mounted volumes</strong>: SQLite&rsquo;s locking mechanism does not work reliably
+over network filesystems:</p>
+<ul>
+<li>NFS (all versions)</li>
+<li>SMB/CIFS</li>
+<li>GlusterFS</li>
+<li>Other distributed filesystems</li>
+</ul>
+<p>The <a href="https://www.sqlite.org/faq.html#q5">SQLite documentation</a> explicitly warns against using SQLite on
+network filesystems because <code>fcntl()</code> file locking does not work correctly
+across network boundaries. Even if operations appear to succeed, data corruption
+can occur silently.</p>
+<p><strong>Docker Desktop (macOS/Windows)</strong>: When running Docker Desktop on macOS or
+Windows, the Linux containers run inside a virtual machine. Volumes mounted from
+the host filesystem use a network filesystem layer to bridge the VM boundary.
+This can cause WAL mode failures and database corruption.</p>
+<p>For development on macOS or Windows:</p>
+<ul>
+<li>Use a named Docker volume instead of bind-mounting from the host</li>
+<li>Or disable WAL mode (not recommended for production)</li>
+</ul>
+<h3 id="why-sidecar-containers-work">Why sidecar containers work<a href="#why-sidecar-containers-work" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When your application and Litestream run as separate containers sharing the same
+volume, they can safely access the same SQLite database because:</p>
+<ol>
+<li>Both containers run on the same Docker host</li>
+<li>The shared volume uses local storage (not network-mounted)</li>
+<li>Both processes see the same kernel and can coordinate file locks</li>
+</ol>
+<p>This is fundamentally different from mounting a database over a network
+filesystem, where lock coordination cannot work correctly.</p>
+<h3 id="best-practices">Best practices<a href="#best-practices" class="anchor" aria-hidden="true">#</a> </h3>
+<ol>
+<li>
+<p><strong>Use local storage</strong>: Always store SQLite databases on local volumes—either
+named volumes or locally-attached block storage.</p>
+</li>
+<li>
+<p><strong>Single writer</strong>: Ensure only one process writes to the database at a time.
+Litestream coordinates with your application through SQLite&rsquo;s locking, but
+only one Litestream instance should replicate a given database.</p>
+</li>
+<li>
+<p><strong>Set busy_timeout</strong>: Configure your application with
+<code>PRAGMA busy_timeout = 5000;</code> to handle brief lock contention during
+Litestream checkpoints.</p>
+</li>
+<li>
+<p><strong>Avoid network mounts</strong>: Never place SQLite databases on NFS, SMB, or other
+network filesystems—even when using Litestream.</p>
+</li>
+<li>
+<p><strong>Test your configuration</strong>: If you&rsquo;re unsure whether your storage supports
+proper locking, run SQLite&rsquo;s integrity check after writes:
+<code>PRAGMA integrity_check;</code></p>
+</li>
+</ol>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
