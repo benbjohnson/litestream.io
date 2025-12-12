@@ -62,5 +62,5 @@ litestream replicate -exec "myapp serve" /path/to/db s3://mybucket/db
 
 # ❌ Incorrect: flags after positional arguments
 litestream replicate /path/to/db s3://mybucket/db -exec "myapp serve"
-# Error: replica url scheme required: -exec
+# Error: flag "-exec" must be positioned before DB_PATH and REPLICA_URL arguments
 ```
