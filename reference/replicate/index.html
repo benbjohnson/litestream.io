@@ -196,7 +196,11 @@ litestream replicate [arguments] Replicate a single file (Command-line mode) Thi
         <li><a href="#replicate-a-single-file-command-line-mode">Replicate a single file (Command-line mode)</a></li>
       </ul>
     </li>
-    <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#arguments">Arguments</a>
+      <ul>
+        <li><a href="#flag-ordering-example">Flag ordering example</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
@@ -349,6 +353,10 @@ You cannot embed credentials in the replica URL for security reasons.</p>
 </span></span></code></pre></div><p>For complex deployments with multiple databases or advanced configuration,
 use a <a href="https://litestream.io/reference/config/">configuration file</a> instead.</p>
 <h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">**Flag Position**: All flags (such as `-exec`, `-config`) must appear *before* the positional arguments (`DB_PATH` and `REPLICA_URL`). Placing flags after the positional arguments will result in an error.</div>
+</div>
 <pre tabindex="0"><code>-config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
@@ -359,6 +367,13 @@ use a <a href="https://litestream.io/reference/config/">configuration file</a> i
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
+</code></pre><h3 id="flag-ordering-example">Flag ordering example<a href="#flag-ordering-example" class="anchor" aria-hidden="true">#</a> </h3>
+<pre tabindex="0"><code># ✅ Correct: flags before positional arguments
+litestream replicate -exec &#34;myapp serve&#34; /path/to/db s3://mybucket/db
+
+# ❌ Incorrect: flags after positional arguments
+litestream replicate /path/to/db s3://mybucket/db -exec &#34;myapp serve&#34;
+# Error: flag &#34;-exec&#34; must be positioned before DB_PATH and REPLICA_URL arguments
 </code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
