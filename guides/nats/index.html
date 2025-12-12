@@ -294,21 +294,108 @@ file. You can configure a replica for your database using the <code>url</code> f
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/BUCKETNAME</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;my-secret-token&#34;</span><span class="w">
 </span></span></span></code></pre></div><h3 id="tls-configuration">TLS Configuration<a href="#tls-configuration" class="anchor" aria-hidden="true">#</a> </h3>
-<p>For secure connections, enable TLS:</p>
+<p>For secure connections to your NATS server, Litestream supports several TLS
+options including custom CA certificates and client certificates for mutual TLS
+(mTLS) authentication.</p>
+<h4 id="basic-tls">Basic TLS<a href="#basic-tls" class="anchor" aria-hidden="true">#</a> </h4>
+<p>When connecting to a NATS server with TLS enabled, Litestream will
+automatically enable TLS when you configure client certificates or custom CA
+certificates:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://secure.nats.example.com:4222/BUCKETNAME</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span></span></span></code></pre></div><p>You can also specify custom CA certificates or client certificates:</p>
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
+</span></span></span></code></pre></div><h4 id="custom-root-ca-certificates">Custom Root CA Certificates<a href="#custom-root-ca-certificates" class="anchor" aria-hidden="true">#</a> </h4>
+<p>If your NATS server uses certificates signed by a private or custom Certificate
+Authority (CA), you need to provide the CA certificate so Litestream can verify
+the server&rsquo;s identity:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/litestream.crt</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/litestream.key</span><span class="w">
-</span></span></span></code></pre></div><h2 id="connection-options">Connection Options<a href="#connection-options" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/custom-ca.pem</span><span class="w">
+</span></span></span></code></pre></div><p>You can specify multiple CA certificates if needed:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/ca1.pem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/ca2.pem</span><span class="w">
+</span></span></span></code></pre></div><p>Common scenarios requiring custom CA certificates:</p>
+<ul>
+<li>Self-signed certificates for development or testing</li>
+<li>Internal PKI with private CA</li>
+<li>Intermediate CA certificates not in system trust store</li>
+</ul>
+<h4 id="client-certificates-mutual-tls">Client Certificates (Mutual TLS)<a href="#client-certificates-mutual-tls" class="anchor" aria-hidden="true">#</a> </h4>
+<p>For environments requiring mutual TLS (mTLS) authentication, where both the
+client and server verify each other&rsquo;s identity, configure client certificates:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/litestream-client.pem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/litestream-client.key</span><span class="w">
+</span></span></span></code></pre></div><p>Both <code>client-cert</code> and <code>client-key</code> must be specified together. The certificate
+and key files should be in PEM format.</p>
+<h4 id="full-mtls-configuration">Full mTLS Configuration<a href="#full-mtls-configuration" class="anchor" aria-hidden="true">#</a> </h4>
+<p>A complete mutual TLS setup with both client authentication and custom CA:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">/etc/ssl/certs/nats-ca.pem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/litestream-client.pem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/litestream-client.key</span><span class="w">
+</span></span></span></code></pre></div><h4 id="environment-variable-configuration">Environment Variable Configuration<a href="#environment-variable-configuration" class="anchor" aria-hidden="true">#</a> </h4>
+<p>You can use environment variables for certificate paths:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">${NATS_CA_CERT}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_CLIENT_CERT}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_CLIENT_KEY}</span><span class="w">
+</span></span></span></code></pre></div><h4 id="certificate-requirements">Certificate Requirements<a href="#certificate-requirements" class="anchor" aria-hidden="true">#</a> </h4>
+<ul>
+<li><strong>Format</strong>: All certificates must be in PEM format</li>
+<li><strong>Permissions</strong>: Certificate files should be readable by the Litestream process</li>
+<li><strong>Key permissions</strong>: Private key files should have restricted permissions (e.g., <code>600</code>)</li>
+<li><strong>Validation</strong>: Both client certificate and key must be provided together</li>
+</ul>
+<h4 id="nats-server-configuration">NATS Server Configuration<a href="#nats-server-configuration" class="anchor" aria-hidden="true">#</a> </h4>
+<p>For reference, your NATS server should be configured to require TLS and
+optionally verify client certificates. Example NATS server configuration:</p>
+<pre tabindex="0"><code class="language-conf" data-lang="conf"># Enable TLS
+tls {
+  cert_file: &#34;/etc/nats/server-cert.pem&#34;
+  key_file: &#34;/etc/nats/server-key.pem&#34;
+  ca_file: &#34;/etc/nats/ca.pem&#34;
+  verify: true  # Require client certificates
+}
+</code></pre><p>See the <a href="https://docs.nats.io/running-a-nats-service/configuration/securing_nats/tls">NATS TLS documentation</a>
+for complete server configuration options.</p>
+<h4 id="troubleshooting-tls">Troubleshooting TLS<a href="#troubleshooting-tls" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Common TLS issues and solutions:</p>
+<p><strong>Certificate validation errors:</strong></p>
+<ul>
+<li>Verify the CA certificate matches what signed the server certificate</li>
+<li>Check certificate expiration dates</li>
+<li>Ensure hostname in certificate matches the server URL</li>
+</ul>
+<p><strong>Client certificate rejected:</strong></p>
+<ul>
+<li>Confirm both <code>client-cert</code> and <code>client-key</code> are specified</li>
+<li>Verify the client certificate was signed by a CA trusted by the server</li>
+<li>Check file permissions on the key file</li>
+</ul>
+<p><strong>Connection timeouts:</strong></p>
+<ul>
+<li>Verify the NATS server is listening on the expected port with TLS enabled</li>
+<li>Check firewall rules allow the connection</li>
+<li>Try increasing the <code>timeout</code> configuration option</li>
+</ul>
+<h2 id="connection-options">Connection Options<a href="#connection-options" class="anchor" aria-hidden="true">#</a> </h2>
 <p>You can configure connection behavior for reliability:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">

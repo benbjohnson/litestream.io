@@ -965,14 +965,13 @@ See the <a href="https://litestream.io/guides/sftp/">SFTP Guide</a> for guidance
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">my-bucket</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># TLS configuration</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># TLS configuration (auto-enables TLS when specified)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/nats-client.crt</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/nats-client.key</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      
+</span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Connection tuning</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
@@ -994,13 +993,15 @@ See the <a href="https://litestream.io/guides/sftp/">SFTP Guide</a> for guidance
 <li><code>token</code>—Simple token authentication</li>
 </ul>
 <p><strong>TLS Options:</strong></p>
+<p>TLS is automatically enabled when <code>client-cert</code>/<code>client-key</code> or <code>root-cas</code> are
+configured. All certificate files must be in PEM format.</p>
 <ul>
-<li><code>tls</code>—Enable TLS encryption</li>
-<li><code>root-cas</code>—List of CA certificate file paths</li>
-<li><code>client-cert</code>—Client certificate for mutual TLS</li>
-<li><code>client-key</code>—Client private key for mutual TLS</li>
+<li><code>root-cas</code>—List of CA certificate file paths for server verification</li>
+<li><code>client-cert</code>—Client certificate file path for mutual TLS authentication</li>
+<li><code>client-key</code>—Client private key file path for mutual TLS authentication
+(must be specified with <code>client-cert</code>)</li>
 </ul>
-<p>See the <a href="https://litestream.io/guides/nats/">NATS Integration Guide</a> for detailed setup instructions.</p>
+<p>See the <a href="https://litestream.io/guides/nats/">NATS Integration Guide</a> for detailed TLS setup instructions.</p>
 <h3 id="alibaba-cloud-oss-replica">Alibaba Cloud OSS replica<a href="#alibaba-cloud-oss-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -1252,16 +1253,17 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># NATS replica with TLS</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># NATS replica with mTLS</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app2.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://nats.example.com:4222/app2-bucket</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">${NATS_PASSWORD}</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">tls</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">root-cas</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">/etc/ssl/certs/nats-ca.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">client-cert</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/certs/litestream-client.crt</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">client-key</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/ssl/private/litestream-client.key</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">max-reconnects</span><span class="p">:</span><span class="w"> </span>-<span class="m">1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">reconnect-wait</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
