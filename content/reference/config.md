@@ -159,7 +159,7 @@ host: backup.example.com:22
 user: backupuser
 password: ${SFTP_PASSWORD}
 key-path: /etc/litestream/sftp_key
-concurrent-writes: 4
+concurrent-writes: true
 ```
 
 **NATS JetStream settings:**
