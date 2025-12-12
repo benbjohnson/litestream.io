@@ -210,6 +210,14 @@
     </li>
     <li><a href="#performance-tuning">Performance tuning</a></li>
     <li><a href="#limitations--constraints">Limitations &amp; constraints</a></li>
+    <li><a href="#transaction-duration--memory">Transaction duration &amp; memory</a>
+      <ul>
+        <li><a href="#recommended-transaction-duration">Recommended transaction duration</a></li>
+        <li><a href="#monitoring-pending-index-growth">Monitoring pending index growth</a></li>
+        <li><a href="#comparison-to-sqlite-primary-behavior">Comparison to SQLite primary behavior</a></li>
+        <li><a href="#when-not-to-use-vfs">When NOT to use VFS</a></li>
+      </ul>
+    </li>
     <li><a href="#troubleshooting">Troubleshooting</a></li>
     <li><a href="#common-use-cases">Common use cases</a></li>
   </ul>
@@ -425,7 +433,102 @@ See the <a href="/reference/config#l0-retention-vfs-read-replicas">L0 retention 
 <li>Network-bound latency: first access to a page incurs storage/network latency before it is cached.</li>
 <li>High concurrency: designed for modest fan-out; very high reader counts will increase object-store requests.</li>
 <li>Consistency: requires contiguous LTX files. Missing L0 files (e.g., after aggressive retention) will surface errors until new compactions appear.</li>
+<li>Transaction duration: long-held read transactions during sustained writes cause memory growth. See <a href="#transaction-duration--memory">Transaction duration &amp; memory</a> below.</li>
 </ul>
+<h2 id="transaction-duration--memory">Transaction duration &amp; memory<a href="#transaction-duration--memory" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The VFS provides snapshot isolation by staging incoming LTX updates in a pending
+index while read transactions are active. This means long-held transactions
+during high write activity can cause memory growth on the VFS client.</p>
+<h3 id="recommended-transaction-duration">Recommended transaction duration<a href="#recommended-transaction-duration" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended Max Duration</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Point queries, indexed lookups</td>
+<td>No practical limit</td>
+<td>Low memory overhead</td>
+</tr>
+<tr>
+<td>Dashboard/reporting queries</td>
+<td>&lt; 30 seconds</td>
+<td>Moderate pending index growth</td>
+</tr>
+<tr>
+<td>Analytics with sustained writes</td>
+<td>&lt; 60 seconds</td>
+<td>Monitor memory usage</td>
+</tr>
+<tr>
+<td>Batch exports during writes</td>
+<td>Consider chunking</td>
+<td>Break into smaller transactions</td>
+</tr>
+</tbody>
+</table>
+<p>For most VFS use cases (dashboards, reporting, ad-hoc queries), transaction
+durations under 30 seconds pose no concern. The VFS is designed for read
+replicas serving moderate query loads.</p>
+<h3 id="monitoring-pending-index-growth">Monitoring pending index growth<a href="#monitoring-pending-index-growth" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Currently, there is no direct PRAGMA to observe pending index size. Signs of
+excessive pending growth include:</p>
+<ul>
+<li>Increased memory usage on the VFS client during long queries</li>
+<li>Slow unlock operations as large pending maps merge into the main index</li>
+</ul>
+<p>If you observe these symptoms:</p>
+<ol>
+<li>Reduce transaction duration by breaking queries into smaller chunks</li>
+<li>Schedule long-running queries during low-write periods</li>
+<li>Consider using the <code>restore</code> command for heavy analytics instead of VFS</li>
+</ol>
+<h3 id="comparison-to-sqlite-primary-behavior">Comparison to SQLite primary behavior<a href="#comparison-to-sqlite-primary-behavior" class="anchor" aria-hidden="true">#</a> </h3>
+<p>This behavior mirrors SQLite&rsquo;s own transaction semantics:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>SQLite Primary</th>
+<th>Litestream VFS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long read blocks</td>
+<td>WAL checkpointing</td>
+<td>Pending index merge</td>
+</tr>
+<tr>
+<td>Memory growth</td>
+<td>WAL file grows</td>
+<td>Pending index grows</td>
+</tr>
+<tr>
+<td>Cleanup trigger</td>
+<td>Transaction commit/end</td>
+<td>Lock release</td>
+</tr>
+</tbody>
+</table>
+<p>Both systems prioritize snapshot isolation over resource cleanup during active
+transactions. This is a deliberate design choice, not a bug.</p>
+<h3 id="when-not-to-use-vfs">When NOT to use VFS<a href="#when-not-to-use-vfs" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If your workload requires:</p>
+<ul>
+<li>Multi-minute analytical queries during sustained writes</li>
+<li>Minimal memory overhead under all conditions</li>
+<li>Low-latency high-concurrency reads</li>
+</ul>
+<p>Consider restoring the database locally with <code>litestream restore</code> instead of
+using the VFS. The restored database provides full SQLite performance without
+network latency or pending index overhead.</p>
+<p>See <a href="/how-it-works/vfs/#two-index-transaction-isolation">How it works: VFS</a> for
+a deeper explanation of the two-index isolation mechanism.</p>
 <h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><strong>&ldquo;page not found&rdquo; / non-contiguous errors</strong>: ensure VFS retention is configured on the primary (<code>l0-retention</code> long enough) and the replica has no gaps.</li>

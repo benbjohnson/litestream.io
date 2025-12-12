@@ -194,7 +194,12 @@ L0: raw transactional files generated during replication. L1&#43;: compacted LTX
     <li><a href="#replica-layout--restore-plan">Replica layout &amp; restore plan</a></li>
     <li><a href="#page-based-access">Page-based access</a></li>
     <li><a href="#polling--l0l1-coordination">Polling &amp; L0/L1 coordination</a></li>
-    <li><a href="#two-index-transaction-isolation">Two-index transaction isolation</a></li>
+    <li><a href="#two-index-transaction-isolation">Two-index transaction isolation</a>
+      <ul>
+        <li><a href="#memory-implications-of-long-held-transactions">Memory implications of long-held transactions</a></li>
+        <li><a href="#mitigations-already-in-place">Mitigations already in place</a></li>
+      </ul>
+    </li>
     <li><a href="#performance-model">Performance model</a></li>
     <li><a href="#compared-to-restore-first-workflows">Compared to restore-first workflows</a></li>
   </ul>
@@ -234,11 +239,71 @@ indexes are ingested.</li>
 <p>Retention of recent L0 files on the primary (<code>l0-retention</code>) is important so VFS
 replicas can see fresh writes before they are compacted.</p>
 <h2 id="two-index-transaction-isolation">Two-index transaction isolation<a href="#two-index-transaction-isolation" class="anchor" aria-hidden="true">#</a> </h2>
-<p>The VFS maintains a main index and a pending index. When readers hold shared
-locks, new LTX pages are staged in the pending index; once locks drop, pending
-entries replace or merge into the main index and cached pages are invalidated.
-This ensures long-running readers see a consistent snapshot while newer commits
-become visible to subsequent connections.</p>
+<p>The VFS maintains two in-memory page indexes to provide snapshot isolation
+without blocking primary database writes:</p>
+<ul>
+<li><strong>Main index</strong>: Maps page numbers to LTX file offsets for the current
+connection&rsquo;s view. Readers query this index during transactions.</li>
+<li><strong>Pending index</strong>: Accumulates new LTX page entries that arrive while a read
+transaction holds a shared lock.</li>
+</ul>
+<p>When a connection acquires a shared lock (starting a read transaction), the VFS
+continues polling for new LTX files but stages their page entries in the pending
+index rather than the main index. This mirrors SQLite&rsquo;s own transaction
+isolation semantics: a read transaction sees a consistent snapshot of the
+database as it existed when the transaction started.</p>
+<p>When the lock is released (transaction ends), the pending entries atomically
+merge into the main index, and any cached pages for updated page numbers are
+invalidated. The next transaction sees the fresh data.</p>
+<h3 id="memory-implications-of-long-held-transactions">Memory implications of long-held transactions<a href="#memory-implications-of-long-held-transactions" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Because the pending index accumulates page entries during active read
+transactions, holding a transaction open during sustained write activity causes
+memory growth proportional to the write rate and transaction duration:</p>
+<table>
+<thead>
+<tr>
+<th>Write Rate</th>
+<th>Transaction Duration</th>
+<th>Approximate Pending Entries</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100 writes/sec</td>
+<td>30 seconds</td>
+<td>~3,000 entries</td>
+</tr>
+<tr>
+<td>500 writes/sec</td>
+<td>60 seconds</td>
+<td>~30,000 entries</td>
+</tr>
+<tr>
+<td>1,000 writes/sec</td>
+<td>60 seconds</td>
+<td>~60,000 entries</td>
+</tr>
+</tbody>
+</table>
+<p>Each pending entry is a small map entry (page number to LTX offset), so memory
+overhead is modest—typically a few bytes per entry. However, sustained
+high-write scenarios with long-held transactions can accumulate tens of
+thousands of entries.</p>
+<p>This behavior is working as designed and mirrors SQLite&rsquo;s own semantics where
+long-running read transactions prevent resource cleanup (WAL checkpointing on
+the primary, pending index cleanup on VFS replicas).</p>
+<h3 id="mitigations-already-in-place">Mitigations already in place<a href="#mitigations-already-in-place" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li><strong>L0 retention</strong>: The primary&rsquo;s <code>l0-retention</code> setting ensures LTX files
+remain available even as new files arrive, giving VFS clients time to
+discover and index them.</li>
+<li><strong>Bounded index growth</strong>: Normal page reuse means the same logical pages are
+updated repeatedly, limiting unique entries.</li>
+<li><strong>Design intent</strong>: The VFS targets read-replica workloads with moderate query
+load, not high-concurrency OLTP scenarios.</li>
+</ul>
+<p>See the <a href="/guides/vfs/#transaction-duration--memory">VFS guide</a> for practical
+recommendations on transaction duration.</p>
 <h2 id="performance-model">Performance model<a href="#performance-model" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li>First access to a page incurs network/object-store latency; hot pages are
