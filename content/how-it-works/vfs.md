@@ -49,11 +49,59 @@ replicas can see fresh writes before they are compacted.
 
 ## Two-index transaction isolation
 
-The VFS maintains a main index and a pending index. When readers hold shared
-locks, new LTX pages are staged in the pending index; once locks drop, pending
-entries replace or merge into the main index and cached pages are invalidated.
-This ensures long-running readers see a consistent snapshot while newer commits
-become visible to subsequent connections.
+The VFS maintains two in-memory page indexes to provide snapshot isolation
+without blocking primary database writes:
+
+- **Main index**: Maps page numbers to LTX file offsets for the current
+  connection's view. Readers query this index during transactions.
+- **Pending index**: Accumulates new LTX page entries that arrive while a read
+  transaction holds a shared lock.
+
+When a connection acquires a shared lock (starting a read transaction), the VFS
+continues polling for new LTX files but stages their page entries in the pending
+index rather than the main index. This mirrors SQLite's own transaction
+isolation semantics: a read transaction sees a consistent snapshot of the
+database as it existed when the transaction started.
+
+When the lock is released (transaction ends), the pending entries atomically
+merge into the main index, and any cached pages for updated page numbers are
+invalidated. The next transaction sees the fresh data.
+
+
+### Memory implications of long-held transactions
+
+Because the pending index accumulates page entries during active read
+transactions, holding a transaction open during sustained write activity causes
+memory growth proportional to the write rate and transaction duration:
+
+| Write Rate | Transaction Duration | Approximate Pending Entries |
+|------------|---------------------|----------------------------|
+| 100 writes/sec | 30 seconds | ~3,000 entries |
+| 500 writes/sec | 60 seconds | ~30,000 entries |
+| 1,000 writes/sec | 60 seconds | ~60,000 entries |
+
+Each pending entry is a small map entry (page number to LTX offset), so memory
+overhead is modest—typically a few bytes per entry. However, sustained
+high-write scenarios with long-held transactions can accumulate tens of
+thousands of entries.
+
+This behavior is working as designed and mirrors SQLite's own semantics where
+long-running read transactions prevent resource cleanup (WAL checkpointing on
+the primary, pending index cleanup on VFS replicas).
+
+
+### Mitigations already in place
+
+- **L0 retention**: The primary's `l0-retention` setting ensures LTX files
+  remain available even as new files arrive, giving VFS clients time to
+  discover and index them.
+- **Bounded index growth**: Normal page reuse means the same logical pages are
+  updated repeatedly, limiting unique entries.
+- **Design intent**: The VFS targets read-replica workloads with moderate query
+  load, not high-concurrency OLTP scenarios.
+
+See the [VFS guide](/guides/vfs/#transaction-duration--memory) for practical
+recommendations on transaction duration.
 
 
 ## Performance model

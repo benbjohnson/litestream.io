@@ -251,6 +251,69 @@ SELECT litestream_set_time('5 minutes ago');  -- Set time travel point
 - Network-bound latency: first access to a page incurs storage/network latency before it is cached.
 - High concurrency: designed for modest fan-out; very high reader counts will increase object-store requests.
 - Consistency: requires contiguous LTX files. Missing L0 files (e.g., after aggressive retention) will surface errors until new compactions appear.
+- Transaction duration: long-held read transactions during sustained writes cause memory growth. See [Transaction duration & memory](#transaction-duration--memory) below.
+
+
+## Transaction duration & memory
+
+The VFS provides snapshot isolation by staging incoming LTX updates in a pending
+index while read transactions are active. This means long-held transactions
+during high write activity can cause memory growth on the VFS client.
+
+### Recommended transaction duration
+
+| Scenario | Recommended Max Duration | Notes |
+|----------|-------------------------|-------|
+| Point queries, indexed lookups | No practical limit | Low memory overhead |
+| Dashboard/reporting queries | < 30 seconds | Moderate pending index growth |
+| Analytics with sustained writes | < 60 seconds | Monitor memory usage |
+| Batch exports during writes | Consider chunking | Break into smaller transactions |
+
+For most VFS use cases (dashboards, reporting, ad-hoc queries), transaction
+durations under 30 seconds pose no concern. The VFS is designed for read
+replicas serving moderate query loads.
+
+### Monitoring pending index growth
+
+Currently, there is no direct PRAGMA to observe pending index size. Signs of
+excessive pending growth include:
+
+- Increased memory usage on the VFS client during long queries
+- Slow unlock operations as large pending maps merge into the main index
+
+If you observe these symptoms:
+
+1. Reduce transaction duration by breaking queries into smaller chunks
+2. Schedule long-running queries during low-write periods
+3. Consider using the `restore` command for heavy analytics instead of VFS
+
+### Comparison to SQLite primary behavior
+
+This behavior mirrors SQLite's own transaction semantics:
+
+| Resource | SQLite Primary | Litestream VFS |
+|----------|---------------|----------------|
+| Long read blocks | WAL checkpointing | Pending index merge |
+| Memory growth | WAL file grows | Pending index grows |
+| Cleanup trigger | Transaction commit/end | Lock release |
+
+Both systems prioritize snapshot isolation over resource cleanup during active
+transactions. This is a deliberate design choice, not a bug.
+
+### When NOT to use VFS
+
+If your workload requires:
+
+- Multi-minute analytical queries during sustained writes
+- Minimal memory overhead under all conditions
+- Low-latency high-concurrency reads
+
+Consider restoring the database locally with `litestream restore` instead of
+using the VFS. The restored database provides full SQLite performance without
+network latency or pending index overhead.
+
+See [How it works: VFS](/how-it-works/vfs/#two-index-transaction-isolation) for
+a deeper explanation of the two-index isolation mechanism.
 
 
 ## Troubleshooting
