@@ -125,9 +125,8 @@ S3-compatible services:
 | `username` | Username for basic authentication |
 | `password` | Password for basic authentication |
 | `token` | Token for simple authentication |
-| `tls` | Enable TLS encryption |
-| `root-cas` | List of CA certificate file paths |
-| `client-cert` | Client certificate for mutual TLS |
+| `root-cas` | List of CA certificate file paths (auto-enables TLS) |
+| `client-cert` | Client certificate for mutual TLS (auto-enables TLS) |
 | `client-key` | Client private key for mutual TLS |
 | `max-reconnects` | Maximum reconnection attempts |
 | `reconnect-wait` | Wait time between reconnection attempts |
