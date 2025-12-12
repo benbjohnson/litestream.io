@@ -316,6 +316,8 @@ When no explicit credentials are configured, Litestream attempts authentication 
 4. **Azure CLI Credential** (local development with `az login`)
 5. **Azure Developer CLI Credential** (local development with `azd auth login`)
 
+{{< alert icon="💡" text="When running outside Azure infrastructure, the credential chain may take several seconds to complete as it attempts each method. This is normal behavior—the Managed Identity check times out when not on Azure. For faster startup in non-Azure environments, use explicit credentials (account key or service principal environment variables)." >}}
+
 ##### Environment Variables for Service Principal
 
 To authenticate using a service principal, set these environment variables:
@@ -509,6 +511,10 @@ litestream version
 - `account-key` in configuration
 - `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable
 - Service principal environment variables (`AZURE_CLIENT_ID`, etc.)
+
+#### Breaking Changes
+
+There are no breaking changes. All v0.3.x Azure Blob Storage configurations work with v0.5.0 without modification. The SDK upgrade is transparent to users with existing configurations.
 
 #### Further Reading
 
