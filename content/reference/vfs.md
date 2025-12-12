@@ -170,7 +170,9 @@ SELECT litestream_set_time('10 minutes ago');
 - Page fetch retries: up to 6 attempts with backoff for transient network/read errors.
 - Supports SQLite page sizes from 512 to 65536 bytes (auto-detected from LTX headers).
 - Two-index isolation: incoming LTX pages are staged while readers hold locks,
-  then swapped in to keep long-running reads consistent.
+  then swapped in to keep long-running reads consistent. See
+  [How it works: VFS](/how-it-works/vfs/#memory-implications-of-long-held-transactions)
+  for memory considerations with long-held transactions.
 
 
 ## Limitations & constraints
