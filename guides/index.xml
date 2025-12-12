@@ -142,6 +142,13 @@
       <description>This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running.&#xA;Usage Command line usage You can specify your SFTP replica using a replica URL on the command line. For example, you can replicate a database to an SFTP server with the following command. Replace the placeholders with your username, password, server, &amp;amp; path.</description>
     </item>
     <item>
+      <title>Replicating to a Local File Path</title>
+      <link>https://litestream.io/guides/file/</link>
+      <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/file/</guid>
+      <description>This guide will show you how to use Litestream to replicate your SQLite database to another file on your local filesystem. File-based replication is useful for:&#xA;Creating local backups on a separate disk or partition Testing Litestream before setting up cloud storage Replicating to network-attached storage (NAS) Development and debugging workflows Usage Command line usage You can replicate to a local file path from the command line by specifying both the source database and the destination URL using the file:// scheme:</description>
+    </item>
+    <item>
       <title>Replicating to NATS JetStream</title>
       <link>https://litestream.io/guides/nats/</link>
       <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>

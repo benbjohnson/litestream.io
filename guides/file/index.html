@@ -14,14 +14,14 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>macOS - Litestream</title>
+  <title>Replicating to a Local File Path - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/install/mac/">
+<link rel="canonical" href="https://litestream.io/guides/file/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="macOS">
-<meta name="twitter:description" content="Installation A Homebrew tap to is provided to install Litestream in a single command. After installing Homebrew, run:
-brew install benbjohnson/litestream/litestream You should now be able to run litestream version to verify it is installed.">
+<meta name="twitter:title" content="Replicating to a Local File Path">
+<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate your SQLite database to another file on your local filesystem. File-based replication is useful for:
+Creating local backups on a separate disk or partition Testing Litestream before setting up cloud storage Replicating to network-attached storage (NAS) Development and debugging workflows Usage Command line usage You can replicate to a local file path from the command line by specifying both the source database and the destination URL using the file:// scheme:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -40,13 +40,13 @@ brew install benbjohnson/litestream/litestream You should now be able to run lit
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Install",
-        "item": "https:\/\/litestream.io\/install\/"
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "MAC",
-        "item": "https:\/\/litestream.io\/install\/mac\/"
+        "name": "File",
+        "item": "https:\/\/litestream.io\/guides\/file\/"
     }]
 }
 </script>
@@ -58,7 +58,7 @@ brew install benbjohnson/litestream/litestream You should now be able to run lit
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="install single">
+  <body class="guides single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -114,7 +114,7 @@ brew install benbjohnson/litestream/litestream You should now be able to run lit
     <a href="https://litestream.io/install">Install</a>
   </h3>
   <ul class="list-unstyled">
-    <li><a class="docs-link active" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
     <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
     <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
     </ul>
@@ -156,7 +156,7 @@ brew install benbjohnson/litestream/litestream You should now be able to run lit
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
-    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
     </ul>
@@ -190,27 +190,120 @@ brew install benbjohnson/litestream/litestream You should now be able to run lit
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#installation">Installation</a></li>
+    <li><a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#command-line-usage">Command line usage</a></li>
+        <li><a href="#configuration-file-usage">Configuration file usage</a></li>
+      </ul>
+    </li>
+    <li><a href="#use-cases">Use cases</a>
+      <ul>
+        <li><a href="#local-backup-to-a-separate-disk">Local backup to a separate disk</a></li>
+        <li><a href="#network-attached-storage-nas">Network-attached storage (NAS)</a></li>
+        <li><a href="#development-and-testing">Development and testing</a></li>
+      </ul>
+    </li>
+    <li><a href="#considerations">Considerations</a></li>
   </ul>
 </nav>
   </div>
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>macOS</h1>
+		<h1>Replicating to a Local File Path</h1>
 			<p class="lead"></p>
-			<h2 id="installation">Installation<a href="#installation" class="anchor" aria-hidden="true">#</a> </h2>
-<p>A <a href="https://brew.sh/">Homebrew</a> tap to is provided to install Litestream in a
-single command. After installing Homebrew, run:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">brew install benbjohnson/litestream/litestream
-</span></span></code></pre></div><p>You should now be able to run <code>litestream version</code> to verify it is installed.</p>
+			<p>This guide will show you how to use Litestream to replicate your SQLite database
+to another file on your local filesystem. File-based replication is useful for:</p>
+<ul>
+<li>Creating local backups on a separate disk or partition</li>
+<li>Testing Litestream before setting up cloud storage</li>
+<li>Replicating to network-attached storage (NAS)</li>
+<li>Development and debugging workflows</li>
+</ul>
+<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>You can replicate to a local file path from the command line by specifying both
+the source database and the destination URL using the <code>file://</code> scheme:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db file:///path/to/replica
+</span></span></code></pre></div><p>The replica path should be a directory where Litestream will store its
+replication data. Litestream does not create a simple copy of your database—it
+stores WAL segments and snapshots that allow point-in-time recovery.</p>
+<p>You can later restore your database from the file replica to a new location:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o /path/to/restored.db file:///path/to/replica
+</span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
+file</a>. You can configure a file replica by specifying a local path:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp/data.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/litestream/data</span><span class="w">
+</span></span></span></code></pre></div><p>If no <code>type</code> field is specified and a <code>url</code> is not used, Litestream assumes the
+replica type is <code>file</code>.</p>
+<p>You can also explicitly specify the type:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp/data.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">file</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/backup/litestream/data</span><span class="w">
+</span></span></span></code></pre></div><h2 id="use-cases">Use cases<a href="#use-cases" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="local-backup-to-a-separate-disk">Local backup to a separate disk<a href="#local-backup-to-a-separate-disk" class="anchor" aria-hidden="true">#</a> </h3>
+<p>To protect against disk failure, replicate to a different physical disk:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/mnt/primary/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/mnt/backup/litestream/app</span><span class="w">
+</span></span></span></code></pre></div><h3 id="network-attached-storage-nas">Network-attached storage (NAS)<a href="#network-attached-storage-nas" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Replicate to a mounted NAS for centralized backup:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app/data.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/mnt/nas/backups/litestream/data</span><span class="w">
+</span></span></span></code></pre></div><h3 id="development-and-testing">Development and testing<a href="#development-and-testing" class="anchor" aria-hidden="true">#</a> </h3>
+<p>File replication is useful for testing your backup and restore process locally
+before deploying to production with cloud storage:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Create a test database</span>
+</span></span><span class="line"><span class="cl">sqlite3 ./dev.db <span class="s2">&#34;PRAGMA journal_mode=WAL; CREATE TABLE test(x);&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Start replication (use $PWD for current directory)</span>
+</span></span><span class="line"><span class="cl">litestream replicate ./dev.db file://<span class="nv">$PWD</span>/replica
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># In another terminal, make changes to dev.db</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Then test restoration</span>
+</span></span><span class="line"><span class="cl">litestream restore -o ./restored.db file://<span class="nv">$PWD</span>/replica
+</span></span></code></pre></div><p>Note: The <code>file://</code> URL scheme requires an absolute path. Use <code>$PWD</code> to
+reference the current working directory. For relative paths, use a configuration
+file instead.</p>
+<h2 id="considerations">Considerations<a href="#considerations" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>
+<p><strong>Disk failure</strong>: File replicas on the same disk as your database do not
+protect against disk failure. Use a separate disk or combine with cloud
+storage for better durability.</p>
+</li>
+<li>
+<p><strong>Storage space</strong>: Litestream retains historical data based on your
+<a href="/reference/config#retention-period">retention settings</a>. Monitor disk space on your replica destination.</p>
+</li>
+<li>
+<p><strong>Network mounts</strong>: When replicating to network-attached storage, ensure the
+mount is reliable and has sufficient bandwidth. Network interruptions may
+cause temporary replication delays.</p>
+</li>
+</ul>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a class="ml-auto" href="https://litestream.io/install/debian/">
+	<a href="https://litestream.io/guides/sftp/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Linux (Debian) &rarr;
+					&larr; Replicating to an SFTP Server
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/nats/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Replicating to NATS JetStream &rarr;
 				</div>
 			</div>
 		</a>
