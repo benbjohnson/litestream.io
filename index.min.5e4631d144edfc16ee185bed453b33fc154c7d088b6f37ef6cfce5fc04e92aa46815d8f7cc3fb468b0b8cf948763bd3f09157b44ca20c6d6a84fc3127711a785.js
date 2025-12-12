@@ -42,6 +42,14 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <h4 id="key-changes">Key Changes</h4>
 <ol>
 <li>
+<p><strong>SQLite Driver Change</strong>:</p>
+<ul>
+<li>Migration from <code>mattn/go-sqlite3</code> (cgo-based) to <code>modernc.org/sqlite</code> (pure Go)</li>
+<li>No cgo requirement for main binary (simpler builds, better cross-compilation)</li>
+<li><strong>PRAGMA configuration syntax changed</strong> (see <a href="#sqlite-driver-migration">SQLite Driver Migration</a> below)</li>
+</ul>
+</li>
+<li>
 <p><strong>Cloud SDK Upgrades</strong>:</p>
 <ul>
 <li>AWS SDK v1 → v2 with improved credential chain support</li>
@@ -422,6 +430,132 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <li><a href="https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity#DefaultAzureCredential">DefaultAzureCredential Documentation</a></li>
 <li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/storage-retry-policy-go">Azure Blob Storage Retry Policies</a></li>
 </ul>
+<h3 id="sqlite-driver-migration">SQLite Driver Migration</h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream v0.5.0 migrated from <a href="https://github.com/mattn/go-sqlite3">mattn/go-sqlite3</a> (cgo-based) to <a href="https://pkg.go.dev/modernc.org/sqlite">modernc.org/sqlite</a> (pure Go). This change provides significant benefits but requires attention to PRAGMA configuration syntax.</p>
+<h4 id="why-this-change-was-made-1">Why This Change Was Made</h4>
+<p>The migration to <code>modernc.org/sqlite</code> provides several benefits:</p>
+<ul>
+<li><strong>No cgo requirement</strong>: The main Litestream binary no longer requires a C compiler or cgo toolchain to build</li>
+<li><strong>Easier cross-compilation</strong>: Build for any platform without complex cross-compilation toolchains</li>
+<li><strong>Signed macOS releases</strong>: Enables automatic signing of Apple Silicon Mac releases</li>
+<li><strong>Simpler deployment</strong>: No C library dependencies to manage</li>
+</ul>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100">The VFS feature (litestream-vfs) still uses cgo-based drivers for performance reasons and remains experimental.</div>
+</div>
+<h4 id="pragma-configuration-changes">PRAGMA Configuration Changes</h4>
+<p>The most significant change is how PRAGMAs are configured in database connection strings. The <code>modernc.org/sqlite</code> driver uses a different syntax than <code>mattn/go-sqlite3</code>.</p>
+<h5 id="syntax-comparison">Syntax Comparison</h5>
+<table>
+<thead>
+<tr>
+<th>PRAGMA</th>
+<th>mattn/go-sqlite3 (v0.3.x)</th>
+<th>modernc.org/sqlite (v0.5.0+)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>busy_timeout</td>
+<td><code>?_busy_timeout=5000</code></td>
+<td><code>?_pragma=busy_timeout(5000)</code></td>
+</tr>
+<tr>
+<td>journal_mode</td>
+<td><code>?_journal_mode=WAL</code></td>
+<td><code>?_pragma=journal_mode(WAL)</code></td>
+</tr>
+<tr>
+<td>synchronous</td>
+<td><code>?_synchronous=NORMAL</code></td>
+<td><code>?_pragma=synchronous(NORMAL)</code></td>
+</tr>
+<tr>
+<td>foreign_keys</td>
+<td><code>?_foreign_keys=1</code></td>
+<td><code>?_pragma=foreign_keys(1)</code></td>
+</tr>
+<tr>
+<td>cache_size</td>
+<td><code>?_cache_size=2000</code></td>
+<td><code>?_pragma=cache_size(2000)</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="connection-string-examples">Connection String Examples</h5>
+<p><strong>v0.3.x (mattn/go-sqlite3):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">file:/path/to/db.sqlite?_busy_timeout=5000&amp;_journal_mode=WAL&amp;_synchronous=NORMAL
+</span></span></code></pre></div><p><strong>v0.5.0+ (modernc.org/sqlite):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">file:/path/to/db.sqlite?_pragma=busy_timeout(5000)&amp;_pragma=journal_mode(WAL)&amp;_pragma=synchronous(NORMAL)
+</span></span></code></pre></div><h5 id="multiple-pragmas">Multiple PRAGMAs</h5>
+<p>The <code>_pragma</code> parameter can be specified multiple times:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">file:/path/to/db.sqlite?_pragma=busy_timeout(5000)&amp;_pragma=journal_mode(WAL)&amp;_pragma=foreign_keys(1)
+</span></span></code></pre></div><h4 id="impact-on-litestream-users">Impact on Litestream Users</h4>
+<p>For most Litestream users, this change is transparent. Litestream handles database connections internally and has been updated to use the new syntax. However, if you:</p>
+<ul>
+<li><strong>Use Litestream as a library</strong>: Update your connection strings to use the new <code>_pragma=name(value)</code> syntax</li>
+<li><strong>Pass custom DSN options</strong>: Review and update your database paths</li>
+<li><strong>Build Litestream from source</strong>: Note that cgo is no longer required for the main binary</li>
+</ul>
+<h4 id="for-library-users">For Library Users</h4>
+<p>If you embed Litestream as a library and need to configure SQLite pragmas:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// v0.3.x style (mattn/go-sqlite3) - NO LONGER WORKS
+</span></span></span><span class="line"><span class="cl"><span class="c1">// dsn := &#34;file:/path/to/db?_busy_timeout=5000&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// v0.5.0+ style (modernc.org/sqlite)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">dsn</span> <span class="o">:=</span> <span class="s">&#34;file:/path/to/db?_pragma=busy_timeout(5000)&#34;</span>
+</span></span></code></pre></div><h4 id="building-from-source">Building from Source</h4>
+<p>v0.5.0+ simplifies the build process:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># v0.3.x required cgo</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">1</span> go build ./cmd/litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># v0.5.0+ does not require cgo for main binary</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> go build ./cmd/litestream
+</span></span></code></pre></div><p>Cross-compilation is now straightforward:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Build for Linux on macOS (or any platform)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GOOS</span><span class="o">=</span>linux <span class="nv">GOARCH</span><span class="o">=</span>amd64 go build ./cmd/litestream
+</span></span><span class="line"><span class="cl"><span class="nv">GOOS</span><span class="o">=</span>linux <span class="nv">GOARCH</span><span class="o">=</span>arm64 go build ./cmd/litestream
+</span></span><span class="line"><span class="cl"><span class="nv">GOOS</span><span class="o">=</span>windows <span class="nv">GOARCH</span><span class="o">=</span>amd64 go build ./cmd/litestream
+</span></span></code></pre></div><h4 id="driver-selection-for-library-users">Driver Selection for Library Users</h4>
+<p>If you use Litestream as a library and need the cgo-based driver (for VFS support or performance testing):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Pure Go driver (default in v0.5.0+)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">_</span> <span class="s">&#34;modernc.org/sqlite&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// OR cgo-based driver (for VFS/experimental features)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// _ &#34;github.com/mattn/go-sqlite3&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span>
+</span></span></code></pre></div><p>Build tags control which driver is compiled:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Default: modernc.org/sqlite</span>
+</span></span><span class="line"><span class="cl">go build ./cmd/litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># VFS extension (requires cgo and additional build steps)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># See the VFS Guide for complete build instructions:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># https://litestream.io/guides/vfs/</span>
+</span></span></code></pre></div><h4 id="common-pragma-reference">Common PRAGMA Reference</h4>
+<p>Here are commonly used PRAGMAs with the v0.5.0+ syntax:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># Recommended production settings
+</span></span><span class="line"><span class="cl">?_pragma=busy_timeout(5000)&amp;_pragma=journal_mode(WAL)&amp;_pragma=synchronous(NORMAL)&amp;_pragma=foreign_keys(1)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Individual PRAGMAs:
+</span></span><span class="line"><span class="cl">_pragma=busy_timeout(5000)      # Wait 5 seconds for locks
+</span></span><span class="line"><span class="cl">_pragma=journal_mode(WAL)       # Write-ahead logging (required by Litestream)
+</span></span><span class="line"><span class="cl">_pragma=synchronous(NORMAL)     # Balance safety and performance
+</span></span><span class="line"><span class="cl">_pragma=foreign_keys(1)         # Enable foreign key constraints
+</span></span><span class="line"><span class="cl">_pragma=cache_size(-64000)      # 64MB cache (negative = KB)
+</span></span><span class="line"><span class="cl">_pragma=mmap_size(268435456)    # 256MB memory-mapped I/O
+</span></span></code></pre></div><p>See the <a href="https://www.sqlite.org/pragma.html">SQLite PRAGMA documentation</a> for the complete list.</p>
+<h4 id="troubleshooting-driver-issues">Troubleshooting Driver Issues</h4>
+<p><strong>Error</strong>: <code>unknown pragma</code> or PRAGMA not taking effect</p>
+<p><strong>Solution</strong>: Ensure you&rsquo;re using the <code>_pragma=name(value)</code> syntax, not the old <code>_name=value</code> syntax.</p>
+<p><strong>Error</strong>: Build failures with cgo errors</p>
+<p><strong>Solution</strong>: For v0.5.0+, you don&rsquo;t need cgo. Ensure <code>CGO_ENABLED=0</code> or simply don&rsquo;t set it (defaults work).</p>
+<p><strong>Error</strong>: Performance differences after upgrade</p>
+<p><strong>Solution</strong>: While <code>modernc.org/sqlite</code> is highly optimized, some workloads may see slight differences. If performance is critical, benchmark your specific use case. The pure Go implementation performs comparably to cgo for most workloads.</p>
 <h2 id="configuration-migration-1">Configuration Migration</h2>
 <h3 id="single-replica-vs-multiple-replicas">Single Replica vs Multiple Replicas</h3>
 <p>The new configuration format uses a single <code>replica</code> field instead of a <code>replicas</code> array:</p>
@@ -1190,6 +1324,41 @@ Truncate Threshold Configuration guide</a>.</p>
 <li><strong>Logs</strong>: Relevant log output with debug level enabled</li>
 <li><strong>Additional Context</strong>: Recent changes, related issues, workarounds attempted</li>
 </ul>
+<h2 id="sqlite-driver-issues-v050">SQLite Driver Issues (v0.5.0+)</h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream migrated from <code>mattn/go-sqlite3</code> to <code>modernc.org/sqlite</code>. This section covers issues specific to this change.</p>
+<h3 id="pragma-configuration-errors">PRAGMA Configuration Errors</h3>
+<p><strong>Error</strong>: PRAGMAs not taking effect or <code>unknown pragma</code> errors</p>
+<p><strong>Solution</strong>: v0.5.0+ uses different PRAGMA syntax in connection strings:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># OLD (v0.3.x - mattn/go-sqlite3):
+</span></span><span class="line"><span class="cl">file:/path/to/db?_busy_timeout=5000
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># NEW (v0.5.0+ - modernc.org/sqlite):
+</span></span><span class="line"><span class="cl">file:/path/to/db?_pragma=busy_timeout(5000)
+</span></span></code></pre></div><p>See the <a href="https://litestream.io/docs/migration/#sqlite-driver-migration">SQLite Driver Migration</a> guide for complete syntax.</p>
+<h3 id="busy-timeout-not-working">Busy Timeout Not Working</h3>
+<p><strong>Error</strong>: <code>SQLITE_BUSY</code> errors despite setting busy timeout</p>
+<p><strong>Solution</strong>: Verify you&rsquo;re using the correct syntax for v0.5.0+:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># Correct v0.5.0+ syntax
+</span></span><span class="line"><span class="cl">?_pragma=busy_timeout(5000)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Incorrect (v0.3.x syntax - won&#39;t work in v0.5.0+)
+</span></span><span class="line"><span class="cl">?_busy_timeout=5000
+</span></span></code></pre></div><h3 id="build-errors-with-cgo">Build Errors with CGO</h3>
+<p><strong>Error</strong>: CGO-related build errors when building Litestream</p>
+<p><strong>Solution</strong>: v0.5.0+ does not require cgo for the main binary:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Explicitly disable cgo if you&#39;re seeing cgo errors</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> go build ./cmd/litestream
+</span></span></code></pre></div><h3 id="performance-differences">Performance Differences</h3>
+<p><strong>Symptoms</strong>: Different performance characteristics after upgrading</p>
+<p><strong>Solution</strong>: While <code>modernc.org/sqlite</code> is highly optimized:</p>
+<ol>
+<li>Benchmark your specific workload if performance is critical</li>
+<li>The pure Go driver performs comparably for most use cases</li>
+<li>For VFS/experimental features, the cgo driver is still available</li>
+</ol>
 <h2 id="common-error-reference">Common Error Reference</h2>
 <table>
 <thead>
@@ -1229,6 +1398,11 @@ Truncate Threshold Configuration guide</a>.</p>
 <td><code>bind: address already in use</code></td>
 <td>Port conflict</td>
 <td>Change MCP port or stop conflicting service</td>
+</tr>
+<tr>
+<td>PRAGMA not taking effect</td>
+<td>Wrong syntax for v0.5.0+</td>
+<td>Use <code>_pragma=name(value)</code> syntax</td>
 </tr>
 </tbody>
 </table>

@@ -598,6 +598,41 @@ Truncate Threshold Configuration guide</a>.</p>
 <li><strong>Logs</strong>: Relevant log output with debug level enabled</li>
 <li><strong>Additional Context</strong>: Recent changes, related issues, workarounds attempted</li>
 </ul>
+<h2 id="sqlite-driver-issues-v050">SQLite Driver Issues (v0.5.0+)</h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream migrated from <code>mattn/go-sqlite3</code> to <code>modernc.org/sqlite</code>. This section covers issues specific to this change.</p>
+<h3 id="pragma-configuration-errors">PRAGMA Configuration Errors</h3>
+<p><strong>Error</strong>: PRAGMAs not taking effect or <code>unknown pragma</code> errors</p>
+<p><strong>Solution</strong>: v0.5.0+ uses different PRAGMA syntax in connection strings:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># OLD (v0.3.x - mattn/go-sqlite3):
+</span></span><span class="line"><span class="cl">file:/path/to/db?_busy_timeout=5000
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># NEW (v0.5.0+ - modernc.org/sqlite):
+</span></span><span class="line"><span class="cl">file:/path/to/db?_pragma=busy_timeout(5000)
+</span></span></code></pre></div><p>See the <a href="https://litestream.io/docs/migration/#sqlite-driver-migration">SQLite Driver Migration</a> guide for complete syntax.</p>
+<h3 id="busy-timeout-not-working">Busy Timeout Not Working</h3>
+<p><strong>Error</strong>: <code>SQLITE_BUSY</code> errors despite setting busy timeout</p>
+<p><strong>Solution</strong>: Verify you&rsquo;re using the correct syntax for v0.5.0+:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># Correct v0.5.0+ syntax
+</span></span><span class="line"><span class="cl">?_pragma=busy_timeout(5000)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Incorrect (v0.3.x syntax - won&#39;t work in v0.5.0+)
+</span></span><span class="line"><span class="cl">?_busy_timeout=5000
+</span></span></code></pre></div><h3 id="build-errors-with-cgo">Build Errors with CGO</h3>
+<p><strong>Error</strong>: CGO-related build errors when building Litestream</p>
+<p><strong>Solution</strong>: v0.5.0+ does not require cgo for the main binary:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Explicitly disable cgo if you&#39;re seeing cgo errors</span>
+</span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> go build ./cmd/litestream
+</span></span></code></pre></div><h3 id="performance-differences">Performance Differences</h3>
+<p><strong>Symptoms</strong>: Different performance characteristics after upgrading</p>
+<p><strong>Solution</strong>: While <code>modernc.org/sqlite</code> is highly optimized:</p>
+<ol>
+<li>Benchmark your specific workload if performance is critical</li>
+<li>The pure Go driver performs comparably for most use cases</li>
+<li>For VFS/experimental features, the cgo driver is still available</li>
+</ol>
 <h2 id="common-error-reference">Common Error Reference</h2>
 <table>
 <thead>
@@ -638,6 +673,11 @@ Truncate Threshold Configuration guide</a>.</p>
 <td>Port conflict</td>
 <td>Change MCP port or stop conflicting service</td>
 </tr>
+<tr>
+<td>PRAGMA not taking effect</td>
+<td>Wrong syntax for v0.5.0+</td>
+<td>Use <code>_pragma=name(value)</code> syntax</td>
+</tr>
 </tbody>
 </table>
 <h2 id="next-steps">Next Steps</h2>
@@ -660,7 +700,7 @@ Truncate Threshold Configuration guide</a>.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.4a12877c643810ed24b6bb226abf54347b2f1753b65709f0152375ef667777e55444ccdfaf58b60f6324e02f812851574b8b7966f024490411303dffe151dec7.js" integrity="sha512-ShKHfGQ4EO0ktrsiar9UNHsvF1O2VwnwFSN172Z3d&#43;VURMzfr1i2D2Mk4C&#43;BKFFXS4t5ZvAkSQQRMD3/4VHexw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.5e4631d144edfc16ee185bed453b33fc154c7d088b6f37ef6cfce5fc04e92aa46815d8f7cc3fb468b0b8cf948763bd3f09157b44ca20c6d6a84fc3127711a785.js" integrity="sha512-XkYx0UTt/BbuGFvtRTsz/BVMfQiLbzfvbPzl/ATpKqRoFdj3zD&#43;0aLC4z5SHY70/CRV7RMogxtaoT8MSdxGnhQ==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
