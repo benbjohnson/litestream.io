@@ -63,12 +63,16 @@ litestream version
 
 #### Key Changes
 
-1. **Command Changes**:
+1. **Cloud SDK Upgrades**:
+   - AWS SDK v1 → v2 with improved credential chain support
+   - Azure SDK v1 → v2 with Managed Identity support (see [Azure SDK v2 Migration](#azure-sdk-v2-migration) below)
+
+2. **Command Changes**:
    - `litestream wal` → `litestream ltx` (WAL command renamed to LTX)
    - New `mcp-addr` configuration option for Model Context Protocol support
    - NATS replica support with JetStream
 
-2. **Configuration Changes**:
+3. **Configuration Changes**:
    - Single `replica` field replaces `replicas` array (backward compatible)
    - New global configuration sections: `levels`, `snapshot`, `exec`
    - Extended replica configuration options
@@ -282,6 +286,242 @@ grep -n "age:" /etc/litestream.yml
 # 1. Stay on v0.3.x, OR
 # 2. Remove Age encryption configuration before upgrading
 ```
+
+### Azure SDK v2 Migration
+
+{{< since version="0.5.0" >}} Litestream v0.5.0 upgraded from the deprecated Azure Storage SDK (`github.com/Azure/azure-storage-blob-go`) to the modern Azure SDK for Go v2 (`github.com/Azure/azure-sdk-for-go/sdk/storage/azblob`). This change brings significant improvements in authentication, reliability, and maintenance.
+
+#### Why This Change Was Made
+
+The migration to Azure SDK v2 provides several benefits:
+
+- **Modern authentication**: Support for Azure's default credential chain including Managed Identity
+- **Better reliability**: Improved retry policies with exponential backoff
+- **Active maintenance**: The legacy SDK was retired in September 2024
+- **Consistent patterns**: Aligned with AWS SDK v2 upgrade for unified configuration experience
+
+{{< alert icon="💡" text="The legacy azure-storage-blob-go SDK reached end of Community Support on September 13, 2024. All new Azure Blob Storage integrations should use the modern SDK." >}}
+
+#### Authentication Changes
+
+The most significant improvement is support for Azure's **default credential chain** (`DefaultAzureCredential`). This allows flexible authentication across different environments without code changes.
+
+##### Credential Chain Order
+
+When no explicit credentials are configured, Litestream attempts authentication in this order:
+
+1. **Environment Credential** (service principal via environment variables)
+2. **Workload Identity Credential** (Kubernetes workload identity)
+3. **Managed Identity Credential** (Azure VMs, App Service, Functions)
+4. **Azure CLI Credential** (local development with `az login`)
+5. **Azure Developer CLI Credential** (local development with `azd auth login`)
+
+{{< alert icon="💡" text="When running outside Azure infrastructure, the credential chain may take several seconds to complete as it attempts each method. This is normal behavior—the Managed Identity check times out when not on Azure. For faster startup in non-Azure environments, use explicit credentials (account key or service principal environment variables)." >}}
+
+##### Environment Variables for Service Principal
+
+To authenticate using a service principal, set these environment variables:
+
+```bash
+export AZURE_CLIENT_ID=your-app-id
+export AZURE_TENANT_ID=your-tenant-id
+export AZURE_CLIENT_SECRET=your-client-secret
+```
+
+For certificate-based authentication:
+
+```bash
+export AZURE_CLIENT_ID=your-app-id
+export AZURE_TENANT_ID=your-tenant-id
+export AZURE_CLIENT_CERTIFICATE_PATH=/path/to/cert.pem
+export AZURE_CLIENT_CERTIFICATE_PASSWORD=optional-password
+```
+
+##### Managed Identity (Recommended for Azure)
+
+When running on Azure infrastructure (VMs, App Service, Container Apps, AKS), Managed Identity is the recommended authentication method. No credentials or environment variables are required:
+
+```yaml
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      url: abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+      # No account-key needed - uses Managed Identity
+```
+
+{{< alert icon="⚠️" text="Managed Identity only works when running on Azure infrastructure. For local development, use Azure CLI authentication (`az login`) or explicit credentials." >}}
+
+##### Shared Key Authentication (Backward Compatible)
+
+Existing configurations using account keys continue to work:
+
+```yaml
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      url: abs://STORAGEACCOUNT@CONTAINERNAME/PATH
+      account-key: ACCOUNTKEY
+```
+
+Or using environment variables:
+
+```bash
+export LITESTREAM_AZURE_ACCOUNT_KEY=your-account-key
+```
+
+#### Configuration Migration
+
+##### No Breaking Changes
+
+The upgrade to Azure SDK v2 maintains **full backward compatibility**. All existing Litestream configurations for Azure Blob Storage will continue to work without modification.
+
+##### New Capabilities
+
+With SDK v2, you can now:
+
+- Use Managed Identity without any credential configuration
+- Leverage service principal authentication via environment variables
+- Benefit from improved retry handling automatically
+
+##### Before and After Examples
+
+**Shared Key Authentication** (unchanged):
+
+```yaml
+# v0.3.x and v0.5.x - identical configuration
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      type: abs
+      account-name: mystorageaccount
+      account-key: ${AZURE_STORAGE_KEY}
+      bucket: mycontainer
+      path: backups/app
+```
+
+**Managed Identity** (new in v0.5.x):
+
+```yaml
+# v0.5.x - no credentials needed on Azure infrastructure
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      type: abs
+      account-name: mystorageaccount
+      bucket: mycontainer
+      path: backups/app
+      # Automatically uses Managed Identity when available
+```
+
+**Service Principal** (new in v0.5.x):
+
+```bash
+# Set environment variables
+export AZURE_CLIENT_ID=12345678-1234-1234-1234-123456789012
+export AZURE_TENANT_ID=87654321-4321-4321-4321-210987654321
+export AZURE_CLIENT_SECRET=your-client-secret
+```
+
+```yaml
+# Configuration - no credentials in file
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      type: abs
+      account-name: mystorageaccount
+      bucket: mycontainer
+      path: backups/app
+```
+
+#### Retry Policy Changes
+
+Azure SDK v2 includes improved retry handling:
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| Max Retries | 10 | Maximum retry attempts |
+| Retry Delay | 1-30 seconds | Exponential backoff range |
+| Try Timeout | 15 minutes | Timeout per individual attempt |
+| Status Codes | 408, 429, 500, 502, 503, 504 | HTTP codes that trigger retries |
+
+These settings are optimized for Azure Blob Storage and follow [Azure SDK best practices](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-retry-policy-go).
+
+#### Troubleshooting
+
+##### Authentication Errors
+
+**Error**: `DefaultAzureCredential: failed to acquire a token`
+
+**Solutions**:
+
+1. **On Azure infrastructure**: Ensure Managed Identity is enabled for your resource
+2. **Local development**: Run `az login` to authenticate with Azure CLI
+3. **Service principal**: Verify environment variables are set correctly
+
+```bash
+# Check if environment variables are set
+echo $AZURE_CLIENT_ID
+echo $AZURE_TENANT_ID
+echo $AZURE_CLIENT_SECRET
+
+# Test Azure CLI authentication
+az account show
+```
+
+**Error**: `AZURE_TENANT_ID, AZURE_CLIENT_ID, and AZURE_CLIENT_SECRET must be set`
+
+**Solution**: This indicates service principal authentication is being attempted but environment variables are missing. Either:
+
+- Set all three environment variables, or
+- Use a different authentication method (Managed Identity, Azure CLI, or account key)
+
+##### Timeout Errors
+
+If you encounter timeout errors with large databases:
+
+```yaml
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      type: abs
+      account-name: mystorageaccount
+      bucket: mycontainer
+      path: backups/app
+      # SDK v2 has a 15-minute per-operation timeout by default
+      # Contact the Litestream team if you need adjustments
+```
+
+##### Verifying SDK Version
+
+To confirm you're running Litestream v0.5.0+ with Azure SDK v2:
+
+```bash
+litestream version
+# Should show v0.5.0 or later
+```
+
+##### Common Migration Issues
+
+**Issue**: Authentication worked in v0.3.x but fails in v0.5.x
+
+**Cause**: The SDK v2 credential chain may behave differently than SDK v1
+
+**Solution**: Explicitly specify credentials using either:
+
+- `account-key` in configuration
+- `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable
+- Service principal environment variables (`AZURE_CLIENT_ID`, etc.)
+
+#### Breaking Changes
+
+There are no breaking changes. All v0.3.x Azure Blob Storage configurations work with v0.5.0 without modification. The SDK upgrade is transparent to users with existing configurations.
+
+#### Further Reading
+
+- [Azure Blob Storage Guide](/guides/azure)
+- [Azure SDK for Go Authentication Overview](https://learn.microsoft.com/en-us/azure/developer/go/sdk/authentication/authentication-overview)
+- [DefaultAzureCredential Documentation](https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity#DefaultAzureCredential)
+- [Azure Blob Storage Retry Policies](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-retry-policy-go)
 
 ## Configuration Migration
 

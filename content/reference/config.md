@@ -668,7 +668,7 @@ account key file, or use workload identity in GKE environments.
 
 ### Azure Blob Storage (ABS) replica
 
-{{< since version="0.5.0" >}} Updated to use Azure SDK v2.
+{{< since version="0.5.0" >}} Updated to use Azure SDK v2 with support for Managed Identity and service principal authentication. See the [Azure SDK v2 Migration Guide](/docs/migration/#azure-sdk-v2-migration) for details.
 
 ABS replicas can be configured using the `url` field:
 
