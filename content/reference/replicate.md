@@ -150,6 +150,8 @@ use a [configuration file]({{< ref "config" >}}) instead.
 
 ## Arguments
 
+{{< alert icon="⚠️" text="**Flag Position**: All flags (such as `-exec`, `-config`) must appear *before* the positional arguments (`DB_PATH` and `REPLICA_URL`). Placing flags after the positional arguments will result in an error." >}}
+
 ```
 -config PATH
     Specifies the configuration file.
@@ -161,4 +163,15 @@ use a [configuration file]({{< ref "config" >}}) instead.
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
+```
+
+### Flag ordering example
+
+```
+# ✅ Correct: flags before positional arguments
+litestream replicate -exec "myapp serve" /path/to/db s3://mybucket/db
+
+# ❌ Incorrect: flags after positional arguments
+litestream replicate /path/to/db s3://mybucket/db -exec "myapp serve"
+# Error: flag "-exec" must be positioned before DB_PATH and REPLICA_URL arguments
 ```
