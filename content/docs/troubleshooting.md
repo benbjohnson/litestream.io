@@ -604,6 +604,61 @@ When reporting issues on GitHub, the bug report template will ask for:
 - **Logs**: Relevant log output with debug level enabled
 - **Additional Context**: Recent changes, related issues, workarounds attempted
 
+## SQLite Driver Issues (v0.5.0+)
+
+{{< since version="0.5.0" >}} Litestream migrated from `mattn/go-sqlite3` to `modernc.org/sqlite`. This section covers issues specific to this change.
+
+### PRAGMA Configuration Errors
+
+**Error**: PRAGMAs not taking effect or `unknown pragma` errors
+
+**Solution**: v0.5.0+ uses different PRAGMA syntax in connection strings:
+
+```text
+# OLD (v0.3.x - mattn/go-sqlite3):
+file:/path/to/db?_busy_timeout=5000
+
+# NEW (v0.5.0+ - modernc.org/sqlite):
+file:/path/to/db?_pragma=busy_timeout(5000)
+```
+
+See the [SQLite Driver Migration]({{< ref "/docs/migration#sqlite-driver-migration" >}}) guide for complete syntax.
+
+### Busy Timeout Not Working
+
+**Error**: `SQLITE_BUSY` errors despite setting busy timeout
+
+**Solution**: Verify you're using the correct syntax for v0.5.0+:
+
+```text
+# Correct v0.5.0+ syntax
+?_pragma=busy_timeout(5000)
+
+# Incorrect (v0.3.x syntax - won't work in v0.5.0+)
+?_busy_timeout=5000
+```
+
+### Build Errors with CGO
+
+**Error**: CGO-related build errors when building Litestream
+
+**Solution**: v0.5.0+ does not require cgo for the main binary:
+
+```bash
+# Explicitly disable cgo if you're seeing cgo errors
+CGO_ENABLED=0 go build ./cmd/litestream
+```
+
+### Performance Differences
+
+**Symptoms**: Different performance characteristics after upgrading
+
+**Solution**: While `modernc.org/sqlite` is highly optimized:
+
+1. Benchmark your specific workload if performance is critical
+2. The pure Go driver performs comparably for most use cases
+3. For VFS/experimental features, the cgo driver is still available
+
 ## Common Error Reference
 
 | Error Message | Common Cause | Solution |
@@ -614,6 +669,7 @@ When reporting issues on GitHub, the bug report template will ask for:
 | `connection refused` | Service not running | Check if target service is accessible |
 | `yaml: unmarshal errors` | Invalid YAML syntax | Validate configuration file syntax |
 | `bind: address already in use` | Port conflict | Change MCP port or stop conflicting service |
+| PRAGMA not taking effect | Wrong syntax for v0.5.0+ | Use `_pragma=name(value)` syntax |
 
 ## Next Steps
 
