@@ -148,10 +148,12 @@ dbs:
 that require the protocol prefix.
 
 ```yaml
+# All of these path values are equivalent:
+#   /data/app.db
+#   sqlite:///data/app.db
+#   sqlite3:///data/app.db
+
 dbs:
-  # All of these are equivalent:
-  - path: /data/app.db
-  - path: sqlite:///data/app.db
   - path: sqlite3:///data/app.db
 ```
 
