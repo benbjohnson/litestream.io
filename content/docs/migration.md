@@ -640,8 +640,9 @@ Build tags control which driver is compiled:
 # Default: modernc.org/sqlite
 go build ./cmd/litestream
 
-# VFS binary with mattn/go-sqlite3
-go build -tags=cgo ./cmd/litestream-vfs
+# VFS extension (requires cgo and additional build steps)
+# See the VFS Guide for complete build instructions:
+# https://litestream.io/guides/vfs/
 ```
 
 #### Common PRAGMA Reference
