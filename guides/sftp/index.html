@@ -196,6 +196,13 @@ Usage Command line usage You can specify your SFTP replica using a replica URL o
         <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
+    <li><a href="#concurrent-writes">Concurrent Writes</a>
+      <ul>
+        <li><a href="#trade-offs">Trade-offs</a></li>
+        <li><a href="#when-to-disable-concurrent-writes">When to disable concurrent writes</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
   </div>
@@ -244,7 +251,55 @@ file path should point to your private key.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">sftp://USER@HOST:PORT/PATH</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">key-path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/id_rsa</span><span class="w">
-</span></span></span></code></pre></div>
+</span></span></span></code></pre></div><h2 id="concurrent-writes">Concurrent Writes<a href="#concurrent-writes" class="anchor" aria-hidden="true">#</a> </h2>
+<p>By default, Litestream enables concurrent writes for SFTP connections, which
+improves upload throughput by allowing multiple write operations to proceed
+simultaneously.</p>
+<h3 id="trade-offs">Trade-offs<a href="#trade-offs" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Concurrent writes offer better performance but with a trade-off:</p>
+<ul>
+<li>
+<p><strong>Enabled (default)</strong>: Higher throughput during replication, but if an upload
+fails, Litestream must re-upload the entire file from the beginning.</p>
+</li>
+<li>
+<p><strong>Disabled</strong>: Slightly slower uploads, but failed transfers can resume from
+the last successfully written chunk.</p>
+</li>
+</ul>
+<h3 id="when-to-disable-concurrent-writes">When to disable concurrent writes<a href="#when-to-disable-concurrent-writes" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Consider disabling concurrent writes if you have:</p>
+<ul>
+<li>
+<p><strong>Unreliable network connections</strong>: If your connection to the SFTP server
+frequently drops, disabling concurrent writes allows Litestream to resume
+interrupted uploads rather than starting over.</p>
+</li>
+<li>
+<p><strong>Very large databases</strong>: For databases several gigabytes in size,
+re-uploading from scratch after a failure can be costly in terms of time
+and bandwidth.</p>
+</li>
+<li>
+<p><strong>Bandwidth constraints</strong>: In environments where bandwidth is limited or
+metered, the ability to resume partial uploads may be more important than
+raw throughput.</p>
+</li>
+</ul>
+<h3 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>To disable concurrent writes, add the <code>concurrent-writes</code> option to your
+configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">              </span><span class="l">sftp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">host</span><span class="p">:</span><span class="w">              </span><span class="l">HOST:PORT</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">user</span><span class="p">:</span><span class="w">              </span><span class="l">USER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w">          </span><span class="l">PASSWORD</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">              </span><span class="l">PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">concurrent-writes</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div><p>The <code>concurrent-writes</code> option accepts <code>true</code> (default) or <code>false</code>.</p>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	<a href="https://litestream.io/guides/linode/">

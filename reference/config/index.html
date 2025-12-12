@@ -940,6 +940,10 @@ account key file, or use workload identity in GKE environments.</p>
 <li><code>password</code>—Password for authentication (not recommended for production)</li>
 <li><code>key-path</code>—Path to SSH private key file for key-based authentication</li>
 <li><code>path</code>—Remote path where replica files will be stored</li>
+<li><code>concurrent-writes</code>—Enables concurrent writes for improved throughput (defaults
+to <code>true</code>). When enabled, failed uploads must restart from the beginning. Set
+to <code>false</code> to allow resuming failed transfers from the last successful chunk.
+See the <a href="https://litestream.io/guides/sftp/">SFTP Guide</a> for guidance on when to disable.</li>
 </ul>
 <h3 id="nats-jetstream-object-store-replica">NATS JetStream Object Store replica<a href="#nats-jetstream-object-store-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
