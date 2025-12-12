@@ -42,6 +42,13 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <h4 id="key-changes">Key Changes</h4>
 <ol>
 <li>
+<p><strong>Cloud SDK Upgrades</strong>:</p>
+<ul>
+<li>AWS SDK v1 → v2 with improved credential chain support</li>
+<li>Azure SDK v1 → v2 with Managed Identity support (see <a href="#azure-sdk-v2-migration">Azure SDK v2 Migration</a> below)</li>
+</ul>
+</li>
+<li>
 <p><strong>Command Changes</strong>:</p>
 <ul>
 <li><code>litestream wal</code> → <code>litestream ltx</code> (WAL command renamed to LTX)</li>
@@ -220,7 +227,202 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </span></span><span class="line"><span class="cl"><span class="c1"># If the above returns results, you MUST:</span>
 </span></span><span class="line"><span class="cl"><span class="c1"># 1. Stay on v0.3.x, OR</span>
 </span></span><span class="line"><span class="cl"><span class="c1"># 2. Remove Age encryption configuration before upgrading</span>
-</span></span></code></pre></div><h2 id="configuration-migration">Configuration Migration</h2>
+</span></span></code></pre></div><h3 id="azure-sdk-v2-migration">Azure SDK v2 Migration</h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream v0.5.0 upgraded from the deprecated Azure Storage SDK (<code>github.com/Azure/azure-storage-blob-go</code>) to the modern Azure SDK for Go v2 (<code>github.com/Azure/azure-sdk-for-go/sdk/storage/azblob</code>). This change brings significant improvements in authentication, reliability, and maintenance.</p>
+<h4 id="why-this-change-was-made">Why This Change Was Made</h4>
+<p>The migration to Azure SDK v2 provides several benefits:</p>
+<ul>
+<li><strong>Modern authentication</strong>: Support for Azure&rsquo;s default credential chain including Managed Identity</li>
+<li><strong>Better reliability</strong>: Improved retry policies with exponential backoff</li>
+<li><strong>Active maintenance</strong>: The legacy SDK was retired in September 2024</li>
+<li><strong>Consistent patterns</strong>: Aligned with AWS SDK v2 upgrade for unified configuration experience</li>
+</ul>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100">The legacy azure-storage-blob-go SDK reached end of Community Support on September 13, 2024. All new Azure Blob Storage integrations should use the modern SDK.</div>
+</div>
+<h4 id="authentication-changes">Authentication Changes</h4>
+<p>The most significant improvement is support for Azure&rsquo;s <strong>default credential chain</strong> (<code>DefaultAzureCredential</code>). This allows flexible authentication across different environments without code changes.</p>
+<h5 id="credential-chain-order">Credential Chain Order</h5>
+<p>When no explicit credentials are configured, Litestream attempts authentication in this order:</p>
+<ol>
+<li><strong>Environment Credential</strong> (service principal via environment variables)</li>
+<li><strong>Workload Identity Credential</strong> (Kubernetes workload identity)</li>
+<li><strong>Managed Identity Credential</strong> (Azure VMs, App Service, Functions)</li>
+<li><strong>Azure CLI Credential</strong> (local development with <code>az login</code>)</li>
+<li><strong>Azure Developer CLI Credential</strong> (local development with <code>azd auth login</code>)</li>
+</ol>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100">When running outside Azure infrastructure, the credential chain may take several seconds to complete as it attempts each method. This is normal behavior—the Managed Identity check times out when not on Azure. For faster startup in non-Azure environments, use explicit credentials (account key or service principal environment variables).</div>
+</div>
+<h5 id="environment-variables-for-service-principal">Environment Variables for Service Principal</h5>
+<p>To authenticate using a service principal, set these environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span>your-app-id
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_TENANT_ID</span><span class="o">=</span>your-tenant-id
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span>your-client-secret
+</span></span></code></pre></div><p>For certificate-based authentication:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span>your-app-id
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_TENANT_ID</span><span class="o">=</span>your-tenant-id
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_CERTIFICATE_PATH</span><span class="o">=</span>/path/to/cert.pem
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_CERTIFICATE_PASSWORD</span><span class="o">=</span>optional-password
+</span></span></code></pre></div><h5 id="managed-identity-recommended-for-azure">Managed Identity (Recommended for Azure)</h5>
+<p>When running on Azure infrastructure (VMs, App Service, Container Apps, AKS), Managed Identity is the recommended authentication method. No credentials or environment variables are required:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">abs://STORAGEACCOUNT@CONTAINERNAME/PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># No account-key needed - uses Managed Identity</span><span class="w">
+</span></span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Managed Identity only works when running on Azure infrastructure. For local development, use Azure CLI authentication (\`az login\`) or explicit credentials.</div>
+</div>
+<h5 id="shared-key-authentication-backward-compatible">Shared Key Authentication (Backward Compatible)</h5>
+<p>Existing configurations using account keys continue to work:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">abs://STORAGEACCOUNT@CONTAINERNAME/PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-key</span><span class="p">:</span><span class="w"> </span><span class="l">ACCOUNTKEY</span><span class="w">
+</span></span></span></code></pre></div><p>Or using environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_AZURE_ACCOUNT_KEY</span><span class="o">=</span>your-account-key
+</span></span></code></pre></div><h4 id="configuration-migration">Configuration Migration</h4>
+<h5 id="no-breaking-changes">No Breaking Changes</h5>
+<p>The upgrade to Azure SDK v2 maintains <strong>full backward compatibility</strong>. All existing Litestream configurations for Azure Blob Storage will continue to work without modification.</p>
+<h5 id="new-capabilities">New Capabilities</h5>
+<p>With SDK v2, you can now:</p>
+<ul>
+<li>Use Managed Identity without any credential configuration</li>
+<li>Leverage service principal authentication via environment variables</li>
+<li>Benefit from improved retry handling automatically</li>
+</ul>
+<h5 id="before-and-after-examples">Before and After Examples</h5>
+<p><strong>Shared Key Authentication</strong> (unchanged):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># v0.3.x and v0.5.x - identical configuration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">mystorageaccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-key</span><span class="p">:</span><span class="w"> </span><span class="l">\${AZURE_STORAGE_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mycontainer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">backups/app</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Managed Identity</strong> (new in v0.5.x):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># v0.5.x - no credentials needed on Azure infrastructure</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">mystorageaccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mycontainer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">backups/app</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Automatically uses Managed Identity when available</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Service Principal</strong> (new in v0.5.x):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Set environment variables</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span>12345678-1234-1234-1234-123456789012
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_TENANT_ID</span><span class="o">=</span>87654321-4321-4321-4321-210987654321
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span>your-client-secret
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Configuration - no credentials in file</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">mystorageaccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mycontainer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">backups/app</span><span class="w">
+</span></span></span></code></pre></div><h4 id="retry-policy-changes">Retry Policy Changes</h4>
+<p>Azure SDK v2 includes improved retry handling:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Max Retries</td>
+<td>10</td>
+<td>Maximum retry attempts</td>
+</tr>
+<tr>
+<td>Retry Delay</td>
+<td>1-30 seconds</td>
+<td>Exponential backoff range</td>
+</tr>
+<tr>
+<td>Try Timeout</td>
+<td>15 minutes</td>
+<td>Timeout per individual attempt</td>
+</tr>
+<tr>
+<td>Status Codes</td>
+<td>408, 429, 500, 502, 503, 504</td>
+<td>HTTP codes that trigger retries</td>
+</tr>
+</tbody>
+</table>
+<p>These settings are optimized for Azure Blob Storage and follow <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/storage-retry-policy-go">Azure SDK best practices</a>.</p>
+<h4 id="troubleshooting">Troubleshooting</h4>
+<h5 id="authentication-errors">Authentication Errors</h5>
+<p><strong>Error</strong>: <code>DefaultAzureCredential: failed to acquire a token</code></p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>On Azure infrastructure</strong>: Ensure Managed Identity is enabled for your resource</li>
+<li><strong>Local development</strong>: Run <code>az login</code> to authenticate with Azure CLI</li>
+<li><strong>Service principal</strong>: Verify environment variables are set correctly</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check if environment variables are set</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="nv">$AZURE_CLIENT_ID</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="nv">$AZURE_TENANT_ID</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="nv">$AZURE_CLIENT_SECRET</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Test Azure CLI authentication</span>
+</span></span><span class="line"><span class="cl">az account show
+</span></span></code></pre></div><p><strong>Error</strong>: <code>AZURE_TENANT_ID, AZURE_CLIENT_ID, and AZURE_CLIENT_SECRET must be set</code></p>
+<p><strong>Solution</strong>: This indicates service principal authentication is being attempted but environment variables are missing. Either:</p>
+<ul>
+<li>Set all three environment variables, or</li>
+<li>Use a different authentication method (Managed Identity, Azure CLI, or account key)</li>
+</ul>
+<h5 id="timeout-errors">Timeout Errors</h5>
+<p>If you encounter timeout errors with large databases:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">abs</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">account-name</span><span class="p">:</span><span class="w"> </span><span class="l">mystorageaccount</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mycontainer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">backups/app</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># SDK v2 has a 15-minute per-operation timeout by default</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># Contact the Litestream team if you need adjustments</span><span class="w">
+</span></span></span></code></pre></div><h5 id="verifying-sdk-version">Verifying SDK Version</h5>
+<p>To confirm you&rsquo;re running Litestream v0.5.0+ with Azure SDK v2:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream version
+</span></span><span class="line"><span class="cl"><span class="c1"># Should show v0.5.0 or later</span>
+</span></span></code></pre></div><h5 id="common-migration-issues">Common Migration Issues</h5>
+<p><strong>Issue</strong>: Authentication worked in v0.3.x but fails in v0.5.x</p>
+<p><strong>Cause</strong>: The SDK v2 credential chain may behave differently than SDK v1</p>
+<p><strong>Solution</strong>: Explicitly specify credentials using either:</p>
+<ul>
+<li><code>account-key</code> in configuration</li>
+<li><code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable</li>
+<li>Service principal environment variables (<code>AZURE_CLIENT_ID</code>, etc.)</li>
+</ul>
+<h4 id="breaking-changes">Breaking Changes</h4>
+<p>There are no breaking changes. All v0.3.x Azure Blob Storage configurations work with v0.5.0 without modification. The SDK upgrade is transparent to users with existing configurations.</p>
+<h4 id="further-reading">Further Reading</h4>
+<ul>
+<li><a href="/guides/azure">Azure Blob Storage Guide</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/developer/go/sdk/authentication/authentication-overview">Azure SDK for Go Authentication Overview</a></li>
+<li><a href="https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity#DefaultAzureCredential">DefaultAzureCredential Documentation</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/storage-retry-policy-go">Azure Blob Storage Retry Policies</a></li>
+</ul>
+<h2 id="configuration-migration-1">Configuration Migration</h2>
 <h3 id="single-replica-vs-multiple-replicas">Single Replica vs Multiple Replicas</h3>
 <p>The new configuration format uses a single <code>replica</code> field instead of a <code>replicas</code> array:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Multiple replicas (OLD - still supported)</span><span class="w">
@@ -469,7 +671,7 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /var/lib/app-recovered.db /var/lib/app.db
 </span></span></code></pre></div></li>
 </ol>
-<h2 id="common-migration-issues">Common Migration Issues</h2>
+<h2 id="common-migration-issues-1">Common Migration Issues</h2>
 <h3 id="configuration-validation-errors">Configuration Validation Errors</h3>
 <p><strong>Error</strong>: <code>yaml: unmarshal errors</code>
 <strong>Solution</strong>: Validate YAML syntax and check for unsupported options</p>
