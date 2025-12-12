@@ -95,13 +95,20 @@ File replication is useful for testing your backup and restore process locally
 before deploying to production with cloud storage:
 
 ```sh
-# Start replication
-litestream replicate ./dev.db file://./replica
+# Create a test database
+sqlite3 ./dev.db "PRAGMA journal_mode=WAL; CREATE TABLE test(x);"
+
+# Start replication (use $PWD for current directory)
+litestream replicate ./dev.db file://$PWD/replica
 
 # In another terminal, make changes to dev.db
 # Then test restoration
-litestream restore -o ./restored.db file://./replica
+litestream restore -o ./restored.db file://$PWD/replica
 ```
+
+Note: The `file://` URL scheme requires an absolute path. Use `$PWD` to
+reference the current working directory. For relative paths, use a configuration
+file instead.
 
 
 ## Considerations
