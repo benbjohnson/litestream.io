@@ -344,7 +344,10 @@ dbs:
 
 Each database supports the following configuration options:
 
-- `path`—Absolute path to the SQLite database file
+- `path`—Absolute path to the SQLite database file. {{< since version="0.5.0" >}}
+  Litestream automatically strips `sqlite://` and `sqlite3://` prefixes, allowing
+  you to use the same `DATABASE_URL` with Litestream and other SQLite tools. See
+  [SQLite Connection String Prefixes](#sqlite-connection-string-prefixes) below.
 - `meta-path`—Path to store Litestream metadata (defaults to `<path>-litestream`)
 - `monitor-interval`—How often to check for changes (default: `1s`)
 - `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
@@ -369,6 +372,38 @@ dbs:
     replica:
       url: s3://mybucket/myapp
       sync-interval: 1s
+```
+
+### SQLite Connection String Prefixes
+
+{{< since version="0.5.0" >}} Litestream automatically strips `sqlite://` and
+`sqlite3://` prefixes from database paths. This allows you to use a single
+`DATABASE_URL` environment variable across Litestream and other SQLite tools
+that require the protocol prefix.
+
+```yaml
+# All of these path values are equivalent:
+#   /data/app.db
+#   sqlite:///data/app.db
+#   sqlite3:///data/app.db
+
+dbs:
+  - path: sqlite3:///data/app.db
+```
+
+This is particularly useful when working with tools like Django, Prisma, or
+other ORMs that expect connection string URLs:
+
+```sh
+# Set once, use everywhere
+export DATABASE_URL=sqlite3:///data/app.db
+
+# Works with Litestream
+litestream replicate $DATABASE_URL s3://backup-bucket/db
+
+# Also works with other tools expecting the prefix
+python manage.py migrate  # Django
+prisma migrate deploy     # Prisma
 ```
 
 
