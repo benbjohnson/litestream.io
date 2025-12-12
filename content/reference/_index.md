@@ -14,6 +14,7 @@ The `litestream` commands are:
 
 - [`litestream databases`](/reference/databases) — Lists databases specified in config file.
 - [`litestream ltx`](/reference/ltx) — List available LTX files for a database.
+- [`litestream mcp`](/reference/mcp) — MCP server for AI assistant integration.
 - [`litestream replicate`](/reference/replicate) — Runs a server to replicate databases.
 - [`litestream restore`](/reference/restore) — Recovers database backup from a replica.
 - [`litestream version`](/reference/version) — Prints the binary version.
