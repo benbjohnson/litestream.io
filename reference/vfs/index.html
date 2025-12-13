@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="VFS Extension">
 <meta name="twitter:description" content="The Litestream VFS provides read-only access to a replicated SQLite database directly from object storage. It registers a VFS named litestream, fetches pages on-demand, and continuously polls the replica for new LTX files. The VFS is built separately from the main litestream binary and requires CGO. Pre-built binaries are available in GitHub releases.
-Build requirements Go 1.25&#43; with a working CGO toolchain (gcc/clang). Build with the VFS &amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &#34;vfs,SQLITE3VFS_LOADABLE_EXT&#34; -buildmode=c-archive -o dist/litestream-vfs.">
+Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build with the VFS &amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &#34;vfs,SQLITE3VFS_LOADABLE_EXT&#34; -buildmode=c-archive -o dist/litestream-vfs.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -223,7 +223,7 @@ Pre-built binaries are available in
 <a href="https://github.com/benbjohnson/litestream/releases">GitHub releases</a>.</p>
 <h2 id="build-requirements">Build requirements<a href="#build-requirements" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li>Go 1.25+ with a working CGO toolchain (gcc/clang).</li>
+<li>Go 1.24+ with a working CGO toolchain (gcc/clang).</li>
 <li>Build with the VFS &amp; extension tags using the repository Makefile (handles platform flags):</li>
 </ul>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">make vfs

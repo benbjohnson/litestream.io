@@ -55,7 +55,7 @@
       <link>https://litestream.io/reference/vfs/</link>
       <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/vfs/</guid>
-      <description>The Litestream VFS provides read-only access to a replicated SQLite database directly from object storage. It registers a VFS named litestream, fetches pages on-demand, and continuously polls the replica for new LTX files. The VFS is built separately from the main litestream binary and requires CGO. Pre-built binaries are available in GitHub releases.&#xA;Build requirements Go 1.25+ with a working CGO toolchain (gcc/clang). Build with the VFS &amp;amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &amp;#34;vfs,SQLITE3VFS_LOADABLE_EXT&amp;#34; -buildmode=c-archive -o dist/litestream-vfs.</description>
+      <description>The Litestream VFS provides read-only access to a replicated SQLite database directly from object storage. It registers a VFS named litestream, fetches pages on-demand, and continuously polls the replica for new LTX files. The VFS is built separately from the main litestream binary and requires CGO. Pre-built binaries are available in GitHub releases.&#xA;Build requirements Go 1.24+ with a working CGO toolchain (gcc/clang). Build with the VFS &amp;amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &amp;#34;vfs,SQLITE3VFS_LOADABLE_EXT&amp;#34; -buildmode=c-archive -o dist/litestream-vfs.</description>
     </item>
     <item>
       <title>Command: version</title>
