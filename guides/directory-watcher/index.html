@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.3d00da4403468933e125edaaa0fd3f1c4dacf6d970d5130de45fa62f952af339aa6f9f622f4a35891e84d43de4e54156ed6fad0512598680291fb62f17e96153.css" integrity="sha512-PQDaRANGiTPhJe2qoP0/HE2s9tlw1RMN5F&#43;mL5Uq8zmqb59iL0o1iR6E1D3k5UFW7W&#43;tBRJZhoApH7YvF&#43;lhUw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Directory Watcher - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/directory-watcher/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Directory Watcher">
+<meta name="twitter:description" content="This guide will show you how to use the directory watcher feature for automatic database discovery. This is useful for multi-tenant applications where databases are dynamically created and removed at runtime.
+v0.5.0 Overview Litestream supports two modes for managing multiple databases in a directory:
+Static directory replication scans a directory at startup and replicates all matching databases. New databases require a restart to be picked up.
+Directory watcher monitors a directory in real-time and automatically starts replication for new databases within seconds.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Directory Watcher",
+        "item": "https:\/\/litestream.io\/guides\/directory-watcher\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#configuration">Configuration</a>
+      <ul>
+        <li><a href="#configuration-options">Configuration options</a></li>
+        <li><a href="#pattern-matching">Pattern matching</a></li>
+      </ul>
+    </li>
+    <li><a href="#example-configurations">Example configurations</a>
+      <ul>
+        <li><a href="#flat-directory-structure">Flat directory structure</a></li>
+        <li><a href="#nested-directory-structure">Nested directory structure</a></li>
+        <li><a href="#multiple-patterns">Multiple patterns</a></li>
+      </ul>
+    </li>
+    <li><a href="#behavior">Behavior</a>
+      <ul>
+        <li><a href="#database-discovery">Database discovery</a></li>
+        <li><a href="#database-removal">Database removal</a></li>
+        <li><a href="#directory-removal">Directory removal</a></li>
+        <li><a href="#restart-behavior">Restart behavior</a></li>
+      </ul>
+    </li>
+    <li><a href="#differences-from-static-directory-replication">Differences from static directory replication</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#verifying-database-discovery">Verifying database discovery</a></li>
+        <li><a href="#debugging-pattern-matching">Debugging pattern matching</a></li>
+        <li><a href="#common-issues">Common issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#performance-considerations">Performance considerations</a></li>
+    <li><a href="#limitations">Limitations</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Directory Watcher</h1>
+			<p class="lead"></p>
+			<p>This guide will show you how to use the directory watcher feature for automatic
+database discovery. This is useful for multi-tenant applications where databases
+are dynamically created and removed at runtime.</p>
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+
+<h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream supports two modes for managing multiple databases in a directory:</p>
+<ol>
+<li>
+<p><strong>Static directory replication</strong> scans a directory at startup and replicates
+all matching databases. New databases require a restart to be picked up.</p>
+</li>
+<li>
+<p><strong>Directory watcher</strong> monitors a directory in real-time and automatically
+starts replication for new databases within seconds. Deleted databases are
+cleanly removed from replication.</p>
+</li>
+</ol>
+<p>The directory watcher is ideal for:</p>
+<ul>
+<li>Multi-tenant SaaS applications with per-tenant databases</li>
+<li>Dynamic provisioning scenarios where databases are created on demand</li>
+<li>High-concurrency environments with rapid database creation</li>
+</ul>
+<h2 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Enable directory watching by adding <code>watch: true</code> to your directory configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">watch</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">my-backup-bucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">tenants</span><span class="w">
+</span></span></span></code></pre></div><h3 id="configuration-options">Configuration options<a href="#configuration-options" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dir</code></td>
+<td>Directory path to monitor</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td>Glob pattern for database files (e.g., <code>*.db</code>, <code>*.sqlite</code>)</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>recursive</code></td>
+<td>Monitor subdirectories</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>watch</code></td>
+<td>Enable real-time monitoring</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="pattern-matching">Pattern matching<a href="#pattern-matching" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The <code>pattern</code> field uses standard glob patterns to match database files:</p>
+<ul>
+<li><code>*.db</code> matches all files ending in <code>.db</code></li>
+<li><code>*.sqlite</code> matches all files ending in <code>.sqlite</code></li>
+<li><code>tenant-*.db</code> matches files like <code>tenant-001.db</code>, <code>tenant-abc.db</code></li>
+</ul>
+<h2 id="example-configurations">Example configurations<a href="#example-configurations" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="flat-directory-structure">Flat directory structure<a href="#flat-directory-structure" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For applications that store all tenant databases in a single directory:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app/databases</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">watch</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/databases</span><span class="w">
+</span></span></span></code></pre></div><p>Directory structure:</p>
+<pre tabindex="0"><code>/var/lib/app/databases/
+├── tenant-001.db
+├── tenant-002.db
+└── tenant-003.db
+</code></pre><p>Replica structure:</p>
+<pre tabindex="0"><code>s3://mybucket/databases/
+├── tenant-001.db/
+├── tenant-002.db/
+└── tenant-003.db/
+</code></pre><h3 id="nested-directory-structure">Nested directory structure<a href="#nested-directory-structure" class="anchor" aria-hidden="true">#</a> </h3>
+<p>For applications that isolate tenants in subdirectories, enable <code>recursive</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">watch</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/tenants</span><span class="w">
+</span></span></span></code></pre></div><p>Directory structure:</p>
+<pre tabindex="0"><code>/var/lib/app/tenants/
+├── acme-corp/
+│   └── data.db
+├── globex/
+│   └── data.db
+└── initech/
+    └── data.db
+</code></pre><p>Replica structure:</p>
+<pre tabindex="0"><code>s3://mybucket/tenants/
+├── acme-corp/data.db/
+├── globex/data.db/
+└── initech/data.db/
+</code></pre><h3 id="multiple-patterns">Multiple patterns<a href="#multiple-patterns" class="anchor" aria-hidden="true">#</a> </h3>
+<p>To replicate different database types with different configurations, use
+separate directory entries:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">watch</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/primary</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app/analytics</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.sqlite&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">watch</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/analytics</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span></code></pre></div><h2 id="behavior">Behavior<a href="#behavior" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="database-discovery">Database discovery<a href="#database-discovery" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When a new SQLite database file is created that matches the configured pattern:</p>
+<ol>
+<li>The directory watcher detects the file creation event</li>
+<li>Litestream validates that the file is a valid SQLite database</li>
+<li>Replication begins automatically within seconds</li>
+<li>The database appears in logs and metrics</li>
+</ol>
+<p>Files that do not pass SQLite validation are ignored, preventing non-database
+files from being picked up.</p>
+<h3 id="database-removal">Database removal<a href="#database-removal" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When a database file is deleted:</p>
+<ol>
+<li>The directory watcher detects the file removal event</li>
+<li>Litestream stops replication for that database</li>
+<li>Resources are cleaned up</li>
+<li>The replica data remains in storage (not deleted)</li>
+</ol>
+<p>Replica data is preserved to allow recovery if needed. Use your storage
+provider&rsquo;s lifecycle policies to manage old replica cleanup.</p>
+<h3 id="directory-removal">Directory removal<a href="#directory-removal" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When an entire directory is removed (in recursive mode):</p>
+<ol>
+<li>All databases within that directory are removed from replication</li>
+<li>Directory watches are cleaned up</li>
+<li>Replica data remains in storage</li>
+</ol>
+<h3 id="restart-behavior">Restart behavior<a href="#restart-behavior" class="anchor" aria-hidden="true">#</a> </h3>
+<p>On Litestream restart:</p>
+<ol>
+<li>The directory is scanned for existing databases</li>
+<li>All matching databases begin replication</li>
+<li>Directory watching resumes for new files</li>
+<li>Previously replicated databases that no longer exist are not cleaned up
+from storage</li>
+</ol>
+<h2 id="differences-from-static-directory-replication">Differences from static directory replication<a href="#differences-from-static-directory-replication" class="anchor" aria-hidden="true">#</a> </h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Static (<code>watch: false</code>)</th>
+<th>Watcher (<code>watch: true</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New database detection</td>
+<td>Requires restart</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>Database removal</td>
+<td>Requires restart</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>Empty directory on startup</td>
+<td>Error</td>
+<td>Allowed</td>
+</tr>
+<tr>
+<td>Resource usage</td>
+<td>Lower</td>
+<td>Slightly higher</td>
+</tr>
+<tr>
+<td>Use case</td>
+<td>Fixed set of databases</td>
+<td>Dynamic provisioning</td>
+</tr>
+</tbody>
+</table>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="verifying-database-discovery">Verifying database discovery<a href="#verifying-database-discovery" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Check Litestream logs for database discovery messages:</p>
+<pre tabindex="0"><code>INFO added database to replication path=/var/lib/app/tenants/tenant-001.db
+</code></pre><h3 id="debugging-pattern-matching">Debugging pattern matching<a href="#debugging-pattern-matching" class="anchor" aria-hidden="true">#</a> </h3>
+<p>If databases are not being discovered, verify:</p>
+<ol>
+<li>The <code>pattern</code> matches your file extensions</li>
+<li>The <code>dir</code> path is correct and accessible</li>
+<li>For nested structures, <code>recursive: true</code> is set</li>
+<li>Files are valid SQLite databases (not empty or corrupted)</li>
+</ol>
+<h3 id="common-issues">Common issues<a href="#common-issues" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database not detected</td>
+<td>Pattern mismatch</td>
+<td>Verify glob pattern matches file extension</td>
+</tr>
+<tr>
+<td>Subdirectory databases missing</td>
+<td>Recursive disabled</td>
+<td>Set <code>recursive: true</code></td>
+</tr>
+<tr>
+<td>Permission denied</td>
+<td>Insufficient access</td>
+<td>Verify Litestream has read access to directory</td>
+</tr>
+<tr>
+<td>File not a SQLite database</td>
+<td>Invalid file</td>
+<td>Ensure files have valid SQLite headers</td>
+</tr>
+</tbody>
+</table>
+<h2 id="performance-considerations">Performance considerations<a href="#performance-considerations" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The directory watcher adds minimal overhead:</p>
+<ul>
+<li>Uses filesystem events (fsnotify) rather than polling</li>
+<li>Only validates files that match the configured pattern</li>
+<li>SQLite validation reads only the file header</li>
+</ul>
+<p>For high-volume provisioning scenarios (many databases created simultaneously),
+the watcher has been tested with 20+ concurrent database creations.</p>
+<h2 id="limitations">Limitations<a href="#limitations" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>The <code>watch</code> option requires a <code>dir</code> configuration; it cannot be used with
+single database <code>path</code> configurations</li>
+<li>Pattern matching uses glob syntax, not regular expressions</li>
+<li>Directory watching is not available on all platforms (requires fsnotify
+support)</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/windows/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Running as a Windows Service
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/global-defaults/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Global Replica Defaults &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.5e4631d144edfc16ee185bed453b33fc154c7d088b6f37ef6cfce5fc04e92aa46815d8f7cc3fb468b0b8cf948763bd3f09157b44ca20c6d6a84fc3127711a785.js" integrity="sha512-XkYx0UTt/BbuGFvtRTsz/BVMfQiLbzfvbPzl/ATpKqRoFdj3zD&#43;0aLC4z5SHY70/CRV7RMogxtaoT8MSdxGnhQ==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

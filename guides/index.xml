@@ -37,6 +37,13 @@
       <description>This guide will get you running Litestream on the Windows operating system as either a command line tool or as a background Windows Service.&#xA;Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.&#xA;Running as a Windows Service Running Litestream as a Windows Service means that it will run in the background and continuously monitor and replicate your databases.</description>
     </item>
     <item>
+      <title>Directory Watcher</title>
+      <link>https://litestream.io/guides/directory-watcher/</link>
+      <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/directory-watcher/</guid>
+      <description>This guide will show you how to use the directory watcher feature for automatic database discovery. This is useful for multi-tenant applications where databases are dynamically created and removed at runtime.&#xA;v0.5.0 Overview Litestream supports two modes for managing multiple databases in a directory:&#xA;Static directory replication scans a directory at startup and replicates all matching databases. New databases require a restart to be picked up.&#xA;Directory watcher monitors a directory in real-time and automatically starts replication for new databases within seconds.</description>
+    </item>
+    <item>
       <title>Global Replica Defaults</title>
       <link>https://litestream.io/guides/global-defaults/</link>
       <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
