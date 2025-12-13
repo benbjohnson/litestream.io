@@ -15,16 +15,18 @@ of SQLite databases. Directory replication is useful for:
 - Applications managing multiple SQLite databases
 - Batch replication without listing each database individually
 
+{{< since version="0.5.0" >}}
+
 
 ## Configuration
 
-Directory replication uses the `directory` field instead of `path` in your
+Directory replication uses the `dir` field instead of `path` in your
 database configuration. Litestream will scan the directory and replicate all
 matching SQLite databases.
 
 ```yaml
 dbs:
-  - directory: /var/lib/tenants
+  - dir: /var/lib/tenants
     pattern: "*.db"
     recursive: true
     replica:
@@ -38,9 +40,11 @@ dbs:
 
 Directory configurations support the following options:
 
-- `directory`—Absolute path to the directory containing databases
-- `pattern`—Glob pattern to match database files (default: `*.db`)
+- `dir`—Absolute path to the directory containing databases
+- `pattern`—Glob pattern to match database files (required)
 - `recursive`—Scan subdirectories when `true` (default: `false`)
+- `watch`—Enable real-time monitoring for new databases (default: `false`).
+  See [Directory Watcher](/guides/directory-watcher) for details.
 
 All standard database options like `monitor-interval` and `checkpoint-interval`
 are also supported and apply to each discovered database.
@@ -53,13 +57,13 @@ The `pattern` field accepts glob patterns to filter which files are replicated:
 ```yaml
 dbs:
   # Match only .db files
-  - directory: /var/lib/data
+  - dir: /var/lib/data
     pattern: "*.db"
     replica:
       url: s3://mybucket/data
 
   # Match SQLite files with different extensions
-  - directory: /var/lib/data
+  - dir: /var/lib/data
     pattern: "*.sqlite"
     replica:
       url: s3://mybucket/data
@@ -75,7 +79,7 @@ Enable recursive scanning to include databases in subdirectories:
 
 ```yaml
 dbs:
-  - directory: /var/lib/databases
+  - dir: /var/lib/databases
     pattern: "*.db"
     recursive: true
     replica:
@@ -95,7 +99,7 @@ collision risk.
 
 ```yaml
 dbs:
-  - directory: /var/lib/databases
+  - dir: /var/lib/databases
     pattern: "*.db"
     recursive: true
     replica:
@@ -123,7 +127,7 @@ For applications where each tenant has their own database file:
 
 ```yaml
 dbs:
-  - directory: /var/lib/tenants
+  - dir: /var/lib/tenants
     pattern: "*.db"
     replica:
       url: s3://mybucket/tenants
@@ -139,7 +143,7 @@ With recursive scanning, you can organize databases by tier or region:
 
 ```yaml
 dbs:
-  - directory: /var/lib/customers
+  - dir: /var/lib/customers
     pattern: "*.db"
     recursive: true
     replica:
@@ -178,7 +182,7 @@ dbs:
       sync-interval: 500ms
 
   # Directory of tenant databases with default settings
-  - directory: /var/lib/tenants
+  - dir: /var/lib/tenants
     pattern: "*.db"
     replica:
       url: s3://mybucket/tenants
@@ -205,9 +209,10 @@ litestream restore -o /tmp/acme.db s3://mybucket/customers/enterprise/acme.db
 
 ## Considerations
 
-- **Discovery timing**: Litestream discovers databases when it starts. New
-  databases created after startup will not be replicated until Litestream is
-  restarted.
+- **Discovery timing**: By default, Litestream discovers databases at startup.
+  New databases created after startup require a restart to be replicated. To
+  enable automatic discovery of new databases, use the
+  [Directory Watcher](/guides/directory-watcher) feature with `watch: true`.
 
 - **Database validation**: Only files with valid SQLite headers are replicated.
   Files matching the pattern but not containing SQLite data are skipped.
@@ -217,3 +222,10 @@ litestream restore -o /tmp/acme.db s3://mybucket/customers/enterprise/acme.db
 
 - **Unique paths**: Each database must have a unique relative path within the
   directory. Litestream uses the relative path to generate unique replica paths.
+
+
+## Next steps
+
+- **Dynamic database discovery**: For applications that create databases at
+  runtime, see the [Directory Watcher](/guides/directory-watcher) guide to
+  enable automatic replication of new databases without restarting Litestream.

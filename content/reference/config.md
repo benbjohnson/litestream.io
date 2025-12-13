@@ -452,12 +452,12 @@ prisma migrate deploy     # Prisma
 ### Directory configuration
 
 {{< since version="0.5.0" >}} Litestream can replicate all SQLite databases in a
-directory using the `directory` field instead of `path`. This is useful for
+directory using the `dir` field instead of `path`. This is useful for
 multi-tenant applications where each tenant has their own database.
 
 ```yaml
 dbs:
-  - directory: /var/lib/tenants
+  - dir: /var/lib/tenants
     pattern: "*.db"
     recursive: true
     replica:
@@ -468,9 +468,11 @@ dbs:
 
 Directory configurations support the following options:
 
-- `directory`—Absolute path to the directory containing databases
-- `pattern`—Glob pattern to match database files (default: `*.db`)
+- `dir`—Absolute path to the directory containing databases
+- `pattern`—Glob pattern to match database files (required)
 - `recursive`—Scan subdirectories when `true` (default: `false`)
+- `watch`—Enable real-time monitoring for new databases (default: `false`).
+  See [Directory Watcher](/guides/directory-watcher) for details.
 
 Each discovered database gets a unique replica path by appending its relative
 path from the directory root:
