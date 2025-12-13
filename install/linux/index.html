@@ -14,16 +14,16 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Linux (Debian) - Litestream</title>
+  <title>Linux - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/install/debian/">
+<link rel="canonical" href="https://litestream.io/install/linux/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Linux (Debian)">
-<meta name="twitter:description" content="Download &amp; install Debian package files are provided so you can install Litestream and its systemd service with a few commands. First, download the latest .deb file to your local machine:
-wget https://github.com/benbjohnson/litestream/releases/download/v0.5.2/litestream-v0.5.2-linux-amd64.deb Then install it using dpkg:
-sudo dpkg -i litestream-v0.5.2-linux-amd64.deb You should now be able to run litestream version to verify it is installed.
-Installing as a service To run Litestream continuously as a background service, you&rsquo;ll need to enable and start the service:">
+<meta name="twitter:title" content="Linux">
+<meta name="twitter:description" content="Debian/Ubuntu Debian package files are provided so you can install Litestream and its systemd service with a few commands. First, download the latest .deb file to your local machine:
+wget https://github.com/benbjohnson/litestream/releases/download/v0.5.3/litestream-0.5.3-linux-x86_64.deb Then install it using dpkg:
+sudo dpkg -i litestream-0.5.3-linux-x86_64.deb You should now be able to run litestream version to verify it is installed.
+RHEL/Fedora/CentOS RPM package files are also available. First, download the latest .rpm file to your local machine:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -47,8 +47,8 @@ Installing as a service To run Litestream continuously as a background service, 
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Debian",
-        "item": "https:\/\/litestream.io\/install\/debian\/"
+        "name": "Linux",
+        "item": "https:\/\/litestream.io\/install\/linux\/"
     }]
 }
 </script>
@@ -117,7 +117,7 @@ Installing as a service To run Litestream continuously as a background service, 
   </h3>
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/install/debian/">Linux (Debian)</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/install/linux/">Linux</a></li>
     <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
     </ul>
   <h3>
@@ -194,7 +194,8 @@ Installing as a service To run Litestream continuously as a background service, 
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#download--install">Download &amp; install</a></li>
+    <li><a href="#debianubuntu">Debian/Ubuntu</a></li>
+    <li><a href="#rhelfedoracentos">RHEL/Fedora/CentOS</a></li>
     <li><a href="#installing-as-a-service">Installing as a service</a></li>
   </ul>
 </nav>
@@ -202,15 +203,22 @@ Installing as a service To run Litestream continuously as a background service, 
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Linux (Debian)</h1>
+		<h1>Linux</h1>
 			<p class="lead"></p>
-			<h2 id="download--install">Download &amp; install<a href="#download--install" class="anchor" aria-hidden="true">#</a> </h2>
+			<h2 id="debianubuntu">Debian/Ubuntu<a href="#debianubuntu" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Debian package files are provided so you can install Litestream and its systemd
 service with a few commands. First, download the latest <code>.deb</code> file to your
 local machine:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.5.2/litestream-v0.5.2-linux-amd64.deb
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.5.3/litestream-0.5.3-linux-x86_64.deb
 </span></span></code></pre></div><p>Then install it using <code>dpkg</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo dpkg -i litestream-v0.5.2-linux-amd64.deb
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo dpkg -i litestream-0.5.3-linux-x86_64.deb
+</span></span></code></pre></div><p>You should now be able to run <code>litestream version</code> to verify it is installed.</p>
+<h2 id="rhelfedoracentos">RHEL/Fedora/CentOS<a href="#rhelfedoracentos" class="anchor" aria-hidden="true">#</a> </h2>
+<p>RPM package files are also available. First, download the latest <code>.rpm</code> file to
+your local machine:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.5.3/litestream-0.5.3-linux-x86_64.rpm
+</span></span></code></pre></div><p>Then install it using <code>dnf</code> (or <code>yum</code> on older systems):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo dnf install litestream-0.5.3-linux-x86_64.rpm
 </span></span></code></pre></div><p>You should now be able to run <code>litestream version</code> to verify it is installed.</p>
 <h2 id="installing-as-a-service">Installing as a service<a href="#installing-as-a-service" class="anchor" aria-hidden="true">#</a> </h2>
 <p>To run Litestream continuously as a background service, you&rsquo;ll need to enable
