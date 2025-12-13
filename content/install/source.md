@@ -33,7 +33,7 @@ binary.
 ### Prerequisites
 
 - CGO toolchain (gcc/clang)
-- Go 1.25+
+- Go 1.24+
 
 ### Build command
 
