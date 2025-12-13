@@ -392,6 +392,36 @@ dbs:
 
 See the [Scaleway Guide](/guides/scaleway/) for detailed setup instructions.
 
+### Tigris (Fly.io)
+
+[Tigris](https://www.tigrisdata.com/) is Fly.io's globally distributed
+S3-compatible object storage with automatic geographic distribution and
+CDN-like caching.
+
+**Configuration:**
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: db
+      endpoint: fly.storage.tigris.dev
+      region: auto
+      access-key-id: ${TIGRIS_ACCESS_KEY}
+      secret-access-key: ${TIGRIS_SECRET_KEY}
+```
+
+**Notes:**
+
+- Litestream v0.5.0+ automatically detects Tigris and configures required settings
+- Region should be set to `auto`
+- Objects are automatically distributed globally and cached near requesters
+- Create buckets using `fly storage create` via the Fly CLI
+
+See the [Tigris Guide](/guides/tigris/) for detailed setup instructions.
+
 ### Filebase
 
 [Filebase](https://filebase.com/) provides S3-compatible access to decentralized
@@ -436,6 +466,7 @@ The following table summarizes configuration requirements for each provider:
 | OCI | Yes | `us-east-1` | No | Namespace in endpoint |
 | Vultr | Yes | Yes | No | No request fees |
 | Scaleway | Yes | Yes | No | EU regions |
+| Tigris | Yes | `auto` | No | Auto-detected in v0.5+ |
 | Filebase | Yes | `us-east-1` | No | Decentralized |
 
 ## Advanced Configuration Options
