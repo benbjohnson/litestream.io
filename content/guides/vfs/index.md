@@ -27,7 +27,7 @@ LTX files.
 
 ## Prerequisites
 
-- Go 1.25+ with CGO enabled (compiler toolchain installed).
+- Go 1.24+ with CGO enabled (compiler toolchain installed).
 - A Litestream-managed replica already syncing to object storage.
 - SQLite clients that support loadable extensions (CLI, Python, etc.) or a Go application built with CGO.
 - Supported page sizes: 512–65536 bytes (auto-detected from LTX headers).
