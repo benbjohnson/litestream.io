@@ -19,8 +19,9 @@ are dynamically created and removed at runtime.
 
 Litestream supports two modes for managing multiple databases in a directory:
 
-1. **Static directory replication** scans a directory at startup and replicates
-   all matching databases. New databases require a restart to be picked up.
+1. **[Static directory replication](/guides/directory)** scans a directory at
+   startup and replicates all matching databases. New databases require a
+   restart to be picked up.
 
 2. **Directory watcher** monitors a directory in real-time and automatically
    starts replication for new databases within seconds. Deleted databases are

@@ -19,6 +19,7 @@ different platforms.
 
 ### Configuration guides
 
+- [Directory Replication](/guides/directory)
 - [Global Replica Defaults](/guides/global-defaults)
 
 ### Migration guides
