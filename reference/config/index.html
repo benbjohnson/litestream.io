@@ -160,6 +160,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
     </ul>
   <h3>
@@ -213,6 +214,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#database-configuration-options">Database configuration options</a></li>
         <li><a href="#directory-replication">Directory replication</a></li>
         <li><a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a></li>
+        <li><a href="#directory-configuration">Directory configuration</a></li>
       </ul>
     </li>
     <li><a href="#replica-settings">Replica settings</a>
@@ -648,7 +650,54 @@ other ORMs that expect connection string URLs:</p>
 </span></span><span class="line"><span class="cl"><span class="c1"># Also works with other tools expecting the prefix</span>
 </span></span><span class="line"><span class="cl">python manage.py migrate  <span class="c1"># Django</span>
 </span></span><span class="line"><span class="cl">prisma migrate deploy     <span class="c1"># Prisma</span>
-</span></span></code></pre></div><h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></code></pre></div><h3 id="directory-configuration">Directory configuration<a href="#directory-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
+    v0.5.0
+</span>
+ Litestream can replicate all SQLite databases in a
+directory using the <code>dir</code> field instead of <code>path</code>. This is useful for
+multi-tenant applications where each tenant has their own database.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">backups</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">tenants</span><span class="w">
+</span></span></span></code></pre></div><p>Directory configurations support the following options:</p>
+<ul>
+<li><code>dir</code>—Absolute path to the directory containing databases</li>
+<li><code>pattern</code>—Glob pattern to match database files (required)</li>
+<li><code>recursive</code>—Scan subdirectories when <code>true</code> (default: <code>false</code>)</li>
+<li><code>watch</code>—Enable real-time monitoring for new databases (default: <code>false</code>).
+See <a href="/guides/directory-watcher">Directory Watcher</a> for details.</li>
+</ul>
+<p>Each discovered database gets a unique replica path by appending its relative
+path from the directory root:</p>
+<table>
+<thead>
+<tr>
+<th>Local database path</th>
+<th>Replica path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/var/lib/tenants/tenant1.db</code></td>
+<td><code>backups/tenants/tenant1.db/ltx/...</code></td>
+</tr>
+<tr>
+<td><code>/var/lib/tenants/team-a/db2.db</code></td>
+<td><code>backups/tenants/team-a/db2.db/ltx/...</code></td>
+</tr>
+</tbody>
+</table>
+<p>Litestream validates the SQLite header of each matched file to ensure only
+actual SQLite databases are replicated.</p>
+<p>See the <a href="https://litestream.io/guides/directory/">Directory Replication Guide</a> for detailed
+usage examples.</p>
+<h2 id="replica-settings">Replica settings<a href="#replica-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream supports seven types of replicas:</p>
 <ul>
 <li><code>&quot;abs&quot;</code> replicates a database to an Azure Blob Storage container.</li>

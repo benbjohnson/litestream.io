@@ -161,6 +161,7 @@ Directory watcher monitors a directory in real-time and automatically starts rep
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
     </ul>
   <h3>
@@ -244,8 +245,9 @@ are dynamically created and removed at runtime.</p>
 <p>Litestream supports two modes for managing multiple databases in a directory:</p>
 <ol>
 <li>
-<p><strong>Static directory replication</strong> scans a directory at startup and replicates
-all matching databases. New databases require a restart to be picked up.</p>
+<p><strong><a href="/guides/directory">Static directory replication</a></strong> scans a directory at
+startup and replicates all matching databases. New databases require a
+restart to be picked up.</p>
 </li>
 <li>
 <p><strong>Directory watcher</strong> monitors a directory in real-time and automatically

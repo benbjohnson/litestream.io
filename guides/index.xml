@@ -163,6 +163,13 @@
       <description>This guide will show you how to use NATS JetStream Object Store as a replica destination for Litestream. You will need a NATS server with JetStream enabled to complete this guide.&#xA;Setup Install NATS Server Using Docker:&#xA;# Run NATS server with JetStream enabled docker run -d --name nats-server \ -p 4222:4222 \ nats:alpine \ -js Using Binary:&#xA;# Download and install NATS server curl -L https://github.com/nats-io/nats-server/releases/latest/download/nats-server-v2.10.7-linux-amd64.zip -o nats-server.zip unzip nats-server.</description>
     </item>
     <item>
+      <title>Replicating Directories</title>
+      <link>https://litestream.io/guides/directory/</link>
+      <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/directory/</guid>
+      <description>This guide will show you how to use Litestream to replicate entire directories of SQLite databases. Directory replication is useful for:&#xA;Multi-tenant applications where each tenant has their own database Applications managing multiple SQLite databases Batch replication without listing each database individually v0.5.0 Configuration Directory replication uses the dir field instead of path in your database configuration. Litestream will scan the directory and replicate all matching SQLite databases.&#xA;dbs: - dir: /var/lib/tenants pattern: &amp;#34;*.</description>
+    </item>
+    <item>
       <title>Replicating to a WebDAV Server</title>
       <link>https://litestream.io/guides/webdav/</link>
       <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
