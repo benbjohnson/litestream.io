@@ -358,6 +358,48 @@ Each database supports the following configuration options:
 
 {{< alert icon="⚠️" text="The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead." >}}
 
+### Directory replication
+
+{{< since version="0.5.0" >}} Instead of specifying a single database `path`, you can
+configure Litestream to replicate all databases in a directory using the `dir` field:
+
+```yaml
+dbs:
+  - dir: /var/lib/app/tenants
+    pattern: "*.db"
+    replica:
+      url: s3://mybucket/tenants
+```
+
+Directory configuration options:
+
+- `dir`—Directory path to scan for databases
+- `pattern`—Glob pattern for matching database files (e.g., `*.db`, `*.sqlite`)
+- `recursive`—Scan subdirectories recursively (default: `false`)
+- `watch`—Enable real-time directory monitoring (default: `false`)
+
+When `watch` is enabled, Litestream monitors the directory for new databases and
+automatically starts replication within seconds. Deleted databases are cleanly
+removed from replication. This is useful for multi-tenant applications with
+dynamic database provisioning.
+
+```yaml
+dbs:
+  - dir: /var/lib/app/tenants
+    pattern: "*.db"
+    recursive: true
+    watch: true
+    replica:
+      url: s3://mybucket/tenants
+```
+
+Replica paths are automatically namespaced by the database's relative path within
+the directory. For example, `/var/lib/app/tenants/acme/data.db` would replicate to
+`s3://mybucket/tenants/acme/data.db/`.
+
+See the [Directory Watcher Guide]({{< ref "directory-watcher" >}}) for detailed
+configuration examples and use cases.
+
 Example with database-level options:
 
 ```yaml
