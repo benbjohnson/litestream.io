@@ -1,5 +1,5 @@
 params:
-  litestreamVersion: 0.5.2
+  litestreamVersion: 0.5.3
   docsVersion: "0.5"
   versionBanner:
     version: "v0.5.x"
