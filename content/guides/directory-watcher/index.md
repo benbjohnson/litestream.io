@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "infrastructure-guides"
-weight: 350
+weight: 340
 ---
 
 This guide will show you how to use the directory watcher feature for automatic
