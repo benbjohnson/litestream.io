@@ -211,6 +211,7 @@ Overview S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools 
         <li><a href="#oci-object-storage">OCI Object Storage</a></li>
         <li><a href="#vultr-object-storage">Vultr Object Storage</a></li>
         <li><a href="#scaleway-object-storage">Scaleway Object Storage</a></li>
+        <li><a href="#tigris-flyio">Tigris (Fly.io)</a></li>
         <li><a href="#filebase">Filebase</a></li>
       </ul>
     </li>
@@ -665,6 +666,29 @@ S3-compatible storage in European data centers.</p>
 </tbody>
 </table>
 <p>See the <a href="/guides/scaleway/">Scaleway Guide</a> for detailed setup instructions.</p>
+<h3 id="tigris-flyio">Tigris (Fly.io)<a href="#tigris-flyio" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.tigrisdata.com/">Tigris</a> is Fly.io&rsquo;s globally distributed
+S3-compatible object storage with automatic geographic distribution and
+CDN-like caching.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">fly.storage.tigris.dev</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">auto</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${TIGRIS_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${TIGRIS_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Litestream v0.5.0+ automatically detects Tigris and configures required settings</li>
+<li>Region should be set to <code>auto</code></li>
+<li>Objects are automatically distributed globally and cached near requesters</li>
+<li>Create buckets using <code>fly storage create</code> via the Fly CLI</li>
+</ul>
+<p>See the <a href="/guides/tigris/">Tigris Guide</a> for detailed setup instructions.</p>
 <h3 id="filebase">Filebase<a href="#filebase" class="anchor" aria-hidden="true">#</a> </h3>
 <p><a href="https://filebase.com/">Filebase</a> provides S3-compatible access to decentralized
 storage networks including IPFS and Sia.</p>
@@ -769,6 +793,13 @@ storage networks including IPFS and Sia.</p>
 <td>Yes</td>
 <td>No</td>
 <td>EU regions</td>
+</tr>
+<tr>
+<td>Tigris</td>
+<td>Yes</td>
+<td><code>auto</code></td>
+<td>No</td>
+<td>Auto-detected in v0.5+</td>
 </tr>
 <tr>
 <td>Filebase</td>
