@@ -239,3 +239,27 @@ For security considerations including backup encryption, see the
 [Configuration Reference](/reference/config#encryption) section. Note that Age
 encryption is not available in v0.5.0+. If you are upgrading from v0.3.x with
 Age encryption, please review the [migration guide](/docs/migration/#age-encryption-migration).
+
+
+## Explore Further
+
+- [How It Works](/how-it-works) - Understand WAL, snapshots, generations, and replication internals
+- [Tips & Caveats](/tips) - Important production considerations and SQLite settings
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+
+
+## Next Steps
+
+Choose your deployment target:
+
+- [Running in Docker](/guides/docker) - Container deployment with sidecars
+- [Running with Systemd](/guides/systemd) - Linux service management
+- [Running in Kubernetes](/guides/kubernetes) - StatefulSet deployments
+- [Running on Windows](/guides/windows) - Windows service setup
+
+Or explore storage options:
+
+- [Amazon S3](/guides/s3) - AWS object storage
+- [Google Cloud Storage](/guides/gcs) - GCP object storage
+- [Azure Blob Storage](/guides/azure) - Azure object storage
+- [All storage guides](/guides#replica-guides) - Complete list of supported backends

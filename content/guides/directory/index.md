@@ -229,3 +229,9 @@ litestream restore -o /tmp/acme.db s3://mybucket/customers/enterprise/acme.db
 - **Dynamic database discovery**: For applications that create databases at
   runtime, see the [Directory Watcher](/guides/directory-watcher) guide to
   enable automatic replication of new databases without restarting Litestream.
+
+
+## See Also
+
+- [Configuration Reference](/reference/config) - Complete configuration options
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions

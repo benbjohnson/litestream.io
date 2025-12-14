@@ -137,6 +137,13 @@ it's always troublesome to see errors, these do not affect the integrity of your
 backups.
 
 
+## See Also
+
+- [S3-Compatible Services](/guides/s3-compatible) - Other S3-compatible providers
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Configuration Reference](/reference/config) - Complete configuration options
+
+
 [spaces]: https://www.digitalocean.com/products/spaces/
 [do]: https://www.digitalocean.com/
 [console]: https://cloud.digitalocean.com/

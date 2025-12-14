@@ -66,6 +66,14 @@ dbs:
       secret-access-key: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
+
+## See Also
+
+- [S3-Compatible Services](/guides/s3-compatible) - Other S3-compatible providers
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Configuration Reference](/reference/config) - Complete configuration options
+
+
 [os]: https://www.scaleway.com/en/object-storage/
 [scw]: https://www.scaleway.com/
 [console]: https://console.scaleway.com/

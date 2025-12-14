@@ -6,8 +6,13 @@ layout: docs
 
 ## Overview
 
-These guides provides instructions for running Litestream in production on
+These guides provide instructions for running Litestream in production on
 different platforms.
+
+After completing the [Getting Started](/getting-started) tutorial, use these
+guides to deploy Litestream in your production environment. For conceptual
+background on how Litestream works, see [How It Works](/how-it-works). If you
+encounter issues, check the [Troubleshooting](/docs/troubleshooting) guide.
 
 ### Infrastructure guides
 

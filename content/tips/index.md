@@ -191,6 +191,14 @@ ok
 You now use this snapshot file as your application's database file and continue
 replicating it again with Litestream.
 
+
+## See Also
+
+- [How It Works](/how-it-works) - Understanding WAL, snapshots, and replication internals
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Configuration Reference](/reference/config) - Complete configuration options
+
+
 [pg]: https://www.postgresql.org/docs/9.3/warm-standby.html
 
 

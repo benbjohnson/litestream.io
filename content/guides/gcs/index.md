@@ -98,4 +98,11 @@ dbs:
 
 {{< since version="0.5.0" >}} Litestream v0.5.0+ maintains compatibility with existing authentication methods.
 
+
+## See Also
+
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Configuration Reference](/reference/config) - Complete configuration options
+
+
 [configuration file]: /reference/config
