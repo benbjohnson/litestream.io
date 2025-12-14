@@ -55,7 +55,7 @@
       <link>https://litestream.io/guides/s3/</link>
       <pubDate>Mon, 08 Mar 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/s3/</guid>
-      <description>This guide will show you how to use Amazon S3 as a database replica path for Litestream. You will need an Amazon AWS account to complete this guide.&#xA;Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Add User button.</description>
+      <description>This guide will show you how to use Amazon S3 as a database replica path for Litestream. You will need an Amazon AWS account to complete this guide.&#xA;Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Create user button.</description>
     </item>
     <item>
       <title>AWS SDK v2 Migration</title>

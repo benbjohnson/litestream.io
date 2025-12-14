@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Replicating to Amazon S3">
 <meta name="twitter:description" content="This guide will show you how to use Amazon S3 as a database replica path for Litestream. You will need an Amazon AWS account to complete this guide.
-Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Add User button.">
+Setup Create an IAM user You will need to set up a user with programmatic access to work with Amazon S3. From the AWS Console, go to the IAM service. Next, click Users from the left-hand navigation and then click the Create user button.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -244,25 +244,26 @@ complete this guide.</p>
 <h3 id="create-an-iam-user">Create an IAM user<a href="#create-an-iam-user" class="anchor" aria-hidden="true">#</a> </h3>
 <p>You will need to set up a user with programmatic access to work with Amazon S3.
 From the <a href="https://console.aws.amazon.com/">AWS Console</a>, go to the IAM service.
-Next, click <em>Users</em> from the left-hand navigation and then click the <em>Add User</em>
+Next, click <em>Users</em> from the left-hand navigation and then click the <em>Create user</em>
 button.</p>
-<p>Enter a name for your user and make sure to enable <em>Programmatic Access</em>. Then
-click the <em>Next</em> button.</p>
+<p>Enter a name for your user and click the <em>Next</em> button.</p>
 <figure>
- <img src="iam_0.png" alt="Screenshot of creating an IAM user">
+  <img src="iam_0.png" alt="Screenshot of creating an IAM user">
 </figure>
-<p>On the permissions screen, click on <em>&ldquo;Attach existing policies directly&rdquo;</em>, then
-search for &ldquo;S3&rdquo; and choose <code>AmazonS3FullAccess</code>. You can also specify a <a href="#restrictive-iam-policies">more
-restrictive policy</a> as described later in this guide.</p>
+<p>On the permissions screen, select <em>&ldquo;Attach policies directly&rdquo;</em>, then search for
+&ldquo;S3&rdquo; and choose <code>AmazonS3FullAccess</code>. You can also specify a <a href="#restrictive-iam-policies">more restrictive
+policy</a> as described later in this guide. Click <em>Next</em>
+to continue.</p>
 <figure>
- <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
+  <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
 </figure>
-<p>Then click the <em>Next</em> button twice and then click the <em>Create user</em> button. This
-will create the user and display credentials for programmatic access. You will
-need to save the <em>&ldquo;Access key ID&rdquo;</em> and <em>&ldquo;Secret access key&rdquo;</em> for later use
-in this guide.</p>
+<p>Review the user details and click <em>Create user</em>. After the user is created,
+navigate to the user&rsquo;s <em>Security credentials</em> tab and click <em>Create access key</em>.
+Select your use case, acknowledge the warning, and create the key. You will need
+to save the <em>&ldquo;Access key ID&rdquo;</em> and <em>&ldquo;Secret access key&rdquo;</em> for later use in this
+guide.</p>
 <figure>
- <img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
+  <img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
 </figure>
 <h3 id="create-a-bucket">Create a bucket<a href="#create-a-bucket" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Once you have a user created, go to the <a href="https://s3.console.aws.amazon.com/">S3 service</a>
@@ -270,7 +271,19 @@ in the AWS Console. Click the <em>&ldquo;Create bucket&rdquo;</em> button.</p>
 <p>You&rsquo;ll need to choose a globally unique bucket name and choose a region to
 store the bucket data.</p>
 <figure>
- <img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
+  <img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
+</figure>
+<p>While Litestream files are immutable and don&rsquo;t require versioning, enabling S3
+bucket versioning is a best practice that provides additional protection against
+accidental deletions.</p>
+<figure>
+  <img src="s3_1.png" alt="Screenshot of AWS S3 bucket versioning setting">
+</figure>
+<p>It is also recommended to enable default encryption to protect your data at rest.
+The default <em>&ldquo;Server-side encryption with Amazon S3 managed keys (SSE-S3)&rdquo;</em> option
+is sufficient for most use cases.</p>
+<figure>
+  <img src="s3_2.png" alt="Screenshot of AWS S3 default encryption setting">
 </figure>
 <p>Then click the <em>&ldquo;Create bucket&rdquo;</em> button at the bottom of the screen. Your bucket
 has now been created.</p>
