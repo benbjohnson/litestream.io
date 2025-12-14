@@ -204,4 +204,6 @@ without modification.
 
 - [AWS SDK for Go v2 Documentation][aws-sdk-v2]
 - [Amazon S3 Guide](/guides/s3)
+- [Migration Guide](/docs/migration) - Full version upgrade guide
 - [Configuration Reference](/reference/config)
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions

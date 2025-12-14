@@ -175,3 +175,10 @@ litestream replicate -exec "myapp serve" /path/to/db s3://mybucket/db
 litestream replicate /path/to/db s3://mybucket/db -exec "myapp serve"
 # Error: flag "-exec" must be positioned before DB_PATH and REPLICA_URL arguments
 ```
+
+
+## See Also
+
+- [Configuration Reference](/reference/config) - Complete configuration options
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Getting Started](/getting-started) - Tutorial for setting up replication

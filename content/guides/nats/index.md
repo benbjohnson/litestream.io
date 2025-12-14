@@ -288,3 +288,9 @@ replica:
   reconnect-wait: 2s        # Wait between reconnection attempts
   timeout: 10s              # Connection timeout
 ```
+
+
+## See Also
+
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Configuration Reference](/reference/config) - Complete configuration options

@@ -166,4 +166,12 @@ az login
 
 Litestream will automatically use your Azure CLI credentials when no other authentication method is configured.
 
+
+## See Also
+
+- [Azure SDK v2 Migration](/docs/migration#azure-sdk-v2-migration) - Upgrading authentication
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+- [Configuration Reference](/reference/config) - Complete configuration options
+
+
 [configuration file]: /reference/config

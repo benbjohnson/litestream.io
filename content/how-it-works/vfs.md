@@ -123,3 +123,10 @@ and disk cost but introduces network latency and relies on contiguous replica
 history. Choose VFS for light-weight read replicas and rapid spin-up; choose
 restore for low-latency, write-capable workloads on local disk.
 
+
+## See Also
+
+- [VFS Read Replicas Guide](/guides/vfs) - Step-by-step setup and usage
+- [VFS Extension Reference](/reference/vfs) - Complete API and configuration
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
+

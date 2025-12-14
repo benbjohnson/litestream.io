@@ -262,3 +262,10 @@ the watcher has been tested with 20+ concurrent database creations.
 - Pattern matching uses glob syntax, not regular expressions
 - Directory watching is not available on all platforms (requires fsnotify
   support)
+
+
+## See Also
+
+- [Directory Replication](/guides/directory) - Static directory replication
+- [Configuration Reference](/reference/config) - Complete configuration options
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions

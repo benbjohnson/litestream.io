@@ -351,3 +351,9 @@ dbs:
     replica:
       url: s3://mybucket/db
 ```
+
+
+## See Also
+
+- [Configuration Reference](/reference/config) - Complete configuration options
+- [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
