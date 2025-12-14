@@ -18,31 +18,32 @@ complete this guide.
 
 You will need to set up a user with programmatic access to work with Amazon S3.
 From the [AWS Console](https://console.aws.amazon.com/), go to the IAM service.
-Next, click _Users_ from the left-hand navigation and then click the _Add User_
+Next, click _Users_ from the left-hand navigation and then click the _Create user_
 button.
 
-Enter a name for your user and make sure to enable _Programmatic Access_. Then
-click the _Next_ button.
+Enter a name for your user and click the _Next_ button.
 
 <figure>
- <img src="iam_0.png" alt="Screenshot of creating an IAM user">
+  <img src="iam_0.png" alt="Screenshot of creating an IAM user">
 </figure>
 
-On the permissions screen, click on _"Attach existing policies directly"_, then
-search for "S3" and choose `AmazonS3FullAccess`. You can also specify a [more
-restrictive policy](#restrictive-iam-policies) as described later in this guide.
+On the permissions screen, select _"Attach policies directly"_, then search for
+"S3" and choose `AmazonS3FullAccess`. You can also specify a [more restrictive
+policy](#restrictive-iam-policies) as described later in this guide. Click _Next_
+to continue.
 
 <figure>
- <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
+  <img src="iam_1.png" alt="Screenshot of attaching policy to IAM user">
 </figure>
 
-Then click the _Next_ button twice and then click the _Create user_ button. This
-will create the user and display credentials for programmatic access. You will
-need to save the _"Access key ID"_ and _"Secret access key"_ for later use
-in this guide.
+Review the user details and click _Create user_. After the user is created,
+navigate to the user's _Security credentials_ tab and click _Create access key_.
+Select your use case, acknowledge the warning, and create the key. You will need
+to save the _"Access key ID"_ and _"Secret access key"_ for later use in this
+guide.
 
 <figure>
- <img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
+  <img src="iam_2.png" alt="Screenshot of AWS credentials for created user">
 </figure>
 
 
@@ -55,7 +56,23 @@ You'll need to choose a globally unique bucket name and choose a region to
 store the bucket data.
 
 <figure>
- <img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
+  <img src="s3_0.png" alt="Screenshot of AWS S3 create bucket UI">
+</figure>
+
+While Litestream files are immutable and don't require versioning, enabling S3
+bucket versioning is a best practice that provides additional protection against
+accidental deletions.
+
+<figure>
+  <img src="s3_1.png" alt="Screenshot of AWS S3 bucket versioning setting">
+</figure>
+
+It is also recommended to enable default encryption to protect your data at rest.
+The default _"Server-side encryption with Amazon S3 managed keys (SSE-S3)"_ option
+is sufficient for most use cases.
+
+<figure>
+  <img src="s3_2.png" alt="Screenshot of AWS S3 default encryption setting">
 </figure>
 
 Then click the _"Create bucket"_ button at the bottom of the screen. Your bucket
