@@ -29,10 +29,10 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <h4 id="installation">Installation</h4>
 <p>Download and install the new version:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Download latest stable release (check https://github.com/benbjohnson/litestream/releases)</span>
-</span></span><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz
+</span></span><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.5.3/litestream-v0.5.3-linux-amd64.tar.gz
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Extract and install</span>
-</span></span><span class="line"><span class="cl">tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
+</span></span><span class="line"><span class="cl">tar -xzf litestream-v0.5.3-linux-amd64.tar.gz
 </span></span><span class="line"><span class="cl">sudo mv litestream /usr/local/bin/
 </span></span><span class="line"><span class="cl">sudo chmod +x /usr/local/bin/litestream
 </span></span><span class="line"><span class="cl">
