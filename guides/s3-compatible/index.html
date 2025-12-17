@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Replicating to S3-Compatible Services">
 <meta name="twitter:description" content="This guide covers how to use Litestream with S3-compatible storage providers beyond Amazon S3. Many cloud providers and self-hosted solutions implement the S3 API, allowing you to use Litestream&rsquo;s S3 replica type with minimal configuration changes.
-Overview S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools built for AWS S3 to work with alternative storage providers. Litestream supports these services through the endpoint configuration option, which redirects API requests to your chosen provider.">
+Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-compatible providers based on the endpoint URL and configures the appropriate settings. This eliminates the need to manually specify options like force-path-style or sign-payload for most providers.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -192,6 +192,7 @@ Overview S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools 
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
+    <li><a href="#automatic-provider-detection">Automatic Provider Detection</a></li>
     <li><a href="#overview">Overview</a></li>
     <li><a href="#configuration-methods">Configuration Methods</a>
       <ul>
@@ -246,6 +247,61 @@ Overview S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools 
 beyond Amazon S3. Many cloud providers and self-hosted solutions implement the
 S3 API, allowing you to use Litestream&rsquo;s S3 replica type with minimal
 configuration changes.</p>
+<h2 id="automatic-provider-detection">Automatic Provider Detection<a href="#automatic-provider-detection" class="anchor" aria-hidden="true">#</a> </h2>
+<p><strong>New in v0.5.0:</strong> Litestream automatically detects S3-compatible providers based
+on the endpoint URL and configures the appropriate settings. This eliminates
+the need to manually specify options like <code>force-path-style</code> or <code>sign-payload</code>
+for most providers.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Endpoint Pattern</th>
+<th>Auto-detected Settings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backblaze B2</td>
+<td><code>*.backblazeb2.com</code></td>
+<td><code>sign-payload: true</code>, <code>force-path-style: true</code></td>
+</tr>
+<tr>
+<td>Filebase</td>
+<td><code>*.filebase.com</code></td>
+<td><code>sign-payload: true</code>, <code>force-path-style: true</code></td>
+</tr>
+<tr>
+<td>MinIO</td>
+<td><code>*.minio.*</code></td>
+<td><code>sign-payload: true</code>, <code>force-path-style: true</code></td>
+</tr>
+<tr>
+<td>DigitalOcean Spaces</td>
+<td><code>*.digitaloceanspaces.com</code></td>
+<td><code>sign-payload: true</code></td>
+</tr>
+<tr>
+<td>Scaleway</td>
+<td><code>*.scw.cloud</code></td>
+<td><code>sign-payload: true</code></td>
+</tr>
+<tr>
+<td>Cloudflare R2</td>
+<td><code>*.r2.cloudflarestorage.com</code></td>
+<td><code>sign-payload: true</code></td>
+</tr>
+<tr>
+<td>Tigris</td>
+<td><code>*.tigris.dev</code></td>
+<td><code>sign-payload: true</code>, consistency header</td>
+</tr>
+</tbody>
+</table>
+<p>Auto-detection means you can use simpler configurations without worrying about
+provider-specific quirks. The provider examples below show configurations that
+work with both older Litestream versions and v0.5.0+. If you&rsquo;re using v0.5.0+,
+you can omit the <code>force-path-style</code> setting for auto-detected providers.</p>
 <h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
 <p>S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools built for AWS
 S3 to work with alternative storage providers. Litestream supports these
@@ -337,7 +393,9 @@ with free uploads.</p>
 <ul>
 <li>Endpoint format: <code>s3.&lt;region&gt;.backblazeb2.com</code></li>
 <li>The <code>region</code> must match your bucket&rsquo;s region exactly</li>
-<li>Always set <code>force-path-style: true</code> for B2</li>
+<li><strong>Litestream v0.5.0+</strong> automatically detects B2 and sets <code>force-path-style: true</code>
+and <code>sign-payload: true</code>; you can omit these settings</li>
+<li>For older versions, set <code>force-path-style: true</code> manually</li>
 <li>Create application keys with access limited to specific buckets for security</li>
 <li>B2 requires minimum 5 MB part sizes for multipart uploads (Litestream default)</li>
 </ul>
@@ -713,7 +771,9 @@ storage networks including IPFS and Sia.</p>
 <li>Provides decentralized storage with IPFS pinning</li>
 </ul>
 <h2 id="provider-compatibility-matrix">Provider Compatibility Matrix<a href="#provider-compatibility-matrix" class="anchor" aria-hidden="true">#</a> </h2>
-<p>The following table summarizes configuration requirements for each provider:</p>
+<p>The following table summarizes configuration requirements for each provider.
+Providers marked with ✓ in the &ldquo;Auto-detected&rdquo; column have their settings
+automatically configured in Litestream v0.5.0+ based on the endpoint URL.</p>
 <table>
 <thead>
 <tr>
@@ -721,7 +781,7 @@ storage networks including IPFS and Sia.</p>
 <th>Endpoint Required</th>
 <th>Region</th>
 <th>force-path-style</th>
-<th>Notes</th>
+<th>Auto-detected</th>
 </tr>
 </thead>
 <tbody>
@@ -730,42 +790,42 @@ storage networks including IPFS and Sia.</p>
 <td>No</td>
 <td>Yes</td>
 <td>No</td>
-<td>Native support</td>
+<td>—</td>
 </tr>
 <tr>
 <td>MinIO</td>
 <td>Yes</td>
 <td>Optional</td>
 <td>Auto</td>
-<td>Self-hosted</td>
+<td>✓</td>
 </tr>
 <tr>
 <td>Backblaze B2</td>
 <td>Yes</td>
 <td>Yes</td>
-<td>Yes</td>
-<td>Min 5MB parts</td>
+<td>Auto</td>
+<td>✓</td>
 </tr>
 <tr>
 <td>Wasabi</td>
 <td>Yes</td>
 <td>Yes</td>
 <td>No</td>
-<td>No egress fees</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Cloudflare R2</td>
 <td>Yes</td>
 <td><code>auto</code></td>
 <td>No</td>
-<td>No egress fees</td>
+<td>✓</td>
 </tr>
 <tr>
 <td>DigitalOcean Spaces</td>
 <td>Yes</td>
 <td>Yes</td>
 <td>No</td>
-<td>CDN included</td>
+<td>✓</td>
 </tr>
 <tr>
 <td>Linode</td>
@@ -779,35 +839,35 @@ storage networks including IPFS and Sia.</p>
 <td>Yes</td>
 <td><code>us-east-1</code></td>
 <td>No</td>
-<td>Namespace in endpoint</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Vultr</td>
 <td>Yes</td>
 <td>Yes</td>
 <td>No</td>
-<td>No request fees</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Scaleway</td>
 <td>Yes</td>
 <td>Yes</td>
 <td>No</td>
-<td>EU regions</td>
+<td>✓</td>
 </tr>
 <tr>
 <td>Tigris</td>
 <td>Yes</td>
 <td><code>auto</code></td>
 <td>No</td>
-<td>Auto-detected in v0.5+</td>
+<td>✓</td>
 </tr>
 <tr>
 <td>Filebase</td>
 <td>Yes</td>
 <td><code>us-east-1</code></td>
-<td>No</td>
-<td>Decentralized</td>
+<td>Auto</td>
+<td>✓</td>
 </tr>
 </tbody>
 </table>

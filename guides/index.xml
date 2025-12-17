@@ -90,7 +90,7 @@
       <link>https://litestream.io/guides/s3-compatible/</link>
       <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/s3-compatible/</guid>
-      <description>This guide covers how to use Litestream with S3-compatible storage providers beyond Amazon S3. Many cloud providers and self-hosted solutions implement the S3 API, allowing you to use Litestream&amp;rsquo;s S3 replica type with minimal configuration changes.&#xA;Overview S3-compatible services implement Amazon&amp;rsquo;s S3 API, enabling tools built for AWS S3 to work with alternative storage providers. Litestream supports these services through the endpoint configuration option, which redirects API requests to your chosen provider.</description>
+      <description>This guide covers how to use Litestream with S3-compatible storage providers beyond Amazon S3. Many cloud providers and self-hosted solutions implement the S3 API, allowing you to use Litestream&amp;rsquo;s S3 replica type with minimal configuration changes.&#xA;Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-compatible providers based on the endpoint URL and configures the appropriate settings. This eliminates the need to manually specify options like force-path-style or sign-payload for most providers.</description>
     </item>
     <item>
       <title>Replicating to Azure Blob Storage</title>

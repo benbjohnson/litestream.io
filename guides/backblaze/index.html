@@ -228,7 +228,11 @@ the file&rdquo;</em> as Litestream files are immutable and don&rsquo;t require v
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w"> </span><span class="c"># change to whatever path you want</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">s3.us-west-000.backblazeb2.com</span><span class="w"> </span><span class="c"># change this</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">force-path-style</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span></span></span></code></pre></div><h2 id="create-a-user">Create a user<a href="#create-a-user" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100"><strong>Litestream v0.5.0+</strong> automatically detects Backblaze B2 endpoints and configures <code>force-path-style</code> and <code>sign-payload</code> settings. You can omit <code>force-path-style: true</code> from your configuration when using v0.5.0 or later.</div>
+</div>
+<h2 id="create-a-user">Create a user<a href="#create-a-user" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Next, create a user with programmatic access to the bucket you just created.</p>
 <ol>
 <li>From your Backblaze dashboard, go to <em>My Account &gt; App Keys</em></li>
