@@ -51,7 +51,7 @@ gcc -DSQLITE3VFS_LOADABLE_EXT -fPIC -shared -o dist/litestream-vfs.so src/litest
 - macOS requires the additional frameworks used in `Makefile`; prefer `make vfs`.
 - Use `.dylib` on macOS or `.dll` on Windows if your environment expects it.
 - The output registers a VFS called `litestream`. Keep the `.so/.dylib/.dll` near your application.
-- The loadable extension currently ships with the S3 replica client (including S3-compatible endpoints).
+- The loadable extension supports all replica backends (S3, GCS, Azure, SFTP, file, NATS, WebDAV, Alibaba OSS).
 
 The SQLite entrypoint symbol is `sqlite3_litestreamvfs_init`; pass this when
 loading the extension if your client requires it.
@@ -59,17 +59,46 @@ loading the extension if your client requires it.
 
 ## Configure the replica target
 
-Set the storage connection for the VFS. The extension uses the AWS SDK, so any
-standard AWS credential sources are supported in addition to these variables:
+Set `LITESTREAM_REPLICA_URL` to specify the replica location. The URL scheme
+determines the backend:
 
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` — optional; falls back to the AWS default chain.
-- `LITESTREAM_S3_BUCKET` (required) — bucket containing the replica.
-- `LITESTREAM_S3_PATH` (required) — prefix/path to the database replica.
+```sh
+# AWS S3
+export LITESTREAM_REPLICA_URL="s3://mybucket/db"
+
+# S3-compatible (MinIO, R2, Tigris, etc.)
+export LITESTREAM_REPLICA_URL="s3://mybucket/db?endpoint=minio.example.com"
+
+# Google Cloud Storage
+export LITESTREAM_REPLICA_URL="gs://mybucket/db"
+
+# Azure Blob Storage
+export LITESTREAM_REPLICA_URL="abs://mycontainer/db"
+
+# SFTP
+export LITESTREAM_REPLICA_URL="sftp://user@host/path/db"
+
+# Local filesystem
+export LITESTREAM_REPLICA_URL="file:///backups/db"
+```
+
+Standard cloud provider credentials are honored by their respective SDKs
+(e.g., `AWS_ACCESS_KEY_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, `AZURE_STORAGE_ACCOUNT`).
+
+Additional configuration:
+
+- `LITESTREAM_LOG_LEVEL` — `DEBUG` or `INFO` (default).
+
+### Legacy S3 configuration
+
+The following S3-specific variables are still supported for backwards
+compatibility:
+
+- `LITESTREAM_S3_BUCKET`, `LITESTREAM_S3_PATH` — bucket and path to the replica.
 - `LITESTREAM_S3_REGION` — defaults to the bucket's region (or `us-east-1` with a custom endpoint).
 - `LITESTREAM_S3_ENDPOINT` — for S3-compatible stores (MinIO, R2, etc).
 - `LITESTREAM_S3_FORCE_PATH_STYLE` — `true` for path-style URLs (default: `false`).
 - `LITESTREAM_S3_SKIP_VERIFY` — `true` to skip TLS verification for testing (default: `false`).
-- `LITESTREAM_LOG_LEVEL` — `DEBUG` or `INFO` (default).
 
 
 ## Using the VFS as a loadable extension
@@ -77,10 +106,12 @@ standard AWS credential sources are supported in addition to these variables:
 ### SQLite CLI
 
 ```sh
+# Set credentials (for AWS S3)
 export AWS_ACCESS_KEY_ID=AKIAxxxx
 export AWS_SECRET_ACCESS_KEY=xxxx
-export LITESTREAM_S3_BUCKET=my-backups
-export LITESTREAM_S3_PATH=prod.db
+
+# Set replica URL
+export LITESTREAM_REPLICA_URL="s3://my-backups/prod.db"
 
 sqlite3
 sqlite> .load ./dist/litestream-vfs sqlite3_litestreamvfs_init
@@ -93,6 +124,15 @@ sqlite> SELECT count(*) FROM users LIMIT 10;
 > or use the Python example below instead.
 
 ### Python (`sqlite3`)
+
+Set `LITESTREAM_REPLICA_URL` before running your script:
+
+```sh
+export LITESTREAM_REPLICA_URL="s3://my-backups/prod.db"
+export AWS_ACCESS_KEY_ID=AKIAxxxx
+export AWS_SECRET_ACCESS_KEY=xxxx
+python my_script.py
+```
 
 ```python
 import sqlite3
