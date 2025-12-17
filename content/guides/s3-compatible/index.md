@@ -13,6 +13,28 @@ beyond Amazon S3. Many cloud providers and self-hosted solutions implement the
 S3 API, allowing you to use Litestream's S3 replica type with minimal
 configuration changes.
 
+## Automatic Provider Detection
+
+**New in v0.5.0:** Litestream automatically detects S3-compatible providers based
+on the endpoint URL and configures the appropriate settings. This eliminates
+the need to manually specify options like `force-path-style` or `sign-payload`
+for most providers.
+
+| Provider | Endpoint Pattern | Auto-detected Settings |
+|----------|------------------|----------------------|
+| Backblaze B2 | `*.backblazeb2.com` | `sign-payload: true`, `force-path-style: true` |
+| Filebase | `*.filebase.com` | `sign-payload: true`, `force-path-style: true` |
+| MinIO | `*.minio.*` | `sign-payload: true`, `force-path-style: true` |
+| DigitalOcean Spaces | `*.digitaloceanspaces.com` | `sign-payload: true` |
+| Scaleway | `*.scw.cloud` | `sign-payload: true` |
+| Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true` |
+| Tigris | `*.tigris.dev` | `sign-payload: true`, consistency header |
+
+Auto-detection means you can use simpler configurations without worrying about
+provider-specific quirks. The provider examples below show configurations that
+work with both older Litestream versions and v0.5.0+. If you're using v0.5.0+,
+you can omit the `force-path-style` setting for auto-detected providers.
+
 ## Overview
 
 S3-compatible services implement Amazon's S3 API, enabling tools built for AWS
@@ -142,7 +164,9 @@ dbs:
 
 - Endpoint format: `s3.<region>.backblazeb2.com`
 - The `region` must match your bucket's region exactly
-- Always set `force-path-style: true` for B2
+- **Litestream v0.5.0+** automatically detects B2 and sets `force-path-style: true`
+  and `sign-payload: true`; you can omit these settings
+- For older versions, set `force-path-style: true` manually
 - Create application keys with access limited to specific buckets for security
 - B2 requires minimum 5 MB part sizes for multipart uploads (Litestream default)
 
@@ -452,22 +476,24 @@ dbs:
 
 ## Provider Compatibility Matrix
 
-The following table summarizes configuration requirements for each provider:
+The following table summarizes configuration requirements for each provider.
+Providers marked with ✓ in the "Auto-detected" column have their settings
+automatically configured in Litestream v0.5.0+ based on the endpoint URL.
 
-| Provider | Endpoint Required | Region | force-path-style | Notes |
-|----------|-------------------|--------|------------------|-------|
-| AWS S3 | No | Yes | No | Native support |
-| MinIO | Yes | Optional | Auto | Self-hosted |
-| Backblaze B2 | Yes | Yes | Yes | Min 5MB parts |
-| Wasabi | Yes | Yes | No | No egress fees |
-| Cloudflare R2 | Yes | `auto` | No | No egress fees |
-| DigitalOcean Spaces | Yes | Yes | No | CDN included |
+| Provider | Endpoint Required | Region | force-path-style | Auto-detected |
+|----------|-------------------|--------|------------------|---------------|
+| AWS S3 | No | Yes | No | — |
+| MinIO | Yes | Optional | Auto | ✓ |
+| Backblaze B2 | Yes | Yes | Auto | ✓ |
+| Wasabi | Yes | Yes | No | — |
+| Cloudflare R2 | Yes | `auto` | No | ✓ |
+| DigitalOcean Spaces | Yes | Yes | No | ✓ |
 | Linode | Yes | Yes | No | — |
-| OCI | Yes | `us-east-1` | No | Namespace in endpoint |
-| Vultr | Yes | Yes | No | No request fees |
-| Scaleway | Yes | Yes | No | EU regions |
-| Tigris | Yes | `auto` | No | Auto-detected in v0.5+ |
-| Filebase | Yes | `us-east-1` | No | Decentralized |
+| OCI | Yes | `us-east-1` | No | — |
+| Vultr | Yes | Yes | No | — |
+| Scaleway | Yes | Yes | No | ✓ |
+| Tigris | Yes | `auto` | No | ✓ |
+| Filebase | Yes | `us-east-1` | Auto | ✓ |
 
 ## Advanced Configuration Options
 
