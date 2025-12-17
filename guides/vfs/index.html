@@ -195,7 +195,11 @@
     <li><a href="#when-to-use-the-vfs">When to use the VFS</a></li>
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#build-the-litestream-vfs-extension">Build the <code>litestream-vfs</code> extension</a></li>
-    <li><a href="#configure-the-replica-target">Configure the replica target</a></li>
+    <li><a href="#configure-the-replica-target">Configure the replica target</a>
+      <ul>
+        <li><a href="#legacy-s3-configuration">Legacy S3 configuration</a></li>
+      </ul>
+    </li>
     <li><a href="#using-the-vfs-as-a-loadable-extension">Using the VFS as a loadable extension</a>
       <ul>
         <li><a href="#sqlite-cli">SQLite CLI</a></li>
@@ -267,29 +271,54 @@ LTX files.</p>
 <li>macOS requires the additional frameworks used in <code>Makefile</code>; prefer <code>make vfs</code>.</li>
 <li>Use <code>.dylib</code> on macOS or <code>.dll</code> on Windows if your environment expects it.</li>
 <li>The output registers a VFS called <code>litestream</code>. Keep the <code>.so/.dylib/.dll</code> near your application.</li>
-<li>The loadable extension currently ships with the S3 replica client (including S3-compatible endpoints).</li>
+<li>The loadable extension supports all replica backends (S3, GCS, Azure, SFTP, file, NATS, WebDAV, Alibaba OSS).</li>
 </ul>
 <p>The SQLite entrypoint symbol is <code>sqlite3_litestreamvfs_init</code>; pass this when
 loading the extension if your client requires it.</p>
 <h2 id="configure-the-replica-target">Configure the replica target<a href="#configure-the-replica-target" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Set the storage connection for the VFS. The extension uses the AWS SDK, so any
-standard AWS credential sources are supported in addition to these variables:</p>
+<p>Set <code>LITESTREAM_REPLICA_URL</code> to specify the replica location. The URL scheme
+determines the backend:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># AWS S3</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/db&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># S3-compatible (MinIO, R2, Tigris, etc.)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/db?endpoint=minio.example.com&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Google Cloud Storage</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;gs://mybucket/db&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Azure Blob Storage</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;abs://mycontainer/db&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># SFTP</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;sftp://user@host/path/db&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Local filesystem</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;file:///backups/db&#34;</span>
+</span></span></code></pre></div><p>Standard cloud provider credentials are honored by their respective SDKs
+(e.g., <code>AWS_ACCESS_KEY_ID</code>, <code>GOOGLE_APPLICATION_CREDENTIALS</code>, <code>AZURE_STORAGE_ACCOUNT</code>).</p>
+<p>Additional configuration:</p>
 <ul>
-<li><code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code> — optional; falls back to the AWS default chain.</li>
-<li><code>LITESTREAM_S3_BUCKET</code> (required) — bucket containing the replica.</li>
-<li><code>LITESTREAM_S3_PATH</code> (required) — prefix/path to the database replica.</li>
+<li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
+</ul>
+<h3 id="legacy-s3-configuration">Legacy S3 configuration<a href="#legacy-s3-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The following S3-specific variables are still supported for backwards
+compatibility:</p>
+<ul>
+<li><code>LITESTREAM_S3_BUCKET</code>, <code>LITESTREAM_S3_PATH</code> — bucket and path to the replica.</li>
 <li><code>LITESTREAM_S3_REGION</code> — defaults to the bucket&rsquo;s region (or <code>us-east-1</code> with a custom endpoint).</li>
 <li><code>LITESTREAM_S3_ENDPOINT</code> — for S3-compatible stores (MinIO, R2, etc).</li>
 <li><code>LITESTREAM_S3_FORCE_PATH_STYLE</code> — <code>true</code> for path-style URLs (default: <code>false</code>).</li>
 <li><code>LITESTREAM_S3_SKIP_VERIFY</code> — <code>true</code> to skip TLS verification for testing (default: <code>false</code>).</li>
-<li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
 </ul>
 <h2 id="using-the-vfs-as-a-loadable-extension">Using the VFS as a loadable extension<a href="#using-the-vfs-as-a-loadable-extension" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="sqlite-cli">SQLite CLI<a href="#sqlite-cli" class="anchor" aria-hidden="true">#</a> </h3>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxx
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Set credentials (for AWS S3)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxx
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxx
-</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_S3_BUCKET</span><span class="o">=</span>my-backups
-</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_S3_PATH</span><span class="o">=</span>prod.db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Set replica URL</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://my-backups/prod.db&#34;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">sqlite3
 </span></span><span class="line"><span class="cl">sqlite&gt; .load ./dist/litestream-vfs sqlite3_litestreamvfs_init
@@ -301,7 +330,12 @@ SQLite via Homebrew (<code>brew install sqlite3</code>) and use the Homebrew ver
 or use the Python example below instead.</p>
 </blockquote>
 <h3 id="python-sqlite3">Python (<code>sqlite3</code>)<a href="#python-sqlite3" class="anchor" aria-hidden="true">#</a> </h3>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sqlite3</span>
+<p>Set <code>LITESTREAM_REPLICA_URL</code> before running your script:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://my-backups/prod.db&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxx
+</span></span><span class="line"><span class="cl">python my_script.py
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sqlite3</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Load the VFS extension first (registers the &#34;litestream&#34; VFS globally)</span>
 </span></span><span class="line"><span class="cl"><span class="n">loader</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;:memory:&#34;</span><span class="p">)</span>

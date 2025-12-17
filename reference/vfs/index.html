@@ -195,7 +195,14 @@ Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build 
     <li><a href="#build-requirements">Build requirements</a></li>
     <li><a href="#supported-storage-backends">Supported storage backends</a></li>
     <li><a href="#vfs-registration--usage">VFS registration &amp; usage</a></li>
-    <li><a href="#configuration-environment-variables">Configuration (environment variables)</a></li>
+    <li><a href="#configuration-environment-variables">Configuration (environment variables)</a>
+      <ul>
+        <li><a href="#replica-url">Replica URL</a></li>
+        <li><a href="#other-configuration">Other configuration</a></li>
+        <li><a href="#legacy-s3-configuration">Legacy S3 configuration</a></li>
+        <li><a href="#runtime-tuning">Runtime tuning</a></li>
+      </ul>
+    </li>
     <li><a href="#pragmas--sql-functions">PRAGMAs &amp; SQL functions</a>
       <ul>
         <li><a href="#pragma-litestream_txid">PRAGMA litestream_txid</a></li>
@@ -242,11 +249,20 @@ Pre-built binaries are available in
 with <code>-tags vfs</code> and registering the VFS via <code>sqlite3vfs.RegisterVFS</code>.</li>
 </ul>
 <h2 id="supported-storage-backends">Supported storage backends<a href="#supported-storage-backends" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The loadable extension supports all Litestream replica backends via the
+<code>LITESTREAM_REPLICA_URL</code> environment variable:</p>
 <ul>
-<li>The loadable extension bundles the S3 replica client (AWS S3 &amp; S3-compatible endpoints via custom <code>LITESTREAM_S3_ENDPOINT</code>).</li>
-<li>Go applications can use any <code>ReplicaClient</code> (S3, GCS, Azure Blob Storage, SFTP, file, etc.) when building with <code>-tags vfs</code>.</li>
-<li>SQLite clients must support loadable extensions.</li>
+<li><strong>S3</strong> — AWS S3 and S3-compatible storage (MinIO, R2, Tigris, etc.)</li>
+<li><strong>GCS</strong> — Google Cloud Storage</li>
+<li><strong>ABS</strong> — Azure Blob Storage</li>
+<li><strong>SFTP</strong> — SSH File Transfer Protocol</li>
+<li><strong>File</strong> — Local filesystem</li>
+<li><strong>NATS</strong> — NATS JetStream</li>
+<li><strong>WebDAV</strong> — WebDAV and WebDAVS servers</li>
+<li><strong>Alibaba OSS</strong> — Alibaba Cloud Object Storage Service</li>
 </ul>
+<p>Go applications can use any <code>ReplicaClient</code> when building with <code>-tags vfs</code>.
+SQLite clients must support loadable extensions.</p>
 <h2 id="vfs-registration--usage">VFS registration &amp; usage<a href="#vfs-registration--usage" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li>VFS name: <code>litestream</code></li>
@@ -262,19 +278,89 @@ reports <code>DELETE</code> journal mode, matching SQLite expectations for exter
 cleaned up automatically.</li>
 </ul>
 <h2 id="configuration-environment-variables">Configuration (environment variables)<a href="#configuration-environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
-<p>The extension uses the AWS SDK default credential chain plus the following
-variables to describe the replica location:</p>
+<h3 id="replica-url">Replica URL<a href="#replica-url" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Set <code>LITESTREAM_REPLICA_URL</code> to specify the replica location using a URL format:</p>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s3://</code></td>
+<td>AWS S3 / S3-compatible</td>
+<td><code>s3://mybucket/db</code> or <code>s3://mybucket/db?endpoint=s3.us-west-2.amazonaws.com</code></td>
+</tr>
+<tr>
+<td><code>gs://</code></td>
+<td>Google Cloud Storage</td>
+<td><code>gs://mybucket/db</code></td>
+</tr>
+<tr>
+<td><code>abs://</code></td>
+<td>Azure Blob Storage</td>
+<td><code>abs://mycontainer/db</code></td>
+</tr>
+<tr>
+<td><code>sftp://</code></td>
+<td>SFTP</td>
+<td><code>sftp://user@host/path/db</code></td>
+</tr>
+<tr>
+<td><code>file://</code></td>
+<td>Local filesystem</td>
+<td><code>file:///backups/db</code></td>
+</tr>
+<tr>
+<td><code>nats://</code></td>
+<td>NATS JetStream</td>
+<td><code>nats://server/subject</code></td>
+</tr>
+<tr>
+<td><code>webdav://</code></td>
+<td>WebDAV</td>
+<td><code>webdav://server/path/db</code></td>
+</tr>
+<tr>
+<td><code>webdavs://</code></td>
+<td>WebDAV (TLS)</td>
+<td><code>webdavs://server/path/db</code></td>
+</tr>
+<tr>
+<td><code>oss://</code></td>
+<td>Alibaba OSS</td>
+<td><code>oss://mybucket/db</code></td>
+</tr>
+</tbody>
+</table>
+<p>For S3-compatible storage, append query parameters:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># MinIO example</span>
+</span></span><span class="line"><span class="cl"><span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/db?endpoint=minio.example.com&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Cloudflare R2 example</span>
+</span></span><span class="line"><span class="cl"><span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/db?endpoint=&lt;account&gt;.r2.cloudflarestorage.com&#34;</span>
+</span></span></code></pre></div><h3 id="other-configuration">Other configuration<a href="#other-configuration" class="anchor" aria-hidden="true">#</a> </h3>
 <ul>
-<li><code>LITESTREAM_S3_BUCKET</code> (required) — bucket containing the replica.</li>
-<li><code>LITESTREAM_S3_PATH</code> (required) — prefix/path to the database replica.</li>
+<li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
+<li>Standard cloud provider credentials (AWS, GCP, Azure) are honored by their
+respective SDKs. For example: <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>,
+<code>AWS_PROFILE</code>, <code>GOOGLE_APPLICATION_CREDENTIALS</code>, <code>AZURE_STORAGE_ACCOUNT</code>.</li>
+</ul>
+<h3 id="legacy-s3-configuration">Legacy S3 configuration<a href="#legacy-s3-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The following S3-specific variables are still supported for backwards
+compatibility but <code>LITESTREAM_REPLICA_URL</code> is preferred:</p>
+<ul>
+<li><code>LITESTREAM_S3_BUCKET</code> — bucket containing the replica.</li>
+<li><code>LITESTREAM_S3_PATH</code> — prefix/path to the database replica.</li>
 <li><code>LITESTREAM_S3_REGION</code> — defaults to the bucket&rsquo;s region, or <code>us-east-1</code> when using a custom endpoint.</li>
 <li><code>LITESTREAM_S3_ENDPOINT</code> — custom endpoint for S3-compatible storage.</li>
 <li><code>LITESTREAM_S3_FORCE_PATH_STYLE</code> — <code>true</code> to force path-style URLs (default <code>false</code>).</li>
 <li><code>LITESTREAM_S3_SKIP_VERIFY</code> — <code>true</code> to skip TLS verification (default <code>false</code>; testing only).</li>
-<li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
-<li>Standard AWS variables such as <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>,
-<code>AWS_PROFILE</code>, and role-based credentials are honored by the SDK.</li>
 </ul>
+<h3 id="runtime-tuning">Runtime tuning<a href="#runtime-tuning" class="anchor" aria-hidden="true">#</a> </h3>
 <p>VFS runtime tuning is set in code (Go) by adjusting <code>VFS.PollInterval</code> (default
 <code>1s</code>) and <code>VFS.CacheSize</code> (default <code>10MB</code>).</p>
 <h2 id="pragmas--sql-functions">PRAGMAs &amp; SQL functions<a href="#pragmas--sql-functions" class="anchor" aria-hidden="true">#</a> </h2>
