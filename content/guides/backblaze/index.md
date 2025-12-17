@@ -38,6 +38,8 @@ dbs:
       force-path-style: true
 ```
 
+{{< alert icon="💡" text="<strong>Litestream v0.5.0+</strong> automatically detects Backblaze B2 endpoints and configures <code>force-path-style</code> and <code>sign-payload</code> settings. You can omit <code>force-path-style: true</code> from your configuration when using v0.5.0 or later." >}}
+
 ## Create a user
 
 Next, create a user with programmatic access to the bucket you just created.
