@@ -12,8 +12,8 @@ This guide will show you how to use [Tigris][tigris] as a database replica path
 for Litestream. Tigris is [Fly.io][flyio]'s globally distributed S3-compatible
 object storage. You will need a Fly.io account to complete this guide.
 
-{{< since version="0.5.0" >}} Litestream automatically detects Tigris endpoints
-and configures the required settings for you.
+{{< since version="0.5.0" >}} Litestream automatically detects Tigris endpoints,
+configures the required settings, and enables strong consistency for you.
 
 
 ## Setup
@@ -120,23 +120,33 @@ dbs:
 ```
 
 
+## Supported Endpoints
+
+Litestream recognizes the following Tigris endpoints:
+
+- `fly.storage.tigris.dev` — Primary Tigris endpoint
+- `t3.storage.dev` — Alternate Tigris endpoint
+
+
 ## Auto-Detection
 
-When Litestream detects a Tigris endpoint (`fly.storage.tigris.dev`), it
-automatically applies Tigris-specific settings:
+When Litestream detects a Tigris endpoint, it automatically applies
+Tigris-specific settings:
 
-- `sign-payload: true` — Required by Tigris for request authentication
-- `require-content-md5: false` — Tigris doesn't support Content-MD5 headers on
-  DELETE operations
+- **Strong consistency** — Sets `X-Tigris-Consistent: true` header on all
+  requests, ensuring read-after-write consistency
+- **Payload signing** — Enables `sign-payload: true` as required by Tigris
+- **Content-MD5 disabled** — Sets `require-content-md5: false` since Tigris
+  doesn't support Content-MD5 headers on DELETE operations
 
-These settings are applied automatically. You only need to override them if you
-have specific requirements.
+These settings are applied automatically and ensure reliable replication and
+restore operations.
 
 
 ## Manual Override
 
-If you need to override the auto-detected settings, you can specify them
-explicitly in your configuration:
+If you need to override the auto-detected settings for payload signing or
+Content-MD5, you can specify them explicitly in your configuration:
 
 ```yaml
 dbs:
@@ -150,6 +160,9 @@ dbs:
       sign-payload: true
       require-content-md5: false
 ```
+
+Note that strong consistency (`X-Tigris-Consistent: true`) is always enabled
+for Tigris endpoints and cannot be disabled.
 
 
 ## Environment Variables
