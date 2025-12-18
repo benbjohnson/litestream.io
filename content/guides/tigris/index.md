@@ -127,8 +127,6 @@ Litestream recognizes the following Tigris endpoints:
 - `fly.storage.tigris.dev` — Primary Tigris endpoint
 - `t3.storage.dev` — Alternate Tigris endpoint
 
-Any endpoint containing `tigris.dev` is also detected as a Tigris endpoint.
-
 
 ## Auto-Detection
 
