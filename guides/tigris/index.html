@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Replicating to Tigris (Fly.io)">
 <meta name="twitter:description" content="This guide will show you how to use Tigris as a database replica path for Litestream. Tigris is Fly.io&rsquo;s globally distributed S3-compatible object storage. You will need a Fly.io account to complete this guide.
-v0.5.0 Litestream automatically detects Tigris endpoints and configures the required settings for you.
+v0.5.0 Litestream automatically detects Tigris endpoints, configures the required settings, and enables strong consistency for you.
 Setup Install the Fly CLI If you haven&rsquo;t already, install the Fly CLI by following the installation instructions. Once installed, authenticate with your account:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
@@ -205,6 +205,7 @@ Setup Install the Fly CLI If you haven&rsquo;t already, install the Fly CLI by f
         <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
+    <li><a href="#supported-endpoints">Supported Endpoints</a></li>
     <li><a href="#auto-detection">Auto-Detection</a></li>
     <li><a href="#manual-override">Manual Override</a></li>
     <li><a href="#environment-variables">Environment Variables</a></li>
@@ -225,8 +226,8 @@ object storage. You will need a Fly.io account to complete this guide.</p>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
 </span>
- Litestream automatically detects Tigris endpoints
-and configures the required settings for you.</p>
+ Litestream automatically detects Tigris endpoints,
+configures the required settings, and enables strong consistency for you.</p>
 <h2 id="setup">Setup<a href="#setup" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="install-the-fly-cli">Install the Fly CLI<a href="#install-the-fly-cli" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you haven&rsquo;t already, install the Fly CLI by following the <a href="https://fly.io/docs/flyctl/install/">installation
@@ -286,19 +287,27 @@ file. You can configure a replica for your database using the <code>url</code> f
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">auto</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">tid_xxxxxxxxxxxxxxxxxxxx</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">tsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
-</span></span></span></code></pre></div><h2 id="auto-detection">Auto-Detection<a href="#auto-detection" class="anchor" aria-hidden="true">#</a> </h2>
-<p>When Litestream detects a Tigris endpoint (<code>fly.storage.tigris.dev</code>), it
-automatically applies Tigris-specific settings:</p>
+</span></span></span></code></pre></div><h2 id="supported-endpoints">Supported Endpoints<a href="#supported-endpoints" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream recognizes the following Tigris endpoints:</p>
 <ul>
-<li><code>sign-payload: true</code> — Required by Tigris for request authentication</li>
-<li><code>require-content-md5: false</code> — Tigris doesn&rsquo;t support Content-MD5 headers on
-DELETE operations</li>
+<li><code>fly.storage.tigris.dev</code> — Primary Tigris endpoint</li>
+<li><code>t3.storage.dev</code> — Alternate Tigris endpoint</li>
 </ul>
-<p>These settings are applied automatically. You only need to override them if you
-have specific requirements.</p>
+<h2 id="auto-detection">Auto-Detection<a href="#auto-detection" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When Litestream detects a Tigris endpoint, it automatically applies
+Tigris-specific settings:</p>
+<ul>
+<li><strong>Strong consistency</strong> — Sets <code>X-Tigris-Consistent: true</code> header on all
+requests, ensuring read-after-write consistency</li>
+<li><strong>Payload signing</strong> — Enables <code>sign-payload: true</code> as required by Tigris</li>
+<li><strong>Content-MD5 disabled</strong> — Sets <code>require-content-md5: false</code> since Tigris
+doesn&rsquo;t support Content-MD5 headers on DELETE operations</li>
+</ul>
+<p>These settings are applied automatically and ensure reliable replication and
+restore operations.</p>
 <h2 id="manual-override">Manual Override<a href="#manual-override" class="anchor" aria-hidden="true">#</a> </h2>
-<p>If you need to override the auto-detected settings, you can specify them
-explicitly in your configuration:</p>
+<p>If you need to override the auto-detected settings for payload signing or
+Content-MD5, you can specify them explicitly in your configuration:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
@@ -309,7 +318,9 @@ explicitly in your configuration:</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">auto</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sign-payload</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">require-content-md5</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-</span></span></span></code></pre></div><h2 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><p>Note that strong consistency (<code>X-Tigris-Consistent: true</code>) is always enabled
+for Tigris endpoints and cannot be disabled.</p>
+<h2 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream supports standard AWS environment variables for Tigris credentials:</p>
 <table>
 <thead>
