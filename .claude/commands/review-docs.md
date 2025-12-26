@@ -79,7 +79,24 @@ The final report MUST include proof of every verification:
 - **Config validation output** showing success/failure
 - **Any errors encountered** and how they were resolved
 
-### 6. Temporary Directory Requirement (MANDATORY)
+### 6. Go Version Verification (MANDATORY)
+
+If the PR mentions a minimum Go version requirement (e.g., "Go 1.21 or later"), verify it matches the litestream `go.mod`:
+
+```bash
+# Try local repo first, fall back to GitHub API
+if [ -f ../litestream/go.mod ]; then
+  grep "^go " ../litestream/go.mod
+else
+  gh api repos/benbjohnson/litestream/contents/go.mod --jq '.content' | base64 -d | grep "^go "
+fi
+```
+
+- The documented version MUST match or be compatible with `go.mod`
+- If `go.mod` says `go 1.24.1`, documentation should say "Go 1.24 or later"
+- Flag any mismatch as a **blocking issue**
+
+### 7. Temporary Directory Requirement (MANDATORY)
 
 **ALL test artifacts MUST be created in `/tmp/litestream-review/` - NEVER in source repositories.**
 
@@ -115,7 +132,12 @@ rm -rf /tmp/litestream-review
 
 ## Litestream Binary Location
 
-The Litestream source code is at `../litestream` (relative) or `~/projects/benbjohnson/litestream` (absolute).
+The Litestream source code MAY be available at `../litestream` (relative). This is optional - not all contributors will have the repo cloned locally.
+
+**If local repo is not available:**
+- Use `gh api` to fetch files from GitHub (e.g., go.mod for version checks)
+- Use the installed `litestream` binary for command testing
+- Skip tests that require building from source (acknowledge in report)
 
 If testing requires a specific branch or unreleased feature:
 
@@ -519,6 +541,11 @@ Before generating the report, confirm ALL items. Present this checklist to the u
 - [ ] Naming conventions were verified against existing docs
 - [ ] N/A - No new env vars in this PR
 
+### Go Version Verification
+- [ ] Go version requirement checked against ../litestream/go.mod
+- [ ] Documented version matches go.mod (e.g., "Go 1.24 or later" for go 1.24.x)
+- [ ] N/A - No Go version mentioned in this PR
+
 ### Evidence Collection
 - [ ] Full output captured for each verification (not truncated)
 - [ ] Evidence is ready to include in report
@@ -567,6 +594,7 @@ Present findings in this format:
 | SQL | X | X | X | X | X |
 | Configs | X | X | X | X | X |
 | Env Vars | X | X | X | X | X |
+| Go Version | X | X | X | X | X |
 | **Total** | **X** | **X** | **X** | **X** | **X** |
 
 **Verification Status: COMPLETE / INCOMPLETE**
@@ -651,6 +679,25 @@ $ ../litestream/litestream replicate -config /tmp/litestream-review/litestream.y
 | # | Variable | In .envrc | Format Valid | In Existing Docs | Result |
 |---|----------|-----------|--------------|------------------|--------|
 | 1 | `LITESTREAM_ACCESS_KEY_ID` | ✅ Yes | ✅ Yes | ✅ Yes | PASS |
+
+#### Go Version Verified
+
+| Documented Version | go.mod Version | Match | Result |
+|-------------------|----------------|-------|--------|
+| Go 1.24 or later | go 1.24.1 | ✅ Yes | PASS |
+
+<details>
+<summary>📋 Go Version Check</summary>
+
+```
+# Local repo or GitHub API fallback
+$ if [ -f ../litestream/go.mod ]; then grep "^go " ../litestream/go.mod; else gh api repos/benbjohnson/litestream/contents/go.mod --jq '.content' | base64 -d | grep "^go "; fi
+go 1.24.1
+```
+
+Documented prerequisite says "Go 1.24 or later" which matches go.mod requirement.
+
+</details>
 
 ---
 

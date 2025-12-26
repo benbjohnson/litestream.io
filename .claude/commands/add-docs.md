@@ -134,6 +134,20 @@ git checkout -b docs/$ARGUMENTS-<short-description>
 
 ## 6. Implement Documentation
 
+**GO VERSION REQUIREMENT:**
+If the documentation mentions a Go version prerequisite (e.g., in Prerequisites section), verify it matches the litestream `go.mod`:
+
+```bash
+# Try local repo first, fall back to GitHub API
+if [ -f ../litestream/go.mod ]; then
+  grep "^go " ../litestream/go.mod
+else
+  gh api repos/benbjohnson/litestream/contents/go.mod --jq '.content' | base64 -d | grep "^go "
+fi
+```
+
+If `go.mod` says `go 1.24.1`, documentation should say "Go 1.24 or later".
+
 **DATE FORMAT:**
 Use yesterday's date to avoid Hugo's future-date exclusion (timezone differences on build servers can cause today's date to be treated as "future"). The date appears in RSS feeds and OpenGraph meta tags.
 
