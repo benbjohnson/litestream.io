@@ -84,7 +84,12 @@ The final report MUST include proof of every verification:
 If the PR mentions a minimum Go version requirement (e.g., "Go 1.21 or later"), verify it matches the litestream `go.mod`:
 
 ```bash
-grep "^go " ../litestream/go.mod
+# Try local repo first, fall back to GitHub API
+if [ -f ../litestream/go.mod ]; then
+  grep "^go " ../litestream/go.mod
+else
+  gh api repos/benbjohnson/litestream/contents/go.mod --jq '.content' | base64 -d | grep "^go "
+fi
 ```
 
 - The documented version MUST match or be compatible with `go.mod`
@@ -127,7 +132,12 @@ rm -rf /tmp/litestream-review
 
 ## Litestream Binary Location
 
-The Litestream source code is at `../litestream` (relative) or `~/projects/benbjohnson/litestream` (absolute).
+The Litestream source code MAY be available at `../litestream` (relative). This is optional - not all contributors will have the repo cloned locally.
+
+**If local repo is not available:**
+- Use `gh api` to fetch files from GitHub (e.g., go.mod for version checks)
+- Use the installed `litestream` binary for command testing
+- Skip tests that require building from source (acknowledge in report)
 
 If testing requires a specific branch or unreleased feature:
 
@@ -680,7 +690,8 @@ $ ../litestream/litestream replicate -config /tmp/litestream-review/litestream.y
 <summary>📋 Go Version Check</summary>
 
 ```
-$ grep "^go " ../litestream/go.mod
+# Local repo or GitHub API fallback
+$ if [ -f ../litestream/go.mod ]; then grep "^go " ../litestream/go.mod; else gh api repos/benbjohnson/litestream/contents/go.mod --jq '.content' | base64 -d | grep "^go "; fi
 go 1.24.1
 ```
 
