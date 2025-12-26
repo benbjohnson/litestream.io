@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.3d00da4403468933e125edaaa0fd3f1c4dacf6d970d5130de45fa62f952af339aa6f9f622f4a35891e84d43de4e54156ed6fad0512598680291fb62f17e96153.css" integrity="sha512-PQDaRANGiTPhJe2qoP0/HE2s9tlw1RMN5F&#43;mL5Uq8zmqb59iL0o1iR6E1D3k5UFW7W&#43;tBRJZhoApH7YvF&#43;lhUw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Using Litestream as a Go Library - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/go-library/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Using Litestream as a Go Library">
+<meta name="twitter:description" content="Litestream can be embedded directly into your Go application as a library, giving you programmatic control over database replication without running a separate process. This approach is useful when you need tighter integration with your application lifecycle or want to customize replication behavior.
+⚠️ The Litestream library API is not considered stable and may change between versions. The CLI interface is recommended for production use cases where API stability is important.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Go Library",
+        "item": "https:\/\/litestream.io\/guides\/go-library\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/linux/">Linux</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/go-library/">Using Litestream as a Go Library</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#when-to-use-the-library">When to use the library</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#installation">Installation</a></li>
+    <li><a href="#core-concepts">Core concepts</a></li>
+    <li><a href="#basic-usage">Basic usage</a></li>
+    <li><a href="#s3-backend-with-restore-on-startup">S3 backend with restore-on-startup</a></li>
+    <li><a href="#supported-backends">Supported backends</a></li>
+    <li><a href="#configuration-options">Configuration options</a>
+      <ul>
+        <li><a href="#compaction-levels">Compaction levels</a></li>
+        <li><a href="#database-options">Database options</a></li>
+        <li><a href="#replica-options">Replica options</a></li>
+      </ul>
+    </li>
+    <li><a href="#graceful-shutdown">Graceful shutdown</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#see-also">See also</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Using Litestream as a Go Library</h1>
+			<p class="lead"></p>
+			<p>Litestream can be embedded directly into your Go application as a library,
+giving you programmatic control over database replication without running a
+separate process. This approach is useful when you need tighter integration
+with your application lifecycle or want to customize replication behavior.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The Litestream library API is not considered stable and may change between versions. The CLI interface is recommended for production use cases where API stability is important.</div>
+</div>
+<h2 id="when-to-use-the-library">When to use the library<a href="#when-to-use-the-library" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Embed replication directly in your Go application without managing a separate Litestream process.</li>
+<li>Implement custom restore-on-startup patterns for ephemeral or containerized deployments.</li>
+<li>Integrate replication lifecycle with your application&rsquo;s graceful shutdown handling.</li>
+<li>Manage multiple databases from a single application with unified compaction.</li>
+<li>Avoid when you need a stable, well-documented interface—the CLI is more mature.</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Go 1.24 or later.</li>
+<li>A SQLite driver. The examples use <a href="https://pkg.go.dev/modernc.org/sqlite"><code>modernc.org/sqlite</code></a> (pure Go, no CGO required).</li>
+<li>Familiarity with Litestream concepts from the <a href="/getting-started">Getting Started</a> guide.</li>
+</ul>
+<h2 id="installation">Installation<a href="#installation" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Add Litestream to your Go module:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">go get github.com/benbjohnson/litestream
+</span></span></code></pre></div><p>Import the packages you need:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream/file&#34;</span>  <span class="c1">// For file backend
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="s">&#34;github.com/benbjohnson/litestream/s3&#34;</span>    <span class="c1">// For S3 backend
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span>
+</span></span></code></pre></div><h2 id="core-concepts">Core concepts<a href="#core-concepts" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The library uses three main types:</p>
+<ul>
+<li><strong><code>DB</code></strong>: Wraps a SQLite database path and manages its replica.</li>
+<li><strong><code>Replica</code></strong>: Handles replication to a specific backend (S3, file, etc.).</li>
+<li><strong><code>Store</code></strong>: Manages one or more databases and runs background compaction.</li>
+</ul>
+<p>The typical lifecycle is:</p>
+<ol>
+<li>Create a <code>DB</code> wrapper for your SQLite database path.</li>
+<li>Create a replica client for your storage backend.</li>
+<li>Attach the replica to the database.</li>
+<li>Create a <code>Store</code> with compaction levels.</li>
+<li>Open the store (starts replication and compaction monitors).</li>
+<li>Open your application&rsquo;s SQLite connection separately.</li>
+<li>Close the store on shutdown.</li>
+</ol>
+<h2 id="basic-usage">Basic usage<a href="#basic-usage" class="anchor" aria-hidden="true">#</a> </h2>
+<p>This example replicates a SQLite database to the local filesystem:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;context&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;database/sql&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;log&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">_</span> <span class="s">&#34;modernc.org/sqlite&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream/file&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">ctx</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">dbPath</span> <span class="o">:=</span> <span class="s">&#34;./myapp.db&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">replicaPath</span> <span class="o">:=</span> <span class="s">&#34;./replica&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 1. Create the Litestream DB wrapper
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">db</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewDB</span><span class="p">(</span><span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 2. Create a replica client (file-based)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">client</span> <span class="o">:=</span> <span class="nx">file</span><span class="p">.</span><span class="nf">NewReplicaClient</span><span class="p">(</span><span class="nx">replicaPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 3. Create a replica and attach it to the database
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">replica</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaWithClient</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">db</span><span class="p">.</span><span class="nx">Replica</span> <span class="p">=</span> <span class="nx">replica</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Replica</span> <span class="p">=</span> <span class="nx">replica</span> <span class="c1">// Preserves file permissions
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 4. Create compaction levels (L0 required, plus at least one more)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">levels</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nx">CompactionLevels</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">Interval</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 5. Create a Store to manage the database and background compaction
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">store</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewStore</span><span class="p">([]</span><span class="o">*</span><span class="nx">litestream</span><span class="p">.</span><span class="nx">DB</span><span class="p">{</span><span class="nx">db</span><span class="p">},</span> <span class="nx">levels</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 6. Open the store (starts replication and compaction monitors)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;open store: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Close</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">());</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">log</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;close store: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 7. Open your app&#39;s SQLite connection separately
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">sqlDB</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite&#34;</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;open sqlite: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Configure WAL mode and busy timeout
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA journal_mode = wal;`</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA busy_timeout = 5000;`</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Use sqlDB for your application queries
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Replication started. Database ready for use.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h2 id="s3-backend-with-restore-on-startup">S3 backend with restore-on-startup<a href="#s3-backend-with-restore-on-startup" class="anchor" aria-hidden="true">#</a> </h2>
+<p>For production deployments, you typically want to restore from backup if the
+local database doesn&rsquo;t exist. This pattern works well with ephemeral containers:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;context&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;database/sql&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;errors&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;log&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;os&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">_</span> <span class="s">&#34;modernc.org/sqlite&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream/s3&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="nx">dbPath</span> <span class="p">=</span> <span class="s">&#34;./myapp.db&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">ctx</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Configure S3 client
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">client</span> <span class="o">:=</span> <span class="nx">s3</span><span class="p">.</span><span class="nf">NewReplicaClient</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Bucket</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;LITESTREAM_BUCKET&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Path</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;LITESTREAM_PATH&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Region</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_REGION&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">AccessKeyID</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_ACCESS_KEY_ID&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">SecretAccessKey</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_SECRET_ACCESS_KEY&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Restore from S3 if local database doesn&#39;t exist
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">restoreIfNotExists</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">client</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;restore: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Set up replication (same pattern as basic example)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">db</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewDB</span><span class="p">(</span><span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">replica</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaWithClient</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">db</span><span class="p">.</span><span class="nx">Replica</span> <span class="p">=</span> <span class="nx">replica</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">levels</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nx">CompactionLevels</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">Interval</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">store</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewStore</span><span class="p">([]</span><span class="o">*</span><span class="nx">litestream</span><span class="p">.</span><span class="nx">DB</span><span class="p">{</span><span class="nx">db</span><span class="p">},</span> <span class="nx">levels</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;open store: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Close</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Open app database and continue...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">sqlDB</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite&#34;</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA journal_mode = wal;`</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA busy_timeout = 5000;`</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Database ready with S3 replication&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">restoreIfNotExists</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">client</span> <span class="o">*</span><span class="nx">s3</span><span class="p">.</span><span class="nx">ReplicaClient</span><span class="p">,</span> <span class="nx">dbPath</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Check if database already exists
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Stat</span><span class="p">(</span><span class="nx">dbPath</span><span class="p">);</span> <span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Local database found, skipping restore&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">!</span><span class="nx">os</span><span class="p">.</span><span class="nf">IsNotExist</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">err</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Local database not found, attempting restore from S3...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Initialize the client
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">client</span><span class="p">.</span><span class="nf">Init</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;init s3 client: %w&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Create a replica (without DB) for restore
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">replica</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaWithClient</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Set up restore options
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">opt</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewRestoreOptions</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">opt</span><span class="p">.</span><span class="nx">OutputPath</span> <span class="p">=</span> <span class="nx">dbPath</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Attempt restore
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">replica</span><span class="p">.</span><span class="nf">Restore</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">opt</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// No backup exists - that&#39;s OK for a fresh deployment
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="nx">errors</span><span class="p">.</span><span class="nf">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">litestream</span><span class="p">.</span><span class="nx">ErrTxNotAvailable</span><span class="p">)</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">           <span class="nx">errors</span><span class="p">.</span><span class="nf">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">litestream</span><span class="p">.</span><span class="nx">ErrNoSnapshots</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;No backup found, will create new database&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">err</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Database restored from S3&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Set the required environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_BUCKET</span><span class="o">=</span><span class="s2">&#34;my-backup-bucket&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_PATH</span><span class="o">=</span><span class="s2">&#34;databases/myapp&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_REGION</span><span class="o">=</span><span class="s2">&#34;us-east-1&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&#34;AKIAxxxx&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&#34;xxxx&#34;</span>
+</span></span></code></pre></div><h2 id="supported-backends">Supported backends<a href="#supported-backends" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The library supports all Litestream replica backends:</p>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Client Package</th>
+<th>URL Scheme</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local filesystem</td>
+<td><code>github.com/benbjohnson/litestream/file</code></td>
+<td><code>file://</code></td>
+</tr>
+<tr>
+<td>Amazon S3</td>
+<td><code>github.com/benbjohnson/litestream/s3</code></td>
+<td><code>s3://</code></td>
+</tr>
+<tr>
+<td>Google Cloud Storage</td>
+<td><code>github.com/benbjohnson/litestream/gcs</code></td>
+<td><code>gs://</code></td>
+</tr>
+<tr>
+<td>Azure Blob Storage</td>
+<td><code>github.com/benbjohnson/litestream/abs</code></td>
+<td><code>abs://</code></td>
+</tr>
+<tr>
+<td>Alibaba Cloud OSS</td>
+<td><code>github.com/benbjohnson/litestream/oss</code></td>
+<td><code>oss://</code></td>
+</tr>
+<tr>
+<td>SFTP</td>
+<td><code>github.com/benbjohnson/litestream/sftp</code></td>
+<td><code>sftp://</code></td>
+</tr>
+<tr>
+<td>NATS JetStream</td>
+<td><code>github.com/benbjohnson/litestream/nats</code></td>
+<td><code>nats://</code></td>
+</tr>
+<tr>
+<td>WebDAV</td>
+<td><code>github.com/benbjohnson/litestream/webdav</code></td>
+<td><code>webdav://</code></td>
+</tr>
+</tbody>
+</table>
+<p>You can also create a client from a URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">client</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaClientFromURL</span><span class="p">(</span><span class="s">&#34;s3://my-bucket/path&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><h2 id="configuration-options">Configuration options<a href="#configuration-options" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="compaction-levels">Compaction levels<a href="#compaction-levels" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Compaction reduces the number of files in your replica by merging smaller files:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">levels</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nx">CompactionLevels</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>                                    <span class="c1">// Required: L0 files
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">Interval</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span>        <span class="c1">// Compact every 10s
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">{</span><span class="nx">Level</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">Interval</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Minute</span><span class="p">},</span>         <span class="c1">// Optional: longer retention
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><h3 id="database-options">Database options<a href="#database-options" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Configure monitoring and checkpointing behavior:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">db</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewDB</span><span class="p">(</span><span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">db</span><span class="p">.</span><span class="nx">MonitorInterval</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>      <span class="c1">// How often to check for changes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">db</span><span class="p">.</span><span class="nx">CheckpointInterval</span> <span class="p">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>  <span class="c1">// WAL checkpoint frequency
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">db</span><span class="p">.</span><span class="nx">MinCheckpointPageN</span> <span class="p">=</span> <span class="mi">1000</span>              <span class="c1">// Minimum pages before checkpoint
+</span></span></span></code></pre></div><h3 id="replica-options">Replica options<a href="#replica-options" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Configure sync behavior:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">replica</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaWithClient</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">replica</span><span class="p">.</span><span class="nx">SyncInterval</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>  <span class="c1">// How often to sync to replica
+</span></span></span></code></pre></div><h2 id="graceful-shutdown">Graceful shutdown<a href="#graceful-shutdown" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Always close the store before your application exits to ensure all pending
+writes are flushed to the replica:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// Handle shutdown signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">sigCh</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">os</span><span class="p">.</span><span class="nx">Signal</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">signal</span><span class="p">.</span><span class="nf">Notify</span><span class="p">(</span><span class="nx">sigCh</span><span class="p">,</span> <span class="nx">syscall</span><span class="p">.</span><span class="nx">SIGINT</span><span class="p">,</span> <span class="nx">syscall</span><span class="p">.</span><span class="nx">SIGTERM</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">&lt;-</span><span class="nx">sigCh</span>
+</span></span><span class="line"><span class="cl"><span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Shutting down...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Close the store with a timeout context if needed
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">cancel</span> <span class="o">:=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">WithTimeout</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(),</span> <span class="mi">30</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">defer</span> <span class="nf">cancel</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Close</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;close store: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>
+<p><strong>&ldquo;database is locked&rdquo; errors</strong>: Ensure you set <code>PRAGMA busy_timeout</code> on your
+application&rsquo;s SQLite connection. A value of 5000ms (5 seconds) works well.</p>
+</li>
+<li>
+<p><strong>WAL mode not enabled</strong>: The application must enable WAL mode on its own
+connection. Litestream requires WAL mode for replication.</p>
+</li>
+<li>
+<p><strong>No replication occurring</strong>: Verify the store is opened successfully and
+that your replica client has valid credentials.</p>
+</li>
+<li>
+<p><strong>Restore fails with &ldquo;no snapshots&rdquo;</strong>: This is expected for a fresh
+deployment with no prior backups. Handle <code>ErrNoSnapshots</code> gracefully.</p>
+</li>
+</ul>
+<h2 id="see-also">See also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="https://github.com/benbjohnson/litestream/tree/main/_examples/library">Working examples</a> in the Litestream repository</li>
+<li><a href="/guides/vfs">VFS Read Replicas</a> for read-only access to replicated data</li>
+<li><a href="/reference/config">Configuration Reference</a> for CLI configuration options</li>
+<li><a href="/how-it-works">How It Works</a> for background on Litestream internals</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/vfs/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; VFS Read Replicas
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/s3-compatible/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Replicating to S3-Compatible Services &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.ccd7afc3bf63cd0223b56ebd09df96d936c9d4e9eff724d0a9c2556b109631cf49cf5b263d887d299545f0c361c9b8ff0bf1061aacf68d97b3ac1c2f74952d9f.js" integrity="sha512-zNevw79jzQIjtW69Cd&#43;W2TbJ1Onv9yTQqcJVaxCWMc9Jz1smPYh9KZVF8MNhybj/C/EGGqz2jZezrBwvdJUtnw==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>

@@ -143,6 +143,13 @@
   </url>
   
   <url>
+    <loc>https://litestream.io/guides/go-library/</loc>
+    <lastmod>2025-12-23T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://litestream.io/guides/s3-compatible/</loc>
     <lastmod>2025-12-04T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
