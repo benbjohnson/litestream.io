@@ -27,7 +27,7 @@ with your application lifecycle or want to customize replication behavior.
 
 ## Prerequisites
 
-- Go 1.21 or later.
+- Go 1.24 or later.
 - A SQLite driver. The examples use [`modernc.org/sqlite`](https://pkg.go.dev/modernc.org/sqlite) (pure Go, no CGO required).
 - Familiarity with Litestream concepts from the [Getting Started](/getting-started) guide.
 
