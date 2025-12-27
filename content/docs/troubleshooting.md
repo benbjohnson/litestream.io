@@ -361,6 +361,23 @@ mcp-addr: ":3002"
          password: pass
    ```
 
+### S3-Compatible Upload Errors
+
+**Error**: `InvalidContentEncoding`, `MalformedTrailerError`, or similar errors
+when uploading to S3-compatible providers
+
+**Solution**:
+
+This error occurs with Litestream versions prior to v0.5.4 when using S3-compatible
+providers (Tigris, Backblaze B2, MinIO, DigitalOcean Spaces, etc.). AWS SDK Go v2
+v1.73.0+ introduced aws-chunked encoding that many providers don't support.
+
+1. **Upgrade to v0.5.4 or later** — Litestream automatically disables aws-chunked
+   encoding for all S3-compatible providers.
+
+2. See the [S3-Compatible Guide](/guides/s3-compatible/#upload-encoding-errors)
+   for more details.
+
 ### Slow Replication
 
 **Symptoms**: High lag between database changes and replica updates
@@ -666,6 +683,8 @@ CGO_ENABLED=0 go build ./cmd/litestream
 | `database is locked` | No busy timeout set | Add `PRAGMA busy_timeout = 5000;` |
 | `no such file or directory` | Incorrect database path | Verify path exists and permissions |
 | `NoCredentialsProviders` | Missing AWS credentials | Configure AWS credentials |
+| `InvalidContentEncoding` | aws-chunked encoding (pre-v0.5.4) | Upgrade to v0.5.4+ for S3-compatible providers |
+| `MalformedTrailerError` | aws-chunked encoding (pre-v0.5.4) | Upgrade to v0.5.4+ for S3-compatible providers |
 | `connection refused` | Service not running | Check if target service is accessible |
 | `yaml: unmarshal errors` | Invalid YAML syntax | Validate configuration file syntax |
 | `bind: address already in use` | Port conflict | Change MCP port or stop conflicting service |
