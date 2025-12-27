@@ -602,9 +602,11 @@ The following settings are specific to S3 replicas:
   networks but use more memory. See the
   [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
 
-- `sign-payload`—{{< since version="0.5.0" >}} Signs the request payload. Required
-  by some S3-compatible providers like Tigris. Automatically enabled for Tigris
-  endpoints. Defaults to `false`.
+- `sign-payload`—{{< since version="0.5.0" >}} Signs the request payload.
+  {{< since version="0.5.5" >}} Defaults to `true` for compatibility with AWS S3
+  and most S3-compatible providers. Previously defaulted to `false`, which caused
+  `SignatureDoesNotMatch` errors with some configurations. Set to `false` only if
+  your specific provider requires unsigned payloads.
 
 - `require-content-md5`—{{< since version="0.5.0" >}} Adds Content-MD5 header to
   requests. Some S3-compatible providers don't support this header on certain
@@ -624,13 +626,13 @@ for popular providers:
 
 | Provider | sign-payload | require-content-md5 | Notes |
 |----------|--------------|---------------------|-------|
-| AWS S3 | `false` | `true` | Defaults work |
-| Backblaze B2 | `false` | `true` | Defaults work |
+| AWS S3 | `true` | `true` | Defaults work |
+| Backblaze B2 | `true` | `true` | Defaults work |
 | Tigris (Fly.io) | `true` | `false` | Requires signed payloads |
-| OCI Object Storage | `false` | `true` | Requires Content-MD5 |
-| Filebase | `false` | `true` | Defaults work |
-| MinIO | `false` | `true` | Defaults work |
-| DigitalOcean Spaces | `false` | `true` | Defaults work |
+| OCI Object Storage | `true` | `true` | Requires Content-MD5 |
+| Filebase | `true` | `true` | Defaults work |
+| MinIO | `true` | `true` | Defaults work |
+| DigitalOcean Spaces | `true` | `true` | Defaults work |
 
 
 ### Tigris (Fly.io) Configuration
