@@ -451,20 +451,44 @@ Truncate Threshold Configuration guide](/guides/wal-truncate-threshold).
 
 ### High CPU Usage
 
-**Symptoms**: Litestream consuming excessive CPU
+**Symptoms**: Litestream consuming excessive CPU (100%+ sustained)
 
-**Solution**:
+**Common Causes**:
 
-1. Increase monitoring intervals:
+1. **Unbounded WAL growth** — Long-running read transactions blocking checkpoints
+2. **State corruption** — Tracking files mismatched with replica state
+3. **Blocked checkpoints** — Application holding read locks
+
+**Diagnosis**:
+
+```bash
+# Check CPU usage over time
+pidstat -p $(pgrep litestream) 1 5
+
+# Check WAL file size (large WAL indicates checkpoint blocking)
+ls -lh /path/to/db.sqlite-wal
+
+# Check for blocking processes
+sqlite3 /path/to/db.sqlite "PRAGMA wal_checkpoint(PASSIVE);"
+# Result: status|log|checkpointed
+# status=1 means checkpoint was blocked
+```
+
+**Solutions**:
+
+1. **Reduce monitoring frequency**:
 
    ```yaml
    dbs:
      - path: /path/to/db.sqlite
-       monitor-interval: 10s  # Reduce frequency
+       monitor-interval: 10s
+       replica:
+         sync-interval: 5m
    ```
 
-2. Check for database hotspots (frequent small transactions)
-3. Consider batch operations in your application
+2. **Fix blocked checkpoints** — Kill long-running read connections in your application
+
+3. **Reset corrupted state** — See [Recovering from corrupted tracking state](#recovering-from-corrupted-tracking-state)
 
 ### Memory Issues
 
@@ -576,6 +600,126 @@ litestream restore -o /tmp/test.db /path/to/db.sqlite
 # Run integrity check
 sqlite3 /tmp/test.db "PRAGMA integrity_check;"
 ```
+
+## Operations That Invalidate Tracking State
+
+Litestream maintains internal tracking state in `.sqlite-litestream` directories
+to efficiently replicate changes. Certain operations can corrupt or invalidate
+this tracking, leading to high CPU usage, replication errors, or state mismatch
+between local tracking and remote replicas.
+
+### Operations to avoid
+
+| Operation | Why It's Problematic | Safe Alternative |
+|-----------|----------------------|------------------|
+| In-place `VACUUM` | Rewrites entire database, invalidating page tracking | Use `VACUUM INTO 'new.db'` |
+| Manual checkpoint while Litestream is stopped | Large WAL changes database state without tracking | Let Litestream manage checkpoints |
+| Deleting `.sqlite-litestream` directory | Creates local/remote state mismatch | Delete both local tracking AND remote replica |
+| Restoring database while Litestream is running | Overwrites database without updating tracking | Stop Litestream before restore |
+
+### In-place VACUUM
+
+The SQLite `VACUUM` command rewrites the entire database file. Litestream tracks
+changes at the page level, so a full rewrite invalidates all tracking state.
+
+```sql
+-- Dangerous: Invalidates Litestream tracking
+VACUUM;
+
+-- Safe: Creates new file, preserves original
+VACUUM INTO '/path/to/compacted.db';
+```
+
+If you must use in-place `VACUUM`:
+
+1. Stop Litestream
+2. Run `VACUUM`
+3. Delete the `.sqlite-litestream` tracking directory
+4. Delete the remote replica data (start fresh)
+5. Restart Litestream
+
+### Symptoms of corrupted tracking state
+
+- **High CPU usage** (100%+) even when database is idle
+- **Repeated log messages** with identical transaction IDs
+- **"timeout waiting for db initialization"** warnings
+- **Missing LTX file errors**:
+
+  ```
+  level=ERROR msg="monitor error" error="open .../ltx/0/0000000000000001.ltx: no such file or directory"
+  ```
+
+- **Local/remote state mismatch**:
+
+  ```
+  level=INFO msg="detected database behind replica" db_txid=0000000000000000 replica_txid=0000000000000001
+  ```
+
+
+## Recovering from Corrupted Tracking State
+
+When Litestream's tracking state becomes corrupted, a complete state reset is
+required. This procedure removes all local tracking and remote replica data,
+forcing a fresh snapshot.
+
+{{< alert icon="⚠️" text="**Warning**: This procedure deletes your replica history. You will lose the ability to do point-in-time recovery to timestamps before the reset. Only proceed if you have confirmed tracking corruption." >}}
+
+### Recovery procedure
+
+```bash
+# 1. Stop Litestream
+sudo systemctl stop litestream
+
+# 2. Kill any processes holding database connections
+# (application-specific - check for zombie processes)
+lsof /path/to/db.sqlite
+
+# 3. Checkpoint the database to clear WAL
+sqlite3 /path/to/db.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
+# Verify: result should be "0|0|0" (success)
+
+# 4. Remove local Litestream tracking
+rm -rf /path/to/.db.sqlite-litestream
+
+# 5. Remove remote replica data (start fresh)
+# For S3:
+aws s3 rm s3://bucket/path/db.sqlite --recursive
+
+# For GCS:
+gsutil rm -r gs://bucket/path/db.sqlite
+
+# For Azure:
+az storage blob delete-batch --source container --pattern "path/db.sqlite/*"
+
+# 6. Restart Litestream
+sudo systemctl start litestream
+```
+
+### Verifying recovery
+
+After restarting, verify Litestream has recovered:
+
+```bash
+# Check CPU usage is normal (should be near 0% when idle)
+pidstat -p $(pgrep litestream) 1 5
+
+# Check logs for successful snapshot
+journalctl -u litestream -f
+# Should see: "snapshot written" or similar
+```
+
+### Preventing future issues
+
+1. **Avoid in-place VACUUM** — Use `VACUUM INTO` instead
+2. **Set busy timeout** — Prevent checkpoint blocking:
+
+   ```sql
+   PRAGMA busy_timeout = 5000;
+   ```
+
+3. **Monitor WAL size** — Alert if WAL exceeds 50% of database size
+4. **Kill zombie connections** — Ensure application processes don't hold long-lived read locks
+
 
 ## Getting Help
 
