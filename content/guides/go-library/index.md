@@ -51,6 +51,24 @@ import (
 ```
 
 
+## Important constraints
+
+When using Litestream as a library, be aware of these critical requirements:
+
+1. **Required SQLite driver**: You must use [`modernc.org/sqlite`](https://pkg.go.dev/modernc.org/sqlite).
+   Litestream uses this driver internally, and mixing drivers causes lock conflicts
+   on POSIX systems (Linux, macOS, BSD) due to per-process SQLite locks.
+
+2. **Lifecycle management**: You cannot call `litestream.DB.Close()` or
+   `Replica.Stop(true)` while your application still has open database connections.
+   Either close all your app's database connections first, or only close Litestream
+   when your process is shutting down.
+
+3. **PRAGMA configuration**: Use DSN parameters (e.g., `?_pragma=busy_timeout(5000)`)
+   instead of `PRAGMA` statements via `ExecContext`. An `sql.DB` is a connection pool,
+   and `ExecContext` only applies the PRAGMA to one random connection from the pool.
+
+
 ## Core concepts
 
 The library uses three main types:
@@ -126,15 +144,13 @@ func main() {
     }()
 
     // 7. Open your app's SQLite connection separately
-    sqlDB, err := sql.Open("sqlite", dbPath)
+    // Use DSN parameters for PRAGMAs to ensure they apply to all pooled connections
+    dsn := fmt.Sprintf("file:%s?_pragma=busy_timeout(5000)&_pragma=journal_mode(wal)", dbPath)
+    sqlDB, err := sql.Open("sqlite", dsn)
     if err != nil {
         log.Fatalf("open sqlite: %v", err)
     }
     defer sqlDB.Close()
-
-    // Configure WAL mode and busy timeout
-    sqlDB.ExecContext(ctx, `PRAGMA journal_mode = wal;`)
-    sqlDB.ExecContext(ctx, `PRAGMA busy_timeout = 5000;`)
 
     // Use sqlDB for your application queries
     fmt.Println("Replication started. Database ready for use.")
@@ -154,6 +170,7 @@ import (
     "context"
     "database/sql"
     "errors"
+    "fmt"
     "log"
     "os"
     "time"
@@ -198,11 +215,10 @@ func main() {
     }
     defer store.Close(context.Background())
 
-    // Open app database and continue...
-    sqlDB, _ := sql.Open("sqlite", dbPath)
+    // Open app database with DSN parameters for PRAGMAs
+    dsn := fmt.Sprintf("file:%s?_pragma=busy_timeout(5000)&_pragma=journal_mode(wal)", dbPath)
+    sqlDB, _ := sql.Open("sqlite", dsn)
     defer sqlDB.Close()
-    sqlDB.ExecContext(ctx, `PRAGMA journal_mode = wal;`)
-    sqlDB.ExecContext(ctx, `PRAGMA busy_timeout = 5000;`)
 
     log.Println("Database ready with S3 replication")
 }
@@ -339,11 +355,12 @@ if err := store.Close(ctx); err != nil {
 
 ## Troubleshooting
 
-- **"database is locked" errors**: Ensure you set `PRAGMA busy_timeout` on your
-  application's SQLite connection. A value of 5000ms (5 seconds) works well.
+- **"database is locked" errors**: Ensure you set `busy_timeout` via DSN parameters
+  (e.g., `?_pragma=busy_timeout(5000)`). A value of 5000ms (5 seconds) works well.
+  Using `ExecContext` with `PRAGMA` statements only affects one connection in the pool.
 
-- **WAL mode not enabled**: The application must enable WAL mode on its own
-  connection. Litestream requires WAL mode for replication.
+- **WAL mode not enabled**: Set `journal_mode` via DSN parameters
+  (e.g., `?_pragma=journal_mode(wal)`). Litestream requires WAL mode for replication.
 
 - **No replication occurring**: Verify the store is opened successfully and
   that your replica client has valid credentials.
