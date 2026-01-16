@@ -198,6 +198,7 @@
     <li><a href="#when-to-use-the-library">When to use the library</a></li>
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#installation">Installation</a></li>
+    <li><a href="#important-constraints">Important constraints</a></li>
     <li><a href="#core-concepts">Core concepts</a></li>
     <li><a href="#basic-usage">Basic usage</a></li>
     <li><a href="#s3-backend-with-restore-on-startup">S3 backend with restore-on-startup</a></li>
@@ -251,7 +252,27 @@ with your application lifecycle or want to customize replication behavior.</p>
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream/file&#34;</span>  <span class="c1">// For file backend
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="s">&#34;github.com/benbjohnson/litestream/s3&#34;</span>    <span class="c1">// For S3 backend
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span>
-</span></span></code></pre></div><h2 id="core-concepts">Core concepts<a href="#core-concepts" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></code></pre></div><h2 id="important-constraints">Important constraints<a href="#important-constraints" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When using Litestream as a library, be aware of these critical requirements:</p>
+<ol>
+<li>
+<p><strong>Required SQLite driver</strong>: You must use <a href="https://pkg.go.dev/modernc.org/sqlite"><code>modernc.org/sqlite</code></a>.
+Litestream uses this driver internally, and mixing drivers causes lock conflicts
+on POSIX systems (Linux, macOS, BSD) due to per-process SQLite locks.</p>
+</li>
+<li>
+<p><strong>Lifecycle management</strong>: You cannot call <code>litestream.DB.Close()</code> or
+<code>Replica.Stop(true)</code> while your application still has open database connections.
+Either close all your app&rsquo;s database connections first, or only close Litestream
+when your process is shutting down.</p>
+</li>
+<li>
+<p><strong>PRAGMA configuration</strong>: Use DSN parameters (e.g., <code>?_pragma=busy_timeout(5000)</code>)
+instead of <code>PRAGMA</code> statements via <code>ExecContext</code>. An <code>sql.DB</code> is a connection pool,
+and <code>ExecContext</code> only applies the PRAGMA to one random connection from the pool.</p>
+</li>
+</ol>
+<h2 id="core-concepts">Core concepts<a href="#core-concepts" class="anchor" aria-hidden="true">#</a> </h2>
 <p>The library uses three main types:</p>
 <ul>
 <li><strong><code>DB</code></strong>: Wraps a SQLite database path and manages its replica.</li>
@@ -321,15 +342,13 @@ with your application lifecycle or want to customize replication behavior.</p>
 </span></span><span class="line"><span class="cl">    <span class="p">}()</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="c1">// 7. Open your app&#39;s SQLite connection separately
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">sqlDB</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite&#34;</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// Use DSN parameters for PRAGMAs to ensure they apply to all pooled connections
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">dsn</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;file:%s?_pragma=busy_timeout(5000)&amp;_pragma=journal_mode(wal)&#34;</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite&#34;</span><span class="p">,</span> <span class="nx">dsn</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;open sqlite: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// Configure WAL mode and busy timeout
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA journal_mode = wal;`</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA busy_timeout = 5000;`</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="c1">// Use sqlDB for your application queries
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Replication started. Database ready for use.&#34;</span><span class="p">)</span>
@@ -343,6 +362,7 @@ local database doesn&rsquo;t exist. This pattern works well with ephemeral conta
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;context&#34;</span>
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;database/sql&#34;</span>
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;errors&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;fmt&#34;</span>
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;log&#34;</span>
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;os&#34;</span>
 </span></span><span class="line"><span class="cl">    <span class="s">&#34;time&#34;</span>
@@ -387,11 +407,10 @@ local database doesn&rsquo;t exist. This pattern works well with ephemeral conta
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">store</span><span class="p">.</span><span class="nf">Close</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">())</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">// Open app database and continue...
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">sqlDB</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite&#34;</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Open app database with DSN parameters for PRAGMAs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">dsn</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;file:%s?_pragma=busy_timeout(5000)&amp;_pragma=journal_mode(wal)&#34;</span><span class="p">,</span> <span class="nx">dbPath</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite&#34;</span><span class="p">,</span> <span class="nx">dsn</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA journal_mode = wal;`</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="nx">sqlDB</span><span class="p">.</span><span class="nf">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`PRAGMA busy_timeout = 5000;`</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Database ready with S3 replication&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -532,12 +551,13 @@ writes are flushed to the replica:</p>
 </span></span></code></pre></div><h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li>
-<p><strong>&ldquo;database is locked&rdquo; errors</strong>: Ensure you set <code>PRAGMA busy_timeout</code> on your
-application&rsquo;s SQLite connection. A value of 5000ms (5 seconds) works well.</p>
+<p><strong>&ldquo;database is locked&rdquo; errors</strong>: Ensure you set <code>busy_timeout</code> via DSN parameters
+(e.g., <code>?_pragma=busy_timeout(5000)</code>). A value of 5000ms (5 seconds) works well.
+Using <code>ExecContext</code> with <code>PRAGMA</code> statements only affects one connection in the pool.</p>
 </li>
 <li>
-<p><strong>WAL mode not enabled</strong>: The application must enable WAL mode on its own
-connection. Litestream requires WAL mode for replication.</p>
+<p><strong>WAL mode not enabled</strong>: Set <code>journal_mode</code> via DSN parameters
+(e.g., <code>?_pragma=journal_mode(wal)</code>). Litestream requires WAL mode for replication.</p>
 </li>
 <li>
 <p><strong>No replication occurring</strong>: Verify the store is opened successfully and
