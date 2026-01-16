@@ -1195,20 +1195,40 @@ Truncate Threshold Configuration guide</a>.</p>
 </ol>
 <h2 id="performance-issues">Performance Issues</h2>
 <h3 id="high-cpu-usage">High CPU Usage</h3>
-<p><strong>Symptoms</strong>: Litestream consuming excessive CPU</p>
-<p><strong>Solution</strong>:</p>
+<p><strong>Symptoms</strong>: Litestream consuming excessive CPU (100%+ sustained)</p>
+<p><strong>Common Causes</strong>:</p>
+<ol>
+<li><strong>Unbounded WAL growth</strong> — Long-running read transactions blocking checkpoints</li>
+<li><strong>State corruption</strong> — Tracking files mismatched with replica state</li>
+<li><strong>Blocked checkpoints</strong> — Application holding read locks</li>
+</ol>
+<p><strong>Diagnosis</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check CPU usage over time</span>
+</span></span><span class="line"><span class="cl">pidstat -p <span class="k">$(</span>pgrep litestream<span class="k">)</span> <span class="m">1</span> <span class="m">5</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Check WAL file size (large WAL indicates checkpoint blocking)</span>
+</span></span><span class="line"><span class="cl">ls -lh /path/to/db.sqlite-wal
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Check for blocking processes</span>
+</span></span><span class="line"><span class="cl">sqlite3 /path/to/db.sqlite <span class="s2">&#34;PRAGMA wal_checkpoint(PASSIVE);&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Result: status|log|checkpointed</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># status=1 means checkpoint was blocked</span>
+</span></span></code></pre></div><p><strong>Solutions</strong>:</p>
 <ol>
 <li>
-<p>Increase monitoring intervals:</p>
+<p><strong>Reduce monitoring frequency</strong>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s </span><span class="w"> </span><span class="c"># Reduce frequency</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">10s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># ... (other replica settings)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
 </span></span></span></code></pre></div></li>
 <li>
-<p>Check for database hotspots (frequent small transactions)</p>
+<p><strong>Fix blocked checkpoints</strong> — Kill long-running read connections in your application</p>
 </li>
 <li>
-<p>Consider batch operations in your application</p>
+<p><strong>Reset corrupted state</strong> — See <a href="#recovering-from-corrupted-tracking-state">Recovering from corrupted tracking state</a></p>
 </li>
 </ol>
 <h3 id="memory-issues">Memory Issues</h3>
@@ -1299,7 +1319,140 @@ Truncate Threshold Configuration guide</a>.</p>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Run integrity check</span>
 </span></span><span class="line"><span class="cl">sqlite3 /tmp/test.db <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
-</span></span></code></pre></div><h2 id="getting-help">Getting Help</h2>
+</span></span></code></pre></div><h2 id="operations-that-invalidate-tracking-state">Operations That Invalidate Tracking State</h2>
+<p>Litestream maintains internal tracking state in <code>.{filename}-litestream</code> directories
+(e.g., <code>.db.sqlite-litestream</code> for a database file named <code>db.sqlite</code>) to efficiently
+replicate changes. Certain operations can corrupt or invalidate
+this tracking, leading to high CPU usage, replication errors, or state mismatch
+between local tracking and remote replicas.</p>
+<h3 id="operations-to-avoid">Operations to avoid</h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Why It&rsquo;s Problematic</th>
+<th>Safe Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In-place <code>VACUUM</code></td>
+<td>Rewrites entire database, invalidating page tracking</td>
+<td>Use <code>VACUUM INTO 'new.db'</code></td>
+</tr>
+<tr>
+<td>Manual checkpoint while Litestream is stopped</td>
+<td>Large WAL changes database state without tracking</td>
+<td>Let Litestream manage checkpoints</td>
+</tr>
+<tr>
+<td>Deleting <code>.sqlite-litestream</code> directory</td>
+<td>Creates local/remote state mismatch</td>
+<td>Delete both local tracking AND remote replica</td>
+</tr>
+<tr>
+<td>Restoring database while Litestream is running</td>
+<td>Overwrites database without updating tracking</td>
+<td>Stop Litestream before restore</td>
+</tr>
+</tbody>
+</table>
+<h3 id="in-place-vacuum">In-place VACUUM</h3>
+<p>The SQLite <code>VACUUM</code> command rewrites the entire database file. Litestream tracks
+changes at the page level, so a full rewrite invalidates all tracking state.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Dangerous: Invalidates Litestream tracking
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">VACUUM</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Safe: Creates new file, preserves original
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">VACUUM</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="s1">&#39;/path/to/compacted.db&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>If you must use in-place <code>VACUUM</code>:</p>
+<ol>
+<li>Stop Litestream</li>
+<li>Run <code>VACUUM</code></li>
+<li>Delete the <code>.sqlite-litestream</code> tracking directory</li>
+<li>Delete the remote replica data (start fresh)</li>
+<li>Restart Litestream</li>
+</ol>
+<h3 id="symptoms-of-corrupted-tracking-state">Symptoms of corrupted tracking state</h3>
+<ul>
+<li>
+<p><strong>High CPU usage</strong> (100%+) even when database is idle</p>
+</li>
+<li>
+<p><strong>Repeated log messages</strong> with identical transaction IDs</p>
+</li>
+<li>
+<p><strong>&ldquo;timeout waiting for db initialization&rdquo;</strong> warnings</p>
+</li>
+<li>
+<p><strong>Missing LTX file errors</strong>:</p>
+<pre tabindex="0"><code>level=ERROR msg=&#34;monitor error&#34; error=&#34;open .../ltx/0/0000000000000001.ltx: no such file or directory&#34;
+</code></pre></li>
+<li>
+<p><strong>Local/remote state mismatch</strong>:</p>
+<pre tabindex="0"><code>level=INFO msg=&#34;detected database behind replica&#34; db_txid=0000000000000000 replica_txid=0000000000000001
+</code></pre></li>
+</ul>
+<h2 id="recovering-from-corrupted-tracking-state">Recovering from Corrupted Tracking State</h2>
+<p>When Litestream&rsquo;s tracking state becomes corrupted, a complete state reset is
+required. This procedure removes all local tracking and remote replica data,
+forcing a fresh snapshot.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">**Warning**: This procedure deletes your replica history. You will lose the ability to do point-in-time recovery to timestamps before the reset. Only proceed if you have confirmed tracking corruption.</div>
+</div>
+<h3 id="recovery-procedure">Recovery procedure</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. Stop Litestream</span>
+</span></span><span class="line"><span class="cl">sudo systemctl stop litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Kill any processes holding database connections</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># (application-specific - check for zombie processes)</span>
+</span></span><span class="line"><span class="cl">lsof /path/to/db.sqlite
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. Checkpoint the database to clear WAL</span>
+</span></span><span class="line"><span class="cl">sqlite3 /path/to/db.sqlite <span class="s2">&#34;PRAGMA wal_checkpoint(TRUNCATE);&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Verify: result should be &#34;0|0|0&#34; (success)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 4. Remove local Litestream tracking</span>
+</span></span><span class="line"><span class="cl">rm -rf /path/to/.db.sqlite-litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 5. Remove remote replica data (start fresh)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># For S3:</span>
+</span></span><span class="line"><span class="cl">aws s3 rm s3://bucket/path/db.sqlite --recursive
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># For GCS:</span>
+</span></span><span class="line"><span class="cl">gsutil rm -r gs://bucket/path/db.sqlite
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># For Azure:</span>
+</span></span><span class="line"><span class="cl">az storage blob delete-batch --source container --pattern <span class="s2">&#34;path/db.sqlite/*&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 6. Restart Litestream</span>
+</span></span><span class="line"><span class="cl">sudo systemctl start litestream
+</span></span></code></pre></div><h3 id="verifying-recovery">Verifying recovery</h3>
+<p>After restarting, verify Litestream has recovered:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check CPU usage is normal (should be near 0% when idle)</span>
+</span></span><span class="line"><span class="cl">pidstat -p <span class="k">$(</span>pgrep litestream<span class="k">)</span> <span class="m">1</span> <span class="m">5</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Check logs for successful snapshot</span>
+</span></span><span class="line"><span class="cl">journalctl -u litestream -f
+</span></span><span class="line"><span class="cl"><span class="c1"># Should see: &#34;snapshot written&#34; or similar</span>
+</span></span></code></pre></div><h3 id="preventing-future-issues">Preventing future issues</h3>
+<ol>
+<li>
+<p><strong>Avoid in-place VACUUM</strong> — Use <code>VACUUM INTO</code> instead</p>
+</li>
+<li>
+<p><strong>Set busy timeout</strong> — Prevent checkpoint blocking:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">PRAGMA</span><span class="w"> </span><span class="n">busy_timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p><strong>Monitor WAL size</strong> — Alert if WAL exceeds 50% of database size</p>
+</li>
+<li>
+<p><strong>Kill zombie connections</strong> — Ensure application processes don&rsquo;t hold long-lived read locks</p>
+</li>
+</ol>
+<h2 id="getting-help">Getting Help</h2>
 <h3 id="before-asking-for-help">Before Asking for Help</h3>
 <ol>
 <li><strong>Check the logs</strong> for error messages (use debug level)</li>
