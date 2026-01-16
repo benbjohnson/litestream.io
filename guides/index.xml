@@ -86,11 +86,25 @@
       <description>Litestream&amp;rsquo;s Virtual File System (VFS) lets you read a replicated database directly from object storage without restoring it to local disk first. Queries fetch pages on-demand, cache them locally, and stay in sync by polling for new LTX files.&#xA;⚠️ The VFS is read-only and requires CGO. Pre-built binaries are available in [GitHub releases](https://github.com/benbjohnson/litestream/releases), or build from source with the `-tags vfs` build tag. When to use the VFS Serve read-only workloads from a remote replica (analytics, dashboards, reporting).</description>
     </item>
     <item>
+      <title>VFS Write Mode</title>
+      <link>https://litestream.io/guides/vfs-write-mode/</link>
+      <pubDate>Tue, 13 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/vfs-write-mode/</guid>
+      <description>VFS write mode enables remote-first SQLite databases where writes sync back to object storage. Instead of the default read-only behavior, write mode buffers changes locally and periodically pushes them as new LTX files to the replica.&#xA;⚠️ Write mode assumes a single writer. Multiple concurrent writers will trigger conflict detection. Use distributed locking or application-level coordination if your workload requires concurrent writes from multiple processes. When to use write mode Edge deployments where local disk is ephemeral but you need write capability.</description>
+    </item>
+    <item>
       <title>Using Litestream as a Go Library</title>
       <link>https://litestream.io/guides/go-library/</link>
       <pubDate>Tue, 23 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/go-library/</guid>
       <description>Litestream can be embedded directly into your Go application as a library, giving you programmatic control over database replication without running a separate process. This approach is useful when you need tighter integration with your application lifecycle or want to customize replication behavior.&#xA;⚠️ The Litestream library API is not considered stable and may change between versions. The CLI interface is recommended for production use cases where API stability is important.</description>
+    </item>
+    <item>
+      <title>VFS Hydration</title>
+      <link>https://litestream.io/guides/vfs-hydration/</link>
+      <pubDate>Tue, 13 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/vfs-hydration/</guid>
+      <description>VFS hydration restores the entire database to a local file in the background while the VFS continues serving reads from the cache and remote storage. Once hydration completes, all reads are served from the local file, eliminating remote fetch latency entirely.&#xA;When to use hydration Read-heavy workloads where remote latency impacts performance. Large databases where the cache cannot hold the full working set. Latency-sensitive applications that need local-disk performance after startup.</description>
     </item>
     <item>
       <title>Replicating to S3-Compatible Services</title>

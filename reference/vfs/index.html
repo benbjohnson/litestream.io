@@ -149,6 +149,8 @@ Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build 
     <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/go-library/">Using Litestream as a Go Library</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-write-mode/">VFS Write Mode</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-hydration/">VFS Hydration</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
@@ -202,6 +204,8 @@ Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build 
         <li><a href="#other-configuration">Other configuration</a></li>
         <li><a href="#legacy-s3-configuration">Legacy S3 configuration</a></li>
         <li><a href="#runtime-tuning">Runtime tuning</a></li>
+        <li><a href="#write-mode-configuration">Write mode configuration</a></li>
+        <li><a href="#hydration-configuration">Hydration configuration</a></li>
       </ul>
     </li>
     <li><a href="#pragmas--sql-functions">PRAGMAs &amp; SQL functions</a>
@@ -210,6 +214,8 @@ Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build 
         <li><a href="#pragma-litestream_lag">PRAGMA litestream_lag</a></li>
         <li><a href="#pragma-litestream_time">PRAGMA litestream_time</a></li>
         <li><a href="#sql-function-equivalents">SQL function equivalents</a></li>
+        <li><a href="#hydration-monitoring-functions">Hydration monitoring functions</a></li>
+        <li><a href="#write-mode-functions">Write mode functions</a></li>
       </ul>
     </li>
     <li><a href="#performance-characteristics">Performance characteristics</a></li>
@@ -364,6 +370,72 @@ compatibility but <code>LITESTREAM_REPLICA_URL</code> is preferred:</p>
 <h3 id="runtime-tuning">Runtime tuning<a href="#runtime-tuning" class="anchor" aria-hidden="true">#</a> </h3>
 <p>VFS runtime tuning is set in code (Go) by adjusting <code>VFS.PollInterval</code> (default
 <code>1s</code>) and <code>VFS.CacheSize</code> (default <code>10MB</code>).</p>
+<h3 id="write-mode-configuration">Write mode configuration<a href="#write-mode-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Write mode enables the VFS to sync writes back to object storage instead of
+being read-only. See the <a href="/guides/vfs-write-mode">VFS Write Mode Guide</a> for
+usage details.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LITESTREAM_WRITE_ENABLED</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Enable write mode</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_SYNC_INTERVAL</code></td>
+<td>duration</td>
+<td><code>1s</code></td>
+<td>How often to sync writes to remote</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_BUFFER_PATH</code></td>
+<td>string</td>
+<td>temp file</td>
+<td>Local write buffer path for crash recovery</td>
+</tr>
+</tbody>
+</table>
+<p>Write mode assumes a single writer. Multiple concurrent writers trigger conflict
+detection.</p>
+<h3 id="hydration-configuration">Hydration configuration<a href="#hydration-configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Hydration restores the full database to a local file in the background while
+the VFS continues serving reads. See the <a href="/guides/vfs-hydration">VFS Hydration Guide</a>
+for usage details.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LITESTREAM_HYDRATION_ENABLED</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Enable background hydration</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_HYDRATION_PATH</code></td>
+<td>string</td>
+<td>temp file</td>
+<td>Local file path for hydrated database</td>
+</tr>
+</tbody>
+</table>
+<p>Once hydration completes, all reads are served from the local file instead of
+remote storage.</p>
 <h2 id="pragmas--sql-functions">PRAGMAs &amp; SQL functions<a href="#pragmas--sql-functions" class="anchor" aria-hidden="true">#</a> </h2>
 <p>The VFS extension registers custom PRAGMAs and SQL functions for observability
 and time travel queries.</p>
@@ -425,6 +497,48 @@ so historical LTX files remain available.</p>
 <p>Example:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_txid</span><span class="p">(),</span><span class="w"> </span><span class="n">litestream_lag</span><span class="p">(),</span><span class="w"> </span><span class="n">litestream_time</span><span class="p">();</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_set_time</span><span class="p">(</span><span class="s1">&#39;10 minutes ago&#39;</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><h3 id="hydration-monitoring-functions">Hydration monitoring functions<a href="#hydration-monitoring-functions" class="anchor" aria-hidden="true">#</a> </h3>
+<p>These functions are available when hydration is enabled:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>litestream_hydration_progress()</code></td>
+<td>Returns hydration progress as percentage (0-100)</td>
+</tr>
+<tr>
+<td><code>litestream_hydration_status()</code></td>
+<td>Returns status: <code>idle</code>, <code>restoring</code>, <code>catching_up</code>, <code>complete</code></td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_hydration_status</span><span class="p">(),</span><span class="w"> </span><span class="n">litestream_hydration_progress</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: restoring, 45
+</span></span></span></code></pre></div><h3 id="write-mode-functions">Write mode functions<a href="#write-mode-functions" class="anchor" aria-hidden="true">#</a> </h3>
+<p>These functions are available when write mode is enabled:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>litestream_write_buffer_size()</code></td>
+<td>Returns current write buffer size in bytes</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_write_buffer_size</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 8192
 </span></span></span></code></pre></div><h2 id="performance-characteristics">Performance characteristics<a href="#performance-characteristics" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li>On-demand page fetch with LRU caching sized by <code>CacheSize</code> (default 10MB).</li>
@@ -438,11 +552,16 @@ for memory considerations with long-held transactions.</li>
 </ul>
 <h2 id="limitations--constraints">Limitations &amp; constraints<a href="#limitations--constraints" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li>Read-only: write attempts return <code>litestream is a read only vfs</code>.</li>
-<li>CGO-only: requires a CGO-enabled SQLite driver (<code>github.com/mattn/go-sqlite3</code>) and <code>-tags vfs</code>.</li>
-<li>Requires contiguous LTX coverage. Missing L0 files (e.g., aggressive retention) will error until new files appear.</li>
-<li>Initial snapshot required: the VFS waits for available backup files before serving reads.</li>
-<li>Network latency adds to first-page reads; place consumers close to the replica endpoint.</li>
+<li><strong>Default read-only</strong>: Write attempts return <code>litestream is a read only vfs</code> unless
+<a href="/guides/vfs-write-mode">write mode</a> is enabled with <code>LITESTREAM_WRITE_ENABLED=true</code>.</li>
+<li><strong>Write mode constraints</strong>: When enabled, write mode assumes a single writer. Multiple
+concurrent writers trigger conflict detection (not prevention). Applications must handle
+conflicts. See <a href="/guides/vfs-write-mode#conflict-handling">conflict handling</a>.</li>
+<li><strong>CGO-only</strong>: Requires a CGO-enabled SQLite driver (<code>github.com/mattn/go-sqlite3</code>) and <code>-tags vfs</code>.</li>
+<li><strong>Contiguous LTX coverage</strong>: Missing L0 files (e.g., aggressive retention) will error until new files appear.</li>
+<li><strong>Initial snapshot required</strong>: The VFS waits for available backup files before serving reads.</li>
+<li><strong>Network latency</strong>: First-page reads incur network latency; place consumers close to the replica endpoint.</li>
+<li><strong>Hydration disk space</strong>: When <a href="/guides/vfs-hydration">hydration</a> is enabled, requires local disk space for the full database.</li>
 </ul>
 <h2 id="architecture-overview">Architecture overview<a href="#architecture-overview" class="anchor" aria-hidden="true">#</a> </h2>
 <p>The VFS derives a restore plan from the replica, detects the database page size,

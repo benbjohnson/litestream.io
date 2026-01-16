@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.3d00da4403468933e125edaaa0fd3f1c4dacf6d970d5130de45fa62f952af339aa6f9f622f4a35891e84d43de4e54156ed6fad0512598680291fb62f17e96153.css" integrity="sha512-PQDaRANGiTPhJe2qoP0/HE2s9tlw1RMN5F&#43;mL5Uq8zmqb59iL0o1iR6E1D3k5UFW7W&#43;tBRJZhoApH7YvF&#43;lhUw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>VFS Write Mode - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/guides/vfs-write-mode/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="VFS Write Mode">
+<meta name="twitter:description" content="VFS write mode enables remote-first SQLite databases where writes sync back to object storage. Instead of the default read-only behavior, write mode buffers changes locally and periodically pushes them as new LTX files to the replica.
+⚠️ Write mode assumes a single writer. Multiple concurrent writers will trigger conflict detection. Use distributed locking or application-level coordination if your workload requires concurrent writes from multiple processes. When to use write mode Edge deployments where local disk is ephemeral but you need write capability.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Guides",
+        "item": "https:\/\/litestream.io\/guides\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Vfs Write Mode",
+        "item": "https:\/\/litestream.io\/guides\/vfs-write-mode\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="guides single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/linux/">Linux</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/go-library/">Using Litestream as a Go Library</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/vfs-write-mode/">VFS Write Mode</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-hydration/">VFS Hydration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#when-to-use-write-mode">When to use write mode</a></li>
+    <li><a href="#when-not-to-use-write-mode">When NOT to use write mode</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#configuration">Configuration</a>
+      <ul>
+        <li><a href="#configuration-options">Configuration options</a></li>
+        <li><a href="#sync-interval-trade-offs">Sync interval trade-offs</a></li>
+      </ul>
+    </li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#creating-new-databases">Creating new databases</a></li>
+    <li><a href="#conflict-handling">Conflict handling</a>
+      <ul>
+        <li><a href="#detection">Detection</a></li>
+        <li><a href="#resolution-strategies">Resolution strategies</a></li>
+      </ul>
+    </li>
+    <li><a href="#examples">Examples</a>
+      <ul>
+        <li><a href="#python">Python</a></li>
+        <li><a href="#go">Go</a></li>
+        <li><a href="#docker-compose">Docker Compose</a></li>
+      </ul>
+    </li>
+    <li><a href="#limitations--constraints">Limitations &amp; constraints</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#see-also">See Also</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>VFS Write Mode</h1>
+			<p class="lead"></p>
+			<p>VFS write mode enables remote-first SQLite databases where writes sync back to
+object storage. Instead of the default read-only behavior, write mode buffers
+changes locally and periodically pushes them as new LTX files to the replica.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Write mode assumes a single writer. Multiple concurrent writers will trigger conflict detection. Use distributed locking or application-level coordination if your workload requires concurrent writes from multiple processes.</div>
+</div>
+<h2 id="when-to-use-write-mode">When to use write mode<a href="#when-to-use-write-mode" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>Edge deployments where local disk is ephemeral but you need write capability.</li>
+<li>Serverless functions that modify a database and need durability beyond the function lifetime.</li>
+<li>Development and testing environments with remote-backed databases.</li>
+<li>Scenarios where the database should persist in object storage as the source of truth.</li>
+</ul>
+<p>Write mode is ideal when you want the convenience of remote storage with the
+ability to make changes, and can tolerate eventual consistency with the remote
+replica.</p>
+<h2 id="when-not-to-use-write-mode">When NOT to use write mode<a href="#when-not-to-use-write-mode" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>High-concurrency write workloads requiring distributed locking.</li>
+<li>Applications where multiple processes need simultaneous write access.</li>
+<li>Latency-sensitive writes (sync interval adds delay before remote visibility).</li>
+<li>Production workloads requiring strong consistency guarantees.</li>
+</ul>
+<p>For high-write throughput or multi-writer scenarios, use a local SQLite database
+with standard Litestream replication instead.</p>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li>VFS extension built with write mode support (included in standard builds).</li>
+<li>A configured replica URL pointing to object storage.</li>
+<li>Sufficient local disk space for the write buffer.</li>
+<li>Understanding of the single-writer constraint.</li>
+</ul>
+<h2 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Enable write mode with environment variables:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Enable write mode</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_WRITE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Set replica URL (required)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/mydb&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Sync interval: how often to push changes to remote (default: 1s)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SYNC_INTERVAL</span><span class="o">=</span>1s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Write buffer path: local file for crash recovery (default: temp file)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_BUFFER_PATH</span><span class="o">=</span>/var/lib/litestream/buffer.db
+</span></span></code></pre></div><h3 id="configuration-options">Configuration options<a href="#configuration-options" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LITESTREAM_WRITE_ENABLED</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Enable write mode</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_SYNC_INTERVAL</code></td>
+<td>duration</td>
+<td><code>1s</code></td>
+<td>How often to sync writes to remote</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_BUFFER_PATH</code></td>
+<td>string</td>
+<td>temp file</td>
+<td>Local write buffer path for crash recovery</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sync-interval-trade-offs">Sync interval trade-offs<a href="#sync-interval-trade-offs" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Interval</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100ms</td>
+<td>Low latency to remote visibility</td>
+<td>Higher API costs, more network traffic</td>
+</tr>
+<tr>
+<td>1s (default)</td>
+<td>Balanced cost/latency</td>
+<td>1 second delay before remote sees changes</td>
+</tr>
+<tr>
+<td>10s</td>
+<td>Lower API costs</td>
+<td>Higher latency, more data at risk on crash</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-it-works">How it works<a href="#how-it-works" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Write mode operates through a local write buffer that captures all database
+modifications before syncing them to remote storage:</p>
+<ol>
+<li>
+<p><strong>Write capture</strong>: All SQLite writes go to a local buffer file instead of
+failing with a read-only error.</p>
+</li>
+<li>
+<p><strong>Dirty page tracking</strong>: The VFS tracks which database pages have been
+modified since the last sync.</p>
+</li>
+<li>
+<p><strong>Periodic sync</strong>: At each sync interval, dirty pages are packaged into a new
+LTX file and uploaded to the replica.</p>
+</li>
+<li>
+<p><strong>Conflict detection</strong>: Before uploading, the VFS checks if new LTX files
+appeared from another source. If so, a conflict is raised.</p>
+</li>
+<li>
+<p><strong>Buffer cleanup</strong>: After successful sync, the buffer is reset for the next
+batch of writes.</p>
+</li>
+</ol>
+<p>The write buffer provides crash recovery: if the process terminates before
+syncing, buffered writes are preserved and can be recovered on restart.</p>
+<h2 id="creating-new-databases">Creating new databases<a href="#creating-new-databases" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Write mode can create databases from scratch without requiring an existing
+replica. When opening a database path that does not exist remotely:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_WRITE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/newdb&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">sqlite3
+</span></span><span class="line"><span class="cl">sqlite&gt; .load ./dist/litestream-vfs sqlite3_litestreamvfs_init
+</span></span><span class="line"><span class="cl">sqlite&gt; .open <span class="s1">&#39;file:newdb.db?vfs=litestream&#39;</span>
+</span></span><span class="line"><span class="cl">sqlite&gt; CREATE TABLE users <span class="o">(</span>id INTEGER PRIMARY KEY, name TEXT<span class="o">)</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">sqlite&gt; INSERT INTO users <span class="o">(</span>name<span class="o">)</span> VALUES <span class="o">(</span><span class="s1">&#39;Alice&#39;</span><span class="o">)</span><span class="p">;</span>
+</span></span></code></pre></div><p>The first sync will create the initial LTX files in the replica location. The
+database filename in the connection string is a logical name; the actual storage
+location is determined by <code>LITESTREAM_REPLICA_URL</code>.</p>
+<h2 id="conflict-handling">Conflict handling<a href="#conflict-handling" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Since write mode assumes a single writer, conflicts occur when another process
+writes to the same replica:</p>
+<h3 id="detection">Detection<a href="#detection" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The VFS detects conflicts by checking for new LTX files before uploading:</p>
+<ul>
+<li>If new files appeared since the last poll, a conflict is detected.</li>
+<li>The current sync is aborted and an error is returned to the application.</li>
+</ul>
+<h3 id="resolution-strategies">Resolution strategies<a href="#resolution-strategies" class="anchor" aria-hidden="true">#</a> </h3>
+<ol>
+<li>
+<p><strong>Retry with refresh</strong>: Re-read the remote state and reapply your changes.</p>
+</li>
+<li>
+<p><strong>Application-level locking</strong>: Use external coordination (Redis, etcd, etc.)
+to ensure only one writer is active.</p>
+</li>
+<li>
+<p><strong>Partition by writer</strong>: Assign different replica paths to different writers.</p>
+</li>
+<li>
+<p><strong>Accept last-writer-wins</strong>: For idempotent operations, simply retry after
+refreshing.</p>
+</li>
+</ol>
+<p>Example conflict handling in Go:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">retries</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">retries</span> <span class="p">&lt;</span> <span class="mi">3</span><span class="p">;</span> <span class="nx">retries</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">_</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="s">&#34;INSERT INTO events (data) VALUES (?)&#34;</span><span class="p">,</span> <span class="nx">eventData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">strings</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="s">&#34;conflict&#34;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Refresh connection and retry
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">continue</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">err</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="python">Python<a href="#python" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_WRITE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/app.db&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>AKIAxxxx
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxx
+</span></span><span class="line"><span class="cl">python app.py
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sqlite3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Load VFS extension</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;:memory:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span><span class="o">.</span><span class="n">enable_load_extension</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span><span class="o">.</span><span class="n">load_extension</span><span class="p">(</span><span class="s2">&#34;./dist/litestream-vfs.so&#34;</span><span class="p">,</span> <span class="n">entrypoint</span><span class="o">=</span><span class="s2">&#34;sqlite3_litestreamvfs_init&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">loader</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Connect with write mode enabled (via environment variable)</span>
+</span></span><span class="line"><span class="cl"><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;file:app.db?vfs=litestream&#34;</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Writes now sync to S3</span>
+</span></span><span class="line"><span class="cl"><span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&#34;CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY, msg TEXT)&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&#34;INSERT INTO logs (msg) VALUES (?)&#34;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&#34;Application started&#34;</span><span class="p">,))</span>
+</span></span><span class="line"><span class="cl"><span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Query as normal</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&#34;SELECT * FROM logs&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span></span></code></pre></div><h3 id="go">Go<a href="#go" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;context&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;database/sql&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;log&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;os&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">_</span> <span class="s">&#34;github.com/mattn/go-sqlite3&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/psanford/sqlite3vfs&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;github.com/benbjohnson/litestream/s3&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span> <span class="o">:=</span> <span class="nx">s3</span><span class="p">.</span><span class="nf">NewReplicaClient</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">AccessKeyID</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_ACCESS_KEY_ID&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">SecretAccessKey</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;AWS_SECRET_ACCESS_KEY&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Region</span> <span class="p">=</span> <span class="s">&#34;us-east-1&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Bucket</span> <span class="p">=</span> <span class="s">&#34;mybucket&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">client</span><span class="p">.</span><span class="nx">Path</span> <span class="p">=</span> <span class="s">&#34;app.db&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">client</span><span class="p">.</span><span class="nf">Init</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">());</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">vfs</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewVFS</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">vfs</span><span class="p">.</span><span class="nx">WriteEnabled</span> <span class="p">=</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">vfs</span><span class="p">.</span><span class="nx">SyncInterval</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">vfs</span><span class="p">.</span><span class="nx">BufferPath</span> <span class="p">=</span> <span class="s">&#34;/tmp/litestream-buffer.db&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sqlite3vfs</span><span class="p">.</span><span class="nf">RegisterVFS</span><span class="p">(</span><span class="s">&#34;litestream&#34;</span><span class="p">,</span> <span class="nx">vfs</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">db</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sql</span><span class="p">.</span><span class="nf">Open</span><span class="p">(</span><span class="s">&#34;sqlite3&#34;</span><span class="p">,</span> <span class="s">&#34;file:app.db?vfs=litestream&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Create table and insert data
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">db</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="s">&#34;CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, ts TEXT)&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">db</span><span class="p">.</span><span class="nf">Exec</span><span class="p">(</span><span class="s">&#34;INSERT INTO events (ts) VALUES (datetime(&#39;now&#39;))&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Query
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">rows</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Query</span><span class="p">(</span><span class="s">&#34;SELECT * FROM events&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">defer</span> <span class="nx">rows</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">rows</span><span class="p">.</span><span class="nf">Next</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">var</span> <span class="nx">id</span> <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">var</span> <span class="nx">ts</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">rows</span><span class="p">.</span><span class="nf">Scan</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">id</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">ts</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Event %d: %s&#34;</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">ts</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="docker-compose">Docker Compose<a href="#docker-compose" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">app</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">myapp:latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">LITESTREAM_WRITE_ENABLED=true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">LITESTREAM_REPLICA_URL=s3://mybucket/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">LITESTREAM_SYNC_INTERVAL=1s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">LITESTREAM_BUFFER_PATH=/data/buffer.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">litestream-buffer:/data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">litestream-buffer</span><span class="p">:</span><span class="w">
+</span></span></span></code></pre></div><p>The volume ensures the write buffer persists across container restarts,
+enabling crash recovery.</p>
+<h2 id="limitations--constraints">Limitations &amp; constraints<a href="#limitations--constraints" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><strong>Single-writer assumption</strong>: No distributed locking; conflicts detected but not prevented.</li>
+<li><strong>Sync latency</strong>: Changes are not immediately visible to other readers until sync completes.</li>
+<li><strong>Buffer disk space</strong>: Write buffer requires local disk proportional to write volume between syncs.</li>
+<li><strong>Crash window</strong>: Uncommitted changes in the buffer since the last sync may be lost on crash (size depends on sync interval).</li>
+<li><strong>Conflict resolution</strong>: Application must handle conflicts; no automatic merge or resolution.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><strong>&ldquo;conflict detected&rdquo; errors</strong>: Another writer modified the replica. Implement retry logic or use external locking.</li>
+<li><strong>Slow syncs</strong>: Reduce write volume, increase sync interval, or use faster storage backend.</li>
+<li><strong>Buffer growth</strong>: Writes are faster than syncs. Increase sync frequency or reduce write rate.</li>
+<li><strong>Permission errors on buffer path</strong>: Ensure the buffer directory exists and is writable.</li>
+</ul>
+<h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="/guides/vfs">VFS Read Replicas Guide</a> - Read-only VFS usage</li>
+<li><a href="/reference/vfs">VFS Extension Reference</a> - Complete configuration reference</li>
+<li><a href="/how-it-works/vfs">How it works: VFS</a> - Architecture details</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/guides/vfs/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; VFS Read Replicas
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/guides/go-library/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Using Litestream as a Go Library &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.ccd7afc3bf63cd0223b56ebd09df96d936c9d4e9eff724d0a9c2556b109631cf49cf5b263d887d299545f0c361c9b8ff0bf1061aacf68d97b3ac1c2f74952d9f.js" integrity="sha512-zNevw79jzQIjtW69Cd&#43;W2TbJ1Onv9yTQqcJVaxCWMc9Jz1smPYh9KZVF8MNhybj/C/EGGqz2jZezrBwvdJUtnw==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
