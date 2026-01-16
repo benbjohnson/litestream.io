@@ -104,6 +104,127 @@ See the [VFS guide](/guides/vfs/#transaction-duration--memory) for practical
 recommendations on transaction duration.
 
 
+## Write mode architecture
+
+When write mode is enabled (`LITESTREAM_WRITE_ENABLED=true`), the VFS transitions
+from read-only to read-write by adding a local write buffer and sync mechanism.
+
+### Write buffer design
+
+- **Local buffer file**: All writes go to a local SQLite database file that
+  serves as a write buffer. This file captures dirty pages before they are
+  synced to remote storage.
+
+- **Dirty page tracking**: The VFS maintains a bitmap of which database pages
+  have been modified since the last sync. Only dirty pages are packaged into
+  LTX files.
+
+- **Crash recovery**: The buffer file persists uncommitted changes. On restart,
+  buffered writes can be recovered and synced.
+
+### Sync process
+
+At each sync interval (default 1 second):
+
+1. **Check for conflicts**: The VFS polls for new LTX files from other sources.
+   If new files are detected, a conflict is raised before uploading.
+
+2. **Package dirty pages**: Modified pages are read from the buffer and
+   packaged into a new LTX file with proper transaction ordering.
+
+3. **Upload to replica**: The new LTX file is uploaded to the configured
+   replica location.
+
+4. **Reset buffer**: After successful upload, the dirty page bitmap is cleared
+   and the buffer is ready for the next batch.
+
+### Conflict detection
+
+Since write mode assumes a single writer, the VFS uses optimistic conflict
+detection:
+
+- Before each sync, check if the remote TXID has advanced unexpectedly.
+- If another writer has uploaded new LTX files, the sync is aborted.
+- The application receives a conflict error and must decide how to proceed.
+
+This approach avoids the complexity of distributed locking while providing
+safety through detection. Applications can implement retry logic, external
+locking, or accept last-writer-wins semantics depending on their requirements.
+
+### Transaction handling during sync
+
+- **In-flight transactions**: Active transactions continue using the local
+  buffer while sync runs in the background.
+
+- **Commit visibility**: Local commits are immediately visible to the same
+  connection but not to remote readers until the next sync completes.
+
+- **Sync isolation**: The sync process reads a consistent snapshot of dirty
+  pages without blocking ongoing writes.
+
+
+## Hydration mechanism
+
+When hydration is enabled (`LITESTREAM_HYDRATION_ENABLED=true`), the VFS
+restores the complete database to a local file while continuing to serve
+reads from cache and remote storage.
+
+### Streaming compaction
+
+Hydration builds the local database through streaming compaction:
+
+1. **Compute restore plan**: Like the standard VFS, determine the sequence of
+   LTX files needed to reconstruct the database.
+
+2. **Stream pages to disk**: Instead of building only an in-memory index, write
+   the actual page data to a local SQLite database file.
+
+3. **Incremental processing**: Process LTX files one at a time, applying their
+   pages to the local file. Memory usage stays bounded regardless of database
+   size.
+
+4. **Handle page overwrites**: When newer LTX files update the same pages,
+   overwrite the local file's pages to maintain consistency.
+
+### Read path evolution
+
+The VFS read path changes as hydration progresses:
+
+| Phase | Page lookup | Source |
+|-------|-------------|--------|
+| Before hydration | Index → Remote LTX | Object storage |
+| During hydration | Index → Remote LTX or cache | Object storage + cache |
+| After hydration | Index → Local file | Local disk |
+
+The transition is transparent: applications continue using the same connection
+while the underlying read path improves.
+
+### Incremental update application
+
+After initial hydration completes:
+
+1. **Continue polling**: The VFS keeps polling for new LTX files from the primary.
+
+2. **Apply to local file**: New pages are written to the hydrated file, keeping
+   it synchronized with the replica.
+
+3. **Cache invalidation**: The in-memory cache is updated to reflect new data,
+   but reads now come from the local file.
+
+This ensures the hydrated database stays current without requiring re-hydration.
+
+### Memory management
+
+Hydration is designed for bounded memory usage:
+
+- **No full-database buffering**: Pages are written directly to disk via streaming I/O.
+- **LTX streaming**: Each LTX file is processed and released before moving to the next.
+- **Index overhead only**: Memory usage is similar to standard VFS operation—just the page index plus cache.
+
+A 10GB database can be hydrated with the same memory footprint as serving it
+read-only via standard VFS.
+
+
 ## Performance model
 
 - First access to a page incurs network/object-store latency; hot pages are
@@ -127,6 +248,8 @@ restore for low-latency, write-capable workloads on local disk.
 ## See Also
 
 - [VFS Read Replicas Guide](/guides/vfs) - Step-by-step setup and usage
+- [VFS Write Mode Guide](/guides/vfs-write-mode) - Enable writes with remote sync
+- [VFS Hydration Guide](/guides/vfs-hydration) - Background restoration to local file
 - [VFS Extension Reference](/reference/vfs) - Complete API and configuration
 - [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
 

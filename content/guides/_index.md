@@ -39,6 +39,8 @@ encounter issues, check the [Troubleshooting](/docs/troubleshooting) guide.
 - [S3-Compatible Services](/guides/s3-compatible)
 - [Go Library Integration](/guides/go-library)
 - [VFS Read Replicas](/guides/vfs)
+- [VFS Write Mode](/guides/vfs-write-mode)
+- [VFS Hydration](/guides/vfs-hydration)
 - [Azure Blob Storage](/guides/azure)
 - [Backblaze B2](/guides/backblaze)
 - [DigitalOcean Spaces](/guides/digitalocean)
