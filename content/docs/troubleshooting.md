@@ -483,6 +483,7 @@ sqlite3 /path/to/db.sqlite "PRAGMA wal_checkpoint(PASSIVE);"
      - path: /path/to/db.sqlite
        monitor-interval: 10s
        replica:
+         # ... (other replica settings)
          sync-interval: 5m
    ```
 
@@ -603,8 +604,9 @@ sqlite3 /tmp/test.db "PRAGMA integrity_check;"
 
 ## Operations That Invalidate Tracking State
 
-Litestream maintains internal tracking state in `.sqlite-litestream` directories
-to efficiently replicate changes. Certain operations can corrupt or invalidate
+Litestream maintains internal tracking state in `.{filename}-litestream` directories
+(e.g., `.db.sqlite-litestream` for a database file named `db.sqlite`) to efficiently
+replicate changes. Certain operations can corrupt or invalidate
 this tracking, leading to high CPU usage, replication errors, or state mismatch
 between local tracking and remote replicas.
 
