@@ -181,8 +181,9 @@ When a database file is deleted:
 3. Resources are cleaned up
 4. The replica data remains in storage (not deleted)
 
-Replica data is preserved to allow recovery if needed. Use your storage
-provider's lifecycle policies to manage old replica cleanup.
+Replica data is preserved to allow recovery if needed. See
+[Restoring databases](#restoring-databases) for recovery instructions. Use your
+storage provider's lifecycle policies to manage old replica cleanup.
 
 ### Directory removal
 
@@ -201,6 +202,89 @@ On Litestream restart:
 3. Directory watching resumes for new files
 4. Previously replicated databases that no longer exist are not cleaned up
    from storage
+
+
+## Restoring databases
+
+When using directory watcher mode, databases are not individually specified in
+the configuration file. This means the standard `litestream restore <db-path>`
+command won't work because Litestream can't find the database definition.
+
+### Restoring a single database
+
+To restore a database from a directory watcher replica, use the replica URL
+directly instead of the database path:
+
+```bash
+litestream restore -o /path/to/database.sqlite s3://mybucket/databases/database.sqlite
+```
+
+If your replica requires credentials, set them via environment variables first:
+
+```bash
+export LITESTREAM_ACCESS_KEY_ID=your-access-key
+export LITESTREAM_SECRET_ACCESS_KEY=your-secret-key
+
+litestream restore -o /var/lib/app/databases/tenant-001.db \
+  s3://mybucket/databases/tenant-001.db
+```
+
+### Restore path structure
+
+The replica path follows your configuration. For a flat directory structure:
+
+| Configuration | Database Path | Replica URL |
+|---------------|---------------|-------------|
+| `url: s3://mybucket/databases` | `/var/lib/app/databases/tenant-001.db` | `s3://mybucket/databases/tenant-001.db` |
+
+For a nested directory structure with `recursive: true`:
+
+| Configuration | Database Path | Replica URL |
+|---------------|---------------|-------------|
+| `url: s3://mybucket/tenants` | `/var/lib/app/tenants/acme/data.db` | `s3://mybucket/tenants/acme/data.db` |
+
+### Listing available databases
+
+To see what databases are available for restore, list the replica storage:
+
+```bash
+# For S3
+aws s3 ls s3://mybucket/databases/
+
+# For GCS
+gsutil ls gs://mybucket/databases/
+
+# For Azure Blob Storage
+az storage blob list --container-name mycontainer --prefix databases/
+```
+
+### Restoring multiple databases
+
+There is no built-in command to restore all databases at once. To restore
+multiple databases, iterate over your replica storage and restore each one:
+
+```bash
+#!/bin/bash
+export LITESTREAM_ACCESS_KEY_ID=your-access-key
+export LITESTREAM_SECRET_ACCESS_KEY=your-secret-key
+
+# List and restore all databases from S3
+for db in $(aws s3 ls s3://mybucket/databases/ | awk '{print $2}' | sed 's/\/$//'); do
+  echo "Restoring $db..."
+  litestream restore -o "/var/lib/app/databases/$db" "s3://mybucket/databases/$db"
+done
+```
+
+### Point-in-time restore
+
+Point-in-time restore works the same way, using the replica URL:
+
+```bash
+litestream restore \
+  -timestamp 2026-01-01T12:00:00Z \
+  -o /var/lib/app/databases/tenant-001.db \
+  s3://mybucket/databases/tenant-001.db
+```
 
 
 ## Differences from static directory replication
