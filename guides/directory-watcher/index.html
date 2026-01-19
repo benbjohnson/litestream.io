@@ -219,6 +219,15 @@ Directory watcher monitors a directory in real-time and automatically starts rep
         <li><a href="#restart-behavior">Restart behavior</a></li>
       </ul>
     </li>
+    <li><a href="#restoring-databases">Restoring databases</a>
+      <ul>
+        <li><a href="#restoring-a-single-database">Restoring a single database</a></li>
+        <li><a href="#restore-path-structure">Restore path structure</a></li>
+        <li><a href="#listing-available-databases">Listing available databases</a></li>
+        <li><a href="#restoring-multiple-databases">Restoring multiple databases</a></li>
+        <li><a href="#point-in-time-restore">Point-in-time restore</a></li>
+      </ul>
+    </li>
     <li><a href="#differences-from-static-directory-replication">Differences from static directory replication</a></li>
     <li><a href="#troubleshooting">Troubleshooting</a>
       <ul>
@@ -391,8 +400,9 @@ files from being picked up.</p>
 <li>Resources are cleaned up</li>
 <li>The replica data remains in storage (not deleted)</li>
 </ol>
-<p>Replica data is preserved to allow recovery if needed. Use your storage
-provider&rsquo;s lifecycle policies to manage old replica cleanup.</p>
+<p>Replica data is preserved to allow recovery if needed. See
+<a href="#restoring-databases">Restoring databases</a> for recovery instructions. Use your
+storage provider&rsquo;s lifecycle policies to manage old replica cleanup.</p>
 <h3 id="directory-removal">Directory removal<a href="#directory-removal" class="anchor" aria-hidden="true">#</a> </h3>
 <p>When an entire directory is removed (in recursive mode):</p>
 <ol>
@@ -409,7 +419,84 @@ provider&rsquo;s lifecycle policies to manage old replica cleanup.</p>
 <li>Previously replicated databases that no longer exist are not cleaned up
 from storage</li>
 </ol>
-<h2 id="differences-from-static-directory-replication">Differences from static directory replication<a href="#differences-from-static-directory-replication" class="anchor" aria-hidden="true">#</a> </h2>
+<h2 id="restoring-databases">Restoring databases<a href="#restoring-databases" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When using directory watcher mode, databases are not individually specified in
+the configuration file. This means the standard <code>litestream restore &lt;db-path&gt;</code>
+command won&rsquo;t work because Litestream can&rsquo;t find the database definition.</p>
+<h3 id="restoring-a-single-database">Restoring a single database<a href="#restoring-a-single-database" class="anchor" aria-hidden="true">#</a> </h3>
+<p>To restore a database from a directory watcher replica, use the replica URL
+directly instead of the database path:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /path/to/database.sqlite s3://mybucket/databases/database.sqlite
+</span></span></code></pre></div><p>If your replica requires credentials, set them via environment variables first:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>your-access-key
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-key
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">litestream restore -o /var/lib/app/databases/tenant-001.db <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  s3://mybucket/databases/tenant-001.db
+</span></span></code></pre></div><h3 id="restore-path-structure">Restore path structure<a href="#restore-path-structure" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The replica path follows your configuration. For a flat directory structure:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Database Path</th>
+<th>Replica URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url: s3://mybucket/databases</code></td>
+<td><code>/var/lib/app/databases/tenant-001.db</code></td>
+<td><code>s3://mybucket/databases/tenant-001.db</code></td>
+</tr>
+</tbody>
+</table>
+<p>For a nested directory structure with <code>recursive: true</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Database Path</th>
+<th>Replica URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url: s3://mybucket/tenants</code></td>
+<td><code>/var/lib/app/tenants/acme/data.db</code></td>
+<td><code>s3://mybucket/tenants/acme/data.db</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="listing-available-databases">Listing available databases<a href="#listing-available-databases" class="anchor" aria-hidden="true">#</a> </h3>
+<p>To see what databases are available for restore, list the replica storage:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># For S3</span>
+</span></span><span class="line"><span class="cl">aws s3 ls s3://mybucket/databases/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># For GCS</span>
+</span></span><span class="line"><span class="cl">gsutil ls gs://mybucket/databases/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># For Azure Blob Storage</span>
+</span></span><span class="line"><span class="cl">az storage blob list --container-name mycontainer --prefix databases/
+</span></span></code></pre></div><h3 id="restoring-multiple-databases">Restoring multiple databases<a href="#restoring-multiple-databases" class="anchor" aria-hidden="true">#</a> </h3>
+<p>There is no built-in command to restore all databases at once. To restore
+multiple databases, iterate over your replica storage and restore each one:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/bash
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>your-access-key
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-key
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># List and restore all databases from S3</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> db in <span class="k">$(</span>aws s3 ls s3://mybucket/databases/ <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/\/$//&#39;</span><span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">echo</span> <span class="s2">&#34;Restoring </span><span class="nv">$db</span><span class="s2">...&#34;</span>
+</span></span><span class="line"><span class="cl">  litestream restore -o <span class="s2">&#34;/var/lib/app/databases/</span><span class="nv">$db</span><span class="s2">&#34;</span> <span class="s2">&#34;s3://mybucket/databases/</span><span class="nv">$db</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="k">done</span>
+</span></span></code></pre></div><h3 id="point-in-time-restore">Point-in-time restore<a href="#point-in-time-restore" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Point-in-time restore works the same way, using the replica URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -timestamp 2026-01-01T12:00:00Z <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  -o /var/lib/app/databases/tenant-001.db <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  s3://mybucket/databases/tenant-001.db
+</span></span></code></pre></div><h2 id="differences-from-static-directory-replication">Differences from static directory replication<a href="#differences-from-static-directory-replication" class="anchor" aria-hidden="true">#</a> </h2>
 <table>
 <thead>
 <tr>
