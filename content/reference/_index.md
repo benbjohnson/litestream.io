@@ -21,7 +21,12 @@ The `litestream` commands are:
 - [`litestream wal`](/reference/wal) — List available WAL files for a database (deprecated).
 
 
-## VFS extension
+## VFS Extension
 
 - [`litestream-vfs`](/reference/vfs) — Optional read-only VFS that serves replicas directly from object storage.
+
+
+## Prometheus Metrics
+
+- [Prometheus Metrics](/reference/metrics) — Reference for all metrics exported by Litestream.
 

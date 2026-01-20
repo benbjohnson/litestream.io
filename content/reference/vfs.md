@@ -5,7 +5,7 @@ layout: docs
 menu:
   docs:
     parent: "reference"
-weight: 550
+weight: 505
 ---
 
 The Litestream VFS provides read-only access to a replicated SQLite database
