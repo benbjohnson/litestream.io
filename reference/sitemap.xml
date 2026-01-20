@@ -9,6 +9,20 @@
     </url>
     
     <url>
+      <loc>https://litestream.io/reference/vfs/</loc>
+      <lastmod>2025-11-20T00:00:00+00:00</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.5</priority>
+    </url>
+    
+    <url>
+      <loc>https://litestream.io/reference/metrics/</loc>
+      <lastmod>2021-02-01T00:00:00+00:00</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.5</priority>
+    </url>
+    
+    <url>
       <loc>https://litestream.io/reference/databases/</loc>
       <lastmod>2021-02-01T00:00:00+00:00</lastmod>
       <changefreq>weekly</changefreq>
@@ -39,13 +53,6 @@
     <url>
       <loc>https://litestream.io/reference/restore/</loc>
       <lastmod>2021-02-01T00:00:00+00:00</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.5</priority>
-    </url>
-    
-    <url>
-      <loc>https://litestream.io/reference/vfs/</loc>
-      <lastmod>2025-11-20T00:00:00+00:00</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.5</priority>
     </url>

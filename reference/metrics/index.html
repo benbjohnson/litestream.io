@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.3d00da4403468933e125edaaa0fd3f1c4dacf6d970d5130de45fa62f952af339aa6f9f622f4a35891e84d43de4e54156ed6fad0512598680291fb62f17e96153.css" integrity="sha512-PQDaRANGiTPhJe2qoP0/HE2s9tlw1RMN5F&#43;mL5Uq8zmqb59iL0o1iR6E1D3k5UFW7W&#43;tBRJZhoApH7YvF&#43;lhUw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>Prometheus Metrics - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/reference/metrics/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="Prometheus Metrics">
+<meta name="twitter:description" content="Litestream exposes metrics in Prometheus format for monitoring replication health and performance. Metrics are disabled by default and require enabling the HTTP server.
+Enabling Metrics Add an addr field to your configuration file to enable the metrics endpoint:
+addr: &#34;:9090&#34; Metrics will be available at http://localhost:9090/metrics.
+Database Metrics These metrics track the state and operations of each replicated database. All database metrics include a db label containing the absolute path to the database file.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Reference",
+        "item": "https:\/\/litestream.io\/reference\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "Metrics",
+        "item": "https:\/\/litestream.io\/reference\/metrics\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="reference single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/linux/">Linux</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/go-library/">Using Litestream as a Go Library</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-write-mode/">VFS Write Mode</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-hydration/">VFS Hydration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#enabling-metrics">Enabling Metrics</a></li>
+    <li><a href="#database-metrics">Database Metrics</a>
+      <ul>
+        <li><a href="#litestream_db_size">litestream_db_size</a></li>
+        <li><a href="#litestream_wal_size">litestream_wal_size</a></li>
+        <li><a href="#litestream_total_wal_bytes">litestream_total_wal_bytes</a></li>
+        <li><a href="#litestream_txid">litestream_txid</a></li>
+        <li><a href="#litestream_sync_count">litestream_sync_count</a></li>
+        <li><a href="#litestream_sync_error_count">litestream_sync_error_count</a></li>
+        <li><a href="#litestream_sync_seconds">litestream_sync_seconds</a></li>
+        <li><a href="#litestream_checkpoint_count">litestream_checkpoint_count</a></li>
+        <li><a href="#litestream_checkpoint_error_count">litestream_checkpoint_error_count</a></li>
+        <li><a href="#litestream_checkpoint_seconds">litestream_checkpoint_seconds</a></li>
+      </ul>
+    </li>
+    <li><a href="#replica-metrics">Replica Metrics</a>
+      <ul>
+        <li><a href="#litestream_replica_operation_total">litestream_replica_operation_total</a></li>
+        <li><a href="#litestream_replica_operation_bytes">litestream_replica_operation_bytes</a></li>
+      </ul>
+    </li>
+    <li><a href="#example-prometheus-queries">Example Prometheus Queries</a>
+      <ul>
+        <li><a href="#replication-lag">Replication Lag</a></li>
+        <li><a href="#sync-error-rate">Sync Error Rate</a></li>
+        <li><a href="#data-transfer-rate">Data Transfer Rate</a></li>
+        <li><a href="#database-growth">Database Growth</a></li>
+      </ul>
+    </li>
+    <li><a href="#alerting-examples">Alerting Examples</a></li>
+    <li><a href="#grafana-dashboard">Grafana Dashboard</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>Prometheus Metrics</h1>
+			<p class="lead"></p>
+			<p>Litestream exposes metrics in <a href="https://prometheus.io/">Prometheus</a> format for
+monitoring replication health and performance. Metrics are disabled by default
+and require enabling the HTTP server.</p>
+<h2 id="enabling-metrics">Enabling Metrics<a href="#enabling-metrics" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Add an <code>addr</code> field to your configuration file to enable the metrics endpoint:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
+</span></span></span></code></pre></div><p>Metrics will be available at <code>http://localhost:9090/metrics</code>.</p>
+<h2 id="database-metrics">Database Metrics<a href="#database-metrics" class="anchor" aria-hidden="true">#</a> </h2>
+<p>These metrics track the state and operations of each replicated database. All
+database metrics include a <code>db</code> label containing the absolute path to the
+database file.</p>
+<h3 id="litestream_db_size">litestream_db_size<a href="#litestream_db_size" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Gauge</p>
+<p>The current size of the database file in bytes.</p>
+<pre tabindex="0"><code>litestream_db_size{db=&#34;/var/lib/myapp.db&#34;} 4194304
+</code></pre><h3 id="litestream_wal_size">litestream_wal_size<a href="#litestream_wal_size" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Gauge</p>
+<p>The current size of the WAL (Write-Ahead Log) file in bytes.</p>
+<pre tabindex="0"><code>litestream_wal_size{db=&#34;/var/lib/myapp.db&#34;} 32768
+</code></pre><h3 id="litestream_total_wal_bytes">litestream_total_wal_bytes<a href="#litestream_total_wal_bytes" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter</p>
+<p>Total number of bytes written to the shadow WAL since Litestream started. This
+metric is cumulative and only increases.</p>
+<pre tabindex="0"><code>litestream_total_wal_bytes{db=&#34;/var/lib/myapp.db&#34;} 1048576
+</code></pre><h3 id="litestream_txid">litestream_txid<a href="#litestream_txid" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Gauge</p>
+<p>The current transaction ID (TXID) of the database. This value increases with
+each SQLite transaction.</p>
+<pre tabindex="0"><code>litestream_txid{db=&#34;/var/lib/myapp.db&#34;} 42
+</code></pre><h3 id="litestream_sync_count">litestream_sync_count<a href="#litestream_sync_count" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter</p>
+<p>Number of sync operations performed. A sync operation copies WAL frames to the
+shadow WAL for replication.</p>
+<pre tabindex="0"><code>litestream_sync_count{db=&#34;/var/lib/myapp.db&#34;} 150
+</code></pre><h3 id="litestream_sync_error_count">litestream_sync_error_count<a href="#litestream_sync_error_count" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter</p>
+<p>Number of sync errors that have occurred. Monitor this metric for replication
+health—any non-zero growth indicates sync failures.</p>
+<pre tabindex="0"><code>litestream_sync_error_count{db=&#34;/var/lib/myapp.db&#34;} 0
+</code></pre><h3 id="litestream_sync_seconds">litestream_sync_seconds<a href="#litestream_sync_seconds" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter</p>
+<p>Cumulative time spent syncing shadow WAL, in seconds. Divide by <code>litestream_sync_count</code>
+to get average sync duration.</p>
+<pre tabindex="0"><code>litestream_sync_seconds{db=&#34;/var/lib/myapp.db&#34;} 0.523
+</code></pre><h3 id="litestream_checkpoint_count">litestream_checkpoint_count<a href="#litestream_checkpoint_count" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter
+<strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
+<p>Number of checkpoint operations performed. The <code>mode</code> label indicates the
+checkpoint type: <code>passive</code> or <code>truncate</code>.</p>
+<pre tabindex="0"><code>litestream_checkpoint_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;passive&#34;} 60
+litestream_checkpoint_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;truncate&#34;} 1
+</code></pre><h3 id="litestream_checkpoint_error_count">litestream_checkpoint_error_count<a href="#litestream_checkpoint_error_count" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter
+<strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
+<p>Number of checkpoint errors that have occurred, grouped by checkpoint mode.</p>
+<pre tabindex="0"><code>litestream_checkpoint_error_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;passive&#34;} 0
+litestream_checkpoint_error_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;truncate&#34;} 0
+</code></pre><h3 id="litestream_checkpoint_seconds">litestream_checkpoint_seconds<a href="#litestream_checkpoint_seconds" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter
+<strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
+<p>Cumulative time spent checkpointing, in seconds, grouped by checkpoint mode.</p>
+<pre tabindex="0"><code>litestream_checkpoint_seconds{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;passive&#34;} 1.234
+</code></pre><h2 id="replica-metrics">Replica Metrics<a href="#replica-metrics" class="anchor" aria-hidden="true">#</a> </h2>
+<p>These metrics track operations performed against replicas (S3, GCS, Azure, etc.).</p>
+<h3 id="litestream_replica_operation_total">litestream_replica_operation_total<a href="#litestream_replica_operation_total" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter
+<strong>Labels:</strong> <code>replica_type</code>, <code>operation</code></p>
+<p>The number of replica operations performed. The <code>replica_type</code> label indicates
+the storage backend (e.g., <code>s3</code>, <code>gcs</code>, <code>abs</code>, <code>file</code>). The <code>operation</code> label
+indicates the operation type.</p>
+<pre tabindex="0"><code>litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;put&#34;} 100
+litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;get&#34;} 25
+litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;delete&#34;} 10
+</code></pre><h3 id="litestream_replica_operation_bytes">litestream_replica_operation_bytes<a href="#litestream_replica_operation_bytes" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter
+<strong>Labels:</strong> <code>replica_type</code>, <code>operation</code></p>
+<p>The number of bytes transferred by replica operations.</p>
+<pre tabindex="0"><code>litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;put&#34;} 52428800
+litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;get&#34;} 4194304
+</code></pre><h2 id="example-prometheus-queries">Example Prometheus Queries<a href="#example-prometheus-queries" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="replication-lag">Replication Lag<a href="#replication-lag" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Calculate the average sync duration over the last 5 minutes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_sync_seconds</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_sync_count</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
+</span></span></span></code></pre></div><h3 id="sync-error-rate">Sync Error Rate<a href="#sync-error-rate" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Calculate the sync error rate:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_sync_error_count</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
+</span></span></span></code></pre></div><h3 id="data-transfer-rate">Data Transfer Rate<a href="#data-transfer-rate" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Calculate bytes uploaded to S3 per second:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_replica_operation_bytes</span><span class="p">{</span><span class="nl">operation</span><span class="o">=</span><span class="p">&#34;</span><span class="s">put</span><span class="p">&#34;}[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
+</span></span></span></code></pre></div><h3 id="database-growth">Database Growth<a href="#database-growth" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Track database size growth:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="nv">litestream_db_size</span><span class="w">
+</span></span></span></code></pre></div><h2 id="alerting-examples">Alerting Examples<a href="#alerting-examples" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Example Prometheus alerting rules:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">groups</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">rules</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">LitestreamSyncErrors</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">increase(litestream_sync_error_count[5m]) &gt; 0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l">warning</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Litestream sync errors detected&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Database {{ $labels.db }} has sync errors&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l">LitestreamReplicationStopped</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l">increase(litestream_sync_count[10m]) == 0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l">critical</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">annotations</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;Litestream replication appears stopped&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;No sync operations for database {{ $labels.db }}&#34;</span><span class="w">
+</span></span></span></code></pre></div><h2 id="grafana-dashboard">Grafana Dashboard<a href="#grafana-dashboard" class="anchor" aria-hidden="true">#</a> </h2>
+<p>A basic Grafana dashboard can visualize these metrics. Key panels to include:</p>
+<ul>
+<li>Database size over time (<code>litestream_db_size</code>)</li>
+<li>Sync operations per second (<code>rate(litestream_sync_count[1m])</code>)</li>
+<li>Sync error rate (<code>rate(litestream_sync_error_count[1m])</code>)</li>
+<li>Replica bytes transferred (<code>rate(litestream_replica_operation_bytes[1m])</code>)</li>
+<li>WAL size (<code>litestream_wal_size</code>)</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/reference/vfs/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; VFS Extension
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/reference/databases/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Command: databases &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.dc041d8ccb6cff5cd718411c91f8ee3e3d1cd9f2405559ad1540238fe786e88d7264f353051f38868faf98499c86059506aba0c9ba872893acc2055202b3a3a3.js" integrity="sha512-3AQdjMts/1zXGEEckfjuPj0c2fJAVVmtFUAjj&#43;eG6I1yZPNTBR84ho&#43;vmEmchgWVBqugybqHKJOswgVSArOjow==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
