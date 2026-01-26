@@ -1,8 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Discussions
-    url: https://github.com/benbjohnson/litestream/discussions
-    about: Ask questions and discuss Litestream features
   - name: Litestream Repository
     url: https://github.com/benbjohnson/litestream
     about: Report bugs or request features in Litestream itself

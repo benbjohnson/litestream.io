@@ -199,13 +199,12 @@ Started](/getting-started) can get you up and running in less than 10 minutes.
 
 I'm interested to hear from others that want to simplify and improve application
 development. If you have ideas or thoughts about the future of Litestream,
-please get in touch on the [GitHub Discussions board][discussions] and drop me a
-line.
+please get in touch on [GitHub Issues][issues] and drop me a line.
 
 _Update: This post sparked a lot of discussion on Hacker News that you can [read here][hn]._
 
 —Ben Johnson ([@benbjohnson](https://twitter.com/benbjohnson))
 
 [replicas]: https://github.com/benbjohnson/litestream/issues/8
-[discussions]: https://github.com/benbjohnson/litestream/discussions
+[issues]: https://github.com/benbjohnson/litestream/issues
 [hn]: https://news.ycombinator.com/item?id=26103776
