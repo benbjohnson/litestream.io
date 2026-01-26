@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.3d00da4403468933e125edaaa0fd3f1c4dacf6d970d5130de45fa62f952af339aa6f9f622f4a35891e84d43de4e54156ed6fad0512598680291fb62f17e96153.css" integrity="sha512-PQDaRANGiTPhJe2qoP0/HE2s9tlw1RMN5F&#43;mL5Uq8zmqb59iL0o1iR6E1D3k5UFW7W&#43;tBRJZhoApH7YvF&#43;lhUw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -91,9 +91,6 @@
         <li class="nav-item">
             <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
           </li>
-        <li class="nav-item">
-            <a class="nav-link" href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Slack</a>
-          </li>
         </ul>
       <div class="break order-6 d-md-none"></div>
     </div>
@@ -106,12 +103,193 @@
     <div class="wrap container" role="document">
       <div class="content">
         
-<div class="row justify-content-center">
-  <div class="col-md-12 col-lg-10 col-xl-8">
-    <article>
-      <h1>Troubleshooting</h1>
-      <h2 id="configuration-issues">Configuration Issues</h2>
-<h3 id="invalid-configuration-file">Invalid Configuration File</h3>
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/linux/">Linux</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/go-library/">Using Litestream as a Go Library</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-write-mode/">VFS Write Mode</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-hydration/">VFS Hydration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#configuration-issues">Configuration Issues</a>
+      <ul>
+        <li><a href="#invalid-configuration-file">Invalid Configuration File</a></li>
+      </ul>
+    </li>
+    <li><a href="#managing-credentials-securely">Managing Credentials Securely</a>
+      <ul>
+        <li><a href="#best-practices">Best Practices</a></li>
+        <li><a href="#environment-variable-expansion">Environment Variable Expansion</a></li>
+        <li><a href="#kubernetes-secrets">Kubernetes Secrets</a></li>
+        <li><a href="#docker-secrets">Docker Secrets</a></li>
+        <li><a href="#azure-with-managed-identity">Azure with Managed Identity</a></li>
+        <li><a href="#credential-security-checklist">Credential Security Checklist</a></li>
+        <li><a href="#database-path-issues">Database Path Issues</a></li>
+        <li><a href="#mcp-server-wont-start">MCP Server Won&rsquo;t Start</a></li>
+      </ul>
+    </li>
+    <li><a href="#replication-issues">Replication Issues</a>
+      <ul>
+        <li><a href="#s3-connection-failures">S3 Connection Failures</a></li>
+        <li><a href="#nats-connection-issues">NATS Connection Issues</a></li>
+        <li><a href="#slow-replication">Slow Replication</a></li>
+      </ul>
+    </li>
+    <li><a href="#database-issues">Database Issues</a>
+      <ul>
+        <li><a href="#wal-mode-problems">WAL Mode Problems</a></li>
+        <li><a href="#database-locks">Database Locks</a></li>
+        <li><a href="#wal-growth-and-checkpoint-blocking">WAL Growth and Checkpoint Blocking</a></li>
+        <li><a href="#corruption-detection">Corruption Detection</a></li>
+      </ul>
+    </li>
+    <li><a href="#performance-issues">Performance Issues</a>
+      <ul>
+        <li><a href="#high-cpu-usage">High CPU Usage</a></li>
+        <li><a href="#memory-issues">Memory Issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#network-and-connectivity">Network and Connectivity</a>
+      <ul>
+        <li><a href="#intermittent-network-failures">Intermittent Network Failures</a></li>
+        <li><a href="#dns-resolution-issues">DNS Resolution Issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#logging-and-debugging">Logging and Debugging</a>
+      <ul>
+        <li><a href="#enabling-debug-logging">Enabling Debug Logging</a></li>
+        <li><a href="#reading-logs">Reading Logs</a></li>
+        <li><a href="#important-log-messages">Important Log Messages</a></li>
+      </ul>
+    </li>
+    <li><a href="#recovery-and-restore">Recovery and Restore</a>
+      <ul>
+        <li><a href="#point-in-time-recovery">Point-in-Time Recovery</a></li>
+        <li><a href="#backup-validation">Backup Validation</a></li>
+      </ul>
+    </li>
+    <li><a href="#operations-that-invalidate-tracking-state">Operations That Invalidate Tracking State</a>
+      <ul>
+        <li><a href="#operations-to-avoid">Operations to avoid</a></li>
+        <li><a href="#in-place-vacuum">In-place VACUUM</a></li>
+        <li><a href="#symptoms-of-corrupted-tracking-state">Symptoms of corrupted tracking state</a></li>
+      </ul>
+    </li>
+    <li><a href="#recovering-from-corrupted-tracking-state">Recovering from Corrupted Tracking State</a>
+      <ul>
+        <li><a href="#recovery-procedure">Recovery procedure</a></li>
+        <li><a href="#verifying-recovery">Verifying recovery</a></li>
+        <li><a href="#preventing-future-issues">Preventing future issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#getting-help">Getting Help</a>
+      <ul>
+        <li><a href="#before-asking-for-help">Before Asking for Help</a></li>
+        <li><a href="#where-to-get-help">Where to Get Help</a></li>
+        <li><a href="#reporting-issues">Reporting Issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#sqlite-driver-issues-v050">SQLite Driver Issues (v0.5.0+)</a>
+      <ul>
+        <li><a href="#pragma-configuration-errors">PRAGMA Configuration Errors</a></li>
+        <li><a href="#busy-timeout-not-working">Busy Timeout Not Working</a></li>
+        <li><a href="#build-errors-with-cgo">Build Errors with CGO</a></li>
+        <li><a href="#performance-differences">Performance Differences</a></li>
+      </ul>
+    </li>
+    <li><a href="#common-error-reference">Common Error Reference</a></li>
+    <li><a href="#next-steps">Next Steps</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9">
+		<h1>Troubleshooting</h1>
+			<p class="lead">Find solutions to common problems when using Litestream for SQLite replication.</p>
+			<h2 id="configuration-issues">Configuration Issues<a href="#configuration-issues" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="invalid-configuration-file">Invalid Configuration File<a href="#invalid-configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>yaml: unmarshal errors</code> or <code>cannot parse config</code></p>
 <p><strong>Solution</strong>: Validate your YAML syntax:</p>
 <ul>
@@ -130,10 +308,10 @@
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path</span><span class="w">
-</span></span></span></code></pre></div><h2 id="managing-credentials-securely">Managing Credentials Securely</h2>
+</span></span></span></code></pre></div><h2 id="managing-credentials-securely">Managing Credentials Securely<a href="#managing-credentials-securely" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Properly securing credentials is critical for Litestream deployments. This section
 covers best practices for credential management across different deployment scenarios.</p>
-<h3 id="best-practices">Best Practices</h3>
+<h3 id="best-practices">Best Practices<a href="#best-practices" class="anchor" aria-hidden="true">#</a> </h3>
 <ol>
 <li><strong>Never commit credentials to version control</strong> — Use <code>.gitignore</code> to exclude
 configuration files containing sensitive data</li>
@@ -146,7 +324,7 @@ use case (principle of least privilege)</li>
 <li><strong>Rotate credentials regularly</strong> — Update access keys and secrets periodically</li>
 <li><strong>Audit access</strong> — Monitor credential usage through cloud provider logs</li>
 </ol>
-<h3 id="environment-variable-expansion">Environment Variable Expansion</h3>
+<h3 id="environment-variable-expansion">Environment Variable Expansion<a href="#environment-variable-expansion" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream automatically expands <code>$VAR</code> and <code>${VAR}</code> references in configuration files.
 This is the simplest way to pass credentials without embedding them in files:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
@@ -161,7 +339,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span><span class="line"><span class="cl">litestream replicate
 </span></span></code></pre></div><p>To disable environment variable expansion if it conflicts with your values:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream replicate -no-expand-env
-</span></span></code></pre></div><h3 id="kubernetes-secrets">Kubernetes Secrets</h3>
+</span></span></code></pre></div><h3 id="kubernetes-secrets">Kubernetes Secrets<a href="#kubernetes-secrets" class="anchor" aria-hidden="true">#</a> </h3>
 <p>For Kubernetes deployments, mount credentials as environment variables from Secrets:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">Secret</span><span class="w">
@@ -236,7 +414,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">env</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">GOOGLE_APPLICATION_CREDENTIALS</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l">/var/run/secrets/cloud.google.com/service_account/key.json</span><span class="w">
-</span></span></span></code></pre></div><h3 id="docker-secrets">Docker Secrets</h3>
+</span></span></span></code></pre></div><h3 id="docker-secrets">Docker Secrets<a href="#docker-secrets" class="anchor" aria-hidden="true">#</a> </h3>
 <p>For Docker Swarm deployments, use Docker Secrets:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.8&#39;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
@@ -266,7 +444,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="k">$(</span>cat /run/secrets/aws_access_key_id<span class="k">)</span>
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="k">$(</span>cat /run/secrets/aws_secret_access_key<span class="k">)</span>
 </span></span><span class="line"><span class="cl"><span class="nb">exec</span> litestream replicate
-</span></span></code></pre></div><h3 id="azure-with-managed-identity">Azure with Managed Identity</h3>
+</span></span></code></pre></div><h3 id="azure-with-managed-identity">Azure with Managed Identity<a href="#azure-with-managed-identity" class="anchor" aria-hidden="true">#</a> </h3>
 <p>For Azure deployments, use managed identity instead of shared keys:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Pod with Azure managed identity</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">aad.banzaicloud.com/v1</span><span class="w">
@@ -311,7 +489,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span></span><span class="line"><span class="cl"><span class="sd">        replica:
 </span></span></span><span class="line"><span class="cl"><span class="sd">          url: abs://account@myaccount.blob.core.windows.net/container/db
 </span></span></span><span class="line"><span class="cl"><span class="sd">          # Managed identity authentication (no keys needed)</span><span class="w">    
-</span></span></span></code></pre></div><h3 id="credential-security-checklist">Credential Security Checklist</h3>
+</span></span></span></code></pre></div><h3 id="credential-security-checklist">Credential Security Checklist<a href="#credential-security-checklist" class="anchor" aria-hidden="true">#</a> </h3>
 <ul>
 <li>✅ Credentials stored in environment variables or secret management systems</li>
 <li>✅ Configuration files never committed to version control with credentials</li>
@@ -322,7 +500,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 <li>✅ Database backup location is restricted to authorized users</li>
 <li>✅ Network access to cloud storage is restricted to necessary services</li>
 </ul>
-<h3 id="database-path-issues">Database Path Issues</h3>
+<h3 id="database-path-issues">Database Path Issues<a href="#database-path-issues" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>no such file or directory</code> or <code>database is locked</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -332,7 +510,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Set busy timeout in your application
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">busy_timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="p">;</span><span class="w">
-</span></span></span></code></pre></div><h3 id="mcp-server-wont-start">MCP Server Won&rsquo;t Start</h3>
+</span></span></span></code></pre></div><h3 id="mcp-server-wont-start">MCP Server Won&rsquo;t Start<a href="#mcp-server-wont-start" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>bind: address already in use</code></p>
 <p><strong>Solution</strong>: Check if another process is using the MCP port:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check what&#39;s using port 3001</span>
@@ -340,8 +518,8 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Use a different port in configuration</span>
 </span></span><span class="line"><span class="cl">mcp-addr: <span class="s2">&#34;:3002&#34;</span>
-</span></span></code></pre></div><h2 id="replication-issues">Replication Issues</h2>
-<h3 id="s3-connection-failures">S3 Connection Failures</h3>
+</span></span></code></pre></div><h2 id="replication-issues">Replication Issues<a href="#replication-issues" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="s3-connection-failures">S3 Connection Failures<a href="#s3-connection-failures" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>NoCredentialsProviders</code> or <code>access denied</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -372,7 +550,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div></li>
 </ol>
-<h3 id="nats-connection-issues">NATS Connection Issues</h3>
+<h3 id="nats-connection-issues">NATS Connection Issues<a href="#nats-connection-issues" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>connection refused</code> or <code>authentication failed</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -393,7 +571,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">pass</span><span class="w">
 </span></span></span></code></pre></div></li>
 </ol>
-<h3 id="slow-replication">Slow Replication</h3>
+<h3 id="slow-replication">Slow Replication<a href="#slow-replication" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Symptoms</strong>: High lag between database changes and replica updates</p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -414,14 +592,14 @@ This is the simplest way to pass credentials without embedding them in files:</p
 <p>Consider using local file replica for testing performance</p>
 </li>
 </ol>
-<h2 id="database-issues">Database Issues</h2>
-<h3 id="wal-mode-problems">WAL Mode Problems</h3>
+<h2 id="database-issues">Database Issues<a href="#database-issues" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="wal-mode-problems">WAL Mode Problems<a href="#wal-mode-problems" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>database is not in WAL mode</code></p>
 <p><strong>Solution</strong>: Litestream requires WAL mode. Enable it in your application:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Enable WAL mode
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">journal_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WAL</span><span class="p">;</span><span class="w">
 </span></span></span></code></pre></div><p>Or let Litestream enable it automatically by ensuring proper database permissions.</p>
-<h3 id="database-locks">Database Locks</h3>
+<h3 id="database-locks">Database Locks<a href="#database-locks" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>database is locked</code> or <code>SQLITE_BUSY</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -429,7 +607,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 <li>Ensure no long-running transactions are blocking checkpoints</li>
 <li>Check for applications holding exclusive locks</li>
 </ol>
-<h3 id="wal-growth-and-checkpoint-blocking">WAL Growth and Checkpoint Blocking</h3>
+<h3 id="wal-growth-and-checkpoint-blocking">WAL Growth and Checkpoint Blocking<a href="#wal-growth-and-checkpoint-blocking" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Symptoms</strong>: WAL file growing excessively large or writes timing out</p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -451,7 +629,7 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </ol>
 <p>For detailed guidance on checkpoint configuration and trade-offs, see the <a href="/guides/wal-truncate-threshold">WAL
 Truncate Threshold Configuration guide</a>.</p>
-<h3 id="corruption-detection">Corruption Detection</h3>
+<h3 id="corruption-detection">Corruption Detection<a href="#corruption-detection" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>database disk image is malformed</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -467,8 +645,8 @@ Truncate Threshold Configuration guide</a>.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /path/to/recovered.db /path/to/db.sqlite
 </span></span></code></pre></div></li>
 </ol>
-<h2 id="performance-issues">Performance Issues</h2>
-<h3 id="high-cpu-usage">High CPU Usage</h3>
+<h2 id="performance-issues">Performance Issues<a href="#performance-issues" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="high-cpu-usage">High CPU Usage<a href="#high-cpu-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Symptoms</strong>: Litestream consuming excessive CPU (100%+ sustained)</p>
 <p><strong>Common Causes</strong>:</p>
 <ol>
@@ -505,7 +683,7 @@ Truncate Threshold Configuration guide</a>.</p>
 <p><strong>Reset corrupted state</strong> — See <a href="#recovering-from-corrupted-tracking-state">Recovering from corrupted tracking state</a></p>
 </li>
 </ol>
-<h3 id="memory-issues">Memory Issues</h3>
+<h3 id="memory-issues">Memory Issues<a href="#memory-issues" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Symptoms</strong>: High memory usage or out-of-memory errors</p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -519,8 +697,8 @@ Truncate Threshold Configuration guide</a>.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h </span><span class="w"> </span><span class="c"># Keep fewer snapshots</span><span class="w">
 </span></span></span></code></pre></div></li>
 </ol>
-<h2 id="network-and-connectivity">Network and Connectivity</h2>
-<h3 id="intermittent-network-failures">Intermittent Network Failures</h3>
+<h2 id="network-and-connectivity">Network and Connectivity<a href="#network-and-connectivity" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="intermittent-network-failures">Intermittent Network Failures<a href="#intermittent-network-failures" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>connection reset by peer</code> or <code>timeout</code></p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -542,7 +720,7 @@ Truncate Threshold Configuration guide</a>.</p>
 <p>For production, use a configuration file to persist your settings (see <a href="https://litestream.io/reference/config/">Configuration Reference</a>)</p>
 </li>
 </ol>
-<h3 id="dns-resolution-issues">DNS Resolution Issues</h3>
+<h3 id="dns-resolution-issues">DNS Resolution Issues<a href="#dns-resolution-issues" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>no such host</code> or DNS timeouts</p>
 <p><strong>Solution</strong>:</p>
 <ol>
@@ -557,14 +735,14 @@ Truncate Threshold Configuration guide</a>.</p>
 <p>Check <code>/etc/resolv.conf</code> configuration</p>
 </li>
 </ol>
-<h2 id="logging-and-debugging">Logging and Debugging</h2>
-<h3 id="enabling-debug-logging">Enabling Debug Logging</h3>
+<h2 id="logging-and-debugging">Logging and Debugging<a href="#logging-and-debugging" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="enabling-debug-logging">Enabling Debug Logging<a href="#enabling-debug-logging" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Add debug logging to your configuration:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span></span></span></code></pre></div><h3 id="reading-logs">Reading Logs</h3>
+</span></span></span></code></pre></div><h3 id="reading-logs">Reading Logs<a href="#reading-logs" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Common log locations:</p>
 <ul>
 <li><strong>Linux systemd</strong>: <code>journalctl -u litestream</code></li>
@@ -572,7 +750,7 @@ Truncate Threshold Configuration guide</a>.</p>
 <li><strong>Windows Service</strong>: Event Viewer → Application → Litestream</li>
 <li><strong>Command Line</strong>: stdout/stderr</li>
 </ul>
-<h3 id="important-log-messages">Important Log Messages</h3>
+<h3 id="important-log-messages">Important Log Messages<a href="#important-log-messages" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Look for these key messages:</p>
 <ul>
 <li><code>initialized db</code>: Database successfully loaded</li>
@@ -580,26 +758,26 @@ Truncate Threshold Configuration guide</a>.</p>
 <li><code>sync error</code>: Replication issues</li>
 <li><code>checkpoint completed</code>: Successful WAL checkpoint</li>
 </ul>
-<h2 id="recovery-and-restore">Recovery and Restore</h2>
-<h3 id="point-in-time-recovery">Point-in-Time Recovery</h3>
+<h2 id="recovery-and-restore">Recovery and Restore<a href="#recovery-and-restore" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="point-in-time-recovery">Point-in-Time Recovery<a href="#point-in-time-recovery" class="anchor" aria-hidden="true">#</a> </h3>
 <p>List available restore points:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream ltx /path/to/db.sqlite
 </span></span></code></pre></div><p>Restore to specific time:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -timestamp 2025-01-01T12:00:00Z -o restored.db /path/to/db.sqlite
-</span></span></code></pre></div><h3 id="backup-validation">Backup Validation</h3>
+</span></span></code></pre></div><h3 id="backup-validation">Backup Validation<a href="#backup-validation" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Verify backup integrity:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Restore to temporary location</span>
 </span></span><span class="line"><span class="cl">litestream restore -o /tmp/test.db /path/to/db.sqlite
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Run integrity check</span>
 </span></span><span class="line"><span class="cl">sqlite3 /tmp/test.db <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
-</span></span></code></pre></div><h2 id="operations-that-invalidate-tracking-state">Operations That Invalidate Tracking State</h2>
+</span></span></code></pre></div><h2 id="operations-that-invalidate-tracking-state">Operations That Invalidate Tracking State<a href="#operations-that-invalidate-tracking-state" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream maintains internal tracking state in <code>.{filename}-litestream</code> directories
 (e.g., <code>.db.sqlite-litestream</code> for a database file named <code>db.sqlite</code>) to efficiently
 replicate changes. Certain operations can corrupt or invalidate
 this tracking, leading to high CPU usage, replication errors, or state mismatch
 between local tracking and remote replicas.</p>
-<h3 id="operations-to-avoid">Operations to avoid</h3>
+<h3 id="operations-to-avoid">Operations to avoid<a href="#operations-to-avoid" class="anchor" aria-hidden="true">#</a> </h3>
 <table>
 <thead>
 <tr>
@@ -631,7 +809,7 @@ between local tracking and remote replicas.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="in-place-vacuum">In-place VACUUM</h3>
+<h3 id="in-place-vacuum">In-place VACUUM<a href="#in-place-vacuum" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The SQLite <code>VACUUM</code> command rewrites the entire database file. Litestream tracks
 changes at the page level, so a full rewrite invalidates all tracking state.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Dangerous: Invalidates Litestream tracking
@@ -647,7 +825,7 @@ changes at the page level, so a full rewrite invalidates all tracking state.</p>
 <li>Delete the remote replica data (start fresh)</li>
 <li>Restart Litestream</li>
 </ol>
-<h3 id="symptoms-of-corrupted-tracking-state">Symptoms of corrupted tracking state</h3>
+<h3 id="symptoms-of-corrupted-tracking-state">Symptoms of corrupted tracking state<a href="#symptoms-of-corrupted-tracking-state" class="anchor" aria-hidden="true">#</a> </h3>
 <ul>
 <li>
 <p><strong>High CPU usage</strong> (100%+) even when database is idle</p>
@@ -667,7 +845,7 @@ changes at the page level, so a full rewrite invalidates all tracking state.</p>
 <pre tabindex="0"><code>level=INFO msg=&#34;detected database behind replica&#34; db_txid=0000000000000000 replica_txid=0000000000000001
 </code></pre></li>
 </ul>
-<h2 id="recovering-from-corrupted-tracking-state">Recovering from Corrupted Tracking State</h2>
+<h2 id="recovering-from-corrupted-tracking-state">Recovering from Corrupted Tracking State<a href="#recovering-from-corrupted-tracking-state" class="anchor" aria-hidden="true">#</a> </h2>
 <p>When Litestream&rsquo;s tracking state becomes corrupted, a complete state reset is
 required. This procedure removes all local tracking and remote replica data,
 forcing a fresh snapshot.</p>
@@ -675,7 +853,7 @@ forcing a fresh snapshot.</p>
   <div class="flex-shrink-1 alert-icon">⚠️</div>
   <div class="w-100">**Warning**: This procedure deletes your replica history. You will lose the ability to do point-in-time recovery to timestamps before the reset. Only proceed if you have confirmed tracking corruption.</div>
 </div>
-<h3 id="recovery-procedure">Recovery procedure</h3>
+<h3 id="recovery-procedure">Recovery procedure<a href="#recovery-procedure" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. Stop Litestream</span>
 </span></span><span class="line"><span class="cl">sudo systemctl stop litestream
 </span></span><span class="line"><span class="cl">
@@ -702,7 +880,7 @@ forcing a fresh snapshot.</p>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 6. Restart Litestream</span>
 </span></span><span class="line"><span class="cl">sudo systemctl start litestream
-</span></span></code></pre></div><h3 id="verifying-recovery">Verifying recovery</h3>
+</span></span></code></pre></div><h3 id="verifying-recovery">Verifying recovery<a href="#verifying-recovery" class="anchor" aria-hidden="true">#</a> </h3>
 <p>After restarting, verify Litestream has recovered:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Check CPU usage is normal (should be near 0% when idle)</span>
 </span></span><span class="line"><span class="cl">pidstat -p <span class="k">$(</span>pgrep litestream<span class="k">)</span> <span class="m">1</span> <span class="m">5</span>
@@ -710,7 +888,7 @@ forcing a fresh snapshot.</p>
 </span></span><span class="line"><span class="cl"><span class="c1"># Check logs for successful snapshot</span>
 </span></span><span class="line"><span class="cl">journalctl -u litestream -f
 </span></span><span class="line"><span class="cl"><span class="c1"># Should see: &#34;snapshot written&#34; or similar</span>
-</span></span></code></pre></div><h3 id="preventing-future-issues">Preventing future issues</h3>
+</span></span></code></pre></div><h3 id="preventing-future-issues">Preventing future issues<a href="#preventing-future-issues" class="anchor" aria-hidden="true">#</a> </h3>
 <ol>
 <li>
 <p><strong>Avoid in-place VACUUM</strong> — Use <code>VACUUM INTO</code> instead</p>
@@ -726,22 +904,20 @@ forcing a fresh snapshot.</p>
 <p><strong>Kill zombie connections</strong> — Ensure application processes don&rsquo;t hold long-lived read locks</p>
 </li>
 </ol>
-<h2 id="getting-help">Getting Help</h2>
-<h3 id="before-asking-for-help">Before Asking for Help</h3>
+<h2 id="getting-help">Getting Help<a href="#getting-help" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="before-asking-for-help">Before Asking for Help<a href="#before-asking-for-help" class="anchor" aria-hidden="true">#</a> </h3>
 <ol>
 <li><strong>Check the logs</strong> for error messages (use debug level)</li>
 <li><strong>Test with minimal config</strong> to isolate the issue</li>
 <li><strong>Verify versions</strong>: Ensure you&rsquo;re using compatible Litestream version</li>
 <li><strong>Search existing issues</strong> on GitHub</li>
 </ol>
-<h3 id="where-to-get-help">Where to Get Help</h3>
+<h3 id="where-to-get-help">Where to Get Help<a href="#where-to-get-help" class="anchor" aria-hidden="true">#</a> </h3>
 <ul>
 <li><strong>GitHub Issues</strong>: <a href="https://github.com/benbjohnson/litestream/issues">github.com/benbjohnson/litestream/issues</a></li>
-<li><strong>GitHub Discussions</strong>: <a href="https://github.com/benbjohnson/litestream/discussions">github.com/benbjohnson/litestream/discussions</a></li>
-<li><strong>Slack Community</strong>: <a href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Join Litestream Slack</a></li>
 <li><strong>Documentation</strong>: Review <a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
 </ul>
-<h3 id="reporting-issues">Reporting Issues</h3>
+<h3 id="reporting-issues">Reporting Issues<a href="#reporting-issues" class="anchor" aria-hidden="true">#</a> </h3>
 <p>When reporting issues on GitHub, the bug report template will ask for:</p>
 <ul>
 <li><strong>Bug Description</strong>: Clear description of the issue</li>
@@ -751,12 +927,12 @@ forcing a fresh snapshot.</p>
 <li><strong>Logs</strong>: Relevant log output with debug level enabled</li>
 <li><strong>Additional Context</strong>: Recent changes, related issues, workarounds attempted</li>
 </ul>
-<h2 id="sqlite-driver-issues-v050">SQLite Driver Issues (v0.5.0+)</h2>
+<h2 id="sqlite-driver-issues-v050">SQLite Driver Issues (v0.5.0+)<a href="#sqlite-driver-issues-v050" class="anchor" aria-hidden="true">#</a> </h2>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
 </span>
  Litestream migrated from <code>mattn/go-sqlite3</code> to <code>modernc.org/sqlite</code>. This section covers issues specific to this change.</p>
-<h3 id="pragma-configuration-errors">PRAGMA Configuration Errors</h3>
+<h3 id="pragma-configuration-errors">PRAGMA Configuration Errors<a href="#pragma-configuration-errors" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: PRAGMAs not taking effect or <code>unknown pragma</code> errors</p>
 <p><strong>Solution</strong>: v0.5.0+ uses different PRAGMA syntax in connection strings:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># OLD (v0.3.x - mattn/go-sqlite3):
@@ -765,7 +941,7 @@ forcing a fresh snapshot.</p>
 </span></span><span class="line"><span class="cl"># NEW (v0.5.0+ - modernc.org/sqlite):
 </span></span><span class="line"><span class="cl">file:/path/to/db?_pragma=busy_timeout(5000)
 </span></span></code></pre></div><p>See the <a href="https://litestream.io/docs/migration/#sqlite-driver-migration">SQLite Driver Migration</a> guide for complete syntax.</p>
-<h3 id="busy-timeout-not-working">Busy Timeout Not Working</h3>
+<h3 id="busy-timeout-not-working">Busy Timeout Not Working<a href="#busy-timeout-not-working" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: <code>SQLITE_BUSY</code> errors despite setting busy timeout</p>
 <p><strong>Solution</strong>: Verify you&rsquo;re using the correct syntax for v0.5.0+:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># Correct v0.5.0+ syntax
@@ -773,12 +949,12 @@ forcing a fresh snapshot.</p>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"># Incorrect (v0.3.x syntax - won&#39;t work in v0.5.0+)
 </span></span><span class="line"><span class="cl">?_busy_timeout=5000
-</span></span></code></pre></div><h3 id="build-errors-with-cgo">Build Errors with CGO</h3>
+</span></span></code></pre></div><h3 id="build-errors-with-cgo">Build Errors with CGO<a href="#build-errors-with-cgo" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Error</strong>: CGO-related build errors when building Litestream</p>
 <p><strong>Solution</strong>: v0.5.0+ does not require cgo for the main binary:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Explicitly disable cgo if you&#39;re seeing cgo errors</span>
 </span></span><span class="line"><span class="cl"><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> go build ./cmd/litestream
-</span></span></code></pre></div><h3 id="performance-differences">Performance Differences</h3>
+</span></span></code></pre></div><h3 id="performance-differences">Performance Differences<a href="#performance-differences" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Symptoms</strong>: Different performance characteristics after upgrading</p>
 <p><strong>Solution</strong>: While <code>modernc.org/sqlite</code> is highly optimized:</p>
 <ol>
@@ -786,7 +962,7 @@ forcing a fresh snapshot.</p>
 <li>The pure Go driver performs comparably for most use cases</li>
 <li>For VFS/experimental features, the cgo driver is still available</li>
 </ol>
-<h2 id="common-error-reference">Common Error Reference</h2>
+<h2 id="common-error-reference">Common Error Reference<a href="#common-error-reference" class="anchor" aria-hidden="true">#</a> </h2>
 <table>
 <thead>
 <tr>
@@ -833,7 +1009,7 @@ forcing a fresh snapshot.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="next-steps">Next Steps</h2>
+<h2 id="next-steps">Next Steps<a href="#next-steps" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
 <li><a href="https://litestream.io/install/">Installation Guide</a></li>
@@ -841,9 +1017,19 @@ forcing a fresh snapshot.</p>
 <li><a href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
 </ul>
 
-    </article>
-  </div>
-</div>
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/docs/migration/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Migration Guide
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
 
       </div>
     </div>
@@ -853,7 +1039,7 @@ forcing a fresh snapshot.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.dc041d8ccb6cff5cd718411c91f8ee3e3d1cd9f2405559ad1540238fe786e88d7264f353051f38868faf98499c86059506aba0c9ba872893acc2055202b3a3a3.js" integrity="sha512-3AQdjMts/1zXGEEckfjuPj0c2fJAVVmtFUAjj&#43;eG6I1yZPNTBR84ho&#43;vmEmchgWVBqugybqHKJOswgVSArOjow==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.12a7da20b2b36c9182458b00e6ce01db0702603ecf3b41e7b14e592bf5b4e669146ee6764334e47c115b5f8a0df680a3e3ab03b5b47d9c585a1736581905e7f8.js" integrity="sha512-EqfaILKzbJGCRYsA5s4B2wcCYD7PO0HnsU5ZK/W05mkUbuZ2QzTkfBFbX4oN9oCj46sDtbR9nFhaFzZYGQXn&#43;A==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

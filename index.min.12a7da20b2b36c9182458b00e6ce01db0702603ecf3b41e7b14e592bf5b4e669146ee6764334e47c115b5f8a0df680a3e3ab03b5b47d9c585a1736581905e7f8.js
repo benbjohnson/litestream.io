@@ -819,7 +819,6 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <h3 id="migration-support">Migration Support</h3>
 <ul>
 <li><strong>Documentation</strong>: <a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
-<li><strong>Community</strong>: <a href="https://github.com/benbjohnson/litestream/discussions">GitHub Discussions</a></li>
 <li><strong>Issues</strong>: <a href="https://github.com/benbjohnson/litestream/issues">Report migration problems</a></li>
 </ul>
 <h3 id="professional-services">Professional Services</h3>
@@ -1463,8 +1462,6 @@ forcing a fresh snapshot.</p>
 <h3 id="where-to-get-help">Where to Get Help</h3>
 <ul>
 <li><strong>GitHub Issues</strong>: <a href="https://github.com/benbjohnson/litestream/issues">github.com/benbjohnson/litestream/issues</a></li>
-<li><strong>GitHub Discussions</strong>: <a href="https://github.com/benbjohnson/litestream/discussions">github.com/benbjohnson/litestream/discussions</a></li>
-<li><strong>Slack Community</strong>: <a href="https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg">Join Litestream Slack</a></li>
 <li><strong>Documentation</strong>: Review <a href="https://litestream.io/reference/config/">Configuration Reference</a></li>
 </ul>
 <h3 id="reporting-issues">Reporting Issues</h3>
