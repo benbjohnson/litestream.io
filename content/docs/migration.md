@@ -1013,7 +1013,6 @@ Always have a rollback plan:
 ### Migration Support
 
 - **Documentation**: [Configuration Reference]({{< ref "/reference/config" >}})
-- **Community**: [GitHub Discussions](https://github.com/benbjohnson/litestream/discussions)
 - **Issues**: [Report migration problems](https://github.com/benbjohnson/litestream/issues)
 
 ### Professional Services
