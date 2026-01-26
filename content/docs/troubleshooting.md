@@ -6,6 +6,7 @@ date: 2025-08-21T00:00:00+00:00
 lastmod: 2025-08-21T00:00:00+00:00
 draft: false
 images: []
+layout: docs
 menu:
   docs:
     parent: "help"
