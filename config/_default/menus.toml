@@ -23,11 +23,6 @@
   url = "https://github.com/benbjohnson/litestream"
   weight = 60
 
-[[main]]
-  name = "Slack"
-  url = "https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg"
-  weight = 70
-
 
 [[docs]]
   name = "Install"
