@@ -589,8 +589,6 @@ sqlite3 /tmp/test.db "PRAGMA integrity_check;"
 ### Where to Get Help
 
 - **GitHub Issues**: [github.com/benbjohnson/litestream/issues](https://github.com/benbjohnson/litestream/issues)
-- **GitHub Discussions**: [github.com/benbjohnson/litestream/discussions](https://github.com/benbjohnson/litestream/discussions)
-- **Slack Community**: [Join Litestream Slack](https://join.slack.com/t/litestream/shared_invite/zt-3ed89j5s4-KODYR5v93N_0vHE_kDWCyg)
 - **Documentation**: Review [Configuration Reference]({{< ref "/reference/config" >}})
 
 ### Reporting Issues
