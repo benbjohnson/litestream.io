@@ -41,6 +41,6 @@ jobs:
           args: >-
             --no-progress
             --offline
-            --root-dir ./public
-            './public/**/*.html'
+            --root-dir ${{ github.workspace }}/public
+            '${{ github.workspace }}/public/**/*.html'
           fail: true
