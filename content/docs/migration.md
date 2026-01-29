@@ -48,10 +48,10 @@ Download and install the new version:
 
 ```bash
 # Download latest stable release (check https://github.com/benbjohnson/litestream/releases)
-wget https://github.com/benbjohnson/litestream/releases/download/v0.5.3/litestream-v0.5.3-linux-amd64.tar.gz
+wget https://github.com/benbjohnson/litestream/releases/download/v0.5.6/litestream-v0.5.6-linux-amd64.tar.gz
 
 # Extract and install
-tar -xzf litestream-v0.5.3-linux-amd64.tar.gz
+tar -xzf litestream-v0.5.6-linux-amd64.tar.gz
 sudo mv litestream /usr/local/bin/
 sudo chmod +x /usr/local/bin/litestream
 
