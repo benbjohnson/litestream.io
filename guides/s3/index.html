@@ -213,6 +213,7 @@ Setup Create an IAM user You will need to set up a user with programmatic access
         <li><a href="#configuration-file-usage-1">Configuration File Usage</a></li>
         <li><a href="#iam-policy-for-access-points">IAM Policy for Access Points</a></li>
         <li><a href="#vpc-endpoint-configuration">VPC Endpoint Configuration</a></li>
+        <li><a href="#troubleshooting-access-points">Troubleshooting Access Points</a></li>
       </ul>
     </li>
     <li><a href="#restrictive-iam-policies">Restrictive IAM Policies</a>
@@ -374,9 +375,67 @@ overridden in the configuration.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/backups</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-2</span><span class="w">
 </span></span></span></code></pre></div><h3 id="iam-policy-for-access-points">IAM Policy for Access Points<a href="#iam-policy-for-access-points" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Access points require appropriate IAM permissions on both the access point and
-the underlying bucket. The following policy grants the minimum permissions
-needed for replication through an access point:</p>
+<p>Access points require IAM permissions on <strong>both</strong> the access point and the
+underlying bucket. For an application to access objects through an access point,
+both the access point policy and the bucket must permit the request.</p>
+<p>There are two approaches to configure this:</p>
+<h4 id="option-1-explicit-permissions-on-both-arns-recommended-for-restrictive-policies">Option 1: Explicit Permissions on Both ARNs (Recommended for Restrictive Policies)<a href="#option-1-explicit-permissions-on-both-arns-recommended-for-restrictive-policies" class="anchor" aria-hidden="true">#</a> </h4>
+<p>The following IAM policy grants permissions on both the access point and the
+underlying bucket ARNs. This approach is useful when you need fine-grained
+control or when the bucket policy doesn&rsquo;t delegate to access points:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetBucketLocation&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:ListBucket&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::my-bucket&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:PutObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:DeleteObject&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;s3:GetObject&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/object/*&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::my-bucket/*&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Replace <code>123456789012</code> with your AWS account ID, <code>us-east-2</code> with your region,
+<code>my-access-point</code> with your access point name, and <code>my-bucket</code> with your bucket name.</p>
+<h4 id="option-2-delegate-access-control-to-access-points-recommended-for-simplified-management">Option 2: Delegate Access Control to Access Points (Recommended for Simplified Management)<a href="#option-2-delegate-access-control-to-access-points-recommended-for-simplified-management" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Add this bucket policy to delegate all access control to your access points:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Principal&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;AWS&#34;</span><span class="p">:</span> <span class="s2">&#34;*&#34;</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="s2">&#34;*&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::my-bucket&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s2">&#34;arn:aws:s3:::my-bucket/*&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">],</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;Condition&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nt">&#34;StringEquals&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="nt">&#34;s3:DataAccessPointAccount&#34;</span><span class="p">:</span> <span class="s2">&#34;123456789012&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>With this bucket policy in place, you only need the access point ARN in your
+IAM policy:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
@@ -399,14 +458,72 @@ needed for replication through an access point:</p>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">]</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>The underlying bucket must also grant access to the access point. See the
-<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html">AWS documentation</a>
-for details on configuring access point and bucket policies together.</p>
+</span></span></code></pre></div><p>See the <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html">AWS documentation</a>
+for more details on configuring access point and bucket policies.</p>
 <h3 id="vpc-endpoint-configuration">VPC Endpoint Configuration<a href="#vpc-endpoint-configuration" class="anchor" aria-hidden="true">#</a> </h3>
-<p>To use VPC-only access points, you must configure a VPC endpoint for S3 in your
-VPC. The access point&rsquo;s network origin must be set to &ldquo;VPC&rdquo; when creating it.
-See <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html">Creating access points restricted to a VPC</a>
-for setup instructions.</p>
+<p>To use VPC-only access points, you must configure a VPC Gateway Endpoint for S3
+in your VPC. Gateway endpoints are free and route traffic through the AWS
+backbone network instead of the public internet, improving security and
+reducing NAT gateway costs.</p>
+<p>The access point&rsquo;s network origin must be set to &ldquo;VPC&rdquo; when creating it.</p>
+<h4 id="terraform-example">Terraform Example<a href="#terraform-example" class="anchor" aria-hidden="true">#</a> </h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-hcl" data-lang="hcl"><span class="line"><span class="cl"><span class="k">resource</span> <span class="s2">&#34;aws_vpc_endpoint&#34; &#34;s3&#34;</span> {
+</span></span><span class="line"><span class="cl"><span class="n">  vpc_id</span>            <span class="o">=</span> <span class="k">aws_vpc</span><span class="p">.</span><span class="k">main</span><span class="p">.</span><span class="k">id</span>
+</span></span><span class="line"><span class="cl"><span class="n">  service_name</span>      <span class="o">=</span> <span class="s2">&#34;com.amazonaws.${var.aws_region}.s3&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">  vpc_endpoint_type</span> <span class="o">=</span> <span class="s2">&#34;Gateway&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">  route_table_ids</span>   <span class="o">=</span> <span class="p">[</span><span class="k">aws_route_table</span><span class="p">.</span><span class="k">private</span><span class="p">.</span><span class="k">id</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">  tags</span> <span class="o">=</span> {
+</span></span><span class="line"><span class="cl"><span class="n">    Name</span> <span class="o">=</span> <span class="s2">&#34;s3-gateway-endpoint&#34;</span>
+</span></span><span class="line"><span class="cl">  }
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></div><h4 id="cloudformation-example">CloudFormation Example<a href="#cloudformation-example" class="anchor" aria-hidden="true">#</a> </h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">Resources</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">S3GatewayEndpoint</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l">AWS::EC2::VPCEndpoint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">Properties</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">VpcId</span><span class="p">:</span><span class="w"> </span>!<span class="l">Ref VPC</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">ServiceName</span><span class="p">:</span><span class="w"> </span>!<span class="l">Sub &#34;com.amazonaws.${AWS::Region}.s3&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">VpcEndpointType</span><span class="p">:</span><span class="w"> </span><span class="l">Gateway</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">RouteTableIds</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- !<span class="l">Ref PrivateRouteTable</span><span class="w">
+</span></span></span></code></pre></div><p>After creating the VPC endpoint, ensure your access point&rsquo;s network origin is
+set to &ldquo;VPC&rdquo; and specifies your VPC ID. See
+<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html">Creating access points restricted to a VPC</a>
+for detailed setup instructions.</p>
+<h3 id="troubleshooting-access-points">Troubleshooting Access Points<a href="#troubleshooting-access-points" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Common errors when configuring S3 access points:</p>
+<table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>no identity-based policy allows the s3:PutObject action</code></td>
+<td>IAM policy not attached to user/role or missing required permissions</td>
+<td>Verify the IAM policy is attached and includes both access point and bucket ARNs (see <a href="#iam-policy-for-access-points">IAM Policy for Access Points</a>)</td>
+</tr>
+<tr>
+<td><code>explicit deny in a resource-based policy</code></td>
+<td>Access point policy or bucket policy is blocking the request</td>
+<td>Check both the access point policy and bucket policy; ensure the bucket delegates to access points or explicitly allows access</td>
+</tr>
+<tr>
+<td><code>Access Denied</code> when using VPC access point</td>
+<td>VPC endpoint not configured or route table not associated</td>
+<td>Create a VPC Gateway Endpoint for S3 and associate it with your private subnet&rsquo;s route table</td>
+</tr>
+<tr>
+<td><code>Could not connect to the endpoint URL</code></td>
+<td>Network cannot reach the access point</td>
+<td>For VPC-only access points, ensure your application runs within the VPC and the VPC endpoint is properly configured</td>
+</tr>
+</tbody>
+</table>
 <h2 id="restrictive-iam-policies">Restrictive IAM Policies<a href="#restrictive-iam-policies" class="anchor" aria-hidden="true">#</a> </h2>
 <p>While specifying <code>AmazonS3FullAccess</code> is an easy way to get up and running, you
 may want to specify a more restrictive policy in order to limit abuse if your
