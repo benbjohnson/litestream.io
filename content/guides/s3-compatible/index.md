@@ -35,6 +35,11 @@ provider-specific quirks. The provider examples below show configurations that
 work with both older Litestream versions and v0.5.0+. If you're using v0.5.0+,
 you can omit the `force-path-style` setting for auto-detected providers.
 
+**New in v0.5.4:** Litestream automatically disables `aws-chunked` content
+encoding for all S3-compatible providers. This prevents upload errors
+(`InvalidContentEncoding`, `MalformedTrailerError`) that occurred with AWS SDK
+Go v2 v1.73.0+ when providers don't support trailing checksums.
+
 ## Overview
 
 S3-compatible services implement Amazon's S3 API, enabling tools built for AWS
@@ -597,6 +602,33 @@ available S3 replica options.
 Some providers (notably DigitalOcean Spaces) may reset connections occasionally.
 Litestream handles these automatically through retries. If you see these errors
 but replication continues, no action is needed.
+
+### Upload Encoding Errors
+
+**Symptom:** `InvalidContentEncoding`, `MalformedTrailerError`, or similar errors
+when uploading to S3-compatible providers
+
+**Background:**
+
+AWS SDK Go v2 v1.73.0+ introduced automatic checksum calculation using
+`aws-chunked` content encoding with trailing checksums. Many S3-compatible
+providers don't support this encoding format, causing upload failures.
+
+**Solutions:**
+
+1. **Upgrade to v0.5.4 or later** — Litestream automatically disables aws-chunked
+   encoding for all S3-compatible providers (any endpoint with a custom URL).
+   This is the recommended solution.
+
+2. If you cannot upgrade and experience these errors, you may need to use an
+   older version of Litestream (v0.5.3 or earlier) that doesn't trigger this
+   SDK behavior.
+
+**Affected Providers:**
+
+This issue can affect any S3-compatible provider including Tigris, Backblaze B2,
+MinIO, DigitalOcean Spaces, Scaleway, Filebase, and others. AWS S3 itself is
+not affected as it fully supports aws-chunked encoding.
 
 ## Environment Variables
 
