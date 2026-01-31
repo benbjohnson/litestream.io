@@ -336,6 +336,35 @@ mcp-addr: ":3002"
    }
    ```
 
+### S3 Signature Errors
+
+**Error**: `SignatureDoesNotMatch` or similar signature mismatch errors
+
+**Solution**:
+
+This error typically occurs with Litestream versions prior to v0.5.5 when using
+AWS S3 or certain S3-compatible providers.
+
+1. **Upgrade to v0.5.5 or later** — The default `sign-payload` setting changed
+   from `false` to `true`, which resolves most signature issues.
+
+2. If you cannot upgrade, explicitly enable payload signing:
+
+   ```yaml
+   dbs:
+     - path: /path/to/db.sqlite
+       replica:
+         url: s3://bucket/path
+         sign-payload: true
+   ```
+
+3. Or via URL query parameter:
+
+   ```yaml
+   replica:
+     url: s3://bucket/path?sign-payload=true
+   ```
+
 ### NATS Connection Issues
 
 **Error**: `connection refused` or `authentication failed`
@@ -811,6 +840,7 @@ CGO_ENABLED=0 go build ./cmd/litestream
 | `database is locked` | No busy timeout set | Add `PRAGMA busy_timeout = 5000;` |
 | `no such file or directory` | Incorrect database path | Verify path exists and permissions |
 | `NoCredentialsProviders` | Missing AWS credentials | Configure AWS credentials |
+| `SignatureDoesNotMatch` | Unsigned payload (pre-v0.5.5) | Upgrade to v0.5.5+ or set `sign-payload: true` |
 | `connection refused` | Service not running | Check if target service is accessible |
 | `yaml: unmarshal errors` | Invalid YAML syntax | Validate configuration file syntax |
 | `bind: address already in use` | Port conflict | Change MCP port or stop conflicting service |
