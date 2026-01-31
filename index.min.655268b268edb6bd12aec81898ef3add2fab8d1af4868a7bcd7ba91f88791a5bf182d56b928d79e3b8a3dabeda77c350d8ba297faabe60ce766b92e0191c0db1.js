@@ -1097,6 +1097,30 @@ This is the simplest way to pass credentials without embedding them in files:</p
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div></li>
 </ol>
+<h3 id="s3-signature-errors">S3 Signature Errors</h3>
+<p><strong>Error</strong>: <code>SignatureDoesNotMatch</code> or similar signature mismatch errors</p>
+<p><strong>Solution</strong>:</p>
+<p>This error typically occurs with Litestream versions prior to v0.5.5 when using
+AWS S3 or certain S3-compatible providers.</p>
+<ol>
+<li>
+<p><strong>Upgrade to v0.5.5 or later</strong> — The default <code>sign-payload</code> setting changed
+from <code>false</code> to <code>true</code>, which resolves most signature issues.</p>
+</li>
+<li>
+<p>If you cannot upgrade, explicitly enable payload signing:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sign-payload</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>Or via URL query parameter:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path?sign-payload=true</span><span class="w">
+</span></span></span></code></pre></div></li>
+</ol>
 <h3 id="nats-connection-issues">NATS Connection Issues</h3>
 <p><strong>Error</strong>: <code>connection refused</code> or <code>authentication failed</code></p>
 <p><strong>Solution</strong>:</p>
@@ -1533,6 +1557,11 @@ forcing a fresh snapshot.</p>
 <td><code>NoCredentialsProviders</code></td>
 <td>Missing AWS credentials</td>
 <td>Configure AWS credentials</td>
+</tr>
+<tr>
+<td><code>SignatureDoesNotMatch</code></td>
+<td>Unsigned payload (pre-v0.5.5)</td>
+<td>Upgrade to v0.5.5+ or set <code>sign-payload: true</code></td>
 </tr>
 <tr>
 <td><code>connection refused</code></td>
