@@ -550,20 +550,25 @@ configure lifecycle rules that handle versioned objects.
 #### Adjusting Retention Configuration
 
 If files are accumulating faster than expected, consider adjusting your
-retention settings:
+retention settings. Snapshot and retention settings are configured globally,
+not per-replica:
 
 ```yaml
+# Global snapshot settings (not per-replica)
+snapshot:
+  interval: 1h      # How often to create snapshots
+  retention: 24h    # How long to keep snapshots
+
 dbs:
   - path: /path/to/db.sqlite
     replica:
       url: s3://bucket/path
-      retention: 24h            # How long to keep snapshots
-      retention-check-interval: 1h  # How often to check for expired files
-      snapshot-interval: 1h     # How often to create snapshots
 ```
 
-Shorter `retention-check-interval` values cause more frequent cleanup checks,
-which may help if deletions are working but infrequent.
+Shorter `snapshot.interval` values create more frequent snapshots, which allows
+older data to be cleaned up sooner. See the
+[Configuration Reference](/reference/config/#retention-period) for details on
+how retention works.
 
 ## Database Issues
 
