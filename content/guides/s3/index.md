@@ -208,9 +208,80 @@ dbs:
 
 ### IAM Policy for Access Points
 
-Access points require appropriate IAM permissions on both the access point and
-the underlying bucket. The following policy grants the minimum permissions
-needed for replication through an access point:
+Access points require IAM permissions on **both** the access point and the
+underlying bucket. For an application to access objects through an access point,
+both the access point policy and the bucket must permit the request.
+
+There are two approaches to configure this:
+
+#### Option 1: Explicit Permissions on Both ARNs (Recommended for Restrictive Policies)
+
+The following IAM policy grants permissions on both the access point and the
+underlying bucket ARNs. This approach is useful when you need fine-grained
+control or when the bucket policy doesn't delegate to access points:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point",
+                "arn:aws:s3:::my-bucket"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:us-east-2:123456789012:accesspoint/my-access-point/object/*",
+                "arn:aws:s3:::my-bucket/*"
+            ]
+        }
+    ]
+}
+```
+
+Replace `123456789012` with your AWS account ID, `us-east-2` with your region,
+`my-access-point` with your access point name, and `my-bucket` with your bucket name.
+
+#### Option 2: Delegate Access Control to Access Points (Recommended for Simplified Management)
+
+Add this bucket policy to delegate all access control to your access points:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {"AWS": "*"},
+            "Action": "*",
+            "Resource": [
+                "arn:aws:s3:::my-bucket",
+                "arn:aws:s3:::my-bucket/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "s3:DataAccessPointAccount": "123456789012"
+                }
+            }
+        }
+    ]
+}
+```
+
+With this bucket policy in place, you only need the access point ARN in your
+IAM policy:
 
 ```json
 {
@@ -237,16 +308,62 @@ needed for replication through an access point:
 }
 ```
 
-The underlying bucket must also grant access to the access point. See the
-[AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html)
-for details on configuring access point and bucket policies together.
+See the [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-policies.html)
+for more details on configuring access point and bucket policies.
 
 ### VPC Endpoint Configuration
 
-To use VPC-only access points, you must configure a VPC endpoint for S3 in your
-VPC. The access point's network origin must be set to "VPC" when creating it.
-See [Creating access points restricted to a VPC](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html)
-for setup instructions.
+To use VPC-only access points, you must configure a VPC Gateway Endpoint for S3
+in your VPC. Gateway endpoints are free and route traffic through the AWS
+backbone network instead of the public internet, improving security and
+reducing NAT gateway costs.
+
+The access point's network origin must be set to "VPC" when creating it.
+
+#### Terraform Example
+
+```hcl
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [aws_route_table.private.id]
+
+  tags = {
+    Name = "s3-gateway-endpoint"
+  }
+}
+```
+
+#### CloudFormation Example
+
+```yaml
+Resources:
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref PrivateRouteTable
+```
+
+After creating the VPC endpoint, ensure your access point's network origin is
+set to "VPC" and specifies your VPC ID. See
+[Creating access points restricted to a VPC](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-points-vpc.html)
+for detailed setup instructions.
+
+### Troubleshooting Access Points
+
+Common errors when configuring S3 access points:
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `no identity-based policy allows the s3:PutObject action` | IAM policy not attached to user/role or missing required permissions | Verify the IAM policy is attached and includes both access point and bucket ARNs (see [IAM Policy for Access Points](#iam-policy-for-access-points)) |
+| `explicit deny in a resource-based policy` | Access point policy or bucket policy is blocking the request | Check both the access point policy and bucket policy; ensure the bucket delegates to access points or explicitly allows access |
+| `Access Denied` when using VPC access point | VPC endpoint not configured or route table not associated | Create a VPC Gateway Endpoint for S3 and associate it with your private subnet's route table |
+| `Could not connect to the endpoint URL` | Network cannot reach the access point | For VPC-only access points, ensure your application runs within the VPC and the VPC endpoint is properly configured |
 
 
 ## Restrictive IAM Policies
