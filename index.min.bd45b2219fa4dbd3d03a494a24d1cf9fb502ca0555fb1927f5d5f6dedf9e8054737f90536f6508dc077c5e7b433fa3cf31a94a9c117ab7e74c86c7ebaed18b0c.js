@@ -1142,6 +1142,23 @@ from <code>false</code> to <code>true</code>, which resolves most signature issu
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">pass</span><span class="w">
 </span></span></span></code></pre></div></li>
 </ol>
+<h3 id="s3-compatible-upload-errors">S3-Compatible Upload Errors</h3>
+<p><strong>Error</strong>: <code>InvalidContentEncoding</code>, <code>MalformedTrailerError</code>, or similar errors
+when uploading to S3-compatible providers</p>
+<p><strong>Solution</strong>:</p>
+<p>This error occurs with Litestream versions prior to v0.5.4 when using S3-compatible
+providers (Tigris, Backblaze B2, MinIO, DigitalOcean Spaces, etc.). AWS SDK Go v2
+v1.73.0+ introduced aws-chunked encoding that many providers don&rsquo;t support.</p>
+<ol>
+<li>
+<p><strong>Upgrade to v0.5.4 or later</strong> — Litestream automatically disables aws-chunked
+encoding for all S3-compatible providers.</p>
+</li>
+<li>
+<p>See the <a href="/guides/s3-compatible/#upload-encoding-errors">S3-Compatible Guide</a>
+for more details.</p>
+</li>
+</ol>
 <h3 id="slow-replication">Slow Replication</h3>
 <p><strong>Symptoms</strong>: High lag between database changes and replica updates</p>
 <p><strong>Solution</strong>:</p>
@@ -1562,6 +1579,16 @@ forcing a fresh snapshot.</p>
 <td><code>SignatureDoesNotMatch</code></td>
 <td>Unsigned payload (pre-v0.5.5)</td>
 <td>Upgrade to v0.5.5+ or set <code>sign-payload: true</code></td>
+</tr>
+<tr>
+<td><code>InvalidContentEncoding</code></td>
+<td>aws-chunked encoding (pre-v0.5.4)</td>
+<td>Upgrade to v0.5.4+ for S3-compatible providers</td>
+</tr>
+<tr>
+<td><code>MalformedTrailerError</code></td>
+<td>aws-chunked encoding (pre-v0.5.4)</td>
+<td>Upgrade to v0.5.4+ for S3-compatible providers</td>
 </tr>
 <tr>
 <td><code>connection refused</code></td>

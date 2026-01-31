@@ -232,6 +232,7 @@ Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-
         <li><a href="#invalid-endpoint">Invalid Endpoint</a></li>
         <li><a href="#region-mismatch">Region Mismatch</a></li>
         <li><a href="#connection-resets">Connection Resets</a></li>
+        <li><a href="#upload-encoding-errors">Upload Encoding Errors</a></li>
       </ul>
     </li>
     <li><a href="#environment-variables">Environment Variables</a></li>
@@ -303,6 +304,10 @@ for most providers.</p>
 provider-specific quirks. The provider examples below show configurations that
 work with both older Litestream versions and v0.5.0+. If you&rsquo;re using v0.5.0+,
 you can omit the <code>force-path-style</code> setting for auto-detected providers.</p>
+<p><strong>New in v0.5.4:</strong> Litestream automatically disables <code>aws-chunked</code> content
+encoding for all S3-compatible providers. This prevents upload errors
+(<code>InvalidContentEncoding</code>, <code>MalformedTrailerError</code>) that occurred with AWS SDK
+Go v2 v1.73.0+ when providers don&rsquo;t support trailing checksums.</p>
 <h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
 <p>S3-compatible services implement Amazon&rsquo;s S3 API, enabling tools built for AWS
 S3 to work with alternative storage providers. Litestream supports these
@@ -943,6 +948,30 @@ available S3 replica options.</p>
 <p>Some providers (notably DigitalOcean Spaces) may reset connections occasionally.
 Litestream handles these automatically through retries. If you see these errors
 but replication continues, no action is needed.</p>
+<h3 id="upload-encoding-errors">Upload Encoding Errors<a href="#upload-encoding-errors" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Symptom:</strong> <code>InvalidContentEncoding</code>, <code>MalformedTrailerError</code>, or similar errors
+when uploading to S3-compatible providers</p>
+<p><strong>Background:</strong></p>
+<p>AWS SDK Go v2 v1.73.0+ introduced automatic checksum calculation using
+<code>aws-chunked</code> content encoding with trailing checksums. Many S3-compatible
+providers don&rsquo;t support this encoding format, causing upload failures.</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p><strong>Upgrade to v0.5.4 or later</strong> — Litestream automatically disables aws-chunked
+encoding for all S3-compatible providers (any endpoint with a custom URL).
+This is the recommended solution.</p>
+</li>
+<li>
+<p>If you cannot upgrade and experience these errors, you may need to use an
+older version of Litestream (v0.5.3 or earlier) that doesn&rsquo;t trigger this
+SDK behavior.</p>
+</li>
+</ol>
+<p><strong>Affected Providers:</strong></p>
+<p>This issue can affect any S3-compatible provider including Tigris, Backblaze B2,
+MinIO, DigitalOcean Spaces, Scaleway, Filebase, and others. AWS S3 itself is
+not affected as it fully supports aws-chunked encoding.</p>
 <h2 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Use environment variables to keep credentials out of configuration files:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
@@ -998,7 +1027,7 @@ but replication continues, no action is needed.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.655268b268edb6bd12aec81898ef3add2fab8d1af4868a7bcd7ba91f88791a5bf182d56b928d79e3b8a3dabeda77c350d8ba297faabe60ce766b92e0191c0db1.js" integrity="sha512-ZVJosmjttr0SrsgYmO863S&#43;rjRr0hop7zXupH4h5GlvxgtVrko1547ij2r7ad8NQ2Lopf6q&#43;YM52a5LgGRwNsQ==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.bd45b2219fa4dbd3d03a494a24d1cf9fb502ca0555fb1927f5d5f6dedf9e8054737f90536f6508dc077c5e7b433fa3cf31a94a9c117ab7e74c86c7ebaed18b0c.js" integrity="sha512-vUWyIZ&#43;k29PQOklKJNHPn7UCygVV&#43;xkn9dX23t&#43;egFRzf5BTb2UI3Ad8XntDP6PPMalKnBF6t&#43;dMhsfrrtGLDA==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
