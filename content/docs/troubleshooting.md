@@ -429,6 +429,142 @@ v1.73.0+ introduced aws-chunked encoding that many providers don't support.
 2. Monitor system resources (CPU, memory, network)
 3. Consider using local file replica for testing performance
 
+### File Retention and Cleanup Issues
+
+**Symptoms**: LTX files accumulating in your S3 or R2 bucket despite having
+retention configured, or files not being deleted as expected.
+
+This section explains how Litestream's retention timing works and covers known
+issues with certain S3-compatible providers.
+
+#### Understanding Retention Timing
+
+Litestream uses a tiered file structure for replicas. Understanding when each
+file type is eligible for deletion helps diagnose retention issues:
+
+| File Type | Retention Trigger | Dependencies |
+|-----------|-------------------|--------------|
+| **L0 (WAL segments)** | After `l0-retention` (default 5m) | Must be compacted into L1 first |
+| **L1/L2/L3 (compacted)** | When `EnforceSnapshotRetention()` runs | Snapshot age > `retention` |
+| **L9 (snapshots)** | When snapshot age > `retention` | None |
+
+The effective cleanup delay is approximately: `snapshot.interval` + `snapshot.retention`
+
+**Example timing with default configuration:**
+
+- Configuration: `interval=30m` + `retention=1h`
+- First snapshot created at T+30m (age: 0)
+- Second snapshot created at T+1h (first snapshot age: 30m)
+- First snapshot becomes eligible for deletion at T+1h30m (age exceeds 1h)
+- **Result**: Minimum 1.5 hours before L1+ cleanup begins
+
+This means files will accumulate during this period. This is expected behavior,
+not a bug.
+
+#### Verifying Retention Is Working
+
+Use Litestream's Prometheus metrics to monitor retention status:
+
+```promql
+# L0 file retention status (v0.5.x)
+litestream_l0_retention_files_total{status="eligible"}      # Ready for deletion
+litestream_l0_retention_files_total{status="not_compacted"} # Awaiting L1 compaction
+litestream_l0_retention_files_total{status="too_recent"}    # Within retention window
+
+# S3/R2 operation tracking
+rate(litestream_replica_operation_total{operation="DELETE"}[5m])
+litestream_replica_operation_errors_total{operation="DELETE"}
+```
+
+If `DELETE` operations show errors or the `eligible` count keeps growing while
+actual deletions don't occur, the issue may be with your storage provider.
+
+#### Cloudflare R2 Silent Deletion Failures
+
+Cloudflare R2 has a known issue where `DeleteObjects` API calls may return
+HTTP 200 with objects listed as "Deleted", but the files are not actually
+removed from storage. This is documented in [Cloudflare Community forums](https://community.cloudflare.com/t/r2-delete-objects-command-does-not-delete-objects/537479).
+
+**Symptoms:**
+
+- Litestream logs show successful deletions
+- Prometheus metrics show DELETE operations succeeding
+- Files remain in R2 bucket when checked manually
+
+**Verification:**
+
+```bash
+# After Litestream reports deletion, check if files still exist
+# Using rclone (configure R2 remote first):
+rclone ls r2:your-bucket/path/to/replica | head -20
+
+# Or using AWS CLI with R2 endpoint:
+aws s3 ls s3://your-bucket/path/to/replica \
+  --endpoint-url https://ACCOUNT_ID.r2.cloudflarestorage.com
+```
+
+If files that should have been deleted are still present, R2's silent deletion
+bug is likely occurring.
+
+##### Workaround: R2 Object Lifecycle Rules
+
+Configure R2 Object Lifecycle rules as a fallback cleanup mechanism:
+
+1. Go to **Cloudflare Dashboard** → **R2** → **Your Bucket** → **Settings**
+2. Click **Object Lifecycle Rules** → **Add rule**
+3. Configure:
+   - **Rule name**: `litestream-cleanup`
+   - **Prefix filter**: Your Litestream replica path (e.g., `backups/mydb/`)
+   - **Action**: Delete objects
+   - **Days after object creation**: Set based on your retention needs (e.g., 7 days)
+
+Example using AWS SDK:
+
+```javascript
+{
+  ID: "litestream-cleanup",
+  Status: "Enabled",
+  Filter: { Prefix: "backups/mydb/" },
+  Expiration: { Days: 7 }
+}
+```
+
+**Important considerations:**
+
+- Objects are typically removed within 24 hours of expiration
+- This is a fallback, not a replacement for Litestream's retention
+- Set lifecycle days higher than your Litestream retention to avoid premature deletion
+
+#### R2 Bucket Versioning
+
+If R2 bucket versioning is enabled, deleted objects become "delete markers"
+rather than being permanently removed. Check your bucket settings:
+
+1. **Cloudflare Dashboard** → **R2** → **Your Bucket** → **Settings**
+2. Look for **Bucket versioning** setting
+3. If enabled, previous versions of objects are retained
+
+To clean up versioned objects, you may need to delete specific versions or
+configure lifecycle rules that handle versioned objects.
+
+#### Adjusting Retention Configuration
+
+If files are accumulating faster than expected, consider adjusting your
+retention settings:
+
+```yaml
+dbs:
+  - path: /path/to/db.sqlite
+    replica:
+      url: s3://bucket/path
+      retention: 24h            # How long to keep snapshots
+      retention-check-interval: 1h  # How often to check for expired files
+      snapshot-interval: 1h     # How often to create snapshots
+```
+
+Shorter `retention-check-interval` values cause more frequent cleanup checks,
+which may help if deletions are working but infrequent.
+
 ## Database Issues
 
 ### WAL Mode Problems
@@ -864,6 +1000,8 @@ CGO_ENABLED=0 go build ./cmd/litestream
 | `yaml: unmarshal errors` | Invalid YAML syntax | Validate configuration file syntax |
 | `bind: address already in use` | Port conflict | Change MCP port or stop conflicting service |
 | PRAGMA not taking effect | Wrong syntax for v0.5.0+ | Use `_pragma=name(value)` syntax |
+| LTX files accumulating (R2) | R2 silent deletion bug | Use R2 Object Lifecycle rules as fallback |
+| Files not deleted despite retention | Retention timing or provider bug | Check retention timing math; verify deletions |
 
 ## Next Steps
 
