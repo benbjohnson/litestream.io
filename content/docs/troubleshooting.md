@@ -459,7 +459,8 @@ The effective cleanup delay is approximately: `snapshot.interval` + `snapshot.re
 - **Result**: Minimum 1.5 hours before L1+ cleanup begins
 
 This means files will accumulate during this period. This is expected behavior,
-not a bug.
+not a bug. Note that retention enforcement only runs when Litestream creates a
+new snapshot, not continuously in the background.
 
 #### Verifying Retention Is Working
 
@@ -496,11 +497,11 @@ removed from storage. This is documented in [Cloudflare Community forums](https:
 ```bash
 # After Litestream reports deletion, check if files still exist
 # Using rclone (configure R2 remote first):
-rclone ls r2:your-bucket/path/to/replica | head -20
+rclone ls r2:your-bucket/path/to/replica | grep "filename-that-should-be-deleted"
 
 # Or using AWS CLI with R2 endpoint:
 aws s3 ls s3://your-bucket/path/to/replica \
-  --endpoint-url https://ACCOUNT_ID.r2.cloudflarestorage.com
+  --endpoint-url https://ACCOUNT_ID.r2.cloudflarestorage.com | grep "filename"
 ```
 
 If files that should have been deleted are still present, R2's silent deletion
@@ -508,7 +509,8 @@ bug is likely occurring.
 
 ##### Workaround: R2 Object Lifecycle Rules
 
-Configure R2 Object Lifecycle rules as a fallback cleanup mechanism:
+Configure [R2 Object Lifecycle rules](https://developers.cloudflare.com/r2/buckets/object-lifecycles/)
+as a fallback cleanup mechanism:
 
 1. Go to **Cloudflare Dashboard** → **R2** → **Your Bucket** → **Settings**
 2. Click **Object Lifecycle Rules** → **Add rule**
