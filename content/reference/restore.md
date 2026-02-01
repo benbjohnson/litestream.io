@@ -61,11 +61,8 @@ litestream restore [arguments] REPLICA_URL
     Defaults to 8
 
 -txid TXID
-    Restore up to a specific transaction ID (inclusive).
-    Defaults to use the highest available transaction ID.
-
--v
-    Enable verbose output.
+    Restore up to a specific hex-encoded transaction ID (inclusive).
+    Defaults to use the highest available transaction.
 
 -timestamp TIMESTAMP
     Restore to a specific point-in-time.
