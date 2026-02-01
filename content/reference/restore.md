@@ -60,13 +60,9 @@ litestream restore [arguments] REPLICA_URL
     Determines the number of WAL files downloaded in parallel.
     Defaults to 8
 
--generation NAME
-    Restore from a specific generation.
-    Defaults to generation with latest data.
-
--index NUM
-    Restore up to a specific WAL index (inclusive).
-    Defaults to use the highest available index.
+-txid TXID
+    Restore up to a specific hex-encoded transaction ID (inclusive).
+    Defaults to use the highest available transaction.
 
 -timestamp TIMESTAMP
     Restore to a specific point-in-time.
