@@ -134,7 +134,7 @@ dbs:
       # No account-key needed - uses Managed Identity
 ```
 
-Ensure your Azure resource has a Managed Identity enabled and has the appropriate role assignment (e.g., "Storage Blob Data Contributor") on the storage account.
+Ensure your Azure resource has a Managed Identity enabled and the required [Storage Blob Data role](#required-azure-roles) assigned.
 
 ### Service Principal
 
@@ -165,6 +165,47 @@ az login
 ```
 
 Litestream will automatically use your Azure CLI credentials when no other authentication method is configured.
+
+**Important**: Your Azure account must have the required [Storage Blob Data role](#required-azure-roles) assigned. Standard Azure account roles like Owner or Contributor are not sufficient for blob data access.
+
+
+## Required Azure Roles
+
+When using Microsoft Entra ID authentication (Managed Identity, Service Principal, or Azure CLI), you must assign the appropriate **Storage Blob Data** role. Standard Azure roles like Owner or Contributor manage the storage account itself but do **not** grant access to blob data.
+
+| Operation | Minimum Required Role |
+|-----------|----------------------|
+| Backup (write) | Storage Blob Data Contributor |
+| Restore (read-only) | Storage Blob Data Reader |
+| Both backup and restore | Storage Blob Data Contributor |
+
+### Assigning Roles via Azure Portal
+
+1. Navigate to your **Storage Account** in the [Azure Portal](https://portal.azure.com/)
+2. Select **Access Control (IAM)** from the left menu
+3. Click **Add** → **Add role assignment**
+4. Search for "Storage Blob Data Contributor" (or Reader for read-only access)
+5. Select the role and click **Next**
+6. Choose **User, group, or service principal** (or **Managed identity** for Azure resources)
+7. Select your identity and complete the assignment
+
+### Assigning Roles via Azure CLI
+
+```sh
+# Assign Storage Blob Data Contributor at storage account scope
+az role assignment create \
+    --role "Storage Blob Data Contributor" \
+    --assignee <your-email-or-object-id> \
+    --scope "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Storage/storageAccounts/<storage-account>"
+
+# Or at container scope (more restrictive)
+az role assignment create \
+    --role "Storage Blob Data Contributor" \
+    --assignee <your-email-or-object-id> \
+    --scope "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Storage/storageAccounts/<storage-account>/blobServices/default/containers/<container>"
+```
+
+{{< alert icon="⚠️" text="Role assignments can take up to 10 minutes to take effect. If you receive permission errors immediately after assigning a role, wait a few minutes and try again." >}}
 
 
 ## See Also
