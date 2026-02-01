@@ -365,6 +365,52 @@ AWS S3 or certain S3-compatible providers.
      url: s3://bucket/path?sign-payload=true
    ```
 
+### Azure Blob Storage Permission Errors
+
+**Error**: `AuthorizationPermissionMismatch` or `no matching backup files available`
+
+When using Microsoft Entra ID authentication (Managed Identity, Service Principal, or
+Azure CLI), you must have the correct **Storage Blob Data** role assigned. Standard
+Azure roles like Owner or Contributor manage the storage account but do **not** grant
+access to blob data.
+
+| Error Message | Likely Cause |
+|---------------|--------------|
+| `AuthorizationPermissionMismatch` | Missing Storage Blob Data role |
+| `AuthorizationFailure` | Authentication issue or wrong account |
+| `no matching backup files available` | Often a permissions issue (prior to v0.5.7, the actual error was hidden) |
+
+**Solution**:
+
+1. Verify you have the correct role assigned:
+
+   | Operation | Minimum Required Role |
+   |-----------|----------------------|
+   | Backup (write) | Storage Blob Data Contributor |
+   | Restore (read-only) | Storage Blob Data Reader |
+
+2. Assign the role via Azure CLI:
+
+   ```bash
+   az role assignment create \
+       --role "Storage Blob Data Contributor" \
+       --assignee <your-email-or-object-id> \
+       --scope "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Storage/storageAccounts/<storage-account>"
+   ```
+
+3. Wait up to 10 minutes for role assignments to take effect.
+
+4. Verify your authentication is working:
+
+   ```bash
+   # For Azure CLI auth
+   az login
+   az storage blob list --account-name <storage-account> --container-name <container> --auth-mode login
+   ```
+
+See the [Azure Blob Storage guide](/guides/azure/#required-azure-roles) for detailed
+role assignment instructions.
+
 ### NATS Connection Issues
 
 **Error**: `connection refused` or `authentication failed`
@@ -1003,6 +1049,8 @@ CGO_ENABLED=0 go build ./cmd/litestream
 | `SignatureDoesNotMatch` | Unsigned payload (pre-v0.5.5) | Upgrade to v0.5.5+ or set `sign-payload: true` |
 | `InvalidContentEncoding` | aws-chunked encoding (pre-v0.5.4) | Upgrade to v0.5.4+ for S3-compatible providers |
 | `MalformedTrailerError` | aws-chunked encoding (pre-v0.5.4) | Upgrade to v0.5.4+ for S3-compatible providers |
+| `AuthorizationPermissionMismatch` (Azure) | Missing Storage Blob Data role | Assign Storage Blob Data Contributor/Reader role |
+| `no matching backup files available` (Azure) | Permission issue (pre-v0.5.7) | Check Azure RBAC roles; upgrade to v0.5.7+ for better errors |
 | `connection refused` | Service not running | Check if target service is accessible |
 | `yaml: unmarshal errors` | Invalid YAML syntax | Validate configuration file syntax |
 | `bind: address already in use` | Port conflict | Change MCP port or stop conflicting service |
