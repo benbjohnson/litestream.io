@@ -1180,6 +1180,139 @@ for more details.</p>
 <p>Consider using local file replica for testing performance</p>
 </li>
 </ol>
+<h3 id="file-retention-and-cleanup-issues">File Retention and Cleanup Issues</h3>
+<p><strong>Symptoms</strong>: LTX files accumulating in your S3 or R2 bucket despite having
+retention configured, or files not being deleted as expected.</p>
+<p>This section explains how Litestream&rsquo;s retention timing works and covers known
+issues with certain S3-compatible providers.</p>
+<h4 id="understanding-retention-timing">Understanding Retention Timing</h4>
+<p>Litestream uses a tiered file structure for replicas. Understanding when each
+file type is eligible for deletion helps diagnose retention issues:</p>
+<table>
+<thead>
+<tr>
+<th>File Type</th>
+<th>Retention Trigger</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L0 (WAL segments)</strong></td>
+<td>After <code>l0-retention</code> (default 5m)</td>
+<td>Must be compacted into L1 first</td>
+</tr>
+<tr>
+<td><strong>L1/L2/L3 (compacted)</strong></td>
+<td>When <code>EnforceSnapshotRetention()</code> runs</td>
+<td>Snapshot age &gt; <code>retention</code></td>
+</tr>
+<tr>
+<td><strong>L9 (snapshots)</strong></td>
+<td>When snapshot age &gt; <code>retention</code></td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p>The effective cleanup delay is approximately: <code>snapshot.interval</code> + <code>snapshot.retention</code></p>
+<p><strong>Example timing with default configuration:</strong></p>
+<ul>
+<li>Configuration: <code>interval=30m</code> + <code>retention=1h</code></li>
+<li>First snapshot created at T+30m (age: 0)</li>
+<li>Second snapshot created at T+1h (first snapshot age: 30m)</li>
+<li>First snapshot becomes eligible for deletion at T+1h30m (age exceeds 1h)</li>
+<li><strong>Result</strong>: Minimum 1.5 hours before L1+ cleanup begins</li>
+</ul>
+<p>This means files will accumulate during this period. This is expected behavior,
+not a bug. Note that retention enforcement only runs when Litestream creates a
+new snapshot, not continuously in the background.</p>
+<h4 id="verifying-retention-is-working">Verifying Retention Is Working</h4>
+<p>Use Litestream&rsquo;s Prometheus metrics to monitor retention status:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="c1"># L0 file retention status (v0.5.x)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nv">litestream_l0_retention_files_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">&#34;</span><span class="s">eligible</span><span class="p">&#34;}</span><span class="w">      </span><span class="c1"># Ready for deletion</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nv">litestream_l0_retention_files_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">&#34;</span><span class="s">not_compacted</span><span class="p">&#34;}</span><span class="w"> </span><span class="c1"># Awaiting L1 compaction</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nv">litestream_l0_retention_files_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">&#34;</span><span class="s">too_recent</span><span class="p">&#34;}</span><span class="w">    </span><span class="c1"># Within retention window</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1"># S3/R2 operation tracking</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_replica_operation_total</span><span class="p">{</span><span class="nl">operation</span><span class="o">=</span><span class="p">&#34;</span><span class="s">DELETE</span><span class="p">&#34;}[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nv">litestream_replica_operation_errors_total</span><span class="p">{</span><span class="nl">operation</span><span class="o">=</span><span class="p">&#34;</span><span class="s">DELETE</span><span class="p">&#34;}</span><span class="w">
+</span></span></span></code></pre></div><p>If <code>DELETE</code> operations show errors or the <code>eligible</code> count keeps growing while
+actual deletions don&rsquo;t occur, the issue may be with your storage provider.</p>
+<h4 id="cloudflare-r2-silent-deletion-failures">Cloudflare R2 Silent Deletion Failures</h4>
+<p>Cloudflare R2 has a known issue where <code>DeleteObjects</code> API calls may return
+HTTP 200 with objects listed as &ldquo;Deleted&rdquo;, but the files are not actually
+removed from storage. This is documented in <a href="https://community.cloudflare.com/t/r2-delete-objects-command-does-not-delete-objects/537479">Cloudflare Community forums</a>.</p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Litestream logs show successful deletions</li>
+<li>Prometheus metrics show DELETE operations succeeding</li>
+<li>Files remain in R2 bucket when checked manually</li>
+</ul>
+<p><strong>Verification:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># After Litestream reports deletion, check if files still exist</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Using rclone (configure R2 remote first):</span>
+</span></span><span class="line"><span class="cl">rclone ls r2:your-bucket/path/to/replica <span class="p">|</span> grep <span class="s2">&#34;filename-that-should-be-deleted&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Or using AWS CLI with R2 endpoint:</span>
+</span></span><span class="line"><span class="cl">aws s3 ls s3://your-bucket/path/to/replica <span class="se">\\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --endpoint-url https://ACCOUNT_ID.r2.cloudflarestorage.com <span class="p">|</span> grep <span class="s2">&#34;filename&#34;</span>
+</span></span></code></pre></div><p>If files that should have been deleted are still present, R2&rsquo;s silent deletion
+bug is likely occurring.</p>
+<h5 id="workaround-r2-object-lifecycle-rules">Workaround: R2 Object Lifecycle Rules</h5>
+<p>Configure <a href="https://developers.cloudflare.com/r2/buckets/object-lifecycles/">R2 Object Lifecycle rules</a>
+as a fallback cleanup mechanism:</p>
+<ol>
+<li>Go to <strong>Cloudflare Dashboard</strong> → <strong>R2</strong> → <strong>Your Bucket</strong> → <strong>Settings</strong></li>
+<li>Click <strong>Object Lifecycle Rules</strong> → <strong>Add rule</strong></li>
+<li>Configure:
+<ul>
+<li><strong>Rule name</strong>: <code>litestream-cleanup</code></li>
+<li><strong>Prefix filter</strong>: Your Litestream replica path (e.g., <code>backups/mydb/</code>)</li>
+<li><strong>Action</strong>: Delete objects</li>
+<li><strong>Days after object creation</strong>: Set based on your retention needs (e.g., 7 days)</li>
+</ul>
+</li>
+</ol>
+<p>Example using AWS SDK:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">ID</span><span class="o">:</span> <span class="s2">&#34;litestream-cleanup&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">Status</span><span class="o">:</span> <span class="s2">&#34;Enabled&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">Filter</span><span class="o">:</span> <span class="p">{</span> <span class="nx">Prefix</span><span class="o">:</span> <span class="s2">&#34;backups/mydb/&#34;</span> <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">Expiration</span><span class="o">:</span> <span class="p">{</span> <span class="nx">Days</span><span class="o">:</span> <span class="mi">7</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>Important considerations:</strong></p>
+<ul>
+<li>Objects are typically removed within 24 hours of expiration</li>
+<li>This is a fallback, not a replacement for Litestream&rsquo;s retention</li>
+<li>Set lifecycle days higher than your Litestream retention to avoid premature deletion</li>
+</ul>
+<h4 id="r2-bucket-versioning">R2 Bucket Versioning</h4>
+<p>If R2 bucket versioning is enabled, deleted objects become &ldquo;delete markers&rdquo;
+rather than being permanently removed. Check your bucket settings:</p>
+<ol>
+<li><strong>Cloudflare Dashboard</strong> → <strong>R2</strong> → <strong>Your Bucket</strong> → <strong>Settings</strong></li>
+<li>Look for <strong>Bucket versioning</strong> setting</li>
+<li>If enabled, previous versions of objects are retained</li>
+</ol>
+<p>To clean up versioned objects, you may need to delete specific versions or
+configure lifecycle rules that handle versioned objects.</p>
+<h4 id="adjusting-retention-configuration">Adjusting Retention Configuration</h4>
+<p>If files are accumulating faster than expected, consider adjusting your
+retention settings. Snapshot and retention settings are configured globally,
+not per-replica:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global snapshot settings (not per-replica)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h     </span><span class="w"> </span><span class="c"># How often to create snapshots</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h   </span><span class="w"> </span><span class="c"># How long to keep snapshots</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db.sqlite</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path</span><span class="w">
+</span></span></span></code></pre></div><p>Shorter <code>snapshot.interval</code> values create more frequent snapshots, which allows
+older data to be cleaned up sooner. See the
+<a href="/reference/config/#retention-period">Configuration Reference</a> for details on
+how retention works.</p>
 <h2 id="database-issues">Database Issues</h2>
 <h3 id="wal-mode-problems">WAL Mode Problems</h3>
 <p><strong>Error</strong>: <code>database is not in WAL mode</code></p>
@@ -1609,6 +1742,16 @@ forcing a fresh snapshot.</p>
 <td>PRAGMA not taking effect</td>
 <td>Wrong syntax for v0.5.0+</td>
 <td>Use <code>_pragma=name(value)</code> syntax</td>
+</tr>
+<tr>
+<td>LTX files accumulating (R2)</td>
+<td>R2 silent deletion bug</td>
+<td>Use R2 Object Lifecycle rules as fallback</td>
+</tr>
+<tr>
+<td>Files not deleted despite retention</td>
+<td>Retention timing or provider bug</td>
+<td>Check retention timing math; verify deletions</td>
 </tr>
 </tbody>
 </table>
