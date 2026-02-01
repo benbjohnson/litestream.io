@@ -1121,6 +1121,76 @@ from <code>false</code> to <code>true</code>, which resolves most signature issu
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://bucket/path?sign-payload=true</span><span class="w">
 </span></span></span></code></pre></div></li>
 </ol>
+<h3 id="azure-blob-storage-permission-errors">Azure Blob Storage Permission Errors</h3>
+<p><strong>Error</strong>: <code>AuthorizationPermissionMismatch</code> or <code>no matching backup files available</code></p>
+<p>When using Microsoft Entra ID authentication (Managed Identity, Service Principal, or
+Azure CLI), you must have the correct <strong>Storage Blob Data</strong> role assigned. Standard
+Azure roles like Owner or Contributor manage the storage account but do <strong>not</strong> grant
+access to blob data.</p>
+<table>
+<thead>
+<tr>
+<th>Error Message</th>
+<th>Likely Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AuthorizationPermissionMismatch</code></td>
+<td>Missing Storage Blob Data role</td>
+</tr>
+<tr>
+<td><code>AuthorizationFailure</code></td>
+<td>Authentication issue or wrong account</td>
+</tr>
+<tr>
+<td><code>no matching backup files available</code></td>
+<td>Often a permissions issue (prior to v0.5.7, the actual error was hidden)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>
+<p>Verify you have the correct role assigned:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Minimum Required Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backup (write)</td>
+<td>Storage Blob Data Contributor</td>
+</tr>
+<tr>
+<td>Restore (read-only)</td>
+<td>Storage Blob Data Reader</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>Assign the role via Azure CLI:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">az role assignment create <span class="se">\\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --role <span class="s2">&#34;Storage Blob Data Contributor&#34;</span> <span class="se">\\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --assignee &lt;your-email-or-object-id&gt; <span class="se">\\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --scope <span class="s2">&#34;/subscriptions/&lt;subscription-id&gt;/resourceGroups/&lt;resource-group&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storage-account&gt;&#34;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>Wait up to 10 minutes for role assignments to take effect.</p>
+</li>
+<li>
+<p>Verify your authentication is working:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># For Azure CLI auth</span>
+</span></span><span class="line"><span class="cl">az login
+</span></span><span class="line"><span class="cl">az storage blob list --account-name &lt;storage-account&gt; --container-name &lt;container&gt; --auth-mode login
+</span></span></code></pre></div></li>
+</ol>
+<p>See the <a href="/guides/azure/#required-azure-roles">Azure Blob Storage guide</a> for detailed
+role assignment instructions.</p>
 <h3 id="nats-connection-issues">NATS Connection Issues</h3>
 <p><strong>Error</strong>: <code>connection refused</code> or <code>authentication failed</code></p>
 <p><strong>Solution</strong>:</p>
@@ -1722,6 +1792,16 @@ forcing a fresh snapshot.</p>
 <td><code>MalformedTrailerError</code></td>
 <td>aws-chunked encoding (pre-v0.5.4)</td>
 <td>Upgrade to v0.5.4+ for S3-compatible providers</td>
+</tr>
+<tr>
+<td><code>AuthorizationPermissionMismatch</code> (Azure)</td>
+<td>Missing Storage Blob Data role</td>
+<td>Assign Storage Blob Data Contributor/Reader role</td>
+</tr>
+<tr>
+<td><code>no matching backup files available</code> (Azure)</td>
+<td>Permission issue (pre-v0.5.7)</td>
+<td>Check Azure RBAC roles; upgrade to v0.5.7+ for better errors</td>
 </tr>
 <tr>
 <td><code>connection refused</code></td>

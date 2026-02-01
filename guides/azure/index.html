@@ -214,6 +214,12 @@ Once you have a storage account, select it from the list of accounts and navigat
         <li><a href="#azure-cli-local-development">Azure CLI (Local Development)</a></li>
       </ul>
     </li>
+    <li><a href="#required-azure-roles">Required Azure Roles</a>
+      <ul>
+        <li><a href="#assigning-roles-via-azure-portal">Assigning Roles via Azure Portal</a></li>
+        <li><a href="#assigning-roles-via-azure-cli">Assigning Roles via Azure CLI</a></li>
+      </ul>
+    </li>
     <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -300,7 +306,7 @@ of specifying the account key in your configuration file.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">CONTAINERNAME</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">PATH</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># No account-key needed - uses Managed Identity</span><span class="w">
-</span></span></span></code></pre></div><p>Ensure your Azure resource has a Managed Identity enabled and has the appropriate role assignment (e.g., &ldquo;Storage Blob Data Contributor&rdquo;) on the storage account.</p>
+</span></span></span></code></pre></div><p>Ensure your Azure resource has a Managed Identity enabled and the required <a href="#required-azure-roles">Storage Blob Data role</a> assigned.</p>
 <h3 id="service-principal">Service Principal<a href="#service-principal" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -323,6 +329,57 @@ of specifying the account key in your configuration file.</p>
  For local development, authenticate using the Azure CLI:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">az login
 </span></span></code></pre></div><p>Litestream will automatically use your Azure CLI credentials when no other authentication method is configured.</p>
+<p><strong>Important</strong>: Your Azure account must have the required <a href="#required-azure-roles">Storage Blob Data role</a> assigned. Standard Azure account roles like Owner or Contributor are not sufficient for blob data access.</p>
+<h2 id="required-azure-roles">Required Azure Roles<a href="#required-azure-roles" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When using Microsoft Entra ID authentication (Managed Identity, Service Principal, or Azure CLI), you must assign the appropriate <strong>Storage Blob Data</strong> role. Standard Azure roles like Owner or Contributor manage the storage account itself but do <strong>not</strong> grant access to blob data.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Minimum Required Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backup (write)</td>
+<td>Storage Blob Data Contributor</td>
+</tr>
+<tr>
+<td>Restore (read-only)</td>
+<td>Storage Blob Data Reader</td>
+</tr>
+<tr>
+<td>Both backup and restore</td>
+<td>Storage Blob Data Contributor</td>
+</tr>
+</tbody>
+</table>
+<h3 id="assigning-roles-via-azure-portal">Assigning Roles via Azure Portal<a href="#assigning-roles-via-azure-portal" class="anchor" aria-hidden="true">#</a> </h3>
+<ol>
+<li>Navigate to your <strong>Storage Account</strong> in the <a href="https://portal.azure.com/">Azure Portal</a></li>
+<li>Select <strong>Access Control (IAM)</strong> from the left menu</li>
+<li>Click <strong>Add</strong> → <strong>Add role assignment</strong></li>
+<li>Search for &ldquo;Storage Blob Data Contributor&rdquo; (or Reader for read-only access)</li>
+<li>Select the role and click <strong>Next</strong></li>
+<li>Choose <strong>User, group, or service principal</strong> (or <strong>Managed identity</strong> for Azure resources)</li>
+<li>Select your identity and complete the assignment</li>
+</ol>
+<h3 id="assigning-roles-via-azure-cli">Assigning Roles via Azure CLI<a href="#assigning-roles-via-azure-cli" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># Assign Storage Blob Data Contributor at storage account scope</span>
+</span></span><span class="line"><span class="cl">az role assignment create <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --role <span class="s2">&#34;Storage Blob Data Contributor&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --assignee &lt;your-email-or-object-id&gt; <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --scope <span class="s2">&#34;/subscriptions/&lt;subscription-id&gt;/resourceGroups/&lt;resource-group&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storage-account&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Or at container scope (more restrictive)</span>
+</span></span><span class="line"><span class="cl">az role assignment create <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --role <span class="s2">&#34;Storage Blob Data Contributor&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --assignee &lt;your-email-or-object-id&gt; <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --scope <span class="s2">&#34;/subscriptions/&lt;subscription-id&gt;/resourceGroups/&lt;resource-group&gt;/providers/Microsoft.Storage/storageAccounts/&lt;storage-account&gt;/blobServices/default/containers/&lt;container&gt;&#34;</span>
+</span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Role assignments can take up to 10 minutes to take effect. If you receive permission errors immediately after assigning a role, wait a few minutes and try again.</div>
+</div>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/docs/migration#azure-sdk-v2-migration">Azure SDK v2 Migration</a> - Upgrading authentication</li>
@@ -359,7 +416,7 @@ of specifying the account key in your configuration file.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.acaed2ab359be4203284b87bf3718ce80bc318f46c826036fd3782dac995f1c9e42145db5e934626b43b552dc6296d580a4e49a3392dbd78784d8a78a6252f93.js" integrity="sha512-rK7SqzWb5CAyhLh783GM6AvDGPRsgmA2/TeC2smV8cnkIUXbXpNGJrQ7VS3GKW1YCk5JozktvXh4TYp4piUvkw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.a67b8f446812a1d1daf83684457db96119988d4a81b6220b04ae1012c641b10bdb91cc3e97b0327f186cf8f412b65807268918a294cc1f15ae53f4c6c1fd7743.js" integrity="sha512-pnuPRGgSodHa&#43;DaERX25YRmYjUqBtiILBK4QEsZBsQvbkcw&#43;l7Ayfxhs&#43;PQStlgHJokYopTMHxWuU/TGwf13Qw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
