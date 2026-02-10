@@ -517,6 +517,41 @@ The following replica settings are available for all replica types:
 
 - `validation-interval`—{{< alert icon="⚠️" text="Currently non-functional in v0.5.x. When enabled in future versions, Litestream will automatically restore and validate that replica data matches the local copy. This will significantly increase cloud storage costs due to restore downloads." >}}
 
+- `auto-recover`—{{< since version="0.5.7" >}} When set to `true`, Litestream
+  automatically resets local state when LTX errors are detected during
+  replication. This triggers the same recovery as running
+  [`litestream reset`]({{< ref "reset" >}}) manually. Defaults to `false`.
+
+### Auto-recover
+
+{{< since version="0.5.7" >}} The `auto-recover` option provides automatic
+recovery from LTX replication errors. When enabled, Litestream detects errors
+such as non-contiguous transaction files or nonsequential page numbers and
+automatically clears local tracking state, forcing a fresh snapshot on the
+next sync.
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: s3://mybucket/db
+      auto-recover: true
+```
+
+{{< alert icon="⚠️" text="Auto-recover is disabled by default to prevent silent data loss. When enabled, Litestream will automatically discard local tracking state on LTX errors, which means you lose the ability to do point-in-time recovery to timestamps before the reset. Enable this only if uninterrupted replication is more important than preserving full recovery history." >}}
+
+**When to enable `auto-recover`:**
+
+- Environments where uptime is critical and manual intervention is impractical
+- Headless or unattended deployments (IoT, edge devices)
+- Databases where point-in-time recovery to old timestamps is not needed
+
+**When to use manual [`litestream reset`]({{< ref "reset" >}}) instead:**
+
+- You want to investigate the root cause before resetting
+- Point-in-time recovery history is important
+- You need to verify database integrity before resuming replication
+
 
 ### S3 replica
 

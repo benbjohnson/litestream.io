@@ -810,6 +810,111 @@ Look for these key messages:
 - `sync error`: Replication issues
 - `checkpoint completed`: Successful WAL checkpoint
 
+## LTX Replication Errors
+
+{{< since version="0.5.7" >}} LTX (Litestream Transaction Log) errors occur when
+local tracking state becomes inconsistent with the replica. These errors are
+commonly reported after unclean shutdowns, OOM kills, or manual state
+manipulation.
+
+### Common Error Messages
+
+#### "cannot close, expected page"
+
+```
+level=ERROR msg="sync error" error="cannot close, expected page N but found M"
+```
+
+This occurs when Litestream detects a mismatch between expected and actual page
+numbers during sync. The local tracking state references pages that don't match
+the current database state.
+
+#### "nonsequential page numbers in snapshot transaction"
+
+```
+level=ERROR msg="sync error" error="nonsequential page numbers in snapshot transaction"
+```
+
+This indicates the snapshot transaction contains pages that are out of order,
+typically caused by an incomplete or corrupted snapshot write.
+
+#### "non-contiguous transaction files"
+
+```
+level=ERROR msg="sync error" error="non-contiguous transaction files"
+```
+
+LTX files must form a contiguous sequence. A gap in the sequence means one or
+more transaction files are missing, usually from an unclean shutdown or
+partial write.
+
+#### Sync retry backoff loops
+
+```
+level=WARN msg="retrying sync" attempt=1 error="..." backoff=1s
+level=WARN msg="retrying sync" attempt=2 error="..." backoff=2s
+level=WARN msg="retrying sync" attempt=3 error="..." backoff=4s
+```
+
+Repeated retry messages with increasing backoff indicate Litestream is stuck
+trying to sync with a persistent LTX error.
+
+### Recovery Options
+
+There are two ways to recover from LTX errors:
+
+#### Option 1: Manual Reset
+
+Use the [`litestream reset`]({{< ref "/reference/reset" >}}) command to clear
+local state and force a fresh snapshot:
+
+```bash
+# Stop Litestream
+sudo systemctl stop litestream
+
+# Reset local state for the affected database
+litestream reset /var/lib/db
+
+# Restart Litestream
+sudo systemctl start litestream
+```
+
+After restart, Litestream will create a fresh snapshot. See the
+[`reset` command reference]({{< ref "/reference/reset" >}}) for details.
+
+#### Option 2: Automatic Recovery
+
+Enable the [`auto-recover`]({{< ref "/reference/config#auto-recover" >}}) option
+on your replica to have Litestream automatically reset when LTX errors occur:
+
+```yaml
+dbs:
+  - path: /var/lib/db
+    replica:
+      url: s3://mybucket/db
+      auto-recover: true
+```
+
+This is recommended for unattended deployments where manual intervention is
+impractical. See the [configuration reference]({{< ref "/reference/config#auto-recover" >}})
+for guidance on when to enable this option.
+
+### Preventing LTX Errors
+
+- **Use proper shutdown procedures** — Always stop Litestream gracefully with
+  `SIGTERM` before shutting down the system
+- **Set busy timeout** — Prevents checkpoint blocking that can lead to state
+  corruption:
+
+  ```sql
+  PRAGMA busy_timeout = 5000;
+  ```
+
+- **Avoid in-place VACUUM** — Use `VACUUM INTO` instead (see
+  [Operations That Invalidate Tracking State](#operations-that-invalidate-tracking-state))
+- **Monitor replication** — Use Prometheus metrics to detect sync errors early
+
+
 ## Recovery and Restore
 
 ### Point-in-Time Recovery
@@ -1057,6 +1162,9 @@ CGO_ENABLED=0 go build ./cmd/litestream
 | PRAGMA not taking effect | Wrong syntax for v0.5.0+ | Use `_pragma=name(value)` syntax |
 | LTX files accumulating (R2) | R2 silent deletion bug | Use R2 Object Lifecycle rules as fallback |
 | Files not deleted despite retention | Retention timing or provider bug | Check retention timing math; verify deletions |
+| `cannot close, expected page` | Corrupted local tracking state | Run `litestream reset` or enable `auto-recover` |
+| `nonsequential page numbers in snapshot transaction` | Incomplete snapshot write | Run `litestream reset` or enable `auto-recover` |
+| `non-contiguous transaction files` | Missing LTX files after unclean shutdown | Run `litestream reset` or enable `auto-recover` |
 
 ## Next Steps
 
