@@ -1,6 +1,6 @@
 ---
 title : "Command: reset"
-date: 2021-02-01T00:00:00Z
+date: 2026-02-01T00:00:00Z
 layout: docs
 menu:
   docs:
@@ -96,6 +96,6 @@ sudo systemctl start litestream
 
 ## See Also
 
-- [`auto-recover` configuration]({{< ref "config#auto-recover" >}}) - Automatic reset on LTX errors
-- [LTX Replication Errors]({{< ref "/docs/troubleshooting#ltx-replication-errors" >}}) - Troubleshooting guide
-- [Recovering from Corrupted Tracking State]({{< ref "/docs/troubleshooting#recovering-from-corrupted-tracking-state" >}})
+- [`auto-recover` configuration](/reference/config#auto-recover) - Automatic reset on LTX errors
+- [LTX Replication Errors](/docs/troubleshooting#ltx-replication-errors) - Troubleshooting guide
+- [Recovering from Corrupted Tracking State](/docs/troubleshooting#recovering-from-corrupted-tracking-state)
