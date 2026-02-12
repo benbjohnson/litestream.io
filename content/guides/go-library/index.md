@@ -330,6 +330,60 @@ replica.SyncInterval = 1 * time.Second  // How often to sync to replica
 ```
 
 
+## Convenience methods
+
+{{< since version="0.5.8" >}} The `DB` type provides convenience methods for
+common operations when using Litestream as a library.
+
+### DB.EnsureExists
+
+Restores the database from the replica if the local file does not exist. If
+the database already exists or no backup is available, it is a no-op.
+
+```go
+db := litestream.NewDB("/path/to/my.db")
+client, _ := litestream.NewReplicaClientFromURL("s3://my-bucket/backups")
+db.Replica = litestream.NewReplicaWithClient(db, client)
+
+if err := db.EnsureExists(ctx); err != nil {
+    log.Fatal(err)
+}
+```
+
+This replaces the manual `restoreIfNotExists` pattern shown in the
+[S3 backend with restore-on-startup](#s3-backend-with-restore-on-startup) example.
+
+### DB.SyncAndWait
+
+Performs a full sync cycle (WAL to LTX to remote) and blocks until complete.
+Useful for ensuring data is replicated before shutting down.
+
+```go
+if err := db.SyncAndWait(ctx); err != nil {
+    log.Printf("Backup failed: %v", err)
+}
+```
+
+### DB.SyncStatus
+
+Returns the current sync status comparing local and remote transaction positions.
+
+```go
+status, err := db.SyncStatus(ctx)
+if err != nil {
+    log.Fatal(err)
+}
+log.Printf("Local TXID: %d, Remote TXID: %d, InSync: %t",
+    status.LocalTXID, status.RemoteTXID, status.InSync)
+```
+
+The returned `SyncStatus` contains:
+
+- `LocalTXID` — The latest local transaction ID
+- `RemoteTXID` — The latest transaction ID on the remote replica
+- `InSync` — Whether local and remote are at the same position
+
+
 ## Graceful shutdown
 
 Always close the store before your application exits to ensure all pending
