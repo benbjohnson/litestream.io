@@ -26,6 +26,17 @@ dollar sign followed by characters—for example, a password. In this case, you
 can set the `-no-expand-env` flag on any `litestream` command to disable
 expansion.
 
+{{< since version="0.5.8" >}} Litestream automatically sets `$PID` during config
+file parsing, expanding to the current process ID. This is useful for creating
+unique replica paths when running multiple Litestream instances on the same host:
+
+```yaml
+dbs:
+  - path: /data/myapp.db
+    replicas:
+      - url: file:///tmp/replicas/$PID/myapp
+```
+
 ### Environment Variables
 
 Litestream supports environment variables for configuring authentication credentials.
