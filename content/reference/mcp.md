@@ -19,10 +19,11 @@ that enables AI applications to connect with external systems. Litestream's MCP 
 exposes tools that allow AI assistants to:
 
 - View database and replica status
-- List generations and snapshots
+- Monitor replication health and sync state
 - List available transaction log (LTX) files
 - Restore databases to specific points in time
-- Monitor replication health
+- Reset local replication state
+- Print version information
 
 This integration enables natural language interaction with your Litestream deployment,
 making it easier to inspect backups, troubleshoot issues, and perform restores through
@@ -123,43 +124,22 @@ path                 replica
 /var/lib/other.db    file
 ```
 
-### litestream_generations
+### litestream_status
 
-Lists all generations for a database or replica.
-
-**Parameters:**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `path` | Yes | Database file path or replica URL |
-| `config` | No | Path to configuration file |
-| `replica` | No | Replica name to filter by |
-
-**Example output:**
-
-```
-name  generation        updated
-s3    abc123def456...   2025-01-15T10:30:00Z
-```
-
-### litestream_snapshots
-
-Lists all snapshots for a database or replica.
+{{< since version="0.5.8" >}} Returns replication health information for configured databases.
 
 **Parameters:**
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `path` | Yes | Database file path or replica URL |
 | `config` | No | Path to configuration file |
-| `replica` | No | Replica name to filter by |
 
 **Example output:**
 
 ```
-replica  generation        index  size    created
-s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
-s3       abc123def456...   1      2048    2025-01-15T10:15:00Z
+path                 status    local_txid  wal_size
+/var/lib/myapp.db    ok        42          8192
+/var/lib/other.db    ok        17          4096
 ```
 
 ### litestream_ltx
@@ -173,8 +153,6 @@ Use this to inspect available restore points.
 |-----------|----------|-------------|
 | `path` | Yes | Database file path or replica URL |
 | `config` | No | Path to configuration file |
-| `replica` | No | Replica name to filter by |
-| `generation` | No | Generation name to filter by |
 
 **Example output:**
 
@@ -196,9 +174,7 @@ Restores a database to a specific point in time.
 | `path` | Yes | Source database path or replica URL |
 | `o` | No | Output file path (default: original path) |
 | `config` | No | Path to configuration file |
-| `replica` | No | Replica name to restore from |
-| `generation` | No | Generation name to restore from |
-| `index` | No | Restore up to specific WAL index |
+| `txid` | No | Restore up to specific hex-encoded transaction ID |
 | `timestamp` | No | Restore to specific point-in-time (RFC3339 format) |
 | `parallelism` | No | Number of WAL files to download in parallel |
 | `if_db_not_exists` | No | Skip if database already exists |
@@ -213,6 +189,30 @@ Restores a database to a specific point in time.
   "timestamp": "2025-01-15T10:00:00Z"
 }
 ```
+
+### litestream_version
+
+Prints the Litestream version.
+
+**Parameters:** None.
+
+**Example output:**
+
+```
+v0.5.8
+```
+
+### litestream_reset
+
+{{< since version="0.5.8" >}} Clears local Litestream replication state for a database. This forces
+a fresh snapshot on the next sync.
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `path` | Yes | Database file path |
+| `config` | No | Path to configuration file |
 
 ## AI Client Configuration
 
