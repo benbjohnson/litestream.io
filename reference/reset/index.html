@@ -14,16 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Linux - Litestream</title>
+  <title>Command: reset - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/install/linux/">
+<link rel="canonical" href="https://litestream.io/reference/reset/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Linux">
-<meta name="twitter:description" content="Debian/Ubuntu Debian package files are provided so you can install Litestream and its systemd service with a few commands. First, download the latest .deb file to your local machine:
-wget https://github.com/benbjohnson/litestream/releases/download/v0.5.6/litestream-0.5.6-linux-x86_64.deb Then install it using dpkg:
-sudo dpkg -i litestream-0.5.6-linux-x86_64.deb You should now be able to run litestream version to verify it is installed.
-RHEL/Fedora/CentOS RPM package files are also available. First, download the latest .rpm file to your local machine:">
+<meta name="twitter:title" content="Command: reset">
+<meta name="twitter:description" content="v0.5.7 The reset command clears local Litestream state for a database, forcing a fresh snapshot on the next replication sync. This is useful for recovering from corrupted or missing LTX files without modifying the database itself.
+The reset command only removes Litestream&rsquo;s internal tracking files from the metadata directory (.db-litestream). It does not modify, delete, or otherwise alter your SQLite database file.
+Usage litestream reset [arguments] DB_PATH Arguments -config PATH Specifies the configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -42,13 +41,13 @@ RHEL/Fedora/CentOS RPM package files are also available. First, download the lat
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Install",
-        "item": "https:\/\/litestream.io\/install\/"
+        "name": "Reference",
+        "item": "https:\/\/litestream.io\/reference\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Linux",
-        "item": "https:\/\/litestream.io\/install\/linux\/"
+        "name": "Reset",
+        "item": "https:\/\/litestream.io\/reference\/reset\/"
     }]
 }
 </script>
@@ -60,7 +59,7 @@ RHEL/Fedora/CentOS RPM package files are also available. First, download the lat
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="install single">
+  <body class="reference single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -114,7 +113,7 @@ RHEL/Fedora/CentOS RPM package files are also available. First, download the lat
   </h3>
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/install/linux/">Linux</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/linux/">Linux</a></li>
     <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
     </ul>
   <h3>
@@ -184,7 +183,7 @@ RHEL/Fedora/CentOS RPM package files are also available. First, download the lat
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/reset/">Command: reset</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -196,56 +195,103 @@ RHEL/Fedora/CentOS RPM package files are also available. First, download the lat
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#debianubuntu">Debian/Ubuntu</a></li>
-    <li><a href="#rhelfedoracentos">RHEL/Fedora/CentOS</a></li>
-    <li><a href="#installing-as-a-service">Installing as a service</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#when-to-use">When to Use</a></li>
+    <li><a href="#examples">Examples</a>
+      <ul>
+        <li><a href="#reset-with-a-database-path">Reset with a database path</a></li>
+        <li><a href="#reset-with-a-custom-config-file">Reset with a custom config file</a></li>
+        <li><a href="#full-recovery-workflow">Full recovery workflow</a></li>
+      </ul>
+    </li>
+    <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
   </div>
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Linux</h1>
+		<h1>Command: reset</h1>
 			<p class="lead"></p>
-			<h2 id="debianubuntu">Debian/Ubuntu<a href="#debianubuntu" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Debian package files are provided so you can install Litestream and its systemd
-service with a few commands. First, download the latest <code>.deb</code> file to your
-local machine:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.5.6/litestream-0.5.6-linux-x86_64.deb
-</span></span></code></pre></div><p>Then install it using <code>dpkg</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo dpkg -i litestream-0.5.6-linux-x86_64.deb
-</span></span></code></pre></div><p>You should now be able to run <code>litestream version</code> to verify it is installed.</p>
-<h2 id="rhelfedoracentos">RHEL/Fedora/CentOS<a href="#rhelfedoracentos" class="anchor" aria-hidden="true">#</a> </h2>
-<p>RPM package files are also available. First, download the latest <code>.rpm</code> file to
-your local machine:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">wget https://github.com/benbjohnson/litestream/releases/download/v0.5.6/litestream-0.5.6-linux-x86_64.rpm
-</span></span></code></pre></div><p>Then install it using <code>dnf</code> (or <code>yum</code> on older systems):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo dnf install litestream-0.5.6-linux-x86_64.rpm
-</span></span></code></pre></div><p>You should now be able to run <code>litestream version</code> to verify it is installed.</p>
-<h2 id="installing-as-a-service">Installing as a service<a href="#installing-as-a-service" class="anchor" aria-hidden="true">#</a> </h2>
-<p>To run Litestream continuously as a background service, you&rsquo;ll need to enable
-and start the service:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo systemctl <span class="nb">enable</span> litestream
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The <code>reset</code> command clears local Litestream
+state for a database, forcing a fresh snapshot on the next replication sync.
+This is useful for recovering from corrupted or missing LTX files without
+modifying the database itself.</p>
+<p>The <code>reset</code> command only removes Litestream&rsquo;s internal tracking files from
+the metadata directory (<code>.db-litestream</code>). It does <strong>not</strong> modify, delete,
+or otherwise alter your SQLite database file.</p>
+<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
+<pre tabindex="0"><code>litestream reset [arguments] DB_PATH
+</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
+<pre tabindex="0"><code>-config PATH
+    Specifies the configuration file.
+    Defaults to /etc/litestream.yml
+
+-no-expand-env
+    Disables environment variable expansion in configuration file.
+</code></pre><h2 id="when-to-use">When to Use<a href="#when-to-use" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Use <code>litestream reset</code> when you encounter replication errors related to
+corrupted or missing LTX files. Common error messages that indicate a reset
+is needed:</p>
+<ul>
+<li><code>cannot close, expected page</code></li>
+<li><code>nonsequential page numbers in snapshot transaction</code></li>
+<li><code>non-contiguous transaction files</code></li>
+<li>Repeated sync retry backoff loops in logs</li>
+</ul>
+<p>These errors typically occur after:</p>
+<ul>
+<li>Unclean shutdowns (power loss, OOM kills, <code>SIGKILL</code>)</li>
+<li>Corrupted local metadata</li>
+<li>Manual deletion of tracking files without clearing the remote replica</li>
+</ul>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">After a reset, Litestream will create a fresh snapshot on the next sync. This means you will lose the ability to do point-in-time recovery to timestamps before the reset.</div>
+</div>
+<p>For automatic recovery without manual intervention, see the
+<a href="https://litestream.io/reference/config/#auto-recover"><code>auto-recover</code></a> configuration option.</p>
+<h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="reset-with-a-database-path">Reset with a database path<a href="#reset-with-a-database-path" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Reset local state for a database specified in the configuration file:</p>
+<pre tabindex="0"><code>$ litestream reset /var/lib/db
+</code></pre><h3 id="reset-with-a-custom-config-file">Reset with a custom config file<a href="#reset-with-a-custom-config-file" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Specify a non-default configuration file:</p>
+<pre tabindex="0"><code>$ litestream reset -config /etc/myapp/litestream.yml /var/lib/db
+</code></pre><h3 id="full-recovery-workflow">Full recovery workflow<a href="#full-recovery-workflow" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When encountering LTX replication errors, follow these steps:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. Stop Litestream</span>
+</span></span><span class="line"><span class="cl">sudo systemctl stop litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. Reset local state</span>
+</span></span><span class="line"><span class="cl">litestream reset /var/lib/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. Restart Litestream (will create a fresh snapshot)</span>
 </span></span><span class="line"><span class="cl">sudo systemctl start litestream
-</span></span></code></pre></div><p>You can verify the service is running by checking the systemd journal:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo journalctl -u litestream -f
-</span></span></code></pre></div><p>If you make changes to Litestream <a href="/reference/config">configuration file</a>,
-you&rsquo;ll need to restart the service:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo systemctl restart litestream
-</span></span></code></pre></div>
+</span></span></code></pre></div><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="/reference/config#auto-recover"><code>auto-recover</code> configuration</a> - Automatic reset on LTX errors</li>
+<li><a href="/docs/troubleshooting#ltx-replication-errors">LTX Replication Errors</a> - Troubleshooting guide</li>
+<li><a href="/docs/troubleshooting#recovering-from-corrupted-tracking-state">Recovering from Corrupted Tracking State</a></li>
+</ul>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/install/mac/">
+	<a href="https://litestream.io/reference/restore/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; macOS
+					&larr; Command: restore
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/install/source/">
+	<a class="ml-auto" href="https://litestream.io/reference/version/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Build from Source &rarr;
+					Command: version &rarr;
 				</div>
 			</div>
 		</a>

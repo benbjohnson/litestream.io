@@ -183,6 +183,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -220,6 +221,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     </li>
     <li><a href="#replica-settings">Replica settings</a>
       <ul>
+        <li><a href="#auto-recover">Auto-recover</a></li>
         <li><a href="#s3-replica">S3 replica</a></li>
         <li><a href="#tigris-flyio-configuration">Tigris (Fly.io) Configuration</a></li>
         <li><a href="#minio-configuration">MinIO Configuration</a></li>
@@ -733,6 +735,45 @@ increase cloud storage costs due to more frequent PUT requests. See the
   <div class="w-100">Currently non-functional in v0.5.x. When enabled in future versions, Litestream will automatically restore and validate that replica data matches the local copy. This will significantly increase cloud storage costs due to restore downloads.</div>
 </div></p>
 </li>
+<li>
+<p><code>auto-recover</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ When set to <code>true</code>, Litestream
+automatically resets local state when LTX errors are detected during
+replication. This triggers the same recovery as running
+<a href="https://litestream.io/reference/reset/"><code>litestream reset</code></a> manually. Defaults to <code>false</code>.</p>
+</li>
+</ul>
+<h3 id="auto-recover">Auto-recover<a href="#auto-recover" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The <code>auto-recover</code> option provides automatic
+recovery from LTX replication errors. When enabled, Litestream detects errors
+such as non-contiguous transaction files or nonsequential page numbers and
+automatically clears local tracking state, forcing a fresh snapshot on the
+next sync.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">auto-recover</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Auto-recover is disabled by default to prevent silent data loss. When enabled, Litestream will automatically discard local tracking state on LTX errors, which means you lose the ability to do point-in-time recovery to timestamps before the reset. Enable this only if uninterrupted replication is more important than preserving full recovery history.</div>
+</div>
+<p><strong>When to enable <code>auto-recover</code>:</strong></p>
+<ul>
+<li>Environments where uptime is critical and manual intervention is impractical</li>
+<li>Headless or unattended deployments (IoT, edge devices)</li>
+<li>Databases where point-in-time recovery to old timestamps is not needed</li>
+</ul>
+<p><strong>When to use manual <a href="https://litestream.io/reference/reset/"><code>litestream reset</code></a> instead:</strong></p>
+<ul>
+<li>You want to investigate the root cause before resetting</li>
+<li>Point-in-time recovery history is important</li>
+<li>You need to verify database integrity before resuming replication</li>
 </ul>
 <h3 id="s3-replica">S3 replica<a href="#s3-replica" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The easiest way to configure an S3 replica is to use the <code>url</code> field:</p>
@@ -1428,7 +1469,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.a67b8f446812a1d1daf83684457db96119988d4a81b6220b04ae1012c641b10bdb91cc3e97b0327f186cf8f412b65807268918a294cc1f15ae53f4c6c1fd7743.js" integrity="sha512-pnuPRGgSodHa&#43;DaERX25YRmYjUqBtiILBK4QEsZBsQvbkcw&#43;l7Ayfxhs&#43;PQStlgHJokYopTMHxWuU/TGwf13Qw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.5beff9d6cba0b18c64b1674eba9a6b8983a3cd906955d56ad9f6707f06b1abb96051140b33426fe576f12b16509a2eab239d01919d1023706fcdc6d1eb4fc8eb.js" integrity="sha512-W&#43;/51sugsYxksWdOuppriYOjzZBpVdVq2fZwfwaxq7lgURQLM0Jv5XbxKxZQmi6rI50BkZ0QI3BvzcbR60/I6w==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

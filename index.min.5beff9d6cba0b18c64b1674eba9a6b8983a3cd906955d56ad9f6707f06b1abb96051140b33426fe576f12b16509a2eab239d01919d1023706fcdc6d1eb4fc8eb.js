@@ -1549,6 +1549,80 @@ Truncate Threshold Configuration guide</a>.</p>
 <li><code>sync error</code>: Replication issues</li>
 <li><code>checkpoint completed</code>: Successful WAL checkpoint</li>
 </ul>
+<h2 id="ltx-replication-errors">LTX Replication Errors</h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ LTX (Litestream Transaction Log) errors occur when
+local tracking state becomes inconsistent with the replica. These errors are
+commonly reported after unclean shutdowns, OOM kills, or manual state
+manipulation.</p>
+<h3 id="common-error-messages">Common Error Messages</h3>
+<h4 id="cannot-close-expected-page">&ldquo;cannot close, expected page&rdquo;</h4>
+<pre tabindex="0"><code>level=ERROR msg=&#34;sync error&#34; error=&#34;cannot close, expected page N but found M&#34;
+</code></pre><p>This occurs when Litestream detects a mismatch between expected and actual page
+numbers during sync. The local tracking state references pages that don&rsquo;t match
+the current database state.</p>
+<h4 id="nonsequential-page-numbers-in-snapshot-transaction">&ldquo;nonsequential page numbers in snapshot transaction&rdquo;</h4>
+<pre tabindex="0"><code>level=ERROR msg=&#34;sync error&#34; error=&#34;nonsequential page numbers in snapshot transaction&#34;
+</code></pre><p>This indicates the snapshot transaction contains pages that are out of order,
+typically caused by an incomplete or corrupted snapshot write.</p>
+<h4 id="non-contiguous-transaction-files">&ldquo;non-contiguous transaction files&rdquo;</h4>
+<pre tabindex="0"><code>level=ERROR msg=&#34;sync error&#34; error=&#34;non-contiguous transaction files&#34;
+</code></pre><p>LTX files must form a contiguous sequence. A gap in the sequence means one or
+more transaction files are missing, usually from an unclean shutdown or
+partial write.</p>
+<h4 id="sync-retry-backoff-loops">Sync retry backoff loops</h4>
+<pre tabindex="0"><code>level=WARN msg=&#34;retrying sync&#34; attempt=1 error=&#34;...&#34; backoff=1s
+level=WARN msg=&#34;retrying sync&#34; attempt=2 error=&#34;...&#34; backoff=2s
+level=WARN msg=&#34;retrying sync&#34; attempt=3 error=&#34;...&#34; backoff=4s
+</code></pre><p>Repeated retry messages with increasing backoff indicate Litestream is stuck
+trying to sync with a persistent LTX error.</p>
+<h3 id="recovery-options">Recovery Options</h3>
+<p>There are two ways to recover from LTX errors:</p>
+<h4 id="option-1-manual-reset">Option 1: Manual Reset</h4>
+<p>Use the <a href="https://litestream.io/reference/reset/"><code>litestream reset</code></a> command to clear
+local state and force a fresh snapshot:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Stop Litestream</span>
+</span></span><span class="line"><span class="cl">sudo systemctl stop litestream
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Reset local state for the affected database</span>
+</span></span><span class="line"><span class="cl">litestream reset /var/lib/db
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Restart Litestream</span>
+</span></span><span class="line"><span class="cl">sudo systemctl start litestream
+</span></span></code></pre></div><p>After restart, Litestream will create a fresh snapshot. See the
+<a href="https://litestream.io/reference/reset/"><code>reset</code> command reference</a> for details.</p>
+<h4 id="option-2-automatic-recovery">Option 2: Automatic Recovery</h4>
+<p>Enable the <a href="https://litestream.io/reference/config/#auto-recover"><code>auto-recover</code></a> option
+on your replica to have Litestream automatically reset when LTX errors occur:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">auto-recover</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><p>This is recommended for unattended deployments where manual intervention is
+impractical. See the <a href="https://litestream.io/reference/config/#auto-recover">configuration reference</a>
+for guidance on when to enable this option.</p>
+<h3 id="preventing-ltx-errors">Preventing LTX Errors</h3>
+<ul>
+<li>
+<p><strong>Use proper shutdown procedures</strong> — Always stop Litestream gracefully with
+<code>SIGTERM</code> before shutting down the system</p>
+</li>
+<li>
+<p><strong>Set busy timeout</strong> — Prevents checkpoint blocking that can lead to state
+corruption:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">PRAGMA</span><span class="w"> </span><span class="n">busy_timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p><strong>Avoid in-place VACUUM</strong> — Use <code>VACUUM INTO</code> instead (see
+<a href="#operations-that-invalidate-tracking-state">Operations That Invalidate Tracking State</a>)</p>
+</li>
+<li>
+<p><strong>Monitor replication</strong> — Use Prometheus metrics to detect sync errors early</p>
+</li>
+</ul>
 <h2 id="recovery-and-restore">Recovery and Restore</h2>
 <h3 id="point-in-time-recovery">Point-in-Time Recovery</h3>
 <p>List available restore points:</p>
@@ -1832,6 +1906,21 @@ forcing a fresh snapshot.</p>
 <td>Files not deleted despite retention</td>
 <td>Retention timing or provider bug</td>
 <td>Check retention timing math; verify deletions</td>
+</tr>
+<tr>
+<td><code>cannot close, expected page</code></td>
+<td>Corrupted local tracking state</td>
+<td>Run <code>litestream reset</code> or enable <code>auto-recover</code></td>
+</tr>
+<tr>
+<td><code>nonsequential page numbers in snapshot transaction</code></td>
+<td>Incomplete snapshot write</td>
+<td>Run <code>litestream reset</code> or enable <code>auto-recover</code></td>
+</tr>
+<tr>
+<td><code>non-contiguous transaction files</code></td>
+<td>Missing LTX files after unclean shutdown</td>
+<td>Run <code>litestream reset</code> or enable <code>auto-recover</code></td>
 </tr>
 </tbody>
 </table>
