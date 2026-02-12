@@ -82,6 +82,12 @@ litestream version
    - New global configuration sections: `levels`, `snapshot`, `exec`
    - Extended replica configuration options
 
+5. **Transparent v0.3.x Restore** {{< since version="0.5.8" >}}:
+   - `litestream restore` now automatically detects and restores from v0.3.x
+     format backups without any special flags or configuration
+   - Both v0.3.x and LTX formats are compared and the most recent backup is used
+   - See [restore format detection](/reference/restore/#format-detection) for details
+
 #### Migration Steps
 
 1. **Update configuration format**:
