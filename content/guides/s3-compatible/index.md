@@ -27,7 +27,7 @@ for most providers.
 | MinIO | `*.minio.*` | `sign-payload: true`, `force-path-style: true` |
 | DigitalOcean Spaces | `*.digitaloceanspaces.com` | `sign-payload: true` |
 | Scaleway | `*.scw.cloud` | `sign-payload: true` |
-| Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true` |
+| Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true`, `concurrency: 2` |
 | Tigris | `*.tigris.dev` | `sign-payload: true`, consistency header |
 
 Auto-detection means you can use simpler configurations without worrying about
@@ -247,6 +247,8 @@ dbs:
 - R2 supports both path-style and virtual-hosted style addressing
 - Jurisdiction-specific endpoints available for EU data residency:
   `${ACCOUNT_ID}.eu.r2.cloudflarestorage.com`
+- {{< since version="0.5.8" >}} Litestream automatically sets `concurrency=2`
+  for R2 endpoints to avoid R2's strict concurrent upload limits
 
 ### DigitalOcean Spaces
 

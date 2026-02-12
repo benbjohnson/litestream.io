@@ -647,11 +647,30 @@ The following settings are specific to S3 replicas:
   requests. Some S3-compatible providers don't support this header on certain
   operations. Automatically disabled for Tigris endpoints. Defaults to `true`.
 
-These options can also be set via URL query parameters:
+- `sse-customer-algorithm`—{{< since version="0.5.8" >}} SSE-C encryption algorithm.
+
+- `sse-customer-key-md5`—{{< since version="0.5.8" >}} Base64-encoded MD5 digest of the SSE-C encryption key.
+
+These options can also be set via URL query parameters. {{< since version="0.5.8" >}}
+Both camelCase and hyphenated forms are accepted:
 
 ```
 s3://bucket/path?sign-payload=true&require-content-md5=false
+s3://bucket/path?signPayload=true&requireContentMD5=false
 ```
+
+**S3 URL query parameter reference:**
+
+| Parameter | Alias | Default | Description |
+|-----------|-------|---------|-------------|
+| `force-path-style` | `forcePathStyle` | `false` | Use path-style URLs |
+| `skip-verify` | `skipVerify` | `false` | Disable TLS verification |
+| `concurrency` | — | `5` | Parallel upload parts |
+| `part-size` | `partSize` | `5MB` | Size of each upload part |
+| `sign-payload` | `signPayload` | `true` | Sign request payload |
+| `require-content-md5` | `requireContentMD5` | `true` | Add Content-MD5 header |
+| `sse-customer-algorithm` | `sseCustomerAlgorithm` | — | SSE-C algorithm |
+| `sse-customer-key-md5` | `sseCustomerKeyMD5` | — | SSE-C key MD5 |
 
 #### S3-Compatible Provider Requirements
 
