@@ -261,6 +261,29 @@ fi
 ```
 
 
+## Format Detection
+
+{{< since version="0.5.8" >}} The `restore` command automatically detects whether
+backups are in v0.3.x format or LTX format and restores from whichever has the
+best available data. This works transparently for both file and S3 backends.
+
+| Scenario | Behavior |
+|----------|----------|
+| With `-timestamp` | Uses format with best snapshot before timestamp |
+| Without `-timestamp` | Uses format with most recent backup overall |
+| Only v0.3.x exists | Uses v0.3.x restore |
+| Only LTX exists | Uses LTX restore |
+| Both exist, v0.3.x newer | Uses v0.3.x restore |
+| Both exist, LTX newer | Uses LTX restore |
+
+The `-timestamp` flag works across both formats, selecting the format that
+has the closest snapshot before the requested time.
+
+This eliminates the need for manual format handling when migrating from v0.3.x
+to v0.5.x — simply run `litestream restore` and it will use the best available
+backup regardless of format.
+
+
 ## See Also
 
 - [Configuration Reference](/reference/config) - Complete configuration options
