@@ -298,10 +298,10 @@ a `412 Precondition Failed` response and the instance waits.
 ### Lock File Format
 
 ```json
-{"token": 1, "expires_at": 1740151473.206179, "owner": "hostname:pid"}
+{"generation": 1, "expires_at": "2025-02-21T15:04:33.206179Z", "owner": "hostname:pid"}
 ```
 
-- `token` — Monotonically increasing counter for lease generations
+- `generation` — Monotonically increasing counter for lease generations
 - `expires_at` — Unix timestamp when the lease expires
 - `owner` — Identifier of the instance holding the lease
 
