@@ -273,6 +273,54 @@ verify you meet their minimum requirements. Backblaze B2 and some other
 providers have a strict 5 MB minimum.
 
 
+## Distributed Leasing
+
+{{< since version="0.5.8" >}} Litestream supports distributed leasing for safe
+multi-instance deployments using S3 conditional writes. This ensures only one
+Litestream instance actively replicates a database at a time, enabling
+high-availability patterns where a standby instance can take over if the
+primary fails.
+
+### How It Works
+
+Litestream uses a `lock.json` file stored alongside your replica data. The
+leasing algorithm uses S3's `If-Match` and `If-None-Match` conditional headers
+for atomic leader election:
+
+1. **Acquire**: Read existing `lock.json`, check if the lease has expired, then
+   conditionally write a new lease using ETag matching
+2. **Renew**: The active leader periodically refreshes the lease before expiry
+3. **Release**: On graceful shutdown, the leader releases the lease
+
+If another instance attempts to acquire the lease while it is held, S3 returns
+a `412 Precondition Failed` response and the instance waits.
+
+### Lock File Format
+
+```json
+{"generation": 1, "expires_at": "2025-02-21T15:04:33.206179Z", "owner": "hostname:pid"}
+```
+
+- `generation` — Monotonically increasing counter for lease generations
+- `expires_at` — Unix timestamp when the lease expires
+- `owner` — Identifier of the instance holding the lease
+
+### Failover Behavior
+
+When the active instance stops (crash, shutdown, or network partition), the
+lease expires and a standby instance acquires it automatically. The failover
+time depends on the lease duration.
+
+### Requirements
+
+Distributed leasing requires an S3 provider that supports conditional writes.
+AWS S3 supports this natively. Check your provider's documentation for
+`If-Match`/`If-None-Match` header support.
+
+This feature is currently available through the Go library API. See the
+[Go library guide](/guides/go-library) for programmatic usage.
+
+
 ## See Also
 
 - [Replicating to Amazon S3](/guides/s3) - Basic S3 setup guide
