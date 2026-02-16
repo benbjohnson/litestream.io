@@ -72,6 +72,18 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <li>Extended replica configuration options</li>
 </ul>
 </li>
+<li>
+<p><strong>Transparent v0.3.x Restore</strong> <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+:</p>
+<ul>
+<li><code>litestream restore</code> now automatically detects and restores from v0.3.x
+format backups without any special flags or configuration</li>
+<li>Both v0.3.x and LTX formats are compared and the most recent backup is used</li>
+<li>See <a href="/reference/restore/#format-detection">restore format detection</a> for details</li>
+</ul>
+</li>
 </ol>
 <h4 id="migration-steps">Migration Steps</h4>
 <ol>

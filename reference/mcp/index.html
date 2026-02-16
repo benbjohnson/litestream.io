@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Command: mcp">
 <meta name="twitter:description" content="The mcp server provides Model Context Protocol integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.
 Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems. Litestream&rsquo;s MCP server exposes tools that allow AI assistants to:
-View database and replica status List generations and snapshots List available transaction log (LTX) files Restore databases to specific points in time Monitor replication health This integration enables natural language interaction with your Litestream deployment, making it easier to inspect backups, troubleshoot issues, and perform restores through conversational AI interfaces.">
+View database and replica status Monitor replication health and sync state List available transaction log (LTX) files Restore databases to specific points in time Reset local replication state Print version information This integration enables natural language interaction with your Litestream deployment, making it easier to inspect backups, troubleshoot issues, and perform restores through conversational AI interfaces.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -206,10 +206,11 @@ View database and replica status List generations and snapshots List available t
       <ul>
         <li><a href="#litestream_info">litestream_info</a></li>
         <li><a href="#litestream_databases">litestream_databases</a></li>
-        <li><a href="#litestream_generations">litestream_generations</a></li>
-        <li><a href="#litestream_snapshots">litestream_snapshots</a></li>
+        <li><a href="#litestream_status">litestream_status</a></li>
         <li><a href="#litestream_ltx">litestream_ltx</a></li>
         <li><a href="#litestream_restore">litestream_restore</a></li>
+        <li><a href="#litestream_version">litestream_version</a></li>
+        <li><a href="#litestream_reset">litestream_reset</a></li>
       </ul>
     </li>
     <li><a href="#ai-client-configuration">AI Client Configuration</a>
@@ -255,10 +256,11 @@ that enables AI applications to connect with external systems. Litestream&rsquo;
 exposes tools that allow AI assistants to:</p>
 <ul>
 <li>View database and replica status</li>
-<li>List generations and snapshots</li>
+<li>Monitor replication health and sync state</li>
 <li>List available transaction log (LTX) files</li>
 <li>Restore databases to specific points in time</li>
-<li>Monitor replication health</li>
+<li>Reset local replication state</li>
+<li>Print version information</li>
 </ul>
 <p>This integration enables natural language interaction with your Litestream deployment,
 making it easier to inspect backups, troubleshoot issues, and perform restores through
@@ -352,8 +354,11 @@ s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
 <pre tabindex="0"><code>path                 replica
 /var/lib/myapp.db    s3
 /var/lib/other.db    file
-</code></pre><h3 id="litestream_generations">litestream_generations<a href="#litestream_generations" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all generations for a database or replica.</p>
+</code></pre><h3 id="litestream_status">litestream_status<a href="#litestream_status" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Returns replication health information for configured databases.</p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -365,58 +370,16 @@ s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
 </thead>
 <tbody>
 <tr>
-<td><code>path</code></td>
-<td>Yes</td>
-<td>Database file path or replica URL</td>
-</tr>
-<tr>
 <td><code>config</code></td>
 <td>No</td>
 <td>Path to configuration file</td>
 </tr>
-<tr>
-<td><code>replica</code></td>
-<td>No</td>
-<td>Replica name to filter by</td>
-</tr>
 </tbody>
 </table>
 <p><strong>Example output:</strong></p>
-<pre tabindex="0"><code>name  generation        updated
-s3    abc123def456...   2025-01-15T10:30:00Z
-</code></pre><h3 id="litestream_snapshots">litestream_snapshots<a href="#litestream_snapshots" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all snapshots for a database or replica.</p>
-<p><strong>Parameters:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>path</code></td>
-<td>Yes</td>
-<td>Database file path or replica URL</td>
-</tr>
-<tr>
-<td><code>config</code></td>
-<td>No</td>
-<td>Path to configuration file</td>
-</tr>
-<tr>
-<td><code>replica</code></td>
-<td>No</td>
-<td>Replica name to filter by</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Example output:</strong></p>
-<pre tabindex="0"><code>replica  generation        index  size    created
-s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
-s3       abc123def456...   1      2048    2025-01-15T10:15:00Z
+<pre tabindex="0"><code>path                 status    local_txid  wal_size
+/var/lib/myapp.db    ok        42          8192
+/var/lib/other.db    ok        17          4096
 </code></pre><h3 id="litestream_ltx">litestream_ltx<a href="#litestream_ltx" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Lists available LTX (Litestream Transaction Log) files for a database or replica.
 Use this to inspect available restore points.</p>
@@ -439,16 +402,6 @@ Use this to inspect available restore points.</p>
 <td><code>config</code></td>
 <td>No</td>
 <td>Path to configuration file</td>
-</tr>
-<tr>
-<td><code>replica</code></td>
-<td>No</td>
-<td>Replica name to filter by</td>
-</tr>
-<tr>
-<td><code>generation</code></td>
-<td>No</td>
-<td>Generation name to filter by</td>
 </tr>
 </tbody>
 </table>
@@ -485,19 +438,9 @@ Use this to inspect available restore points.</p>
 <td>Path to configuration file</td>
 </tr>
 <tr>
-<td><code>replica</code></td>
+<td><code>txid</code></td>
 <td>No</td>
-<td>Replica name to restore from</td>
-</tr>
-<tr>
-<td><code>generation</code></td>
-<td>No</td>
-<td>Generation name to restore from</td>
-</tr>
-<tr>
-<td><code>index</code></td>
-<td>No</td>
-<td>Restore up to specific WAL index</td>
+<td>Restore up to specific hex-encoded transaction ID</td>
 </tr>
 <tr>
 <td><code>timestamp</code></td>
@@ -527,7 +470,40 @@ Use this to inspect available restore points.</p>
 </span></span><span class="line"><span class="cl">  <span class="nt">&#34;o&#34;</span><span class="p">:</span> <span class="s2">&#34;/tmp/restored.db&#34;</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">  <span class="nt">&#34;timestamp&#34;</span><span class="p">:</span> <span class="s2">&#34;2025-01-15T10:00:00Z&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><h2 id="ai-client-configuration">AI Client Configuration<a href="#ai-client-configuration" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></code></pre></div><h3 id="litestream_version">litestream_version<a href="#litestream_version" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Prints the Litestream version.</p>
+<p><strong>Parameters:</strong> None.</p>
+<p><strong>Example output:</strong></p>
+<pre tabindex="0"><code>v0.5.8
+</code></pre><h3 id="litestream_reset">litestream_reset<a href="#litestream_reset" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Clears local Litestream replication state for a database. This forces
+a fresh snapshot on the next sync.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Database file path</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>No</td>
+<td>Path to configuration file</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ai-client-configuration">AI Client Configuration<a href="#ai-client-configuration" class="anchor" aria-hidden="true">#</a> </h2>
 <p>MCP is an open standard supported by many AI assistants and development tools.
 This section covers configuration for popular clients.</p>
 <h3 id="local-configuration">Local Configuration<a href="#local-configuration" class="anchor" aria-hidden="true">#</a> </h3>
@@ -740,7 +716,7 @@ over HTTP using JSON-RPC 2.0 at the root endpoint (<code>/</code>).</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.5beff9d6cba0b18c64b1674eba9a6b8983a3cd906955d56ad9f6707f06b1abb96051140b33426fe576f12b16509a2eab239d01919d1023706fcdc6d1eb4fc8eb.js" integrity="sha512-W&#43;/51sugsYxksWdOuppriYOjzZBpVdVq2fZwfwaxq7lgURQLM0Jv5XbxKxZQmi6rI50BkZ0QI3BvzcbR60/I6w==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.d8f5e476bb38aa6e5d46c69b2d80d720c53aa36a5ac58c007ecdba8f37901667ae80f363425b578c037743ae3f5eae089ae324630132afe826096e36bc9acce1.js" integrity="sha512-2PXkdrs4qm5dRsabLYDXIMU6o2paxYwAfs26jzeQFmeugPNjQltXjAN3Q64/Xq4ImuMkYwEyr&#43;gmCW42vJrM4Q==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
