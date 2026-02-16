@@ -65,6 +65,13 @@
       <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.&#xA;⚠️ **Age Encryption Note**: Age encryption is not available in v0.5.0+. If you are attempting to restore from an Age-encrypted replica created with v0.</description>
     </item>
     <item>
+      <title>IPC Endpoints</title>
+      <link>https://litestream.io/reference/ipc/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/ipc/</guid>
+      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The IPC socket is created at:&#xA;/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.&#xA;Endpoints GET /txid Returns the current transaction ID for a database.&#xA;Query parameters:&#xA;Parameter Required Description path Yes Absolute path to the database file Example:</description>
+    </item>
+    <item>
       <title>Command: reset</title>
       <link>https://litestream.io/reference/reset/</link>
       <pubDate>Sun, 01 Feb 2026 00:00:00 +0000</pubDate>

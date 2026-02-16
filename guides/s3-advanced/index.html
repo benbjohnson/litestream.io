@@ -185,6 +185,7 @@ Part Size: The size of each chunk uploaded to S3 Concurrency: The number of part
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -233,6 +234,14 @@ Part Size: The size of each chunk uploaded to S3 Concurrency: The number of part
         <li><a href="#memory-issues">Memory Issues</a></li>
         <li><a href="#slow-uploads">Slow Uploads</a></li>
         <li><a href="#provider-specific-errors">Provider-Specific Errors</a></li>
+      </ul>
+    </li>
+    <li><a href="#distributed-leasing">Distributed Leasing</a>
+      <ul>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#lock-file-format">Lock File Format</a></li>
+        <li><a href="#failover-behavior">Failover Behavior</a></li>
+        <li><a href="#requirements">Requirements</a></li>
       </ul>
     </li>
     <li><a href="#see-also">See Also</a></li>
@@ -457,6 +466,44 @@ is at least 5 MiB:</p>
 <p>If you receive errors from your storage provider about invalid part sizes,
 verify you meet their minimum requirements. Backblaze B2 and some other
 providers have a strict 5 MB minimum.</p>
+<h2 id="distributed-leasing">Distributed Leasing<a href="#distributed-leasing" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Litestream supports distributed leasing for safe
+multi-instance deployments using S3 conditional writes. This ensures only one
+Litestream instance actively replicates a database at a time, enabling
+high-availability patterns where a standby instance can take over if the
+primary fails.</p>
+<h3 id="how-it-works">How It Works<a href="#how-it-works" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream uses a <code>lock.json</code> file stored alongside your replica data. The
+leasing algorithm uses S3&rsquo;s <code>If-Match</code> and <code>If-None-Match</code> conditional headers
+for atomic leader election:</p>
+<ol>
+<li><strong>Acquire</strong>: Read existing <code>lock.json</code>, check if the lease has expired, then
+conditionally write a new lease using ETag matching</li>
+<li><strong>Renew</strong>: The active leader periodically refreshes the lease before expiry</li>
+<li><strong>Release</strong>: On graceful shutdown, the leader releases the lease</li>
+</ol>
+<p>If another instance attempts to acquire the lease while it is held, S3 returns
+a <code>412 Precondition Failed</code> response and the instance waits.</p>
+<h3 id="lock-file-format">Lock File Format<a href="#lock-file-format" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;generation&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&#34;expires_at&#34;</span><span class="p">:</span> <span class="s2">&#34;2025-02-21T15:04:33.206179Z&#34;</span><span class="p">,</span> <span class="nt">&#34;owner&#34;</span><span class="p">:</span> <span class="s2">&#34;hostname:pid&#34;</span><span class="p">}</span>
+</span></span></code></pre></div><ul>
+<li><code>generation</code> — Monotonically increasing counter for lease generations</li>
+<li><code>expires_at</code> — Unix timestamp when the lease expires</li>
+<li><code>owner</code> — Identifier of the instance holding the lease</li>
+</ul>
+<h3 id="failover-behavior">Failover Behavior<a href="#failover-behavior" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When the active instance stops (crash, shutdown, or network partition), the
+lease expires and a standby instance acquires it automatically. The failover
+time depends on the lease duration.</p>
+<h3 id="requirements">Requirements<a href="#requirements" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Distributed leasing requires an S3 provider that supports conditional writes.
+AWS S3 supports this natively. Check your provider&rsquo;s documentation for
+<code>If-Match</code>/<code>If-None-Match</code> header support.</p>
+<p>This feature is currently available through the Go library API. See the
+<a href="/guides/go-library">Go library guide</a> for programmatic usage.</p>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/guides/s3">Replicating to Amazon S3</a> - Basic S3 setup guide</li>

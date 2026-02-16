@@ -14,15 +14,18 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Running as a Windows Service - Litestream</title>
+  <title>IPC Endpoints - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/guides/windows/">
+<link rel="canonical" href="https://litestream.io/reference/ipc/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Running as a Windows Service">
-<meta name="twitter:description" content="This guide will get you running Litestream on the Windows operating system as either a command line tool or as a background Windows Service.
-Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.
-Running as a Windows Service Running Litestream as a Windows Service means that it will run in the background and continuously monitor and replicate your databases.">
+<meta name="twitter:title" content="IPC Endpoints">
+<meta name="twitter:description" content="v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.
+Socket Path The IPC socket is created at:
+/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.
+Endpoints GET /txid Returns the current transaction ID for a database.
+Query parameters:
+Parameter Required Description path Yes Absolute path to the database file Example:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -41,13 +44,13 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Guides",
-        "item": "https:\/\/litestream.io\/guides\/"
+        "name": "Reference",
+        "item": "https:\/\/litestream.io\/reference\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Windows",
-        "item": "https:\/\/litestream.io\/guides\/windows\/"
+        "name": "Ipc",
+        "item": "https:\/\/litestream.io\/reference\/ipc\/"
     }]
 }
 </script>
@@ -59,7 +62,7 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="guides single">
+  <body class="reference single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -133,7 +136,7 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
     </ul>
   <h3>
@@ -184,7 +187,7 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -196,14 +199,13 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#prerequisites">Prerequisites</a></li>
-    <li><a href="#running-as-a-windows-service">Running as a Windows Service</a>
+    <li><a href="#socket-path">Socket Path</a></li>
+    <li><a href="#endpoints">Endpoints</a>
       <ul>
-        <li><a href="#managing-the-service">Managing the service</a></li>
-        <li><a href="#viewing-the-event-log">Viewing the event log</a></li>
+        <li><a href="#get-txid">GET /txid</a></li>
+        <li><a href="#debugpprof">/debug/pprof/*</a></li>
       </ul>
     </li>
-    <li><a href="#running-from-the-command-line">Running from the command line</a></li>
     <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -211,82 +213,121 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Running as a Windows Service</h1>
+		<h1>IPC Endpoints</h1>
 			<p class="lead"></p>
-			<p>This guide will get you running Litestream on the Windows operating system as
-either a command line tool or as a background Windows Service.</p>
-<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
-<p>This guide assumes you have read the <a href="/getting-started"><em>Getting Started</em></a>
-tutorial already. Please read that to understand the basic operation of Litestream.</p>
-<h2 id="running-as-a-windows-service">Running as a Windows Service<a href="#running-as-a-windows-service" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Running Litestream as a Windows Service means that it will run in the background
-and continuously monitor and replicate your databases. This is the recommended
-way to run Litestream.</p>
-<p>To install, download and run the <code>.msi</code> installer from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
-page</a>. You&rsquo;ll be presented with a window asking if the app can make
-changes to your device. Click <em>&ldquo;Yes&rdquo;</em>.</p>
-<center>
- <img src="msi.png" alt="Screenshot of Windows installer">
-</center>
-<br/>
-<p>Once the installer is done, your Litesteam service will be running. The
-<a href="/reference/config">configuration file</a> for Litestream is installed at:</p>
-<pre tabindex="0"><code>C:\Litestream\litestream.yml
-</code></pre><h3 id="managing-the-service">Managing the service<a href="#managing-the-service" class="anchor" aria-hidden="true">#</a> </h3>
-<p>When you first install Litestream, it will run using an empty <a href="/reference/config">configuration
-file</a>. Whenever you update this file, you&rsquo;ll need to restart
-the service.</p>
-<p>Go to the <em>Services</em> application and select the Litestream service. You should
-see links in the sidebar to <em>Stop</em> and <em>Restart</em> the service.</p>
-<figure>
- <img src="services.png" alt="Screenshot of Windows Services application">
-</figure>
-<h3 id="viewing-the-event-log">Viewing the event log<a href="#viewing-the-event-log" class="anchor" aria-hidden="true">#</a> </h3>
-<p>The Litestream service logs informational and error messages to the Windows
-Event Log during operation. You can view these events in either the <em>Event
-Viewer</em> application or you can view them from PowerShell.</p>
-<p>In PowerShell, you can execute the following:</p>
-<pre tabindex="0"><code>Get-EventLog -LogName Application -Source Litestream
-</code></pre><p>This will show events in reverse chronological order:</p>
-<pre tabindex="0"><code>PS C:\&gt; Get-EventLog -LogName Application -Source Litestream
-
-   Index Time          EntryType   Source                 InstanceID Message
-   ----- ----          ---------   ------                 ---------- -------
-    8894 Jan 01 00:00  Information Litestream                      1 replicating to: name=&#34;s3&#34; type=&#34;s3&#34; bucket=&#34;dev...
-    8892 Jan 01 00:00  Information Litestream                      1 initialized db: C:\my.db...
-    8891 Jan 01 00:00  Information Litestream                      1 litestream v0.5.6...
-    8890 Jan 01 00:00  Information Litestream                      1 Litestream service starting...
-</code></pre><h2 id="running-from-the-command-line">Running from the command line<a href="#running-from-the-command-line" class="anchor" aria-hidden="true">#</a> </h2>
-<p>If you do not wish to run as a background service or you only need to perform
-a database restore then you can download the Litestream executable and run
-from the command line.</p>
-<p>You&rsquo;ll need to download the <code>litestream.exe</code> file from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
-page</a> and install it within your Windows <code>%PATH%</code>. The executable will
-use <code>C:\Litestream\litestream.yml</code> as the default configuration path but you
-can override that with the <code>-config</code> flag.</p>
-<p>All logging messages will go to the terminal window when running from the
-command line and the Event Log is not used.</p>
-<h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Litestream exposes IPC (Inter-Process Communication)
+endpoints via a Unix domain socket. These endpoints allow local tools and scripts
+to query database status and collect profiling data without exposing an HTTP port.</p>
+<h2 id="socket-path">Socket Path<a href="#socket-path" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The IPC socket is created at:</p>
+<pre tabindex="0"><code>/var/run/litestream.sock
+</code></pre><p>The socket is automatically created when Litestream starts replication and
+removed on shutdown.</p>
+<h2 id="endpoints">Endpoints<a href="#endpoints" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="get-txid">GET /txid<a href="#get-txid" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Returns the current transaction ID for a database.</p>
+<p><strong>Query parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Absolute path to the database file</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="s2">&#34;http://localhost/txid?path=/path/to/my.db&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
+</span></span></code></pre></div><h3 id="debugpprof">/debug/pprof/*<a href="#debugpprof" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Standard Go <a href="https://pkg.go.dev/net/http/pprof">pprof</a> endpoints for runtime
+profiling. These allow you to collect CPU profiles, heap snapshots, and
+goroutine dumps without running a separate HTTP server.</p>
+<p><strong>CPU profile:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    http://localhost/debug/pprof/profile &gt; cpu.pprof
+</span></span></code></pre></div><p><strong>Heap profile:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    http://localhost/debug/pprof/heap &gt; heap.pprof
+</span></span></code></pre></div><p><strong>Goroutine dump:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="s2">&#34;http://localhost/debug/pprof/goroutine?debug=2&#34;</span>
+</span></span></code></pre></div><p><strong>Available pprof paths:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/debug/pprof/profile</code></td>
+<td>CPU profile (30s default)</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/heap</code></td>
+<td>Heap memory profile</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/goroutine</code></td>
+<td>Goroutine stack traces</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/allocs</code></td>
+<td>Memory allocation profile</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/block</code></td>
+<td>Blocking profile</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/mutex</code></td>
+<td>Mutex contention profile</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/threadcreate</code></td>
+<td>Thread creation profile</td>
+</tr>
+<tr>
+<td><code>/debug/pprof/trace</code></td>
+<td>Execution trace</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>go tool pprof</code> to analyze collected profiles:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">go tool pprof cpu.pprof
+</span></span><span class="line"><span class="cl">go tool pprof heap.pprof
+</span></span></code></pre></div><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li><a href="/getting-started">Getting Started</a> - Introduction to Litestream basics</li>
-<li><a href="/how-it-works">How It Works</a> - Understanding WAL, checkpoints, and replication</li>
-<li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
 <li><a href="/reference/config">Configuration Reference</a> - Complete configuration options</li>
+<li><a href="/reference/metrics">Metrics</a> - Prometheus metrics reference</li>
 </ul>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/guides/systemd/">
+	<a href="https://litestream.io/reference/restore/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Running as a Systemd service
+					&larr; Command: restore
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/guides/directory-watcher/">
+	<a class="ml-auto" href="https://litestream.io/reference/reset/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Directory Watcher &rarr;
+					Command: reset &rarr;
 				</div>
 			</div>
 		</a>

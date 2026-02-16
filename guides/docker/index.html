@@ -183,6 +183,7 @@
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -201,6 +202,7 @@
         <li><a href="#using-a-replica-url">Using a replica URL</a></li>
       </ul>
     </li>
+    <li><a href="#ca-certificates">CA Certificates</a></li>
     <li><a href="#running-in-the-same-container">Running in the same container</a></li>
     <li><a href="#volume-storage-considerations">Volume storage considerations</a>
       <ul>
@@ -274,6 +276,23 @@ inside the container.</p>
 <p>Finally, the <code>replicate</code> command will replicate data from the <code>db</code> database file
 in your <code>/data</code> volume to an S3 bucket. You&rsquo;ll need to replace <code>BUCKET</code> with the
 name of your bucket.</p>
+<h2 id="ca-certificates">CA Certificates<a href="#ca-certificates" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Litestream embeds a fallback root CA certificate
+bundle. The Go TLS stack automatically uses this embedded bundle when the system
+certificate store is unavailable or empty.</p>
+<p>This means minimal container images (<code>scratch</code>, <code>distroless</code>, <code>busybox</code>) <strong>no
+longer need CA certificates copied or installed</strong> for HTTPS connections to cloud
+storage providers (S3, GCS, Azure, etc.). You can remove these steps from your
+Dockerfiles:</p>
+<ul>
+<li><code>COPY --from=... /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/</code></li>
+<li><code>RUN apk add --no-cache ca-certificates</code></li>
+<li><code>RUN apt-get install -y ca-certificates</code></li>
+</ul>
+<p>This simplifies container setup and reduces image size.</p>
 <h2 id="running-in-the-same-container">Running in the same container<a href="#running-in-the-same-container" class="anchor" aria-hidden="true">#</a> </h2>
 <p>If you are deploying to a service like <a href="https://fly.io/">Fly.io</a> that only uses a single
 container, you can bundle both your application and Litestream together using

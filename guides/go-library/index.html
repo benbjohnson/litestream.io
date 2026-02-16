@@ -183,6 +183,7 @@
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -207,6 +208,13 @@
         <li><a href="#compaction-levels">Compaction levels</a></li>
         <li><a href="#database-options">Database options</a></li>
         <li><a href="#replica-options">Replica options</a></li>
+      </ul>
+    </li>
+    <li><a href="#convenience-methods">Convenience methods</a>
+      <ul>
+        <li><a href="#dbensureexists">DB.EnsureExists</a></li>
+        <li><a href="#dbsyncandwait">DB.SyncAndWait</a></li>
+        <li><a href="#dbsyncstatus">DB.SyncStatus</a></li>
       </ul>
     </li>
     <li><a href="#graceful-shutdown">Graceful shutdown</a></li>
@@ -530,7 +538,45 @@ local database doesn&rsquo;t exist. This pattern works well with ephemeral conta
 <p>Configure sync behavior:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">replica</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaWithClient</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="nx">replica</span><span class="p">.</span><span class="nx">SyncInterval</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>  <span class="c1">// How often to sync to replica
-</span></span></span></code></pre></div><h2 id="graceful-shutdown">Graceful shutdown<a href="#graceful-shutdown" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><h2 id="convenience-methods">Convenience methods<a href="#convenience-methods" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ The <code>DB</code> type provides convenience methods for
+common operations when using Litestream as a library.</p>
+<h3 id="dbensureexists">DB.EnsureExists<a href="#dbensureexists" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Restores the database from the replica if the local file does not exist. If
+the database already exists or no backup is available, it is a no-op.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">db</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewDB</span><span class="p">(</span><span class="s">&#34;/path/to/my.db&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">client</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaClientFromURL</span><span class="p">(</span><span class="s">&#34;s3://my-bucket/backups&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">db</span><span class="p">.</span><span class="nx">Replica</span> <span class="p">=</span> <span class="nx">litestream</span><span class="p">.</span><span class="nf">NewReplicaWithClient</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">EnsureExists</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>This replaces the manual <code>restoreIfNotExists</code> pattern shown in the
+<a href="#s3-backend-with-restore-on-startup">S3 backend with restore-on-startup</a> example.</p>
+<h3 id="dbsyncandwait">DB.SyncAndWait<a href="#dbsyncandwait" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Performs a full sync cycle (WAL to LTX to remote) and blocks until complete.
+Useful for ensuring data is replicated before shutting down.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">SyncAndWait</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Backup failed: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="dbsyncstatus">DB.SyncStatus<a href="#dbsyncstatus" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Returns the current sync status comparing local and remote transaction positions.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">status</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">SyncStatus</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">log</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Local TXID: %d, Remote TXID: %d, InSync: %t&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">status</span><span class="p">.</span><span class="nx">LocalTXID</span><span class="p">,</span> <span class="nx">status</span><span class="p">.</span><span class="nx">RemoteTXID</span><span class="p">,</span> <span class="nx">status</span><span class="p">.</span><span class="nx">InSync</span><span class="p">)</span>
+</span></span></code></pre></div><p>The returned <code>SyncStatus</code> contains:</p>
+<ul>
+<li><code>LocalTXID</code> — The latest local transaction ID</li>
+<li><code>RemoteTXID</code> — The latest transaction ID on the remote replica</li>
+<li><code>InSync</code> — Whether local and remote are at the same position</li>
+</ul>
+<h2 id="graceful-shutdown">Graceful shutdown<a href="#graceful-shutdown" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Always close the store before your application exits to ensure all pending
 writes are flushed to the replica:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// Handle shutdown signals

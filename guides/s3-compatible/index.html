@@ -183,6 +183,7 @@ Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -292,7 +293,7 @@ for most providers.</p>
 <tr>
 <td>Cloudflare R2</td>
 <td><code>*.r2.cloudflarestorage.com</code></td>
-<td><code>sign-payload: true</code></td>
+<td><code>sign-payload: true</code>, <code>concurrency: 2</code></td>
 </tr>
 <tr>
 <td>Tigris</td>
@@ -504,6 +505,11 @@ object storage with zero egress fees and global distribution.</p>
 <li>R2 supports both path-style and virtual-hosted style addressing</li>
 <li>Jurisdiction-specific endpoints available for EU data residency:
 <code>${ACCOUNT_ID}.eu.r2.cloudflarestorage.com</code></li>
+<li><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Litestream automatically sets <code>concurrency=2</code>
+for R2 endpoints to avoid R2&rsquo;s strict concurrent upload limits</li>
 </ul>
 <h3 id="digitalocean-spaces">DigitalOcean Spaces<a href="#digitalocean-spaces" class="anchor" aria-hidden="true">#</a> </h3>
 <p><a href="https://www.digitalocean.com/products/spaces/">DigitalOcean Spaces</a> provides

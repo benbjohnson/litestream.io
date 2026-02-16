@@ -184,6 +184,7 @@ litestream ltx [arguments] DB_PATH List by replica URL This command lists all LT
     <li><a class="docs-link active" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -206,6 +207,8 @@ litestream ltx [arguments] DB_PATH List by replica URL This command lists all LT
       <ul>
         <li><a href="#database-ltx-files">Database LTX files</a></li>
         <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
+        <li><a href="#view-a-specific-compaction-level">View a specific compaction level</a></li>
+        <li><a href="#view-all-compaction-levels">View all compaction levels</a></li>
         <li><a href="#replica-url-ltx-files">Replica URL LTX files</a></li>
       </ul>
     </li>
@@ -233,7 +236,12 @@ in the Litestream configuration file:</p>
 useful when you do not have a configuration file.</p>
 <pre tabindex="0"><code>litestream ltx [arguments] REPLICA_URL
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>-config PATH
+<pre tabindex="0"><code>-level LEVEL
+    View LTX files at a specific compaction level.
+    Accepts a level number (0-9) or &#34;all&#34; to show all levels.
+    When set to &#34;all&#34;, output includes a level column.
+
+-config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
 
@@ -249,6 +257,12 @@ useful when you do not have a configuration file.</p>
 </code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Lists all LTX files for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
 <pre tabindex="0"><code>$ litestream ltx -replica s3 /var/lib/db
+</code></pre><h3 id="view-a-specific-compaction-level">View a specific compaction level<a href="#view-a-specific-compaction-level" class="anchor" aria-hidden="true">#</a> </h3>
+<p>List only L0 (uncompacted) LTX files:</p>
+<pre tabindex="0"><code>$ litestream ltx -level 0 /var/lib/db
+</code></pre><h3 id="view-all-compaction-levels">View all compaction levels<a href="#view-all-compaction-levels" class="anchor" aria-hidden="true">#</a> </h3>
+<p>List LTX files across all levels (output includes a <code>level</code> column):</p>
+<pre tabindex="0"><code>$ litestream ltx -level all /var/lib/db
 </code></pre><h3 id="replica-url-ltx-files">Replica URL LTX files<a href="#replica-url-ltx-files" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Lists all LTX files for a single replica URL:</p>
 <pre tabindex="0"><code>$ litestream ltx s3://mybkt.litestream.io/db

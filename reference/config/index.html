@@ -184,6 +184,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
     </ul>
@@ -235,7 +236,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#webdav-replica">WebDAV replica</a></li>
         <li><a href="#legacy-multiple-replicas">Legacy Multiple Replicas</a></li>
         <li><a href="#retention-period">Retention period</a></li>
-        <li><a href="#validation-interval">Validation interval</a></li>
+        <li><a href="#validation">Validation</a></li>
         <li><a href="#encryption">Encryption</a></li>
       </ul>
     </li>
@@ -270,7 +271,17 @@ is set then it will be replaced with an empty string.</p>
 dollar sign followed by characters—for example, a password. In this case, you
 can set the <code>-no-expand-env</code> flag on any <code>litestream</code> command to disable
 expansion.</p>
-<h3 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Litestream automatically sets <code>$PID</code> during config
+file parsing, expanding to the current process ID. This is useful for creating
+unique replica paths when running multiple Litestream instances on the same host:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/data/myapp.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">file:///tmp/replicas/$PID/myapp</span><span class="w">
+</span></span></span></code></pre></div><h3 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream supports environment variables for configuring authentication credentials.
 There are two types:</p>
 <ol>
@@ -401,9 +412,8 @@ overrides. This eliminates configuration duplication across multiple databases.<
 detailed usage examples and best practices.</p>
 <p><strong>Timing settings</strong> (apply to all replica types):</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">validation-interval</span><span class="p">:</span><span class="w"> </span><span class="l">6h</span><span class="w">
-</span></span></span></code></pre></div><p>Note: Snapshot and retention settings are configured separately under the
-<code>snapshot:</code> section, not as global replica defaults.</p>
+</span></span></span></code></pre></div><p>Note: Snapshot, retention, and validation settings are configured separately
+under their own sections, not as global replica defaults.</p>
 <p><strong>S3 and S3-compatible settings:</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">AKIAxxxxxxxxxxxxxxxx</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
@@ -749,10 +759,7 @@ increase cloud storage costs due to more frequent PUT requests. See the
 <a href="#cost-considerations">Cost Considerations</a> section below for details.</p>
 </li>
 <li>
-<p><code>validation-interval</code>—<div class="alert alert-warning d-flex" role="alert">
-  <div class="flex-shrink-1 alert-icon">⚠️</div>
-  <div class="w-100">Currently non-functional in v0.5.x. When enabled in future versions, Litestream will automatically restore and validate that replica data matches the local copy. This will significantly increase cloud storage costs due to restore downloads.</div>
-</div></p>
+<p><code>validation-interval</code>—Deprecated. Use the <code>validation:</code> global config block instead. See <a href="#validation">Validation</a> below.</p>
 </li>
 <li>
 <p><code>auto-recover</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
@@ -900,10 +907,88 @@ your specific provider requires unsigned payloads.</p>
 requests. Some S3-compatible providers don&rsquo;t support this header on certain
 operations. Automatically disabled for Tigris endpoints. Defaults to <code>true</code>.</p>
 </li>
+<li>
+<p><code>sse-customer-algorithm</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ SSE-C encryption algorithm.</p>
+</li>
+<li>
+<p><code>sse-customer-key-md5</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Base64-encoded MD5 digest of the SSE-C encryption key.</p>
+</li>
 </ul>
-<p>These options can also be set via URL query parameters:</p>
+<p>These options can also be set via URL query parameters. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+
+Both camelCase and hyphenated forms are accepted:</p>
 <pre tabindex="0"><code>s3://bucket/path?sign-payload=true&amp;require-content-md5=false
-</code></pre><h4 id="s3-compatible-provider-requirements">S3-Compatible Provider Requirements<a href="#s3-compatible-provider-requirements" class="anchor" aria-hidden="true">#</a> </h4>
+s3://bucket/path?signPayload=true&amp;requireContentMD5=false
+</code></pre><p><strong>S3 URL query parameter reference:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Alias</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>force-path-style</code></td>
+<td><code>forcePathStyle</code></td>
+<td><code>false</code></td>
+<td>Use path-style URLs</td>
+</tr>
+<tr>
+<td><code>skip-verify</code></td>
+<td><code>skipVerify</code></td>
+<td><code>false</code></td>
+<td>Disable TLS verification</td>
+</tr>
+<tr>
+<td><code>concurrency</code></td>
+<td>—</td>
+<td><code>5</code></td>
+<td>Parallel upload parts</td>
+</tr>
+<tr>
+<td><code>part-size</code></td>
+<td><code>partSize</code></td>
+<td><code>5MB</code></td>
+<td>Size of each upload part</td>
+</tr>
+<tr>
+<td><code>sign-payload</code></td>
+<td><code>signPayload</code></td>
+<td><code>true</code></td>
+<td>Sign request payload</td>
+</tr>
+<tr>
+<td><code>require-content-md5</code></td>
+<td><code>requireContentMD5</code></td>
+<td><code>true</code></td>
+<td>Add Content-MD5 header</td>
+</tr>
+<tr>
+<td><code>sse-customer-algorithm</code></td>
+<td><code>sseCustomerAlgorithm</code></td>
+<td>—</td>
+<td>SSE-C algorithm</td>
+</tr>
+<tr>
+<td><code>sse-customer-key-md5</code></td>
+<td><code>sseCustomerKeyMD5</code></td>
+<td>—</td>
+<td>SSE-C key MD5</td>
+</tr>
+</tbody>
+</table>
+<h4 id="s3-compatible-provider-requirements">S3-Compatible Provider Requirements<a href="#s3-compatible-provider-requirements" class="anchor" aria-hidden="true">#</a> </h4>
 <p>Different S3-compatible storage providers have varying requirements for payload
 signing and Content-MD5 headers. The table below shows the recommended settings
 for popular providers:</p>
@@ -1285,11 +1370,27 @@ configuration, not per-replica. See the <a href="#complete-configuration-example
 section for an example of how to configure snapshot settings.</p>
 <p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
 but days, weeks, &amp; years are not supported.</p>
-<h3 id="validation-interval">Validation interval<a href="#validation-interval" class="anchor" aria-hidden="true">#</a> </h3>
-<div class="alert alert-warning d-flex" role="alert">
-  <div class="flex-shrink-1 alert-icon">⚠️</div>
-  <div class="w-100">The `validation-interval` field is currently non-functional in v0.5.x. It is defined in the configuration schema but has no effect. When this feature is implemented in a future release, it will periodically restore replicas and compare checksums to the primary database, but this will significantly increase costs due to restore downloads.</div>
-</div>
+<h3 id="validation">Validation<a href="#validation" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ Litestream periodically validates replica integrity
+by checking LTX files for sort order and contiguity. The background validation
+monitor runs at the configured interval and reports gaps, overlaps, or unsorted
+files.</p>
+<p>Configure validation using the <code>validation:</code> block in your config file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">validation</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>interval</code>—How frequently to run validation checks. Defaults to disabled.</li>
+</ul>
+<p>Validation checks each compaction level (except snapshot level 9) for:</p>
+<ul>
+<li><strong>Sort order</strong> — LTX files are in the correct sequence</li>
+<li><strong>Contiguity</strong> — No missing transaction ranges between files</li>
+<li><strong>Gap detection</strong> — Identifies holes in the transaction log</li>
+<li><strong>Overlap detection</strong> — Identifies duplicate transaction ranges</li>
+</ul>
 <h3 id="encryption">Encryption<a href="#encryption" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>
@@ -1425,6 +1526,10 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Validation settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">validation</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">6h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># L0 retention settings (for VFS support)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
