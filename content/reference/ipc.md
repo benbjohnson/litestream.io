@@ -41,7 +41,7 @@ Returns the current transaction ID for a database.
 ```bash
 $ curl --unix-socket /var/run/litestream.sock \
     "http://localhost/txid?path=/path/to/my.db"
-{"path":"/path/to/my.db","txid":42}
+{"txid":42}
 ```
 
 ### /debug/pprof/*
