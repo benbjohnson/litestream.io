@@ -113,6 +113,28 @@ ADC automatically supports:
 
 ## Global settings
 
+### Retention
+
+{{< since version="0.5.8" >}} The `retention` block controls whether Litestream
+actively deletes old files from remote storage during retention enforcement.
+When `enabled` is set to `false`, Litestream will not delete old LTX or snapshot
+files from your remote storage. Instead, you can rely on cloud provider lifecycle
+policies (S3 lifecycle rules, GCS object lifecycle, Azure lifecycle management,
+etc.) to handle file retention.
+
+```yaml
+retention:
+  enabled: false
+```
+
+Local file cleanup continues normally regardless of this setting. On startup,
+Litestream logs a warning about idle databases that may lose backup coverage
+when retention is disabled.
+
+**Security benefit:** With retention disabled, your IAM credentials no longer
+need `DeleteObject` permissions. This limits the blast radius if credentials
+are compromised — an attacker with leaked credentials cannot delete your backups.
+
 ### Global replica defaults
 
 {{< since version="0.5.0" >}} Global replica defaults allow you to set default
@@ -1220,6 +1242,10 @@ Example showing available configuration options:
 # Global settings
 access-key-id: ${AWS_ACCESS_KEY_ID}
 secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+
+# Disable remote file deletion (use cloud lifecycle policies instead)
+# retention:
+#   enabled: false
 
 # Metrics endpoint
 addr: ":9090"
