@@ -113,23 +113,25 @@ ADC automatically supports:
 
 ## Global settings
 
-### Skip remote deletion
+### Retention
 
-{{< since version="0.5.8" >}} The `skip-remote-deletion` option disables
-Litestream's remote file deletion during retention enforcement. When enabled,
-Litestream will not delete old LTX or snapshot files from your remote storage.
-Instead, you can rely on cloud provider lifecycle policies (S3 lifecycle rules,
-GCS object lifecycle, Azure lifecycle management, etc.) to handle file retention.
+{{< since version="0.5.8" >}} The `retention` block controls whether Litestream
+actively deletes old files from remote storage during retention enforcement.
+When `enabled` is set to `false`, Litestream will not delete old LTX or snapshot
+files from your remote storage. Instead, you can rely on cloud provider lifecycle
+policies (S3 lifecycle rules, GCS object lifecycle, Azure lifecycle management,
+etc.) to handle file retention.
 
 ```yaml
-skip-remote-deletion: true
+retention:
+  enabled: false
 ```
 
 Local file cleanup continues normally regardless of this setting. On startup,
 Litestream logs a warning about idle databases that may lose backup coverage
-when remote deletion is skipped.
+when retention is disabled.
 
-**Security benefit:** With this option enabled, your IAM credentials no longer
+**Security benefit:** With retention disabled, your IAM credentials no longer
 need `DeleteObject` permissions. This limits the blast radius if credentials
 are compromised — an attacker with leaked credentials cannot delete your backups.
 
@@ -1241,8 +1243,9 @@ Example showing available configuration options:
 access-key-id: ${AWS_ACCESS_KEY_ID}
 secret-access-key: ${AWS_SECRET_ACCESS_KEY}
 
-# Skip remote file deletion (use cloud lifecycle policies instead)
-skip-remote-deletion: false
+# Disable remote file deletion (use cloud lifecycle policies instead)
+# retention:
+#   enabled: false
 
 # Metrics endpoint
 addr: ":9090"

@@ -405,7 +405,7 @@ replica files. Please replace `<BUCKET>` with the name of your bucket.
 }
 ```
 
-{{< since version="0.5.8" >}} If you enable [`skip-remote-deletion`](/reference/config/#skip-remote-deletion)
+{{< since version="0.5.8" >}} If you disable [`retention`](/reference/config/#retention)
 in your configuration, you can remove `s3:DeleteObject` from the replication
 policy above and rely on S3 lifecycle rules for file cleanup instead. This
 limits the damage if credentials are compromised.
