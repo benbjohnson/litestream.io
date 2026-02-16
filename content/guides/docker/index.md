@@ -97,6 +97,24 @@ name of your bucket.
 
 
 
+## CA Certificates
+
+{{< since version="0.5.8" >}} Litestream embeds a fallback root CA certificate
+bundle. The Go TLS stack automatically uses this embedded bundle when the system
+certificate store is unavailable or empty.
+
+This means minimal container images (`scratch`, `distroless`, `busybox`) **no
+longer need CA certificates copied or installed** for HTTPS connections to cloud
+storage providers (S3, GCS, Azure, etc.). You can remove these steps from your
+Dockerfiles:
+
+- `COPY --from=... /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/`
+- `RUN apk add --no-cache ca-certificates`
+- `RUN apt-get install -y ca-certificates`
+
+This simplifies container setup and reduces image size.
+
+
 ## Running in the same container
 
 If you are deploying to a service like [Fly.io][fly] that only uses a single
