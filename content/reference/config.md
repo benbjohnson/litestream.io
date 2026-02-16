@@ -160,11 +160,10 @@ detailed usage examples and best practices.
 
 ```yaml
 sync-interval: 1s
-validation-interval: 6h
 ```
 
-Note: Snapshot and retention settings are configured separately under the
-`snapshot:` section, not as global replica defaults.
+Note: Snapshot, retention, and validation settings are configured separately
+under their own sections, not as global replica defaults.
 
 **S3 and S3-compatible settings:**
 
@@ -548,7 +547,7 @@ The following replica settings are available for all replica types:
   increase cloud storage costs due to more frequent PUT requests. See the
   [Cost Considerations](#cost-considerations) section below for details.
 
-- `validation-interval`—{{< alert icon="⚠️" text="Currently non-functional in v0.5.x. When enabled in future versions, Litestream will automatically restore and validate that replica data matches the local copy. This will significantly increase cloud storage costs due to restore downloads." >}}
+- `validation-interval`—Deprecated. Use the `validation:` global config block instead. See [Validation](#validation) below.
 
 - `auto-recover`—{{< since version="0.5.7" >}} When set to `true`, Litestream
   automatically resets local state when LTX errors are detected during
@@ -1147,9 +1146,28 @@ Duration values can be specified using second (`s`), minute (`m`), or hour (`h`)
 but days, weeks, & years are not supported.
 
 
-### Validation interval
+### Validation
 
-{{< alert icon="⚠️" text="The `validation-interval` field is currently non-functional in v0.5.x. It is defined in the configuration schema but has no effect. When this feature is implemented in a future release, it will periodically restore replicas and compare checksums to the primary database, but this will significantly increase costs due to restore downloads." >}}
+{{< since version="0.5.8" >}} Litestream periodically validates replica integrity
+by checking LTX files for sort order and contiguity. The background validation
+monitor runs at the configured interval and reports gaps, overlaps, or unsorted
+files.
+
+Configure validation using the `validation:` block in your config file:
+
+```yaml
+validation:
+  interval: 5m
+```
+
+- `interval`—How frequently to run validation checks. Defaults to disabled.
+
+Validation checks each compaction level (except snapshot level 9) for:
+
+- **Sort order** — LTX files are in the correct sequence
+- **Contiguity** — No missing transaction ranges between files
+- **Gap detection** — Identifies holes in the transaction log
+- **Overlap detection** — Identifies duplicate transaction ranges
 
 ### Encryption
 
@@ -1302,6 +1320,10 @@ levels:
 snapshot:
   interval: 1h
   retention: 24h
+
+# Validation settings
+validation:
+  interval: 6h
 
 # L0 retention settings (for VFS support)
 l0-retention: 5m
