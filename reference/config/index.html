@@ -203,6 +203,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     </li>
     <li><a href="#global-settings">Global settings</a>
       <ul>
+        <li><a href="#retention">Retention</a></li>
         <li><a href="#global-replica-defaults">Global replica defaults</a></li>
         <li><a href="#aws-credentials">AWS credentials</a></li>
         <li><a href="#metrics">Metrics</a></li>
@@ -370,6 +371,24 @@ The <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable is <strong>
 <li>Service account key file (via <code>GOOGLE_APPLICATION_CREDENTIALS</code>)</li>
 </ul>
 <h2 id="global-settings">Global settings<a href="#global-settings" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="retention">Retention<a href="#retention" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ The <code>retention</code> block controls whether Litestream
+actively deletes old files from remote storage during retention enforcement.
+When <code>enabled</code> is set to <code>false</code>, Litestream will not delete old LTX or snapshot
+files from your remote storage. Instead, you can rely on cloud provider lifecycle
+policies (S3 lifecycle rules, GCS object lifecycle, Azure lifecycle management,
+etc.) to handle file retention.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">retention</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span></code></pre></div><p>Local file cleanup continues normally regardless of this setting. On startup,
+Litestream logs a warning about idle databases that may lose backup coverage
+when retention is disabled.</p>
+<p><strong>Security benefit:</strong> With retention disabled, your IAM credentials no longer
+need <code>DeleteObject</code> permissions. This limits the blast radius if credentials
+are compromised — an attacker with leaked credentials cannot delete your backups.</p>
 <h3 id="global-replica-defaults">Global replica defaults<a href="#global-replica-defaults" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -1376,6 +1395,10 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global settings</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Disable remote file deletion (use cloud lifecycle policies instead)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># retention:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#   enabled: false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Metrics endpoint</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">

@@ -557,7 +557,14 @@ replica files. Please replace <code>&lt;BUCKET&gt;</code> with the name of your 
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">]</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><h3 id="restoration-policy-read-only">Restoration Policy (Read-Only)<a href="#restoration-policy-read-only" class="anchor" aria-hidden="true">#</a> </h3>
+</span></span></code></pre></div><p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ If you disable <a href="/reference/config/#retention"><code>retention</code></a>
+in your configuration, you can remove <code>s3:DeleteObject</code> from the replication
+policy above and rely on S3 lifecycle rules for file cleanup instead. This
+limits the damage if credentials are compromised.</p>
+<h3 id="restoration-policy-read-only">Restoration Policy (Read-Only)<a href="#restoration-policy-read-only" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you only need to restore databases from existing S3 replicas (without
 creating new replicas), you can use this more restrictive read-only policy:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
