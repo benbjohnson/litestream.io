@@ -26,6 +26,11 @@ The `litestream` commands are:
 - [`litestream-vfs`](/reference/vfs) — Optional read-only VFS that serves replicas directly from object storage.
 
 
+## IPC Endpoints
+
+- [IPC Endpoints](/reference/ipc) — Unix socket endpoints for local status queries and profiling.
+
+
 ## Prometheus Metrics
 
 - [Prometheus Metrics](/reference/metrics) — Reference for all metrics exported by Litestream.
