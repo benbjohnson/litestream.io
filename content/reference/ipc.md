@@ -26,6 +26,84 @@ removed on shutdown.
 
 ## Endpoints
 
+### GET /list
+
+Returns all databases currently tracked by the Litestream daemon, along with their
+last sync time.
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    http://localhost/list
+{"databases":[{"path":"/path/to/my.db","last_sync":"2026-02-12T00:00:00Z"}]}
+```
+
+**CLI equivalent:** `litestream list -socket /var/run/litestream.sock`
+
+---
+
+### GET /info
+
+Returns information about the running Litestream daemon including version, PID, and uptime.
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    http://localhost/info
+{"version":"0.5.8","pid":12345,"uptime":3600}
+```
+
+---
+
+### POST /add
+
+Dynamically registers a new database with the Litestream daemon without restarting.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+| `url` | Yes | Replica destination URL (e.g. `s3://bucket/path`) |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/add \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db","url":"s3://mybucket/my.db"}'
+```
+
+**CLI equivalent:** `litestream add -socket /var/run/litestream.sock /path/to/my.db s3://mybucket/my.db`
+
+---
+
+### POST /remove
+
+Dynamically unregisters a database from the Litestream daemon without restarting.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/remove \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db"}'
+```
+
+**CLI equivalent:** `litestream remove -socket /var/run/litestream.sock /path/to/my.db`
+
+---
+
 ### GET /txid
 
 Returns the current transaction ID for a database.
