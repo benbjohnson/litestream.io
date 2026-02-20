@@ -50,5 +50,6 @@ encounter issues, check the [Troubleshooting](/docs/troubleshooting) guide.
 - [NATS JetStream](/guides/nats)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)
+- [Supabase Storage](/guides/supabase)
 - [Tigris (Fly.io)](/guides/tigris)
 - [WebDAV Server](/guides/webdav)

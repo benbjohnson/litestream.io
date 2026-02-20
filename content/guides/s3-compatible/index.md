@@ -28,6 +28,7 @@ for most providers.
 | DigitalOcean Spaces | `*.digitaloceanspaces.com` | `sign-payload: true` |
 | Scaleway | `*.scw.cloud` | `sign-payload: true` |
 | Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true`, `concurrency: 2` |
+| Supabase Storage | `*.supabase.co` | `sign-payload: true`, `force-path-style: true` |
 | Tigris | `*.tigris.dev` | `sign-payload: true`, consistency header |
 
 Auto-detection means you can use simpler configurations without worrying about
@@ -453,6 +454,36 @@ dbs:
 
 See the [Tigris Guide](/guides/tigris/) for detailed setup instructions.
 
+### Supabase Storage
+
+[Supabase Storage](https://supabase.com/storage) provides an S3-compatible API
+as part of the Supabase platform. It's suitable for projects already using
+Supabase that want to keep their Litestream replicas alongside their other
+Supabase resources.
+
+**Configuration:**
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: db
+      endpoint: PROJECT_REF.supabase.co/storage/v1/s3
+      access-key-id: ${SUPABASE_S3_ACCESS_KEY}
+      secret-access-key: ${SUPABASE_S3_SECRET_KEY}
+```
+
+**Notes:**
+
+- Endpoint format: `<PROJECT_REF>.supabase.co/storage/v1/s3`
+- **Litestream v0.5.9+** automatically detects Supabase and sets
+  `force-path-style: true` and `sign-payload: true`; you can omit these settings
+- Generate S3 access keys in **Settings** > **Storage** in the Supabase dashboard
+
+See the [Supabase Storage Guide](/guides/supabase/) for detailed setup instructions.
+
 ### Filebase
 
 [Filebase](https://filebase.com/) provides S3-compatible access to decentralized
@@ -499,6 +530,7 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.
 | OCI | Yes | `us-east-1` | No | — |
 | Vultr | Yes | Yes | No | — |
 | Scaleway | Yes | Yes | No | ✓ |
+| Supabase | Yes | Optional | Auto | ✓ |
 | Tigris | Yes | `auto` | No | ✓ |
 | Filebase | Yes | `us-east-1` | Auto | ✓ |
 
