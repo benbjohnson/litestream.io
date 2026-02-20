@@ -36,7 +36,7 @@ last sync time.
 ```bash
 $ curl --unix-socket /var/run/litestream.sock \
     http://localhost/list
-{"databases":[{"path":"/path/to/my.db","last_sync":"2026-02-12T00:00:00Z"}]}
+{"databases":[{"path":"/path/to/my.db","status":"active","last_sync_at":"2026-02-12T00:00:00Z"}]}
 ```
 
 **CLI equivalent:** `litestream list -socket /var/run/litestream.sock`
@@ -52,12 +52,12 @@ Returns information about the running Litestream daemon including version, PID, 
 ```bash
 $ curl --unix-socket /var/run/litestream.sock \
     http://localhost/info
-{"version":"0.5.8","pid":12345,"uptime":3600}
+{"version":"0.5.8","pid":12345,"uptime_seconds":3600,"started_at":"2026-02-12T00:00:00Z","database_count":1}
 ```
 
 ---
 
-### POST /add
+### POST /register
 
 Dynamically registers a new database with the Litestream daemon without restarting.
 
@@ -66,22 +66,22 @@ Dynamically registers a new database with the Litestream daemon without restarti
 | Field | Required | Description |
 |-------|----------|-------------|
 | `path` | Yes | Absolute path to the SQLite database file |
-| `url` | Yes | Replica destination URL (e.g. `s3://bucket/path`) |
+| `replica_url` | Yes | Replica destination URL (e.g. `s3://bucket/path`) |
 
 **Example:**
 
 ```bash
 $ curl --unix-socket /var/run/litestream.sock \
-    -X POST http://localhost/add \
+    -X POST http://localhost/register \
     -H "Content-Type: application/json" \
-    -d '{"path":"/path/to/my.db","url":"s3://mybucket/my.db"}'
+    -d '{"path":"/path/to/my.db","replica_url":"s3://mybucket/my.db"}'
 ```
 
-**CLI equivalent:** `litestream add -socket /var/run/litestream.sock /path/to/my.db s3://mybucket/my.db`
+**CLI equivalent:** `litestream register -socket /var/run/litestream.sock -replica s3://mybucket/my.db /path/to/my.db`
 
 ---
 
-### POST /remove
+### POST /unregister
 
 Dynamically unregisters a database from the Litestream daemon without restarting.
 
@@ -95,12 +95,12 @@ Dynamically unregisters a database from the Litestream daemon without restarting
 
 ```bash
 $ curl --unix-socket /var/run/litestream.sock \
-    -X POST http://localhost/remove \
+    -X POST http://localhost/unregister \
     -H "Content-Type: application/json" \
     -d '{"path":"/path/to/my.db"}'
 ```
 
-**CLI equivalent:** `litestream remove -socket /var/run/litestream.sock /path/to/my.db`
+**CLI equivalent:** `litestream unregister -socket /var/run/litestream.sock /path/to/my.db`
 
 ---
 
