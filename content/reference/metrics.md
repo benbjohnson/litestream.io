@@ -91,8 +91,9 @@ litestream_sync_count{db="/var/lib/myapp.db"} 150
 
 **Type:** Counter
 
-Number of sync errors that have occurred. Monitor this metric for replication
-health—any non-zero growth indicates sync failures.
+Number of errors that have occurred during sync, including database
+initialization failures. Monitor this metric for replication health—any
+non-zero growth indicates issues with the sync process.
 
 ```
 litestream_sync_error_count{db="/var/lib/myapp.db"} 0
