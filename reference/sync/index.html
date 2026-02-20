@@ -14,15 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Command: databases - Litestream</title>
+  <title>Command: sync - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/reference/databases/">
+<link rel="canonical" href="https://litestream.io/reference/sync/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Command: databases">
-<meta name="twitter:description" content="The databases command lists all databases in the configuration file as well as list their associated replicas.
-Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -no-expand-env Disables environment variable expansion in configuration file. Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &quot;file&quot; and &quot;s3&quot;:
-$ litestream databases path replicas /var/lib/db file,s3 ">
+<meta name="twitter:title" content="Command: sync">
+<meta name="twitter:description" content="v0.5.8 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.
+The sync command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
+Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the control socket.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -46,8 +46,8 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Databases",
-        "item": "https:\/\/litestream.io\/reference\/databases\/"
+        "name": "Sync",
+        "item": "https:\/\/litestream.io\/reference\/sync\/"
     }]
 }
 </script>
@@ -178,12 +178,12 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
     <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/sync/">Command: sync</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/sync/">Command: sync</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
@@ -199,46 +199,90 @@ $ litestream databases path replicas /var/lib/db file,s3 ">
   <ul>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#arguments">Arguments</a></li>
-    <li><a href="#example">Example</a></li>
+    <li><a href="#behavior">Behavior</a></li>
+    <li><a href="#examples">Examples</a>
+      <ul>
+        <li><a href="#basic-sync">Basic sync</a></li>
+        <li><a href="#sync-and-wait-for-completion">Sync and wait for completion</a></li>
+        <li><a href="#sync-with-custom-timeout-and-socket">Sync with custom timeout and socket</a></li>
+      </ul>
+    </li>
+    <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
   </div>
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Command: databases</h1>
+		<h1>Command: sync</h1>
 			<p class="lead"></p>
-			<p>The <code>databases</code> command lists all databases in the configuration file as well
-as list their associated replicas.</p>
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
+    v0.5.8
+</span>
+ The <code>sync</code> command forces an immediate
+WAL-to-LTX sync for a database managed by the Litestream daemon. By default
+it triggers the sync and returns immediately (fire-and-forget). With the
+<code>-wait</code> flag it blocks until the sync completes, including remote replication.</p>
+<p>The <code>sync</code> command communicates with a running <code>litestream replicate</code> process
+over the IPC control socket. The daemon must already be running.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>litestream databases [arguments]
+<pre tabindex="0"><code>litestream sync [arguments] DB_PATH
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>-config PATH
-    Specifies the configuration file.
-    Defaults to /etc/litestream.yml
+<pre tabindex="0"><code>-socket PATH
+    Path to the control socket.
+    Defaults to /var/run/litestream.sock
 
--no-expand-env
-    Disables environment variable expansion in configuration file.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<p>This example shows a single database <code>/var/lib/db</code> defined in the configuration
-file with two replicas named <code>&quot;file&quot;</code> and <code>&quot;s3&quot;</code>:</p>
-<pre tabindex="0"><code>$ litestream databases
-path         replicas
-/var/lib/db  file,s3
-</code></pre>
+-wait
+    Block until sync completes including remote replication.
+    Defaults to false (fire-and-forget).
+
+-timeout SECONDS
+    Maximum time to wait in seconds, best-effort.
+    Defaults to 30.
+</code></pre><h2 id="behavior">Behavior<a href="#behavior" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The <code>sync</code> command operates in two modes:</p>
+<ul>
+<li>
+<p><strong>Fire-and-forget</strong> (default): Triggers WAL-to-LTX conversion and returns
+immediately. The response status will be <code>synced_local</code> if changes were
+synced, or <code>no_change</code> if the database was already up to date.</p>
+</li>
+<li>
+<p><strong>Blocking</strong> (<code>-wait</code>): Blocks until both WAL-to-LTX conversion and
+LTX-to-remote replication complete. The response status will be <code>synced</code>
+when complete, or <code>no_change</code> if the database was already up to date.</p>
+</li>
+</ul>
+<h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="basic-sync">Basic sync<a href="#basic-sync" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Trigger an immediate sync for a database:</p>
+<pre tabindex="0"><code>$ litestream sync /path/to/my.db
+</code></pre><h3 id="sync-and-wait-for-completion">Sync and wait for completion<a href="#sync-and-wait-for-completion" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Block until the sync finishes, including remote replication:</p>
+<pre tabindex="0"><code>$ litestream sync -wait /path/to/my.db
+</code></pre><h3 id="sync-with-custom-timeout-and-socket">Sync with custom timeout and socket<a href="#sync-with-custom-timeout-and-socket" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Specify a longer timeout and a non-default socket path:</p>
+<pre tabindex="0"><code>$ litestream sync -wait -timeout 60 -socket /tmp/litestream.sock /path/to/my.db
+</code></pre><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="/reference/ipc">IPC Endpoints</a> — Unix socket endpoints including <code>POST /sync</code></li>
+<li><a href="/reference/replicate">Command: replicate</a> — Start the replication daemon</li>
+<li><a href="/reference/config">Configuration Reference</a> — Complete configuration options</li>
+</ul>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/reference/metrics/">
+	<a href="https://litestream.io/reference/restore/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Prometheus Metrics
+					&larr; Command: restore
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/reference/mcp/">
+	<a class="ml-auto" href="https://litestream.io/reference/ipc/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Command: mcp &rarr;
+					IPC Endpoints &rarr;
 				</div>
 			</div>
 		</a>

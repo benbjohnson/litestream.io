@@ -184,6 +184,7 @@ Endpoints GET /list Returns all databases currently tracked by the Litestream da
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/sync/">Command: sync</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
     <li><a class="docs-link active" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
@@ -205,6 +206,7 @@ Endpoints GET /list Returns all databases currently tracked by the Litestream da
         <li><a href="#post-register">POST /register</a></li>
         <li><a href="#post-unregister">POST /unregister</a></li>
         <li><a href="#get-txid">GET /txid</a></li>
+        <li><a href="#post-sync">POST /sync</a></li>
         <li><a href="#debugpprof">/debug/pprof/*</a></li>
       </ul>
     </li>
@@ -325,7 +327,76 @@ last sync time.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="s2">&#34;http://localhost/txid?path=/path/to/my.db&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
-</span></span></code></pre></div><h3 id="debugpprof">/debug/pprof/*<a href="#debugpprof" class="anchor" aria-hidden="true">#</a> </h3>
+</span></span></code></pre></div><h3 id="post-sync">POST /sync<a href="#post-sync" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Forces an immediate WAL-to-LTX sync for a database. Without <code>wait</code>, the sync
+is triggered and the request returns immediately (fire-and-forget). With <code>wait</code>
+set to <code>true</code>, the request blocks until both local and remote replication
+complete.</p>
+<p><strong>Request body (JSON):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Absolute path to the SQLite database file</td>
+</tr>
+<tr>
+<td><code>wait</code></td>
+<td>No</td>
+<td>Block until sync completes including remote replication (default: <code>false</code>)</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>No</td>
+<td>Maximum wait time in seconds, best-effort (default: <code>30</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example (fire-and-forget):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/sync <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;}&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;synced_local&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
+</span></span></code></pre></div><p><strong>Example (blocking):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/sync <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;,&#34;wait&#34;:true,&#34;timeout&#34;:60}&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;synced&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
+</span></span></code></pre></div><p><strong>Response statuses:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>synced_local</code></td>
+<td>WAL-to-LTX sync completed (fire-and-forget mode)</td>
+</tr>
+<tr>
+<td><code>synced</code></td>
+<td>Full sync including remote replication completed (blocking mode)</td>
+</tr>
+<tr>
+<td><code>no_change</code></td>
+<td>Database was already up to date</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CLI equivalent:</strong> <code>litestream sync -socket /var/run/litestream.sock /path/to/my.db</code></p>
+<hr>
+<h3 id="debugpprof">/debug/pprof/*<a href="#debugpprof" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Standard Go <a href="https://pkg.go.dev/net/http/pprof">pprof</a> endpoints for runtime
 profiling. These allow you to collect CPU profiles, heap snapshots, and
 goroutine dumps without running a separate HTTP server.</p>
@@ -392,10 +463,10 @@ goroutine dumps without running a separate HTTP server.</p>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/reference/restore/">
+	<a href="https://litestream.io/reference/sync/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Command: restore
+					&larr; Command: sync
 				</div>
 			</div>
 		</a>

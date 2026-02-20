@@ -65,6 +65,13 @@
       <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.&#xA;⚠️ **Age Encryption Note**: Age encryption is not available in v0.5.0+. If you are attempting to restore from an Age-encrypted replica created with v0.</description>
     </item>
     <item>
+      <title>Command: sync</title>
+      <link>https://litestream.io/reference/sync/</link>
+      <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/sync/</guid>
+      <description>v0.5.8 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.&#xA;The sync command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the control socket.</description>
+    </item>
+    <item>
       <title>IPC Endpoints</title>
       <link>https://litestream.io/reference/ipc/</link>
       <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
