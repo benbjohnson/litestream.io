@@ -197,6 +197,13 @@
     <nav id="TableOfContents">
   <ul>
     <li><a href="#overview">Overview</a></li>
+    <li><a href="#hardened-scratch-image">Hardened scratch image</a>
+      <ul>
+        <li><a href="#tag-strategy">Tag strategy</a></li>
+        <li><a href="#when-to-use-the-scratch-image">When to use the scratch image</a></li>
+        <li><a href="#pulling-the-scratch-image">Pulling the scratch image</a></li>
+      </ul>
+    </li>
     <li><a href="#running-as-a-sidecar">Running as a sidecar</a>
       <ul>
         <li><a href="#using-a-configuration-file">Using a configuration file</a></li>
@@ -235,6 +242,52 @@ integrated into your workflow. Docker typically recommends running one
 application per container and Litestream can be run as a sidecar to another
 container. However, some deployment models do not support this so we&rsquo;ll show
 you how to run your application &amp; Litestream in the same container as well.</p>
+<h2 id="hardened-scratch-image">Hardened scratch image<a href="#hardened-scratch-image" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ Litestream publishes a hardened, scratch-based
+Docker image alongside the default Debian-based image. The scratch variant
+contains only the statically-linked Litestream binary — no shell, no package
+manager, and no OS distribution files.</p>
+<h3 id="tag-strategy">Tag strategy<a href="#tag-strategy" class="anchor" aria-hidden="true">#</a> </h3>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Tags</th>
+<th>Base</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default (Debian)</td>
+<td><code>latest</code>, <code>0.5.9</code></td>
+<td><code>debian:bookworm-slim</code></td>
+</tr>
+<tr>
+<td>Hardened (Scratch)</td>
+<td><code>latest-scratch</code>, <code>0.5.9-scratch</code></td>
+<td><code>scratch</code></td>
+</tr>
+</tbody>
+</table>
+<p>Existing users are unaffected — the default tags (<code>latest</code>, version numbers)
+continue to produce the Debian image.</p>
+<h3 id="when-to-use-the-scratch-image">When to use the scratch image<a href="#when-to-use-the-scratch-image" class="anchor" aria-hidden="true">#</a> </h3>
+<ul>
+<li>You need the smallest possible image with a minimal attack surface</li>
+<li>Your security policy requires containers with no shell access</li>
+<li>You want to reduce CVE surface area from OS packages</li>
+</ul>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The scratch image omits the loadable VFS extension (.so). VFS extensions require glibc, which is not available in a scratch image. If your workflow depends on custom VFS extensions, use the default Debian image instead.</div>
+</div>
+<h3 id="pulling-the-scratch-image">Pulling the scratch image<a href="#pulling-the-scratch-image" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker pull litestream/litestream:latest-scratch
+</span></span></code></pre></div><p>Replace <code>litestream/litestream</code> with <code>litestream/litestream:latest-scratch</code> (or
+a version-pinned tag like <code>0.5.9-scratch</code>) in your Dockerfiles and run commands.</p>
 <h2 id="running-as-a-sidecar">Running as a sidecar<a href="#running-as-a-sidecar" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream provides an <a href="https://hub.docker.com/r/litestream/litestream">official image</a> via Docker Hub. You can use it
 with a configuration file or with a replica URL.</p>
