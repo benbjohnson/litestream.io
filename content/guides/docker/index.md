@@ -27,6 +27,41 @@ container. However, some deployment models do not support this so we'll show
 you how to run your application & Litestream in the same container as well.
 
 
+## Hardened scratch image
+
+{{< since version="0.5.9" >}} Litestream publishes a hardened, scratch-based
+Docker image alongside the default Debian-based image. The scratch variant
+contains only the statically-linked Litestream binary — no shell, no package
+manager, and no OS distribution files.
+
+### Tag strategy
+
+| Variant | Tags | Base |
+|---------|------|------|
+| Default (Debian) | `latest`, `0.5.9` | `debian:bookworm-slim` |
+| Hardened (Scratch) | `latest-scratch`, `0.5.9-scratch` | `scratch` |
+
+Existing users are unaffected — the default tags (`latest`, version numbers)
+continue to produce the Debian image.
+
+### When to use the scratch image
+
+- You need the smallest possible image with a minimal attack surface
+- Your security policy requires containers with no shell access
+- You want to reduce CVE surface area from OS packages
+
+{{< alert icon="⚠️" text="The scratch image omits the loadable VFS extension (.so). VFS extensions require glibc, which is not available in a scratch image. If your workflow depends on custom VFS extensions, use the default Debian image instead." >}}
+
+### Pulling the scratch image
+
+```sh
+docker pull litestream/litestream:latest-scratch
+```
+
+Replace `litestream/litestream` with `litestream/litestream:latest-scratch` (or
+a version-pinned tag like `0.5.9-scratch`) in your Dockerfiles and run commands.
+
+
 ## Running as a sidecar
 
 Litestream provides an [official image][image] via Docker Hub. You can use it
