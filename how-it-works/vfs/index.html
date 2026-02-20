@@ -220,6 +220,7 @@ L0: raw transactional files generated during replication. L1&#43;: compacted LTX
         <li><a href="#streaming-compaction">Streaming compaction</a></li>
         <li><a href="#read-path-evolution">Read path evolution</a></li>
         <li><a href="#incremental-update-application">Incremental update application</a></li>
+        <li><a href="#persistence-across-restarts">Persistence across restarts</a></li>
         <li><a href="#memory-management">Memory management</a></li>
       </ul>
     </li>
@@ -465,6 +466,17 @@ but reads now come from the local file.</p>
 </li>
 </ol>
 <p>This ensures the hydrated database stays current without requiring re-hydration.</p>
+<h3 id="persistence-across-restarts">Persistence across restarts<a href="#persistence-across-restarts" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ When <code>LITESTREAM_HYDRATION_PATH</code> is set, the
+hydration file persists across connection restarts. A companion <code>.meta</code> file
+stores the current TXID so the VFS can resume hydration from where it left off
+rather than performing a full restore. If the remote replica&rsquo;s state has
+regressed (e.g. due to a reset), the stale hydration file is discarded and a
+fresh restore begins. See the <a href="/guides/vfs-hydration/#persistence--resume-behavior">VFS Hydration Guide</a>
+for details.</p>
 <h3 id="memory-management">Memory management<a href="#memory-management" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Hydration is designed for bounded memory usage:</p>
 <ul>

@@ -208,6 +208,7 @@ When to use hydration Read-heavy workloads where remote latency impacts performa
     <li><a href="#how-it-works">How it works</a>
       <ul>
         <li><a href="#read-path-evolution">Read path evolution</a></li>
+        <li><a href="#persistence--resume-behavior">Persistence &amp; resume behavior</a></li>
       </ul>
     </li>
     <li><a href="#performance-benefits">Performance benefits</a></li>
@@ -299,7 +300,12 @@ is usually sufficient.</p>
 </table>
 <p>If <code>LITESTREAM_HYDRATION_PATH</code> is not set, hydration uses a temporary file that
 is cleaned up when the VFS closes. Set an explicit path to persist the hydrated
-database across restarts.</p>
+database across restarts. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ With a persistent path,
+hydration resumes from where it left off rather than starting from scratch. See
+<a href="#persistence--resume-behavior">Persistence &amp; resume behavior</a> below.</p>
 <h2 id="how-it-works">How it works<a href="#how-it-works" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Hydration runs as a non-blocking background process while the VFS remains fully
 operational:</p>
@@ -353,6 +359,42 @@ LTX files to the local file, keeping it synchronized with the replica.</p>
 </tbody>
 </table>
 <p>The transition happens automatically and is transparent to the application.</p>
+<h3 id="persistence--resume-behavior">Persistence &amp; resume behavior<a href="#persistence--resume-behavior" class="anchor" aria-hidden="true">#</a> </h3>
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+
+<p>When <code>LITESTREAM_HYDRATION_PATH</code> is set to an explicit path, the hydrated
+database and its state persist across connection restarts.</p>
+<p><strong>The <code>.meta</code> companion file</strong></p>
+<p>A companion file with a <code>.meta</code> suffix (e.g. <code>/var/lib/litestream/hydrated.db.meta</code>)
+is written alongside the hydration file. It stores the current transaction ID
+(TXID) of the hydrated database. The <code>.meta</code> file is written atomically using a
+temporary file and rename to prevent corruption.</p>
+<p><strong>Resume behavior</strong></p>
+<p>On the next VFS open, if both the hydration file and the <code>.meta</code> file exist, the
+VFS resumes hydration from the saved TXID rather than performing a full restore.
+This significantly reduces startup time for large databases that were previously
+hydrated.</p>
+<p><strong>Edge cases</strong></p>
+<ul>
+<li>
+<p><strong>TXID regression</strong>: If the remote replica has been reset or rewound (e.g.
+restored from an older backup), the saved TXID may be ahead of the remote
+state. In this case, the stale hydration file is truncated and a full restore
+is performed from scratch.</p>
+</li>
+<li>
+<p><strong>Stale <code>.meta</code> file</strong>: If the <code>.meta</code> file exists but the hydration file is
+missing (e.g. manually deleted), the <code>.meta</code> file is cleaned up and a fresh
+hydration starts from scratch.</p>
+</li>
+<li>
+<p><strong>Temp file mode</strong>: When <code>LITESTREAM_HYDRATION_PATH</code> is not set, the temporary
+file is still deleted on close. Persistence only applies when an explicit path
+is configured.</p>
+</li>
+</ul>
 <h2 id="performance-benefits">Performance benefits<a href="#performance-benefits" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Hydration significantly improves read latency once complete:</p>
 <table>
@@ -576,7 +618,11 @@ available, monitor the hydration file size as a rough progress indicator.</p>
 <li><strong>Slow hydration</strong>: Check network bandwidth to replica storage. Consider running in the same region.</li>
 <li><strong>Disk full errors</strong>: Ensure sufficient space for the hydration file (database size + overhead).</li>
 <li><strong>Hydration not starting</strong>: Verify <code>LITESTREAM_HYDRATION_ENABLED=true</code> is set before VFS initialization.</li>
-<li><strong>Stale data after restart</strong>: If using a temp file path, hydration restarts from scratch. Use a persistent path.</li>
+<li><strong>Stale data after restart</strong>: If using a temp file path (no
+<code>LITESTREAM_HYDRATION_PATH</code>), hydration restarts from scratch on every
+connection open. Set an explicit path to enable persistence and resume. If
+data still appears stale with a persistent path, the remote replica may have
+been reset, causing a full re-hydration (TXID regression).</li>
 </ul>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
