@@ -69,7 +69,7 @@ export LITESTREAM_HYDRATION_PATH=/var/lib/litestream/hydrated.db
 
 If `LITESTREAM_HYDRATION_PATH` is not set, hydration uses a temporary file that
 is cleaned up when the VFS closes. Set an explicit path to persist the hydrated
-database across restarts. {{< since version="0.5.8" >}} With a persistent path,
+database across restarts. {{< since version="0.5.9" >}} With a persistent path,
 hydration resumes from where it left off rather than starting from scratch. See
 [Persistence & resume behavior](#persistence--resume-behavior) below.
 
@@ -107,7 +107,7 @@ The transition happens automatically and is transparent to the application.
 
 ### Persistence & resume behavior
 
-{{< since version="0.5.8" >}}
+{{< since version="0.5.9" >}}
 
 When `LITESTREAM_HYDRATION_PATH` is set to an explicit path, the hydrated
 database and its state persist across connection restarts.

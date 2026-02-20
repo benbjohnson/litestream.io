@@ -159,7 +159,7 @@ for usage details.
 Once hydration completes, all reads are served from the local file instead of
 remote storage.
 
-{{< since version="0.5.8" >}} When `LITESTREAM_HYDRATION_PATH` is set to an
+{{< since version="0.5.9" >}} When `LITESTREAM_HYDRATION_PATH` is set to an
 explicit path, the hydration file persists across connection restarts. A
 companion `.meta` file (e.g. `hydrated.db.meta`) is written alongside the
 hydration file to track the current transaction ID (TXID). On the next open, if
