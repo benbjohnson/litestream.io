@@ -272,8 +272,9 @@ shadow WAL for replication.</p>
 <pre tabindex="0"><code>litestream_sync_count{db=&#34;/var/lib/myapp.db&#34;} 150
 </code></pre><h3 id="litestream_sync_error_count">litestream_sync_error_count<a href="#litestream_sync_error_count" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter</p>
-<p>Number of sync errors that have occurred. Monitor this metric for replication
-health—any non-zero growth indicates sync failures.</p>
+<p>Number of errors that have occurred during sync, including database
+initialization failures. Monitor this metric for replication health—any
+non-zero growth indicates issues with the sync process.</p>
 <pre tabindex="0"><code>litestream_sync_error_count{db=&#34;/var/lib/myapp.db&#34;} 0
 </code></pre><h3 id="litestream_sync_seconds">litestream_sync_seconds<a href="#litestream_sync_seconds" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter</p>
