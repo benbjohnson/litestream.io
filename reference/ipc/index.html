@@ -23,9 +23,7 @@
 <meta name="twitter:description" content="v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.
 Socket Path The IPC socket is created at:
 /var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.
-Endpoints GET /txid Returns the current transaction ID for a database.
-Query parameters:
-Parameter Required Description path Yes Absolute path to the database file Example:">
+Endpoints GET /list Returns all databases currently tracked by the Litestream daemon, along with their last sync time.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -202,6 +200,10 @@ Parameter Required Description path Yes Absolute path to the database file Examp
     <li><a href="#socket-path">Socket Path</a></li>
     <li><a href="#endpoints">Endpoints</a>
       <ul>
+        <li><a href="#get-list">GET /list</a></li>
+        <li><a href="#get-info">GET /info</a></li>
+        <li><a href="#post-register">POST /register</a></li>
+        <li><a href="#post-unregister">POST /unregister</a></li>
         <li><a href="#get-txid">GET /txid</a></li>
         <li><a href="#debugpprof">/debug/pprof/*</a></li>
       </ul>
@@ -227,6 +229,79 @@ to query database status and collect profiling data without exposing an HTTP por
 </code></pre><p>The socket is automatically created when Litestream starts replication and
 removed on shutdown.</p>
 <h2 id="endpoints">Endpoints<a href="#endpoints" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="get-list">GET /list<a href="#get-list" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Returns all databases currently tracked by the Litestream daemon, along with their
+last sync time.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    http://localhost/list
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;databases&#34;</span>:<span class="o">[{</span><span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;active&#34;</span>,<span class="s2">&#34;last_sync_at&#34;</span>:<span class="s2">&#34;2026-02-12T00:00:00Z&#34;</span><span class="o">}]}</span>
+</span></span></code></pre></div><p><strong>CLI equivalent:</strong> <code>litestream list -socket /var/run/litestream.sock</code></p>
+<hr>
+<h3 id="get-info">GET /info<a href="#get-info" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Returns information about the running Litestream daemon including version, PID, and uptime.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    http://localhost/info
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;version&#34;</span>:<span class="s2">&#34;0.5.8&#34;</span>,<span class="s2">&#34;pid&#34;</span>:12345,<span class="s2">&#34;uptime_seconds&#34;</span>:3600,<span class="s2">&#34;started_at&#34;</span>:<span class="s2">&#34;2026-02-12T00:00:00Z&#34;</span>,<span class="s2">&#34;database_count&#34;</span>:1<span class="o">}</span>
+</span></span></code></pre></div><hr>
+<h3 id="post-register">POST /register<a href="#post-register" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Dynamically registers a new database with the Litestream daemon without restarting.</p>
+<p><strong>Request body (JSON):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Absolute path to the SQLite database file</td>
+</tr>
+<tr>
+<td><code>replica_url</code></td>
+<td>Yes</td>
+<td>Replica destination URL (e.g. <code>s3://bucket/path</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/register <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;,&#34;replica_url&#34;:&#34;s3://mybucket/my.db&#34;}&#39;</span>
+</span></span></code></pre></div><p><strong>CLI equivalent:</strong> <code>litestream register -socket /var/run/litestream.sock -replica s3://mybucket/my.db /path/to/my.db</code></p>
+<hr>
+<h3 id="post-unregister">POST /unregister<a href="#post-unregister" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Dynamically unregisters a database from the Litestream daemon without restarting.</p>
+<p><strong>Request body (JSON):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Absolute path to the SQLite database file</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/unregister <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;}&#39;</span>
+</span></span></code></pre></div><p><strong>CLI equivalent:</strong> <code>litestream unregister -socket /var/run/litestream.sock /path/to/my.db</code></p>
+<hr>
 <h3 id="get-txid">GET /txid<a href="#get-txid" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Returns the current transaction ID for a database.</p>
 <p><strong>Query parameters:</strong></p>

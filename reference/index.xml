@@ -69,7 +69,7 @@
       <link>https://litestream.io/reference/ipc/</link>
       <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/ipc/</guid>
-      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The IPC socket is created at:&#xA;/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.&#xA;Endpoints GET /txid Returns the current transaction ID for a database.&#xA;Query parameters:&#xA;Parameter Required Description path Yes Absolute path to the database file Example:</description>
+      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The IPC socket is created at:&#xA;/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.&#xA;Endpoints GET /list Returns all databases currently tracked by the Litestream daemon, along with their last sync time.</description>
     </item>
     <item>
       <title>Command: reset</title>
