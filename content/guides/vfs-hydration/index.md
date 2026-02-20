@@ -130,8 +130,8 @@ hydrated.
 
 - **TXID regression**: If the remote replica has been reset or rewound (e.g.
   restored from an older backup), the saved TXID may be ahead of the remote
-  state. In this case, the stale hydration file is discarded and a full restore
-  is performed.
+  state. In this case, the stale hydration file is truncated and a full restore
+  is performed from scratch.
 
 - **Stale `.meta` file**: If the `.meta` file exists but the hydration file is
   missing (e.g. manually deleted), the `.meta` file is cleaned up and a fresh
@@ -353,7 +353,11 @@ This combination provides:
 - **Slow hydration**: Check network bandwidth to replica storage. Consider running in the same region.
 - **Disk full errors**: Ensure sufficient space for the hydration file (database size + overhead).
 - **Hydration not starting**: Verify `LITESTREAM_HYDRATION_ENABLED=true` is set before VFS initialization.
-- **Stale data after restart**: If using a temp file path (no `LITESTREAM_HYDRATION_PATH`), hydration restarts from scratch on every connection open. Set an explicit path to enable persistence and resume. If using a persistent path and data still appears stale, check for TXID regression—the remote replica may have been reset, causing a full re-hydration.
+- **Stale data after restart**: If using a temp file path (no
+  `LITESTREAM_HYDRATION_PATH`), hydration restarts from scratch on every
+  connection open. Set an explicit path to enable persistence and resume. If
+  data still appears stale with a persistent path, the remote replica may have
+  been reset, causing a full re-hydration (TXID regression).
 
 
 ## See Also
