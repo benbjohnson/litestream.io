@@ -26,6 +26,84 @@ removed on shutdown.
 
 ## Endpoints
 
+### GET /list
+
+Returns all databases currently tracked by the Litestream daemon, along with their
+last sync time.
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    http://localhost/list
+{"databases":[{"path":"/path/to/my.db","status":"active","last_sync_at":"2026-02-12T00:00:00Z"}]}
+```
+
+**CLI equivalent:** `litestream list -socket /var/run/litestream.sock`
+
+---
+
+### GET /info
+
+Returns information about the running Litestream daemon including version, PID, and uptime.
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    http://localhost/info
+{"version":"0.5.8","pid":12345,"uptime_seconds":3600,"started_at":"2026-02-12T00:00:00Z","database_count":1}
+```
+
+---
+
+### POST /register
+
+Dynamically registers a new database with the Litestream daemon without restarting.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+| `replica_url` | Yes | Replica destination URL (e.g. `s3://bucket/path`) |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/register \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db","replica_url":"s3://mybucket/my.db"}'
+```
+
+**CLI equivalent:** `litestream register -socket /var/run/litestream.sock -replica s3://mybucket/my.db /path/to/my.db`
+
+---
+
+### POST /unregister
+
+Dynamically unregisters a database from the Litestream daemon without restarting.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/unregister \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db"}'
+```
+
+**CLI equivalent:** `litestream unregister -socket /var/run/litestream.sock /path/to/my.db`
+
+---
+
 ### GET /txid
 
 Returns the current transaction ID for a database.
