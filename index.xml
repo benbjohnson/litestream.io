@@ -78,7 +78,7 @@ However, this tradeoff may not make sense for all applications. This page lists 
       <guid>https://litestream.io/guides/</guid>
       <description>Overview These guides provide instructions for running Litestream in production on different platforms.
 After completing the Getting Started tutorial, use these guides to deploy Litestream in your production environment. For conceptual background on how Litestream works, see How It Works. If you encounter issues, check the Troubleshooting guide.
-Infrastructure guides Directory Watcher Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service Configuration guides Directory Replication Global Replica Defaults Migration guides AWS SDK v2 Migration Replica guides Alibaba Cloud OSS Amazon S3 S3 Advanced Configuration S3-Compatible Services Go Library Integration VFS Read Replicas VFS Write Mode VFS Hydration Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Local File Path NATS JetStream Scaleway Object Storage SFTP Server Tigris (Fly.</description>
+Infrastructure guides Directory Watcher Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service Configuration guides Directory Replication Global Replica Defaults Migration guides AWS SDK v2 Migration Replica guides Alibaba Cloud OSS Amazon S3 S3 Advanced Configuration S3-Compatible Services Go Library Integration VFS Read Replicas VFS Write Mode VFS Hydration Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Local File Path NATS JetStream Scaleway Object Storage SFTP Server Supabase Storage Tigris (Fly.</description>
     </item>
     
     <item>

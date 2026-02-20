@@ -154,6 +154,7 @@ Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-
     <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/supabase/">Replicating to Supabase Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
@@ -217,6 +218,7 @@ Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-
         <li><a href="#vultr-object-storage">Vultr Object Storage</a></li>
         <li><a href="#scaleway-object-storage">Scaleway Object Storage</a></li>
         <li><a href="#tigris-flyio">Tigris (Fly.io)</a></li>
+        <li><a href="#supabase-storage">Supabase Storage</a></li>
         <li><a href="#filebase">Filebase</a></li>
       </ul>
     </li>
@@ -295,6 +297,11 @@ for most providers.</p>
 <td>Cloudflare R2</td>
 <td><code>*.r2.cloudflarestorage.com</code></td>
 <td><code>sign-payload: true</code>, <code>concurrency: 2</code></td>
+</tr>
+<tr>
+<td>Supabase Storage</td>
+<td><code>*.supabase.co</code></td>
+<td><code>sign-payload: true</code>, <code>force-path-style: true</code></td>
 </tr>
 <tr>
 <td>Tigris</td>
@@ -762,6 +769,29 @@ CDN-like caching.</p>
 <li>Create buckets using <code>fly storage create</code> via the Fly CLI</li>
 </ul>
 <p>See the <a href="/guides/tigris/">Tigris Guide</a> for detailed setup instructions.</p>
+<h3 id="supabase-storage">Supabase Storage<a href="#supabase-storage" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://supabase.com/storage">Supabase Storage</a> provides an S3-compatible API
+as part of the Supabase platform. It&rsquo;s suitable for projects already using
+Supabase that want to keep their Litestream replicas alongside their other
+Supabase resources.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">PROJECT_REF.supabase.co/storage/v1/s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${SUPABASE_S3_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${SUPABASE_S3_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>Endpoint format: <code>&lt;PROJECT_REF&gt;.supabase.co/storage/v1/s3</code></li>
+<li><strong>Litestream v0.5.9+</strong> automatically detects Supabase and sets
+<code>force-path-style: true</code> and <code>sign-payload: true</code>; you can omit these settings</li>
+<li>Generate S3 access keys in <strong>Settings</strong> &gt; <strong>Storage</strong> in the Supabase dashboard</li>
+</ul>
+<p>See the <a href="/guides/supabase/">Supabase Storage Guide</a> for detailed setup instructions.</p>
 <h3 id="filebase">Filebase<a href="#filebase" class="anchor" aria-hidden="true">#</a> </h3>
 <p><a href="https://filebase.com/">Filebase</a> provides S3-compatible access to decentralized
 storage networks including IPFS and Sia.</p>
@@ -867,6 +897,13 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.</p>
 <td>Yes</td>
 <td>Yes</td>
 <td>No</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Supabase</td>
+<td>Yes</td>
+<td>Optional</td>
+<td>Auto</td>
 <td>✓</td>
 </tr>
 <tr>

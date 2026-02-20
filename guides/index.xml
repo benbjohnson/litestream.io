@@ -149,6 +149,13 @@
       <description>This guide will show you how to use Tigris as a database replica path for Litestream. Tigris is Fly.io&amp;rsquo;s globally distributed S3-compatible object storage. You will need a Fly.io account to complete this guide.&#xA;v0.5.0 Litestream automatically detects Tigris endpoints, configures the required settings, and enables strong consistency for you.&#xA;Setup Install the Fly CLI If you haven&amp;rsquo;t already, install the Fly CLI by following the installation instructions. Once installed, authenticate with your account:</description>
     </item>
     <item>
+      <title>Replicating to Supabase Storage</title>
+      <link>https://litestream.io/guides/supabase/</link>
+      <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/guides/supabase/</guid>
+      <description>This guide will show you how to use Supabase Storage as a database replica path for Litestream. Supabase Storage provides an S3-compatible API that works with Litestream&amp;rsquo;s S3 replica type. You will need a Supabase account to complete this guide.&#xA;v0.5.9 Litestream automatically detects Supabase endpoints and configures the required settings for you.&#xA;Setup Create a storage bucket Log in to the Supabase Dashboard Select your project (or create a new one) Navigate to Storage in the left sidebar Click New bucket to create a bucket for your Litestream replicas Generate S3 access keys Supabase provides S3-compatible access keys for each project:</description>
+    </item>
+    <item>
       <title>Replicating to Google Cloud Storage</title>
       <link>https://litestream.io/guides/gcs/</link>
       <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>

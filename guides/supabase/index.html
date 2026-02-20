@@ -14,15 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Replicating to Google Cloud Storage - Litestream</title>
+  <title>Replicating to Supabase Storage - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/guides/gcs/">
+<link rel="canonical" href="https://litestream.io/guides/supabase/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Replicating to Google Cloud Storage">
-<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to a Google Cloud Storage bucket. You will need a Google Cloud account and to complete this guide.
-Setup Create a bucket In the GCP Console, use the top search bar to navigate to &ldquo;Cloud Storage&rdquo;. You may need to enable storage and billing if you have not previously set it up.
-Next, click the &ldquo;Create Bucket&rdquo; button. Enter a globally unique bucket name and click the &ldquo;Create&rdquo; button.">
+<meta name="twitter:title" content="Replicating to Supabase Storage">
+<meta name="twitter:description" content="This guide will show you how to use Supabase Storage as a database replica path for Litestream. Supabase Storage provides an S3-compatible API that works with Litestream&rsquo;s S3 replica type. You will need a Supabase account to complete this guide.
+v0.5.9 Litestream automatically detects Supabase endpoints and configures the required settings for you.
+Setup Create a storage bucket Log in to the Supabase Dashboard Select your project (or create a new one) Navigate to Storage in the left sidebar Click New bucket to create a bucket for your Litestream replicas Generate S3 access keys Supabase provides S3-compatible access keys for each project:">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -46,8 +46,8 @@ Next, click the &ldquo;Create Bucket&rdquo; button. Enter a globally unique buck
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Gcs",
-        "item": "https:\/\/litestream.io\/guides\/gcs\/"
+        "name": "Supabase",
+        "item": "https:\/\/litestream.io\/guides\/supabase\/"
     }]
 }
 </script>
@@ -155,8 +155,8 @@ Next, click the &ldquo;Create Bucket&rdquo; button. Enter a globally unique buck
     <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
-    <li><a class="docs-link" href="https://litestream.io/guides/supabase/">Replicating to Supabase Storage</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/guides/supabase/">Replicating to Supabase Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
@@ -200,8 +200,8 @@ Next, click the &ldquo;Create Bucket&rdquo; button. Enter a globally unique buck
   <ul>
     <li><a href="#setup">Setup</a>
       <ul>
-        <li><a href="#create-a-bucket">Create a bucket</a></li>
-        <li><a href="#create-a-service-account">Create a service account</a></li>
+        <li><a href="#create-a-storage-bucket">Create a storage bucket</a></li>
+        <li><a href="#generate-s3-access-keys">Generate S3 access keys</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a>
@@ -210,6 +210,9 @@ Next, click the &ldquo;Create Bucket&rdquo; button. Enter a globally unique buck
         <li><a href="#configuration-file-usage">Configuration file usage</a></li>
       </ul>
     </li>
+    <li><a href="#auto-detection">Auto-Detection</a></li>
+    <li><a href="#manual-override">Manual Override</a></li>
+    <li><a href="#environment-variables">Environment Variables</a></li>
     <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -217,79 +220,159 @@ Next, click the &ldquo;Create Bucket&rdquo; button. Enter a globally unique buck
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Replicating to Google Cloud Storage</h1>
+		<h1>Replicating to Supabase Storage</h1>
 			<p class="lead"></p>
-			<p>This guide will show you how to use Litestream to replicate to a <a href="https://cloud.google.com/storage">Google Cloud
-Storage</a> bucket. You will need a <a href="https://cloud.google.com/">Google Cloud</a> account and to complete
-this guide.</p>
+			<p>This guide will show you how to use <a href="https://supabase.com/storage">Supabase Storage</a> as a
+database replica path for Litestream. Supabase Storage provides an
+S3-compatible API that works with Litestream&rsquo;s S3 replica type. You will need a
+<a href="https://supabase.com/">Supabase</a> account to complete this guide.</p>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ Litestream automatically detects Supabase
+endpoints and configures the required settings for you.</p>
 <h2 id="setup">Setup<a href="#setup" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="create-a-bucket">Create a bucket<a href="#create-a-bucket" class="anchor" aria-hidden="true">#</a> </h3>
-<p>In the <a href="https://console.cloud.google.com/">GCP Console</a>, use the top search bar to navigate to <em>&ldquo;Cloud Storage&rdquo;</em>.
-You may need to enable storage and billing if you have not previously set it up.</p>
-<p>Next, click the <em>&ldquo;Create Bucket&rdquo;</em> button. Enter a globally unique bucket name
-and click the <em>&ldquo;Create&rdquo;</em> button.</p>
-<h3 id="create-a-service-account">Create a service account<a href="#create-a-service-account" class="anchor" aria-hidden="true">#</a> </h3>
-<p>On a Compute Engine VM or Cloud Run service, Litestream will automatically pick
-up the credentials associated with the instance from the instance&rsquo;s metadata
-server.</p>
-<p>If you run Litestream outside of Google Cloud, you&rsquo;ll need to set up a service
-account to authenticate into GCP and access your bucket.
-From the top search bar, navigate to <em>&ldquo;Service Accounts&rdquo;</em>. Enter a name
-for your service account and click the <em>&ldquo;Create&rdquo;</em> button.</p>
-<p>Next, you&rsquo;ll need to grant the <em>Storage Admin</em> role to your service accounts
-so they can read &amp; write data. Then click the <em>&ldquo;Done&rdquo;</em> button.</p>
-<p>After your account has been created, click on it and go to the <em>&ldquo;Keys&rdquo;</em>
-subsection. Click the <em>&ldquo;Add Key&rdquo;</em> drop-down and select <em>&ldquo;Create new key&rdquo;</em>.
-Choose the <em>&ldquo;JSON&rdquo;</em> option.</p>
-<p>This will download a JSON file to your local computer. Move it to a safe
-location and set an environment variable pointing to its path:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">GOOGLE_APPLICATION_CREDENTIALS</span><span class="o">=</span>/path/to/xxxxxxx.json
-</span></span></code></pre></div><h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="create-a-storage-bucket">Create a storage bucket<a href="#create-a-storage-bucket" class="anchor" aria-hidden="true">#</a> </h3>
+<ol>
+<li>Log in to the <a href="https://supabase.com/dashboard">Supabase Dashboard</a></li>
+<li>Select your project (or create a new one)</li>
+<li>Navigate to <strong>Storage</strong> in the left sidebar</li>
+<li>Click <strong>New bucket</strong> to create a bucket for your Litestream replicas</li>
+</ol>
+<h3 id="generate-s3-access-keys">Generate S3 access keys<a href="#generate-s3-access-keys" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Supabase provides S3-compatible access keys for each project:</p>
+<ol>
+<li>In your project dashboard, go to <strong>Settings</strong> &gt; <strong>Storage</strong></li>
+<li>Scroll to the <strong>S3 Access Keys</strong> section</li>
+<li>Click <strong>Generate new key</strong> to create a new access key pair</li>
+<li>Save the <strong>Access Key ID</strong> and <strong>Secret Access Key</strong> — you won&rsquo;t be able to
+see the secret key again</li>
+</ol>
+<p>Your S3 endpoint will be:</p>
+<pre tabindex="0"><code>https://&lt;PROJECT_REF&gt;.supabase.co/storage/v1/s3
+</code></pre><p>Where <code>&lt;PROJECT_REF&gt;</code> is your project&rsquo;s reference ID, visible in your project&rsquo;s
+URL or in <strong>Settings</strong> &gt; <strong>General</strong>.</p>
+<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
-<p>You can specify your replica as a replica URL on the command line. For example,
-you can replicate a database to your bucket. <em>Replace the placeholders with your
-bucket &amp; path.</em></p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db gs://BUCKET/PATH
-</span></span></code></pre></div><p>You can later restore your database from Google Cloud Storage to a local <code>my.db</code>
-path with the following command.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db gs://BUCKET/PATH
+<p>You can replicate to Supabase Storage from the command line by setting
+environment variables with your S3 access keys:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>your-access-key-id
+</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-access-key
+</span></span></code></pre></div><p>Then specify your bucket with the Supabase endpoint as a replica URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db s3://BUCKETNAME/db?endpoint<span class="o">=</span>PROJECT_REF.supabase.co/storage/v1/s3
+</span></span></code></pre></div><p>You can later restore your database from Supabase Storage to a local <code>my.db</code>
+path:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db s3://BUCKETNAME/db?endpoint<span class="o">=</span>PROJECT_REF.supabase.co/storage/v1/s3
 </span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Litestream is typically run as a background service which uses a <a href="/reference/config">configuration
-file</a>. You can configure a replica for your database using the <code>url</code> format.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+<p>Litestream is typically run as a background service which uses a configuration
+file. You can configure a replica for your database using the <code>url</code> format:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">your-access-key-id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">your-secret-access-key</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">gs://BUCKET/PATH</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3</span><span class="w">
 </span></span></span></code></pre></div><p>Or you can expand your configuration into multiple fields:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w">   </span><span class="l">gs</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKET</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">PATH</span><span class="w">
-</span></span></span></code></pre></div><p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
-</span>
- Litestream v0.5.0+ maintains compatibility with existing authentication methods.</p>
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">PROJECT_REF.supabase.co/storage/v1/s3</span><span class="w">
+</span></span></span></code></pre></div><p>You may also specify your credentials on a per-replica basis:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">PROJECT_REF.supabase.co/storage/v1/s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">your-access-key-id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">your-secret-access-key</span><span class="w">
+</span></span></span></code></pre></div><h2 id="auto-detection">Auto-Detection<a href="#auto-detection" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When Litestream detects a <code>*.supabase.co</code> endpoint, it automatically applies
+the following settings:</p>
+<ul>
+<li><strong>Path-style addressing</strong> — Sets <code>force-path-style: true</code> as required by
+Supabase Storage&rsquo;s S3 API</li>
+<li><strong>Payload signing</strong> — Enables <code>sign-payload: true</code> for request authentication</li>
+</ul>
+<p>These settings are applied automatically and ensure reliable replication and
+restore operations. You do not need to set them manually.</p>
+<h2 id="manual-override">Manual Override<a href="#manual-override" class="anchor" aria-hidden="true">#</a> </h2>
+<p>If you need to override the auto-detected settings, you can specify them
+explicitly in your configuration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">   </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">PROJECT_REF.supabase.co/storage/v1/s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">force-path-style</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sign-payload</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><h2 id="environment-variables">Environment Variables<a href="#environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream supports standard AWS environment variables for Supabase S3
+credentials:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AWS_ACCESS_KEY_ID</code></td>
+<td>Your Supabase S3 access key</td>
+</tr>
+<tr>
+<td><code>AWS_SECRET_ACCESS_KEY</code></td>
+<td>Your Supabase S3 secret key</td>
+</tr>
+</tbody>
+</table>
+<p>You can also use the Litestream-specific environment variables:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LITESTREAM_ACCESS_KEY_ID</code></td>
+<td>Your Supabase S3 access key</td>
+</tr>
+<tr>
+<td><code>LITESTREAM_SECRET_ACCESS_KEY</code></td>
+<td>Your Supabase S3 secret key</td>
+</tr>
+</tbody>
+</table>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
+<li><a href="/guides/s3-compatible">S3-Compatible Services</a> - Other S3-compatible providers</li>
 <li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
 <li><a href="/reference/config">Configuration Reference</a> - Complete configuration options</li>
 </ul>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/guides/supabase/">
+	<a href="https://litestream.io/guides/tigris/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Replicating to Supabase Storage
+					&larr; Replicating to Tigris (Fly.io)
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/guides/linode/">
+	<a class="ml-auto" href="https://litestream.io/guides/gcs/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Replicating to Linode Object Storage &rarr;
+					Replicating to Google Cloud Storage &rarr;
 				</div>
 			</div>
 		</a>
