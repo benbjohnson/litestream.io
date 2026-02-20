@@ -17,6 +17,7 @@ The `litestream` commands are:
 - [`litestream mcp`](/reference/mcp) — MCP server for AI assistant integration.
 - [`litestream replicate`](/reference/replicate) — Runs a server to replicate databases.
 - [`litestream restore`](/reference/restore) — Recovers database backup from a replica.
+- [`litestream sync`](/reference/sync) — Forces immediate WAL-to-LTX sync for a database.
 - [`litestream version`](/reference/version) — Prints the binary version.
 - [`litestream wal`](/reference/wal) — List available WAL files for a database (deprecated).
 
