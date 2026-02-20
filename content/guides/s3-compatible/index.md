@@ -478,7 +478,7 @@ dbs:
 **Notes:**
 
 - Endpoint format: `<PROJECT_REF>.supabase.co/storage/v1/s3`
-- **Litestream v0.5.0+** automatically detects Supabase and sets
+- **Litestream v0.5.9+** automatically detects Supabase and sets
   `force-path-style: true` and `sign-payload: true`; you can omit these settings
 - Generate S3 access keys in **Settings** > **Storage** in the Supabase dashboard
 

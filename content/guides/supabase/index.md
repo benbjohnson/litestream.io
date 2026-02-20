@@ -13,7 +13,7 @@ database replica path for Litestream. Supabase Storage provides an
 S3-compatible API that works with Litestream's S3 replica type. You will need a
 [Supabase][supabase] account to complete this guide.
 
-{{< since version="0.5.0" >}} Litestream automatically detects Supabase
+{{< since version="0.5.9" >}} Litestream automatically detects Supabase
 endpoints and configures the required settings for you.
 
 
