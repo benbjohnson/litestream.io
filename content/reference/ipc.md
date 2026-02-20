@@ -124,7 +124,7 @@ $ curl --unix-socket /var/run/litestream.sock \
 
 ### POST /sync
 
-Forces an immediate WAL-to-LTX sync for a database. Without `wait`, the sync
+{{< since version="0.5.9" >}} Forces an immediate WAL-to-LTX sync for a database. Without `wait`, the sync
 is triggered and the request returns immediately (fire-and-forget). With `wait`
 set to `true`, the request blocks until both local and remote replication
 complete.

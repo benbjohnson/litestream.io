@@ -8,7 +8,7 @@ menu:
 weight: 542
 ---
 
-{{< since version="0.5.8" >}} The `sync` command forces an immediate
+{{< since version="0.5.9" >}} The `sync` command forces an immediate
 WAL-to-LTX sync for a database managed by the Litestream daemon. By default
 it triggers the sync and returns immediately (fire-and-forget). With the
 `-wait` flag it blocks until the sync completes, including remote replication.
