@@ -159,6 +159,14 @@ for usage details.
 Once hydration completes, all reads are served from the local file instead of
 remote storage.
 
+{{< since version="0.5.8" >}} When `LITESTREAM_HYDRATION_PATH` is set to an
+explicit path, the hydration file persists across connection restarts. A
+companion `.meta` file (e.g. `hydrated.db.meta`) is written alongside the
+hydration file to track the current transaction ID (TXID). On the next open, if
+both files exist, hydration resumes from the saved TXID instead of performing a
+full restore. See the [VFS Hydration Guide](/guides/vfs-hydration/#persistence--resume-behavior)
+for details.
+
 
 ## PRAGMAs & SQL functions
 

@@ -213,6 +213,16 @@ After initial hydration completes:
 
 This ensures the hydrated database stays current without requiring re-hydration.
 
+### Persistence across restarts
+
+{{< since version="0.5.8" >}} When `LITESTREAM_HYDRATION_PATH` is set, the
+hydration file persists across connection restarts. A companion `.meta` file
+stores the current TXID so the VFS can resume hydration from where it left off
+rather than performing a full restore. If the remote replica's state has
+regressed (e.g. due to a reset), the stale hydration file is discarded and a
+fresh restore begins. See the [VFS Hydration Guide](/guides/vfs-hydration/#persistence--resume-behavior)
+for details.
+
 ### Memory management
 
 Hydration is designed for bounded memory usage:
