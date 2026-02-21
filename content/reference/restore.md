@@ -10,7 +10,9 @@ weight: 540
 
 The `restore` command recovers a database from a replica. By default, it
 attempts to restore the latest data. However, it can also restore databases
-to a specific point-in-time if it is covered by the WAL time range.
+to a specific point-in-time if it is covered by the WAL time range. It can
+also run in follow mode (`-f`) to continuously restore new data as it becomes
+available, enabling read-only database replicas.
 
 Restoration will only run if the output database file does not exist so you
 cannot accidentally overwrite your running database.
@@ -67,6 +69,15 @@ litestream restore [arguments] REPLICA_URL
 -timestamp TIMESTAMP
     Restore to a specific point-in-time.
     Defaults to use the latest available backup.
+
+-f
+    Continuously restores new data as it becomes available.
+    The restored database should only be opened in read-only mode.
+    Incompatible with -txid and -timestamp.
+
+-follow-interval DURATION
+    Sets the polling interval for follow mode.
+    Defaults to 1s.
 
 -config PATH
     Specifies the configuration file.
@@ -129,6 +140,24 @@ The `-if-replica-exists` flag works alongside other restore flags:
   "no matching backups found"
 
 
+## Follow Mode
+
+{{< since version="0.5.9" >}} The `-f` flag enables follow mode, which
+continuously polls for new LTX files after the initial restore is complete.
+This keeps the restored database up-to-date as new transactions are replicated,
+enabling read-only database replicas that stay in sync with the primary.
+
+{{< alert icon="⚠️" text="The restored database must only be opened in **read-only mode** (e.g. `PRAGMA query_only = ON` or `?mode=ro`). Writing to the database while follow mode is running will cause conflicts." >}}
+
+Follow mode runs indefinitely until stopped with `Ctrl+C` (SIGINT), at which
+point it shuts down cleanly. The polling interval can be adjusted with
+`-follow-interval` (default: `1s`).
+
+The `-f` flag is incompatible with `-txid` and `-timestamp` because follow mode
+is designed to continuously track the latest state rather than restore to a
+fixed point.
+
+
 ## Examples
 
 ### Database restore
@@ -163,6 +192,23 @@ Restore the `/var/lib/db` database to a specific point-in-time:
 
 ```
 $ litestream restore -timestamp 2020-01-01T00:00:00Z /var/lib/db
+```
+
+### Follow mode
+
+Continuously restore new data from an S3 replica to maintain a read-only
+replica:
+
+```
+$ litestream restore -f -o /tmp/read-replica.db s3://mybkt/db
+```
+
+### Follow mode with custom interval
+
+Use a longer polling interval to reduce the frequency of replica checks:
+
+```
+$ litestream restore -f -follow-interval 5s -o /tmp/read-replica.db s3://mybkt/db
 ```
 
 ### Conditional restore in automation
