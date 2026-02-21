@@ -329,7 +329,10 @@ last sync time.</p>
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="s2">&#34;http://localhost/txid?path=/path/to/my.db&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
 </span></span></code></pre></div><h3 id="post-sync">POST /sync<a href="#post-sync" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Forces an immediate WAL-to-LTX sync for a database. Without <code>wait</code>, the sync
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ Forces an immediate WAL-to-LTX sync for a database. Without <code>wait</code>, the sync
 is triggered and the request returns immediately (fire-and-forget). With <code>wait</code>
 set to <code>true</code>, the request blocks until both local and remote replication
 complete.</p>

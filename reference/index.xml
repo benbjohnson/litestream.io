@@ -69,7 +69,7 @@
       <link>https://litestream.io/reference/sync/</link>
       <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/sync/</guid>
-      <description>v0.5.8 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.&#xA;The sync command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the control socket.</description>
+      <description>v0.5.9 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.&#xA;The sync command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the control socket.</description>
     </item>
     <item>
       <title>IPC Endpoints</title>

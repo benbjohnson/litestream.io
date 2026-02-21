@@ -20,7 +20,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: sync">
-<meta name="twitter:description" content="v0.5.8 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.
+<meta name="twitter:description" content="v0.5.9 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.
 The sync command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
 Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the control socket.">
 <meta name="twitter:site" content="@litestreamio">
@@ -217,8 +217,8 @@ Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the con
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
 		<h1>Command: sync</h1>
 			<p class="lead"></p>
-			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
 </span>
  The <code>sync</code> command forces an immediate
 WAL-to-LTX sync for a database managed by the Litestream daemon. By default
