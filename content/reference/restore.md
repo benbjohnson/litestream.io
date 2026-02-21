@@ -142,7 +142,7 @@ The `-if-replica-exists` flag works alongside other restore flags:
 
 ## Follow Mode
 
-{{< since version="0.5.8" >}} The `-f` flag enables follow mode, which
+{{< since version="0.5.9" >}} The `-f` flag enables follow mode, which
 continuously polls for new LTX files after the initial restore is complete.
 This keeps the restored database up-to-date as new transactions are replicated,
 enabling read-only database replicas that stay in sync with the primary.
