@@ -62,7 +62,7 @@
       <link>https://litestream.io/reference/restore/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/restore/</guid>
-      <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.&#xA;⚠️ **Age Encryption Note**: Age encryption is not available in v0.5.0+. If you are attempting to restore from an Age-encrypted replica created with v0.</description>
+      <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range. It can also run in follow mode (-f) to continuously restore new data as it becomes available, enabling read-only database replicas.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.</description>
     </item>
     <item>
       <title>Command: sync</title>

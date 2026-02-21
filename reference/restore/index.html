@@ -20,9 +20,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: restore">
-<meta name="twitter:description" content="The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range.
-Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.
-⚠️ **Age Encryption Note**: Age encryption is not available in v0.5.0&#43;. If you are attempting to restore from an Age-encrypted replica created with v0.">
+<meta name="twitter:description" content="The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range. It can also run in follow mode (-f) to continuously restore new data as it becomes available, enabling read-only database replicas.
+Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -213,12 +212,15 @@ Restoration will only run if the output database file does not exist so you cann
         <li><a href="#important-notes">Important Notes</a></li>
       </ul>
     </li>
+    <li><a href="#follow-mode">Follow Mode</a></li>
     <li><a href="#examples">Examples</a>
       <ul>
         <li><a href="#database-restore">Database restore</a></li>
         <li><a href="#replica-url-restore">Replica URL restore</a></li>
         <li><a href="#restore-to-new-path">Restore to new path</a></li>
         <li><a href="#point-in-time-restore">Point-in-time restore</a></li>
+        <li><a href="#follow-mode-1">Follow mode</a></li>
+        <li><a href="#follow-mode-with-custom-interval">Follow mode with custom interval</a></li>
         <li><a href="#conditional-restore-in-automation">Conditional restore in automation</a></li>
         <li><a href="#idempotent-deployment-script">Idempotent deployment script</a></li>
         <li><a href="#shell-script-with-error-handling">Shell script with error handling</a></li>
@@ -237,7 +239,9 @@ Restoration will only run if the output database file does not exist so you cann
 			<p class="lead"></p>
 			<p>The <code>restore</code> command recovers a database from a replica. By default, it
 attempts to restore the latest data. However, it can also restore databases
-to a specific point-in-time if it is covered by the WAL time range.</p>
+to a specific point-in-time if it is covered by the WAL time range. It can
+also run in follow mode (<code>-f</code>) to continuously restore new data as it becomes
+available, enabling read-only database replicas.</p>
 <p>Restoration will only run if the output database file does not exist so you
 cannot accidentally overwrite your running database.</p>
 <div class="alert alert-warning d-flex" role="alert">
@@ -278,6 +282,15 @@ as on a development machine.</p>
 -timestamp TIMESTAMP
     Restore to a specific point-in-time.
     Defaults to use the latest available backup.
+
+-f
+    Continuously restores new data as it becomes available.
+    The restored database should only be opened in read-only mode.
+    Incompatible with -txid and -timestamp.
+
+-follow-interval DURATION
+    Sets the polling interval for follow mode.
+    Defaults to 1s.
 
 -config PATH
     Specifies the configuration file.
@@ -349,6 +362,24 @@ will still return non-zero exit codes</li>
 <li>When the flag is used and no backups are found, a log message is emitted:
 &ldquo;no matching backups found&rdquo;</li>
 </ul>
+<h2 id="follow-mode">Follow Mode<a href="#follow-mode" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ The <code>-f</code> flag enables follow mode, which
+continuously polls for new LTX files after the initial restore is complete.
+This keeps the restored database up-to-date as new transactions are replicated,
+enabling read-only database replicas that stay in sync with the primary.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The restored database must only be opened in **read-only mode** (e.g. `PRAGMA query_only = ON` or `?mode=ro`). Writing to the database while follow mode is running will cause conflicts.</div>
+</div>
+<p>Follow mode runs indefinitely until stopped with <code>Ctrl+C</code> (SIGINT), at which
+point it shuts down cleanly. The polling interval can be adjusted with
+<code>-follow-interval</code> (default: <code>1s</code>).</p>
+<p>The <code>-f</code> flag is incompatible with <code>-txid</code> and <code>-timestamp</code> because follow mode
+is designed to continuously track the latest state rather than restore to a
+fixed point.</p>
 <h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="database-restore">Database restore<a href="#database-restore" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Restore the latest replica for the <code>/var/lib/db</code> database to its original
@@ -363,6 +394,13 @@ location:</p>
 </code></pre><h3 id="point-in-time-restore">Point-in-time restore<a href="#point-in-time-restore" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Restore the <code>/var/lib/db</code> database to a specific point-in-time:</p>
 <pre tabindex="0"><code>$ litestream restore -timestamp 2020-01-01T00:00:00Z /var/lib/db
+</code></pre><h3 id="follow-mode-1">Follow mode<a href="#follow-mode-1" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Continuously restore new data from an S3 replica to maintain a read-only
+replica:</p>
+<pre tabindex="0"><code>$ litestream restore -f -o /tmp/read-replica.db s3://mybkt/db
+</code></pre><h3 id="follow-mode-with-custom-interval">Follow mode with custom interval<a href="#follow-mode-with-custom-interval" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Use a longer polling interval to reduce the frequency of replica checks:</p>
+<pre tabindex="0"><code>$ litestream restore -f -follow-interval 5s -o /tmp/read-replica.db s3://mybkt/db
 </code></pre><h3 id="conditional-restore-in-automation">Conditional restore in automation<a href="#conditional-restore-in-automation" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Use <code>-if-replica-exists</code> to allow restore operations to succeed even when no
 backups are available:</p>
