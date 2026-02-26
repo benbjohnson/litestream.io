@@ -41,6 +41,7 @@ jobs:
           args: >-
             --no-progress
             --offline
+            --config ${{ github.workspace }}/lychee.toml
             --root-dir ${{ github.workspace }}/public
             '${{ github.workspace }}/public/**/*.html'
           fail: true
