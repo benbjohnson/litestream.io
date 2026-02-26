@@ -54,6 +54,26 @@ The `sync` command operates in two modes:
   when complete, or `no_change` if the database was already up to date.
 
 
+## Output
+
+The `sync` command returns JSON output with the following fields:
+
+| Field | Description |
+|-------|-------------|
+| `status` | Sync status: `synced_local`, `synced`, or `no_change` |
+| `path` | Absolute path to the database file |
+| `txid` | Current local transaction ID |
+| `replicated_txid` | Transaction ID confirmed replicated to remote storage |
+
+The `replicated_txid` field indicates the transaction ID that has been durably
+replicated to remote storage:
+
+- With `-wait`: Returns the confirmed replicated transaction ID, allowing you
+  to verify that writes have been durably replicated to remote storage.
+- Without `-wait`: Returns `0` since remote replication is not awaited in
+  fire-and-forget mode.
+
+
 ## Examples
 
 ### Basic sync
@@ -62,6 +82,7 @@ Trigger an immediate sync for a database:
 
 ```
 $ litestream sync /path/to/my.db
+{"status":"synced_local","path":"/path/to/my.db","txid":42,"replicated_txid":0}
 ```
 
 ### Sync and wait for completion
@@ -70,6 +91,7 @@ Block until the sync finishes, including remote replication:
 
 ```
 $ litestream sync -wait /path/to/my.db
+{"status":"synced","path":"/path/to/my.db","txid":42,"replicated_txid":42}
 ```
 
 ### Sync with custom timeout and socket
