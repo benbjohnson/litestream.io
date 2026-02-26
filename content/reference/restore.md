@@ -157,6 +157,39 @@ The `-f` flag is incompatible with `-txid` and `-timestamp` because follow mode
 is designed to continuously track the latest state rather than restore to a
 fixed point.
 
+### Crash Recovery
+
+Follow mode writes a `.txid` sidecar file next to the restored database to
+enable crash recovery. For example, restoring to `/tmp/my.db` creates a
+`/tmp/my.db.txid` file that tracks the last successfully applied transaction.
+
+The `.txid` file is written atomically (using a temporary file, fsync, and
+rename) after each batch of LTX files is applied. If the follow mode process
+crashes or is terminated unexpectedly, it can resume from the saved TXID on
+restart without requiring a full re-restore.
+
+**Resuming after a crash:**
+
+When follow mode starts and detects both an existing database file and its
+corresponding `.txid` file, it reads the saved TXID and resumes replication
+from that point. This avoids re-downloading and re-applying the entire database
+history.
+
+**Error conditions:**
+
+| Scenario | Behavior |
+|----------|----------|
+| Database exists, `.txid` file missing | Error: delete the database and re-restore |
+| Saved TXID is older than earliest snapshot | Error: retention has pruned required history |
+
+If the database file exists but the `.txid` file is missing, follow mode cannot
+determine where to resume safely. In this case, delete the database file and
+run a fresh restore.
+
+If the saved TXID is behind the earliest available snapshot (because retention
+policies have pruned older data), follow mode returns a clear error instead of
+silently stalling. Delete the database file and run a fresh restore to recover.
+
 
 ## Examples
 
