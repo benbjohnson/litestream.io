@@ -368,14 +368,41 @@ complete.</p>
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/sync <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;}&#39;</span>
-</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;synced_local&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;synced_local&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42,<span class="s2">&#34;replicated_txid&#34;</span>:40<span class="o">}</span>
 </span></span></code></pre></div><p><strong>Example (blocking):</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/sync <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;,&#34;wait&#34;:true,&#34;timeout&#34;:60}&#39;</span>
-</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;synced&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
-</span></span></code></pre></div><p><strong>Response statuses:</strong></p>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;synced&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42,<span class="s2">&#34;replicated_txid&#34;</span>:42<span class="o">}</span>
+</span></span></code></pre></div><p><strong>Response fields:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td>Sync status (see table below)</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>Absolute path to the database file</td>
+</tr>
+<tr>
+<td><code>txid</code></td>
+<td>Current local transaction ID</td>
+</tr>
+<tr>
+<td><code>replicated_txid</code></td>
+<td>Last transaction ID confirmed replicated to remote storage. In fire-and-forget mode, this may lag behind <code>txid</code> since the newly synced data has not yet been replicated.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response statuses:</strong></p>
 <table>
 <thead>
 <tr>
