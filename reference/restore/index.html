@@ -212,7 +212,11 @@ Restoration will only run if the output database file does not exist so you cann
         <li><a href="#important-notes">Important Notes</a></li>
       </ul>
     </li>
-    <li><a href="#follow-mode">Follow Mode</a></li>
+    <li><a href="#follow-mode">Follow Mode</a>
+      <ul>
+        <li><a href="#crash-recovery">Crash Recovery</a></li>
+      </ul>
+    </li>
     <li><a href="#examples">Examples</a>
       <ul>
         <li><a href="#database-restore">Database restore</a></li>
@@ -380,6 +384,53 @@ point it shuts down cleanly. The polling interval can be adjusted with
 <p>The <code>-f</code> flag is incompatible with <code>-txid</code> and <code>-timestamp</code> because follow mode
 is designed to continuously track the latest state rather than restore to a
 fixed point.</p>
+<h3 id="crash-recovery">Crash Recovery<a href="#crash-recovery" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.10">
+    v0.5.10
+</span>
+ Follow mode writes a <code>-txid</code> sidecar file next
+to the restored database to enable crash recovery. For example, restoring to
+<code>/tmp/my.db</code> creates a <code>/tmp/my.db-txid</code> file that tracks the last successfully
+applied transaction. This follows SQLite&rsquo;s naming convention for associated
+files (e.g. <code>-wal</code>, <code>-shm</code>).</p>
+<p>The <code>-txid</code> file is written atomically (using a temporary file, fsync, and
+rename) after each batch of LTX files is applied. If the follow mode process
+crashes or is terminated unexpectedly, it can resume from the saved TXID on
+restart without requiring a full re-restore.</p>
+<p>When follow mode starts and detects both an existing database file and its
+corresponding <code>-txid</code> file, it reads the saved TXID and resumes replication
+from that point. This avoids re-downloading and re-applying the entire database
+history.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">If the database file exists but the `-txid` file is missing, follow mode cannot determine where to resume safely and will return an error. Delete the database file and run a fresh restore.</div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database exists, <code>-txid</code> file missing</td>
+<td>Error: delete the database and re-restore</td>
+</tr>
+<tr>
+<td>Saved TXID is older than earliest snapshot</td>
+<td>Error: retention has pruned required history</td>
+</tr>
+<tr>
+<td>Saved TXID is ahead of latest snapshot</td>
+<td>Error: delete the database and <code>-txid</code> file to re-restore</td>
+</tr>
+</tbody>
+</table>
+<p>If the saved TXID is behind the earliest available snapshot (because retention
+policies have pruned older data), follow mode returns a clear error instead of
+silently stalling. Delete the database file and the <code>-txid</code> file and run a
+fresh restore to recover.</p>
 <h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="database-restore">Database restore<a href="#database-restore" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Restore the latest replica for the <code>/var/lib/db</code> database to its original
