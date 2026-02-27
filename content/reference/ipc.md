@@ -144,7 +144,7 @@ $ curl --unix-socket /var/run/litestream.sock \
     -X POST http://localhost/sync \
     -H "Content-Type: application/json" \
     -d '{"path":"/path/to/my.db"}'
-{"status":"synced_local","path":"/path/to/my.db","txid":42,"replicated_txid":0}
+{"status":"synced_local","path":"/path/to/my.db","txid":42,"replicated_txid":40}
 ```
 
 **Example (blocking):**
@@ -164,7 +164,7 @@ $ curl --unix-socket /var/run/litestream.sock \
 | `status` | Sync status (see table below) |
 | `path` | Absolute path to the database file |
 | `txid` | Current local transaction ID |
-| `replicated_txid` | Transaction ID confirmed replicated to remote storage. Returns `0` in fire-and-forget mode since remote replication is not awaited. |
+| `replicated_txid` | Last transaction ID confirmed replicated to remote storage. In fire-and-forget mode, this may lag behind `txid` since the newly synced data has not yet been replicated. |
 
 **Response statuses:**
 
