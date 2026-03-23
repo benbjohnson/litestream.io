@@ -77,9 +77,7 @@ $ curl --unix-socket /var/run/litestream.sock \
     -d '{"path":"/path/to/my.db","replica_url":"s3://mybucket/my.db"}'
 ```
 
-**CLI equivalent:** `litestream start -replica s3://mybucket/my.db -socket /var/run/litestream.sock /path/to/my.db`
-
-See [Command: start](/reference/start) for details.
+**CLI equivalent:** `litestream register -socket /var/run/litestream.sock -replica s3://mybucket/my.db /path/to/my.db`
 
 ---
 
@@ -100,6 +98,62 @@ $ curl --unix-socket /var/run/litestream.sock \
     -X POST http://localhost/unregister \
     -H "Content-Type: application/json" \
     -d '{"path":"/path/to/my.db"}'
+```
+
+**CLI equivalent:** `litestream unregister -socket /var/run/litestream.sock /path/to/my.db`
+
+---
+
+### POST /start
+
+Enables replication for a database that is already configured in the daemon.
+Unlike `/register`, which adds a new database, `/start` enables replication
+for a database the daemon already knows about.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+| `timeout` | No | Maximum time to wait in seconds (default: `30`) |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/start \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db"}'
+{"status":"started","path":"/path/to/my.db"}
+```
+
+**CLI equivalent:** `litestream start -socket /var/run/litestream.sock /path/to/my.db`
+
+See [Command: start](/reference/start) for details.
+
+---
+
+### POST /stop
+
+Disables replication for a database. The daemon performs a final sync before
+disabling. The database remains in the daemon's configuration and can be
+re-enabled with `/start`.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+| `timeout` | No | Maximum time to wait in seconds (default: `30`) |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/stop \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db"}'
+{"status":"stopped","path":"/path/to/my.db"}
 ```
 
 **CLI equivalent:** `litestream stop -socket /var/run/litestream.sock /path/to/my.db`
