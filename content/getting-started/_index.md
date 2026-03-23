@@ -225,6 +225,24 @@ If using a config file, ensure credentials are correct and the file is being rea
 by passing the `-config` flag to Litestream.
 
 
+## A note on `replicate` vs `start`/`stop`
+
+The `litestream replicate` command used above is what **starts the Litestream
+daemon**. This is the command you run (or configure your service manager to run)
+to begin replication.
+
+Litestream also has [`start`](/reference/start) and [`stop`](/reference/stop)
+commands, but these do something different — they are **client commands** that
+tell an already running daemon to begin or stop replicating a specific database.
+They do not start or stop the daemon itself.
+
+| Command | What it does |
+|---------|-------------|
+| `litestream replicate` | Starts the Litestream daemon |
+| `litestream start DB_PATH` | Tells a running daemon to replicate a database |
+| `litestream stop DB_PATH` | Tells a running daemon to stop replicating a database |
+
+
 ## Further reading
 
 Litestream was built to run as a background service that you don't need to worry

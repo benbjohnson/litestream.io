@@ -77,7 +77,9 @@ $ curl --unix-socket /var/run/litestream.sock \
     -d '{"path":"/path/to/my.db","replica_url":"s3://mybucket/my.db"}'
 ```
 
-**CLI equivalent:** `litestream register -socket /var/run/litestream.sock -replica s3://mybucket/my.db /path/to/my.db`
+**CLI equivalent:** `litestream start -replica s3://mybucket/my.db -socket /var/run/litestream.sock /path/to/my.db`
+
+See [Command: start](/reference/start) for details.
 
 ---
 
@@ -100,7 +102,9 @@ $ curl --unix-socket /var/run/litestream.sock \
     -d '{"path":"/path/to/my.db"}'
 ```
 
-**CLI equivalent:** `litestream unregister -socket /var/run/litestream.sock /path/to/my.db`
+**CLI equivalent:** `litestream stop -socket /var/run/litestream.sock /path/to/my.db`
+
+See [Command: stop](/reference/stop) for details.
 
 ---
 

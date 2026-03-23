@@ -9,9 +9,13 @@ weight: 530
 ---
 
 The `replicate` command starts a server to monitor & continuously replicate
-SQLite databases. You can specify your database & replica in a configuration
-file or you can replicate a single database file by specifying its path and its
-replica in the command line arguments.
+SQLite databases. This is the main Litestream daemon — it runs in the
+foreground and replicates databases until it is stopped. You can specify your
+database & replica in a configuration file or you can replicate a single
+database file by specifying its path and its replica in the command line
+arguments.
+
+{{< alert icon="💡" text="<strong><code>replicate</code> vs <code>start</code>/<code>stop</code>:</strong> The <code>replicate</code> command starts the Litestream daemon process. The <a href=\"/reference/start\"><code>start</code></a> and <a href=\"/reference/stop\"><code>stop</code></a> commands are <em>client</em> commands that tell a running daemon to begin or stop replicating a specific database. If you want to launch Litestream, use <code>replicate</code>." >}}
 
 
 ## Usage
@@ -179,6 +183,8 @@ litestream replicate /path/to/db s3://mybucket/db -exec "myapp serve"
 
 ## See Also
 
+- [Command: start](/reference/start) — Tell a running daemon to begin replicating a database
+- [Command: stop](/reference/stop) — Tell a running daemon to stop replicating a database
 - [Configuration Reference](/reference/config) - Complete configuration options
 - [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
 - [Getting Started](/getting-started) - Tutorial for setting up replication
