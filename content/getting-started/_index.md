@@ -234,7 +234,8 @@ to begin replication.
 Litestream also has [`start`](/reference/start) and [`stop`](/reference/stop)
 commands, but these do something different — they are **client commands** that
 tell an already running daemon to begin or stop replicating a specific database.
-They do not start or stop the daemon itself.
+They do not start or stop the daemon itself. They require the daemon's
+[IPC control socket](/reference/ipc) to be enabled in the configuration.
 
 | Command | What it does |
 |---------|-------------|

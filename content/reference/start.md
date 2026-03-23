@@ -8,7 +8,7 @@ menu:
 weight: 535
 ---
 
-{{< since version="0.5.8" >}} The `start` command tells a running Litestream
+{{< since version="0.5.7" >}} The `start` command tells a running Litestream
 daemon to enable replication for a specific database. It communicates with the
 `litestream replicate` process over the IPC control socket.
 
@@ -21,8 +21,17 @@ daemon to enable replication for a specific database. It communicates with the
 litestream start [arguments] DB_PATH
 ```
 
-The daemon must already be running via [`litestream replicate`](/reference/replicate).
-If no daemon is running, the command will fail with a connection error.
+The daemon must already be running via [`litestream replicate`](/reference/replicate)
+with the IPC control socket enabled. If the socket is not enabled or no daemon is
+running, the command will fail with a connection error.
+
+To enable the control socket, add this to your configuration file:
+
+```yaml
+socket:
+  enabled: true
+  path: /var/run/litestream.sock
+```
 
 
 ## Arguments
