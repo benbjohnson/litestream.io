@@ -115,7 +115,7 @@ for a database the daemon already knows about.
 | Field | Required | Description |
 |-------|----------|-------------|
 | `path` | Yes | Absolute path to the SQLite database file |
-| `timeout` | No | Maximum time to wait in seconds (default: `30`) |
+| `timeout` | No | Maximum time to wait in seconds (no default; omit to wait indefinitely) |
 
 **Example:**
 
@@ -123,7 +123,7 @@ for a database the daemon already knows about.
 $ curl --unix-socket /var/run/litestream.sock \
     -X POST http://localhost/start \
     -H "Content-Type: application/json" \
-    -d '{"path":"/path/to/my.db"}'
+    -d '{"path":"/path/to/my.db", "timeout":30}'
 {"status":"started","path":"/path/to/my.db"}
 ```
 
@@ -144,7 +144,7 @@ re-enabled with `/start`.
 | Field | Required | Description |
 |-------|----------|-------------|
 | `path` | Yes | Absolute path to the SQLite database file |
-| `timeout` | No | Maximum time to wait in seconds (default: `30`) |
+| `timeout` | No | Maximum time to wait in seconds (no default; omit to wait indefinitely) |
 
 **Example:**
 
@@ -152,7 +152,7 @@ re-enabled with `/start`.
 $ curl --unix-socket /var/run/litestream.sock \
     -X POST http://localhost/stop \
     -H "Content-Type: application/json" \
-    -d '{"path":"/path/to/my.db"}'
+    -d '{"path":"/path/to/my.db", "timeout":30}'
 {"status":"stopped","path":"/path/to/my.db"}
 ```
 
