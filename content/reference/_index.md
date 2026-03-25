@@ -15,8 +15,10 @@ The `litestream` commands are:
 - [`litestream databases`](/reference/databases) — Lists databases specified in config file.
 - [`litestream ltx`](/reference/ltx) — List available LTX files for a database.
 - [`litestream mcp`](/reference/mcp) — MCP server for AI assistant integration.
-- [`litestream replicate`](/reference/replicate) — Runs a server to replicate databases.
+- [`litestream replicate`](/reference/replicate) — Starts the replication daemon.
 - [`litestream restore`](/reference/restore) — Recovers database backup from a replica.
+- [`litestream start`](/reference/start) — Tells a running daemon to begin replicating a database.
+- [`litestream stop`](/reference/stop) — Tells a running daemon to stop replicating a database.
 - [`litestream sync`](/reference/sync) — Forces immediate WAL-to-LTX sync for a database.
 - [`litestream version`](/reference/version) — Prints the binary version.
 - [`litestream wal`](/reference/wal) — List available WAL files for a database (deprecated).
