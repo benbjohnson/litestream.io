@@ -219,6 +219,14 @@ Restoration will only run if the output database file does not exist so you cann
         <li><a href="#important-notes">Important Notes</a></li>
       </ul>
     </li>
+    <li><a href="#dry-run">Dry Run</a>
+      <ul>
+        <li><a href="#human-readable-output">Human-readable output</a></li>
+        <li><a href="#json-output">JSON output</a></li>
+      </ul>
+    </li>
+    <li><a href="#force-overwrite">Force Overwrite</a></li>
+    <li><a href="#json-output-1">JSON Output</a></li>
     <li><a href="#follow-mode">Follow Mode</a>
       <ul>
         <li><a href="#crash-recovery">Crash Recovery</a></li>
@@ -232,6 +240,10 @@ Restoration will only run if the output database file does not exist so you cann
         <li><a href="#point-in-time-restore">Point-in-time restore</a></li>
         <li><a href="#follow-mode-1">Follow mode</a></li>
         <li><a href="#follow-mode-with-custom-interval">Follow mode with custom interval</a></li>
+        <li><a href="#dry-run-1">Dry run</a></li>
+        <li><a href="#dry-run-with-json-output">Dry run with JSON output</a></li>
+        <li><a href="#force-overwrite-1">Force overwrite</a></li>
+        <li><a href="#restore-with-json-summary">Restore with JSON summary</a></li>
         <li><a href="#conditional-restore-in-automation">Conditional restore in automation</a></li>
         <li><a href="#idempotent-deployment-script">Idempotent deployment script</a></li>
         <li><a href="#shell-script-with-error-handling">Shell script with error handling</a></li>
@@ -303,6 +315,17 @@ as on a development machine.</p>
     Sets the polling interval for follow mode.
     Defaults to 1s.
 
+-dry-run
+    Print the restore plan without writing any files.
+    Incompatible with -f.
+
+-force
+    Overwrite an existing non-empty database file.
+    Required when the output path already exists and is not empty.
+
+-json
+    Output raw JSON instead of human-readable text.
+
 -config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
@@ -373,6 +396,115 @@ will still return non-zero exit codes</li>
 <li>When the flag is used and no backups are found, a log message is emitted:
 &ldquo;no matching backups found&rdquo;</li>
 </ul>
+<h2 id="dry-run">Dry Run<a href="#dry-run" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ The <code>-dry-run</code> flag prints the restore plan
+without writing any files. This allows you to preview exactly which LTX files
+would be fetched and the transaction ID range that would be restored.</p>
+<p>The dry run output includes:</p>
+<ul>
+<li>Source database path or replica URL</li>
+<li>Target database path</li>
+<li>Replica type (file, s3, etc.)</li>
+<li>Transaction ID range (min to max)</li>
+<li>List of LTX files with level, size, and timestamp</li>
+</ul>
+<p>Dry run is incompatible with follow mode (<code>-f</code>) since follow mode has no fixed
+end state to preview.</p>
+<h3 id="human-readable-output">Human-readable output<a href="#human-readable-output" class="anchor" aria-hidden="true">#</a> </h3>
+<pre tabindex="0"><code>$ litestream restore -dry-run -o /tmp/my.db s3://mybkt/my.db
+Restore plan:
+  source: s3://mybkt/my.db
+  target: /tmp/my.db
+  replica: s3
+  txid range: 0000000000000001 - 0000000000000004
+
+Files to fetch:
+level  file                                      min_txid          max_txid          size  timestamp
+9      0000000000000001-0000000000000004.ltx     0000000000000001  0000000000000004  8192  2026-04-24T12:00:00Z
+</code></pre><h3 id="json-output">JSON output<a href="#json-output" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When combined with <code>-json</code>, the plan is returned as a JSON object:</p>
+<pre tabindex="0"><code>$ litestream restore -dry-run -json -o /tmp/my.db s3://mybkt/my.db
+{
+  &#34;source&#34;: &#34;s3://mybkt/my.db&#34;,
+  &#34;target_path&#34;: &#34;/tmp/my.db&#34;,
+  &#34;replica&#34;: &#34;s3&#34;,
+  &#34;min_txid&#34;: &#34;0000000000000001&#34;,
+  &#34;max_txid&#34;: &#34;0000000000000004&#34;,
+  &#34;files&#34;: [
+    {
+      &#34;level&#34;: 9,
+      &#34;name&#34;: &#34;0000000000000001-0000000000000004.ltx&#34;,
+      &#34;min_txid&#34;: &#34;0000000000000001&#34;,
+      &#34;max_txid&#34;: &#34;0000000000000004&#34;,
+      &#34;size&#34;: 8192,
+      &#34;timestamp&#34;: &#34;2026-04-24T12:00:00Z&#34;
+    }
+  ]
+}
+</code></pre><h2 id="force-overwrite">Force Overwrite<a href="#force-overwrite" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ By default, the <code>restore</code> command will not
+overwrite an existing non-empty database file. This is a safety guard to prevent
+accidentally destroying a running database.</p>
+<p>If the output path already exists and is not empty (or if SQLite sidecar files
+like <code>-wal</code>, <code>-shm</code>, or <code>-journal</code> exist), the restore will fail with an error:</p>
+<pre tabindex="0"><code>cannot restore, output path already exists and is not empty: /path/to/db. Use -force to overwrite
+</code></pre><p>Use the <code>-force</code> flag to explicitly allow overwriting:</p>
+<pre tabindex="0"><code>$ litestream restore -force -o /tmp/my.db s3://mybkt/my.db
+</code></pre><p>The <code>-if-db-not-exists</code> flag continues to work as before — it returns exit code
+0 if the database already exists, without attempting to overwrite. The <code>-force</code>
+flag is for cases where you explicitly want to replace an existing database.</p>
+<h2 id="json-output-1">JSON Output<a href="#json-output-1" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ The <code>-json</code> flag outputs machine-readable JSON
+instead of human-readable text. All log messages are written to stderr so stdout
+remains parseable JSON.</p>
+<p>After a successful restore, the output is a summary object:</p>
+<pre tabindex="0"><code>$ litestream restore -json -o /tmp/my.db s3://mybkt/my.db
+{
+  &#34;db_path&#34;: &#34;/tmp/my.db&#34;,
+  &#34;replica&#34;: &#34;s3&#34;,
+  &#34;txid&#34;: &#34;0000000000000004&#34;,
+  &#34;duration_ms&#34;: 125,
+  &#34;integrity_check&#34;: &#34;none&#34;
+}
+</code></pre><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>db_path</code></td>
+<td>Restored database path</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>Replica client type used for the restore</td>
+</tr>
+<tr>
+<td><code>txid</code></td>
+<td>Restored transaction ID, when available</td>
+</tr>
+<tr>
+<td><code>duration_ms</code></td>
+<td>Restore duration in milliseconds</td>
+</tr>
+<tr>
+<td><code>integrity_check</code></td>
+<td>Integrity check mode used: <code>none</code>, <code>quick</code>, or <code>full</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="follow-mode">Follow Mode<a href="#follow-mode" class="anchor" aria-hidden="true">#</a> </h2>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
     v0.5.9
@@ -459,6 +591,18 @@ replica:</p>
 </code></pre><h3 id="follow-mode-with-custom-interval">Follow mode with custom interval<a href="#follow-mode-with-custom-interval" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Use a longer polling interval to reduce the frequency of replica checks:</p>
 <pre tabindex="0"><code>$ litestream restore -f -follow-interval 5s -o /tmp/read-replica.db s3://mybkt/db
+</code></pre><h3 id="dry-run-1">Dry run<a href="#dry-run-1" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Preview the restore plan without writing any files:</p>
+<pre tabindex="0"><code>$ litestream restore -dry-run -o /tmp/my.db s3://mybkt/my.db
+</code></pre><h3 id="dry-run-with-json-output">Dry run with JSON output<a href="#dry-run-with-json-output" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Get the restore plan as JSON for scripting:</p>
+<pre tabindex="0"><code>$ litestream restore -dry-run -json -o /tmp/my.db s3://mybkt/my.db
+</code></pre><h3 id="force-overwrite-1">Force overwrite<a href="#force-overwrite-1" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Replace an existing database file:</p>
+<pre tabindex="0"><code>$ litestream restore -force -o /tmp/my.db s3://mybkt/my.db
+</code></pre><h3 id="restore-with-json-summary">Restore with JSON summary<a href="#restore-with-json-summary" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Get a machine-readable summary after restore:</p>
+<pre tabindex="0"><code>$ litestream restore -json -o /tmp/my.db s3://mybkt/my.db
 </code></pre><h3 id="conditional-restore-in-automation">Conditional restore in automation<a href="#conditional-restore-in-automation" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Use <code>-if-replica-exists</code> to allow restore operations to succeed even when no
 backups are available:</p>

@@ -104,7 +104,7 @@
       <link>https://litestream.io/reference/reset/</link>
       <pubDate>Sun, 01 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/reset/</guid>
-      <description>v0.5.7 The reset command clears local Litestream state for a database, forcing a fresh snapshot on the next replication sync. This is useful for recovering from corrupted or missing LTX files without modifying the database itself.&#xA;The reset command only removes Litestream&amp;rsquo;s internal tracking files from the metadata directory (.db-litestream). It does not modify, delete, or otherwise alter your SQLite database file.&#xA;Usage litestream reset [arguments] DB_PATH Arguments -config PATH Specifies the configuration file.</description>
+      <description>v0.5.7 The reset command clears local Litestream state for a database, forcing a fresh snapshot on the next replication sync. This is useful for recovering from corrupted or missing LTX files without modifying the database itself.&#xA;The reset command only removes Litestream&amp;rsquo;s internal tracking files from the metadata directory (.db-litestream). It does not modify, delete, or otherwise alter your SQLite database file.&#xA;Usage litestream reset [arguments] DB_PATH Arguments -dry-run Print the local LTX files that would be removed without deleting anything.</description>
     </item>
     <item>
       <title>Command: register</title>

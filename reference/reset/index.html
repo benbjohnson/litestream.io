@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Command: reset">
 <meta name="twitter:description" content="v0.5.7 The reset command clears local Litestream state for a database, forcing a fresh snapshot on the next replication sync. This is useful for recovering from corrupted or missing LTX files without modifying the database itself.
 The reset command only removes Litestream&rsquo;s internal tracking files from the metadata directory (.db-litestream). It does not modify, delete, or otherwise alter your SQLite database file.
-Usage litestream reset [arguments] DB_PATH Arguments -config PATH Specifies the configuration file.">
+Usage litestream reset [arguments] DB_PATH Arguments -dry-run Print the local LTX files that would be removed without deleting anything.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -207,11 +207,13 @@ Usage litestream reset [arguments] DB_PATH Arguments -config PATH Specifies the 
   <ul>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#dry-run">Dry Run</a></li>
     <li><a href="#when-to-use">When to Use</a></li>
     <li><a href="#examples">Examples</a>
       <ul>
         <li><a href="#reset-with-a-database-path">Reset with a database path</a></li>
         <li><a href="#reset-with-a-custom-config-file">Reset with a custom config file</a></li>
+        <li><a href="#dry-run-1">Dry run</a></li>
         <li><a href="#full-recovery-workflow">Full recovery workflow</a></li>
       </ul>
     </li>
@@ -237,12 +239,34 @@ or otherwise alter your SQLite database file.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>litestream reset [arguments] DB_PATH
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>-config PATH
+<pre tabindex="0"><code>-dry-run
+    Print the local LTX files that would be removed without deleting anything.
+
+-config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
+</code></pre><h2 id="dry-run">Dry Run<a href="#dry-run" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ The <code>-dry-run</code> flag lists the local LTX files
+that would be removed from the metadata directory without actually deleting
+them. This allows you to preview the reset operation before committing to it.</p>
+<pre tabindex="0"><code>$ litestream reset -dry-run /var/lib/db
+Dry run: local Litestream state would be reset for: /var/lib/db
+Would remove: /var/lib/db-litestream/ltx
+Files that would be removed:
+  /var/lib/db-litestream/ltx/0000000000000001-0000000000000001.ltx
+  /var/lib/db-litestream/ltx/0000000000000002-0000000000000002.ltx
+No files were removed.
+</code></pre><p>If no local LTX files exist, the dry run reports that:</p>
+<pre tabindex="0"><code>$ litestream reset -dry-run /var/lib/db
+Dry run: local Litestream state would be reset for: /var/lib/db
+Would remove: /var/lib/db-litestream/ltx
+No local LTX files would be removed.
 </code></pre><h2 id="when-to-use">When to Use<a href="#when-to-use" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Use <code>litestream reset</code> when you encounter replication errors related to
 corrupted or missing LTX files. Common error messages that indicate a reset
@@ -272,6 +296,9 @@ is needed:</p>
 </code></pre><h3 id="reset-with-a-custom-config-file">Reset with a custom config file<a href="#reset-with-a-custom-config-file" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Specify a non-default configuration file:</p>
 <pre tabindex="0"><code>$ litestream reset -config /etc/myapp/litestream.yml /var/lib/db
+</code></pre><h3 id="dry-run-1">Dry run<a href="#dry-run-1" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Preview which files would be removed without deleting anything:</p>
+<pre tabindex="0"><code>$ litestream reset -dry-run /var/lib/db
 </code></pre><h3 id="full-recovery-workflow">Full recovery workflow<a href="#full-recovery-workflow" class="anchor" aria-hidden="true">#</a> </h3>
 <p>When encountering LTX replication errors, follow these steps:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. Stop Litestream</span>
