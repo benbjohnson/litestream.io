@@ -22,6 +22,19 @@ The `litestream` commands are:
 - [`litestream wal`](/reference/wal) — List available WAL files for a database (deprecated).
 
 
+## Daemon Control Commands
+
+These commands communicate with a running `litestream replicate` daemon over the
+IPC control socket. They require a running daemon with the socket enabled.
+
+- [`litestream info`](/reference/info) — Shows daemon version, PID, and uptime.
+- [`litestream list`](/reference/list) — Lists databases managed by the daemon.
+- [`litestream register`](/reference/register) — Dynamically adds a database to the daemon.
+- [`litestream unregister`](/reference/unregister) — Removes a database from the daemon.
+- [`litestream start`](/reference/start) — Resumes replication for a stopped database.
+- [`litestream stop`](/reference/stop) — Pauses replication for a database.
+
+
 ## VFS Extension
 
 - [`litestream-vfs`](/reference/vfs) — Optional read-only VFS that serves replicas directly from object storage.
