@@ -387,7 +387,7 @@ Replace an existing database file:
 $ litestream restore -force -o /tmp/my.db s3://mybkt/my.db
 ```
 
-### JSON output
+### Restore with JSON summary
 
 Get a machine-readable summary after restore:
 
