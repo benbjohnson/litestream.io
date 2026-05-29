@@ -78,8 +78,7 @@ writes a JSON array to stdout with one object per database:
 | `wal_size` | string | Current WAL file size as human-readable text, or `-` if unavailable |
 
 When no databases are configured, or none match the supplied database path, the
-command emits an empty array (`[]`) rather than `null`. This keeps the output
-safe to parse in scripts without special-casing the empty case.
+command emits `null`.
 
 
 ## Examples
