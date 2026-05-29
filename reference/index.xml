@@ -55,7 +55,7 @@
       <link>https://litestream.io/reference/ltx/</link>
       <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/ltx/</guid>
-      <description>v0.5.0 The ltx command lists LTX (Litestream Transaction Log) files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;Usage List by database This command lists all LTX files across all replicas for a database specified in the Litestream configuration file:&#xA;litestream ltx [arguments] DB_PATH List by replica URL This command lists all LTX files for a single replica URL.</description>
+      <description>v0.5.0 The ltx command lists LTX (Litestream Transaction Log) files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;Usage List by database This command lists all LTX files for a database specified in the Litestream configuration file:&#xA;litestream ltx [arguments] DB_PATH List by replica URL This command lists all LTX files for a replica URL. This approach is useful when you do not have a configuration file.</description>
     </item>
     <item>
       <title>Command: restore</title>

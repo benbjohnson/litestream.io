@@ -21,8 +21,8 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: ltx">
 <meta name="twitter:description" content="v0.5.0 The ltx command lists LTX (Litestream Transaction Log) files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.
-Usage List by database This command lists all LTX files across all replicas for a database specified in the Litestream configuration file:
-litestream ltx [arguments] DB_PATH List by replica URL This command lists all LTX files for a single replica URL.">
+Usage List by database This command lists all LTX files for a database specified in the Litestream configuration file:
+litestream ltx [arguments] DB_PATH List by replica URL This command lists all LTX files for a replica URL. This approach is useful when you do not have a configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -205,13 +205,14 @@ litestream ltx [arguments] DB_PATH List by replica URL This command lists all LT
       </ul>
     </li>
     <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#output">Output</a></li>
     <li><a href="#examples">Examples</a>
       <ul>
         <li><a href="#database-ltx-files">Database LTX files</a></li>
-        <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
         <li><a href="#view-a-specific-compaction-level">View a specific compaction level</a></li>
         <li><a href="#view-all-compaction-levels">View all compaction levels</a></li>
         <li><a href="#replica-url-ltx-files">Replica URL LTX files</a></li>
+        <li><a href="#json-output">JSON output</a></li>
       </ul>
     </li>
   </ul>
@@ -230,18 +231,19 @@ Log) files available for a database or replica. This command is not typically
 used in normal usage and is mainly used for debugging.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="list-by-database">List by database<a href="#list-by-database" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all LTX files across all replicas for a database specified
-in the Litestream configuration file:</p>
+<p>This command lists all LTX files for a database specified in the Litestream
+configuration file:</p>
 <pre tabindex="0"><code>litestream ltx [arguments] DB_PATH
 </code></pre><h3 id="list-by-replica-url">List by replica URL<a href="#list-by-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all LTX files for a single replica URL. This approach is
-useful when you do not have a configuration file.</p>
+<p>This command lists all LTX files for a replica URL. This approach is useful
+when you do not have a configuration file.</p>
 <pre tabindex="0"><code>litestream ltx [arguments] REPLICA_URL
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>-level LEVEL
     View LTX files at a specific compaction level.
     Accepts a level number (0-9) or &#34;all&#34; to show all levels.
     When set to &#34;all&#34;, output includes a level column.
+    Defaults to 0.
 
 -config PATH
     Specifies the configuration file.
@@ -250,15 +252,46 @@ useful when you do not have a configuration file.</p>
 -no-expand-env
     Disables environment variable expansion in configuration file.
 
--replica NAME
-    Optional, filter by a specific replica.
-</code></pre><h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+-json
+    Output raw JSON instead of human-readable text.
+</code></pre><h2 id="output">Output<a href="#output" class="anchor" aria-hidden="true">#</a> </h2>
+<p>When the <code>-json</code> flag is used, the command returns an array of objects with the
+following fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>level</code></td>
+<td>Compaction level (0-9)</td>
+</tr>
+<tr>
+<td><code>min_txid</code></td>
+<td>Minimum transaction ID covered by the LTX file</td>
+</tr>
+<tr>
+<td><code>max_txid</code></td>
+<td>Maximum transaction ID covered by the LTX file</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>Size of the LTX file in bytes</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>Creation timestamp in RFC3339 format</td>
+</tr>
+</tbody>
+</table>
+<p>When no LTX files are found, the command outputs an empty array (<code>[]</code>).</p>
+<h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="database-ltx-files">Database LTX files<a href="#database-ltx-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all LTX files across all replicas for the <code>/var/lib/db</code> database:</p>
+<p>List all LTX files for the <code>/var/lib/db</code> database:</p>
 <pre tabindex="0"><code>$ litestream ltx /var/lib/db
-</code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all LTX files for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
-<pre tabindex="0"><code>$ litestream ltx -replica s3 /var/lib/db
 </code></pre><h3 id="view-a-specific-compaction-level">View a specific compaction level<a href="#view-a-specific-compaction-level" class="anchor" aria-hidden="true">#</a> </h3>
 <p>List only L0 (uncompacted) LTX files:</p>
 <pre tabindex="0"><code>$ litestream ltx -level 0 /var/lib/db
@@ -266,8 +299,20 @@ useful when you do not have a configuration file.</p>
 <p>List LTX files across all levels (output includes a <code>level</code> column):</p>
 <pre tabindex="0"><code>$ litestream ltx -level all /var/lib/db
 </code></pre><h3 id="replica-url-ltx-files">Replica URL LTX files<a href="#replica-url-ltx-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all LTX files for a single replica URL:</p>
+<p>Lists all LTX files for a replica URL:</p>
 <pre tabindex="0"><code>$ litestream ltx s3://mybkt.litestream.io/db
+</code></pre><h3 id="json-output">JSON output<a href="#json-output" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Output raw JSON instead of human-readable text:</p>
+<pre tabindex="0"><code>$ litestream ltx -json /var/lib/db
+[
+  {
+    &#34;level&#34;: 0,
+    &#34;min_txid&#34;: &#34;0000000000000001&#34;,
+    &#34;max_txid&#34;: &#34;0000000000000005&#34;,
+    &#34;size&#34;: 4096,
+    &#34;timestamp&#34;: &#34;2025-01-21T12:00:00Z&#34;
+  }
+]
 </code></pre>
 			<div class="docs-navigation d-flex justify-content-between">
 	
