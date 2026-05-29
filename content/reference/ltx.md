@@ -16,8 +16,8 @@ used in normal usage and is mainly used for debugging.
 
 ### List by database
 
-This command lists all LTX files across all replicas for a database specified
-in the Litestream configuration file:
+This command lists all LTX files for a database specified in the Litestream
+configuration file:
 
 ```
 litestream ltx [arguments] DB_PATH
@@ -25,8 +25,8 @@ litestream ltx [arguments] DB_PATH
 
 ### List by replica URL
 
-This command lists all LTX files for a single replica URL. This approach is
-useful when you do not have a configuration file.
+This command lists all LTX files for a replica URL. This approach is useful
+when you do not have a configuration file.
 
 ```
 litestream ltx [arguments] REPLICA_URL
@@ -39,6 +39,7 @@ litestream ltx [arguments] REPLICA_URL
     View LTX files at a specific compaction level.
     Accepts a level number (0-9) or "all" to show all levels.
     When set to "all", output includes a level column.
+    Defaults to 0.
 
 -config PATH
     Specifies the configuration file.
@@ -47,26 +48,35 @@ litestream ltx [arguments] REPLICA_URL
 -no-expand-env
     Disables environment variable expansion in configuration file.
 
--replica NAME
-    Optional, filter by a specific replica.
+-json
+    Output raw JSON instead of human-readable text.
 ```
+
+
+## Output
+
+When the `-json` flag is used, the command returns an array of objects with the
+following fields:
+
+| Field | Description |
+|-------|-------------|
+| `level` | Compaction level (0-9) |
+| `min_txid` | Minimum transaction ID covered by the LTX file |
+| `max_txid` | Maximum transaction ID covered by the LTX file |
+| `size` | Size of the LTX file in bytes |
+| `timestamp` | Creation timestamp in RFC3339 format |
+
+When no LTX files are found, the command outputs an empty array (`[]`).
+
 
 ## Examples
 
 ### Database LTX files
 
-List all LTX files across all replicas for the `/var/lib/db` database:
+List all LTX files for the `/var/lib/db` database:
 
 ```
 $ litestream ltx /var/lib/db
-```
-
-### Filter by replica name
-
-Lists all LTX files for the `/var/lib/db` database but filters by the `s3` replica:
-
-```
-$ litestream ltx -replica s3 /var/lib/db
 ```
 
 ### View a specific compaction level
@@ -87,8 +97,25 @@ $ litestream ltx -level all /var/lib/db
 
 ### Replica URL LTX files
 
-Lists all LTX files for a single replica URL:
+Lists all LTX files for a replica URL:
 
 ```
 $ litestream ltx s3://mybkt.litestream.io/db
+```
+
+### JSON output
+
+Output raw JSON instead of human-readable text:
+
+```
+$ litestream ltx -json /var/lib/db
+[
+  {
+    "level": 0,
+    "min_txid": "0000000000000001",
+    "max_txid": "0000000000000005",
+    "size": 4096,
+    "timestamp": "2025-01-21T12:00:00Z"
+  }
+]
 ```
