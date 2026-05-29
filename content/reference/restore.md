@@ -516,7 +516,8 @@ backup regardless of format.
 
 ## See Also
 
-- [Configuration Reference](/reference/config) - Complete configuration options
-- [Troubleshooting](/docs/troubleshooting) - Recovery and restore issues
-- [Getting Started](/getting-started) - Tutorial including restore examples
+- [JSON Output Reference](/reference/json-output#restore--json) — Schema for `-json` output
+- [Configuration Reference](/reference/config) — Complete configuration options
+- [Troubleshooting](/docs/troubleshooting) — Recovery and restore issues
+- [Getting Started](/getting-started) — Tutorial including restore examples
 

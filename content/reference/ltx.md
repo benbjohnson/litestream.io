@@ -119,3 +119,9 @@ $ litestream ltx -json /var/lib/db
   }
 ]
 ```
+
+
+## See Also
+
+- [JSON Output Reference](/reference/json-output#ltx--json) — Schema for `-json` output
+- [Configuration Reference](/reference/config) — Complete configuration options

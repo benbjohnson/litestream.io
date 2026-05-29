@@ -123,6 +123,7 @@ $ litestream status -json
 
 ## See Also
 
+- [JSON Output Reference](/reference/json-output#status--json) — Schema for `-json` output
 - [Command: databases](/reference/databases) — List databases specified in the config file
 - [Command: sync](/reference/sync) — Force an immediate WAL-to-LTX sync for a database
 - [Configuration Reference](/reference/config) — Complete configuration options

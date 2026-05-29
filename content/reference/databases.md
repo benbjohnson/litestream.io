@@ -26,6 +26,9 @@ litestream databases [arguments]
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
+
+-json
+    Output raw JSON instead of human-readable text.
 ```
 
 
@@ -39,4 +42,31 @@ $ litestream databases
 path         replicas
 /var/lib/db  file,s3
 ```
+
+
+## JSON Output
+
+{{< since version="0.5.12" >}} With the `-json` flag, the `databases` command
+writes a JSON array to stdout:
+
+```
+$ litestream databases -json
+[
+  {
+    "path": "/var/lib/db",
+    "replica": "s3"
+  }
+]
+```
+
+When no databases are configured, the command emits an empty array (`[]`).
+
+See the [JSON Output Reference](/reference/json-output#databases--json) for the
+complete schema documentation.
+
+
+## See Also
+
+- [JSON Output Reference](/reference/json-output#databases--json) — Schema for `-json` output
+- [Configuration Reference](/reference/config) — Complete configuration options
 
