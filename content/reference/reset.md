@@ -28,12 +28,41 @@ litestream reset [arguments] DB_PATH
 ## Arguments
 
 ```
+-dry-run
+    Print the local LTX files that would be removed without deleting anything.
+
 -config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
 
 -no-expand-env
     Disables environment variable expansion in configuration file.
+```
+
+
+## Dry Run
+
+{{< since version="0.5.12" >}} The `-dry-run` flag lists the local LTX files
+that would be removed from the metadata directory without actually deleting
+them. This allows you to preview the reset operation before committing to it.
+
+```
+$ litestream reset -dry-run /var/lib/db
+Dry run: local Litestream state would be reset for: /var/lib/db
+Would remove: /var/lib/db-litestream/ltx
+Files that would be removed:
+  /var/lib/db-litestream/ltx/0000000000000001-0000000000000001.ltx
+  /var/lib/db-litestream/ltx/0000000000000002-0000000000000002.ltx
+No files were removed.
+```
+
+If no local LTX files exist, the dry run reports that:
+
+```
+$ litestream reset -dry-run /var/lib/db
+Dry run: local Litestream state would be reset for: /var/lib/db
+Would remove: /var/lib/db-litestream/ltx
+No local LTX files would be removed.
 ```
 
 
@@ -76,6 +105,14 @@ Specify a non-default configuration file:
 
 ```
 $ litestream reset -config /etc/myapp/litestream.yml /var/lib/db
+```
+
+### Dry run
+
+Preview which files would be removed without deleting anything:
+
+```
+$ litestream reset -dry-run /var/lib/db
 ```
 
 ### Full recovery workflow

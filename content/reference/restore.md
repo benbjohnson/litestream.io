@@ -79,6 +79,17 @@ litestream restore [arguments] REPLICA_URL
     Sets the polling interval for follow mode.
     Defaults to 1s.
 
+-dry-run
+    Print the restore plan without writing any files.
+    Incompatible with -f.
+
+-force
+    Overwrite an existing non-empty database file.
+    Required when the output path already exists and is not empty.
+
+-json
+    Output raw JSON instead of human-readable text.
+
 -config PATH
     Specifies the configuration file.
     Defaults to /etc/litestream.yml
@@ -138,6 +149,116 @@ The `-if-replica-exists` flag works alongside other restore flags:
   will still return non-zero exit codes
 - When the flag is used and no backups are found, a log message is emitted:
   "no matching backups found"
+
+
+## Dry Run
+
+{{< since version="0.5.12" >}} The `-dry-run` flag prints the restore plan
+without writing any files. This allows you to preview exactly which LTX files
+would be fetched and the transaction ID range that would be restored.
+
+The dry run output includes:
+
+- Source database path or replica URL
+- Target database path
+- Replica type (file, s3, etc.)
+- Transaction ID range (min to max)
+- List of LTX files with level, size, and timestamp
+
+Dry run is incompatible with follow mode (`-f`) since follow mode has no fixed
+end state to preview.
+
+### Human-readable output
+
+```
+$ litestream restore -dry-run -o /tmp/my.db s3://mybkt/my.db
+Restore plan:
+  source: s3://mybkt/my.db
+  target: /tmp/my.db
+  replica: s3
+  txid range: 0000000000000001 - 0000000000000004
+
+Files to fetch:
+level  file                                      min_txid          max_txid          size  timestamp
+9      0000000000000001-0000000000000004.ltx     0000000000000001  0000000000000004  8192  2026-04-24T12:00:00Z
+```
+
+### JSON output
+
+When combined with `-json`, the plan is returned as a JSON object:
+
+```
+$ litestream restore -dry-run -json -o /tmp/my.db s3://mybkt/my.db
+{
+  "source": "s3://mybkt/my.db",
+  "target_path": "/tmp/my.db",
+  "replica": "s3",
+  "min_txid": "0000000000000001",
+  "max_txid": "0000000000000004",
+  "files": [
+    {
+      "level": 9,
+      "name": "0000000000000001-0000000000000004.ltx",
+      "min_txid": "0000000000000001",
+      "max_txid": "0000000000000004",
+      "size": 8192,
+      "timestamp": "2026-04-24T12:00:00Z"
+    }
+  ]
+}
+```
+
+
+## Force Overwrite
+
+{{< since version="0.5.12" >}} By default, the `restore` command will not
+overwrite an existing non-empty database file. This is a safety guard to prevent
+accidentally destroying a running database.
+
+If the output path already exists and is not empty (or if SQLite sidecar files
+like `-wal`, `-shm`, or `-journal` exist), the restore will fail with an error:
+
+```
+cannot restore, output path already exists and is not empty: /path/to/db. Use -force to overwrite
+```
+
+Use the `-force` flag to explicitly allow overwriting:
+
+```
+$ litestream restore -force -o /tmp/my.db s3://mybkt/my.db
+```
+
+The `-if-db-not-exists` flag continues to work as before — it returns exit code
+0 if the database already exists, without attempting to overwrite. The `-force`
+flag is for cases where you explicitly want to replace an existing database.
+
+
+## JSON Output
+
+{{< since version="0.5.12" >}} The `-json` flag outputs machine-readable JSON
+instead of human-readable text. All log messages are written to stderr so stdout
+remains parseable JSON.
+
+After a successful restore, the output is a summary object:
+
+```
+$ litestream restore -json -o /tmp/my.db s3://mybkt/my.db
+{
+  "db_path": "/tmp/my.db",
+  "replica": "s3",
+  "txid": "0000000000000004",
+  "duration_ms": 125,
+  "integrity_check": "none"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `db_path` | Restored database path |
+| `replica` | Replica client type used for the restore |
+| `txid` | Restored transaction ID, when available |
+| `duration_ms` | Restore duration in milliseconds |
+| `integrity_check` | Integrity check mode used: `none`, `quick`, or `full` |
 
 
 ## Follow Mode
@@ -240,6 +361,38 @@ Use a longer polling interval to reduce the frequency of replica checks:
 
 ```
 $ litestream restore -f -follow-interval 5s -o /tmp/read-replica.db s3://mybkt/db
+```
+
+### Dry run
+
+Preview the restore plan without writing any files:
+
+```
+$ litestream restore -dry-run -o /tmp/my.db s3://mybkt/my.db
+```
+
+### Dry run with JSON output
+
+Get the restore plan as JSON for scripting:
+
+```
+$ litestream restore -dry-run -json -o /tmp/my.db s3://mybkt/my.db
+```
+
+### Force overwrite
+
+Replace an existing database file:
+
+```
+$ litestream restore -force -o /tmp/my.db s3://mybkt/my.db
+```
+
+### JSON output
+
+Get a machine-readable summary after restore:
+
+```
+$ litestream restore -json -o /tmp/my.db s3://mybkt/my.db
 ```
 
 ### Conditional restore in automation
