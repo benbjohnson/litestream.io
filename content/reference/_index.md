@@ -50,3 +50,8 @@ IPC control socket. They require a running daemon with the socket enabled.
 
 - [Prometheus Metrics](/reference/metrics) — Reference for all metrics exported by Litestream.
 
+
+## JSON Output
+
+- [JSON Output Reference](/reference/json-output) — Stable schemas and conventions for `-json` CLI output.
+

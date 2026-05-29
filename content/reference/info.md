@@ -99,6 +99,7 @@ $ litestream info -socket /tmp/litestream.sock
 
 ## See Also
 
+- [JSON Output Reference](/reference/json-output#info--json) — Schema for `-json` output
 - [IPC Endpoints](/reference/ipc) — Unix socket endpoints including `GET /info`
 - [Command: list](/reference/list) — List all managed databases
 - [Command: replicate](/reference/replicate) — Start the replication daemon

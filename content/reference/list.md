@@ -120,6 +120,7 @@ $ litestream list -socket /tmp/litestream.sock
 
 ## See Also
 
+- [JSON Output Reference](/reference/json-output#list--json) — Schema for `-json` output
 - [IPC Endpoints](/reference/ipc) — Unix socket endpoints including `GET /list`
 - [Command: info](/reference/info) — Show daemon information
 - [Command: databases](/reference/databases) — List databases from config file (offline)
