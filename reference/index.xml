@@ -65,6 +65,13 @@
       <description>The restore command recovers a database from a replica. By default, it attempts to restore the latest data. However, it can also restore databases to a specific point-in-time if it is covered by the WAL time range. It can also run in follow mode (-f) to continuously restore new data as it becomes available, enabling read-only database replicas.&#xA;Restoration will only run if the output database file does not exist so you cannot accidentally overwrite your running database.</description>
     </item>
     <item>
+      <title>Command: status</title>
+      <link>https://litestream.io/reference/status/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/status/</guid>
+      <description>v0.5.6 The status command reports the local replication status of the databases defined in your configuration file. It inspects each database on disk and prints the latest local transaction ID and current WAL file size, making it useful for quick health checks and scripting.&#xA;The status command reads directly from the local database and LTX files. It does not require a running litestream replicate daemon and does not contact remote storage.</description>
+    </item>
+    <item>
       <title>Command: sync</title>
       <link>https://litestream.io/reference/sync/</link>
       <pubDate>Fri, 20 Feb 2026 00:00:00 +0000</pubDate>
