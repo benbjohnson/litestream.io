@@ -39,6 +39,7 @@ litestream ltx [arguments] REPLICA_URL
     View LTX files at a specific compaction level.
     Accepts a level number (0-9) or "all" to show all levels.
     When set to "all", output includes a level column.
+    Defaults to 0.
 
 -config PATH
     Specifies the configuration file.
