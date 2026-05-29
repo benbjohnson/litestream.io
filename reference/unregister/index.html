@@ -14,14 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>Running as a Systemd service - Litestream</title>
+  <title>Command: unregister - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
-<link rel="canonical" href="https://litestream.io/guides/systemd/">
+<link rel="canonical" href="https://litestream.io/reference/unregister/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="Running as a Systemd service">
-<meta name="twitter:description" content="This guide will get you running Litestream as a systemd service on Debian-based operating systems such as Ubuntu. Running as a background service means that Litestream will always run in the background and restart automatically if the server restarts. It assumes you are comfortable with using a command line.
-Prerequisites This guide assumes you have read the Getting Started tutorial already. Please read that to understand the basic operation of Litestream.">
+<meta name="twitter:title" content="Command: unregister">
+<meta name="twitter:description" content="v0.5.12 The unregister command dynamically removes a database from a running Litestream daemon without requiring a restart. Before completing, it performs a final sync to ensure all data is replicated.
+The unregister command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
+Usage litestream unregister [arguments] DB_PATH Arguments -socket PATH Path to the control socket. Defaults to /var/run/litestream.sock -timeout SECONDS Maximum time to wait in seconds.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -40,13 +41,13 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
     },{
         "@type": "ListItem",
         "position":  2 ,
-        "name": "Guides",
-        "item": "https:\/\/litestream.io\/guides\/"
+        "name": "Reference",
+        "item": "https:\/\/litestream.io\/reference\/"
     },{
         "@type": "ListItem",
         "position":  3 ,
-        "name": "Systemd",
-        "item": "https:\/\/litestream.io\/guides\/systemd\/"
+        "name": "Unregister",
+        "item": "https:\/\/litestream.io\/reference\/unregister\/"
     }]
 }
 </script>
@@ -58,7 +59,7 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
 <link rel="manifest" href="https://litestream.io/site.webmanifest">
   
 </head>
-  <body class="guides single">
+  <body class="reference single">
     <header class="navbar fixed-top navbar-expand-md navbar-light">
   <div class="container align-items-baseline">
     <input class="menu-btn order-0" type="checkbox" id="menu-btn">
@@ -131,7 +132,7 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
   <ul class="list-unstyled">
     <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
     <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
     </ul>
@@ -189,7 +190,7 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
     <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/register/">Command: register</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/unregister/">Command: unregister</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/unregister/">Command: unregister</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/start/">Command: start</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/stop/">Command: stop</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
@@ -203,17 +204,19 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#prerequisites">Prerequisites</a>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#arguments">Arguments</a></li>
+    <li><a href="#behavior">Behavior</a></li>
+    <li><a href="#output">Output</a></li>
+    <li><a href="#examples">Examples</a>
       <ul>
-        <li><a href="#install-litestream--sqlite">Install Litestream &amp; SQLite</a></li>
-        <li><a href="#creating-an-s3-bucket">Creating an S3 bucket</a></li>
+        <li><a href="#unregister-a-database">Unregister a database</a></li>
+        <li><a href="#dry-run">Dry run</a></li>
+        <li><a href="#idempotent-unregistration">Idempotent unregistration</a></li>
+        <li><a href="#json-output">JSON output</a></li>
+        <li><a href="#custom-timeout">Custom timeout</a></li>
       </ul>
     </li>
-    <li><a href="#configuration-file">Configuration file</a></li>
-    <li><a href="#writing-to-our-database">Writing to our database</a></li>
-    <li><a href="#simulating-a-disaster">Simulating a disaster</a></li>
-    <li><a href="#restoring-our-database">Restoring our database</a></li>
-    <li><a href="#further-reading">Further reading</a></li>
     <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -221,109 +224,127 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>Running as a Systemd service</h1>
+		<h1>Command: unregister</h1>
 			<p class="lead"></p>
-			<p>This guide will get you running Litestream as a systemd service on Debian-based
-operating systems such as Ubuntu. Running as a background service means that
-Litestream will always run in the background and restart automatically if the
-server restarts. It assumes you are comfortable with using a command line.</p>
-<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true">#</a> </h2>
-<p>This guide assumes you have read the <a href="/getting-started"><em>Getting Started</em></a>
-tutorial already. Please read that to understand the basic operation of Litestream.</p>
-<h3 id="install-litestream--sqlite">Install Litestream &amp; SQLite<a href="#install-litestream--sqlite" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Before continuing, <a href="/install/linux">please install Litestream</a>.</p>
-<p>You will also need <a href="https://sqlite.org/">SQLite</a> installed for this guide. It
-comes packaged with some operating systems such as macOS but you may need to
-install it separately.</p>
-<h3 id="creating-an-s3-bucket">Creating an S3 bucket<a href="#creating-an-s3-bucket" class="anchor" aria-hidden="true">#</a> </h3>
-<p>If you don&rsquo;t already have an Amazon AWS account, you can go
-<a href="https://aws.amazon.com/">https://aws.amazon.com/</a> and click &ldquo;Create Account&rdquo;.
-Once you have an account, you&rsquo;ll need to <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html">create an AWS IAM user</a> with
-<em>programmatic access</em> and with <code>AmazonS3FullAccess</code> permissions. After creating
-the user, you should have an <strong>access key id</strong> and a <strong>secret access key</strong>. We
-will use those in one of the steps below.</p>
-<p>You&rsquo;ll also need to create a bucket in AWS S3. You&rsquo;ll need to create a unique
-name for your bucket. In this guide, we&rsquo;ll name our bucket
-<code>&quot;mybkt.litestream.io&quot;</code> but replace that with your bucket name in the examples
-below.</p>
-<h2 id="configuration-file">Configuration file<a href="#configuration-file" class="anchor" aria-hidden="true">#</a> </h2>
-<p>When running as a systemd service, we&rsquo;ll configure Litestream using a
-<a href="/reference/config">configuration file</a> instead of command line flags so we
-don&rsquo;t need to edit the service definition. The default path for the Litestream
-configuration is <code>/etc/litestream.yml</code></p>
-<p>Litestream monitors one or more <em>databases</em> and each of those databases
-replicates to one or more <em>replicas</em>. First, we&rsquo;ll create a basic configuration
-file. Make sure to replace your AWS credentials with your own, the bucket name
-with your bucket name, and update <code>MYUSER</code> to your local Linux username.</p>
-<pre tabindex="0"><code>sudo cat &gt; /etc/litestream.yml &lt;&lt;EOF
-access-key-id:     AKIAxxxxxxxxxxxxxxxx
-secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
+			<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ The <code>unregister</code> command dynamically removes a
+database from a running Litestream daemon without requiring a restart. Before
+completing, it performs a final sync to ensure all data is replicated.</p>
+<p>The <code>unregister</code> command communicates with a running <code>litestream replicate</code> process
+over the IPC control socket. The daemon must already be running.</p>
+<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
+<pre tabindex="0"><code>litestream unregister [arguments] DB_PATH
+</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
+<pre tabindex="0"><code>-socket PATH
+    Path to the control socket.
+    Defaults to /var/run/litestream.sock
 
-dbs:
-  - path: /home/MYUSER/friends.db
-    replica:
-      url: s3://mybkt.litestream.io/friends.db
-      sync-interval: 1s
-EOF
-</code></pre><p>This configuration specifies that we want Litestream to monitor our
-<code>friends.db</code> database in our home directory and continuously replicate it to
-our <code>mybkt.litestream.io</code> S3 bucket.</p>
-<p>After changing our configuration, we&rsquo;ll need to restart the Litestream service
-for it to register the change:</p>
-<pre tabindex="0"><code>sudo systemctl restart litestream
-</code></pre><h2 id="writing-to-our-database">Writing to our database<a href="#writing-to-our-database" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Now that Litestream is running in the background, let&rsquo;s create our <code>friends.db</code>
-database:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sqlite3 friends.db
-</span></span></code></pre></div><p>We&rsquo;ll create a simple table to store our friends&rsquo; names:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">friends</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></div><p>Then we&rsquo;ll insert some rows:</p>
-<pre tabindex="0"><code>INSERT INTO friends (name) VALUES (&#39;Cory&#39;);
-INSERT INTO friends (name) VALUES (&#39;Kelly&#39;);
-</code></pre><p>Then type <code>.quit</code> or hit <code>CTRL-D</code> to exit the <code>sqlite3</code> session.</p>
-<h2 id="simulating-a-disaster">Simulating a disaster<a href="#simulating-a-disaster" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo systemctl stop litestream
-</span></span></code></pre></div><p>And then we&rsquo;ll delete our database:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">rm -rf friends.db friends.db-shm friends.db-wal friends.db-litestream
-</span></span></code></pre></div><p>This is the state our server would be in if it had crashed and we had rebuilt it
-but lost our data.</p>
-<h2 id="restoring-our-database">Restoring our database<a href="#restoring-our-database" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Our Litestream service and configuration file are still in place so we can
-easily restore our database. Simply run the <code>restore</code> command with our database
-path:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore friends.db
-</span></span></code></pre></div><p>Litesteam will find the database in the configuration file and restore the most
-recent copy it has from its S3 replica.</p>
-<p>You can verify that your data is all there by connecting with SQLite:</p>
-<pre tabindex="0"><code>sqlite3 friends.db
-</code></pre><p>And querying for your data:</p>
-<pre tabindex="0"><code>SELECT * FROM friends;
-Cory
-Kelly
-</code></pre><h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
-<p>You now have a production-ready replication setup using SQLite and Litestream.
-Please see the <a href="/reference">Reference</a> section for more configuration options.</p>
-<h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+-timeout SECONDS
+    Maximum time to wait in seconds.
+    Defaults to 30.
+
+-dry-run
+    Preview what would be unregistered without changing the daemon.
+
+-json
+    Output raw JSON instead of human-readable text.
+</code></pre><h2 id="behavior">Behavior<a href="#behavior" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The <code>unregister</code> command is <strong>idempotent</strong>. If the database is not currently
+registered with the daemon, the command returns <code>already_unregistered</code> status
+and exits successfully (exit code 0). This allows scripts to safely call
+<code>unregister</code> without checking whether the database is currently being replicated.</p>
+<p>When unregistering a database, Litestream performs a final sync to ensure all
+pending changes are replicated before removing the database from management.</p>
+<h2 id="output">Output<a href="#output" class="anchor" aria-hidden="true">#</a> </h2>
+<p>By default, the command displays a human-readable confirmation:</p>
+<pre tabindex="0"><code>status: unregistered
+db_path: /path/to/my.db
+final_txid: 42
+socket: /var/run/litestream.sock
+</code></pre><p>With <code>-json</code>, the response is a JSON object:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td>Either <code>unregistered</code> or <code>already_unregistered</code></td>
+</tr>
+<tr>
+<td><code>db_path</code></td>
+<td>Absolute path to the database file</td>
+</tr>
+<tr>
+<td><code>final_txid</code></td>
+<td>Last transaction ID synced before unregistering</td>
+</tr>
+<tr>
+<td><code>socket</code></td>
+<td>Control socket path used</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="unregister-a-database">Unregister a database<a href="#unregister-a-database" class="anchor" aria-hidden="true">#</a> </h3>
+<pre tabindex="0"><code>$ litestream unregister /path/to/my.db
+status: unregistered
+db_path: /path/to/my.db
+final_txid: 42
+socket: /var/run/litestream.sock
+</code></pre><h3 id="dry-run">Dry run<a href="#dry-run" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Preview what would be unregistered without making changes:</p>
+<pre tabindex="0"><code>$ litestream unregister -dry-run /path/to/my.db
+Dry run: unregister request preview
+  database: /path/to/my.db
+  socket: /var/run/litestream.sock
+  replicas: daemon-managed replica for this database
+  final sync: daemon close will sync the database and replica before the command completes
+  timeout: 30s
+No unregister request was sent.
+</code></pre><h3 id="idempotent-unregistration">Idempotent unregistration<a href="#idempotent-unregistration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Calling <code>unregister</code> on an already-unregistered database succeeds:</p>
+<pre tabindex="0"><code>$ litestream unregister /path/to/my.db
+status: already_unregistered
+db_path: /path/to/my.db
+final_txid: 0
+socket: /var/run/litestream.sock
+</code></pre><h3 id="json-output">JSON output<a href="#json-output" class="anchor" aria-hidden="true">#</a> </h3>
+<pre tabindex="0"><code>$ litestream unregister -json /path/to/my.db
+{
+  &#34;status&#34;: &#34;unregistered&#34;,
+  &#34;db_path&#34;: &#34;/path/to/my.db&#34;,
+  &#34;final_txid&#34;: 42,
+  &#34;socket&#34;: &#34;/var/run/litestream.sock&#34;
+}
+</code></pre><h3 id="custom-timeout">Custom timeout<a href="#custom-timeout" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Wait up to 60 seconds for the final sync to complete:</p>
+<pre tabindex="0"><code>$ litestream unregister -timeout 60 /path/to/my.db
+</code></pre><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li><a href="/how-it-works">How It Works</a> - Understanding WAL, checkpoints, and replication</li>
-<li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
-<li><a href="/tips">Tips &amp; Caveats</a> - Important production considerations</li>
+<li><a href="/reference/ipc">IPC Endpoints</a> — Unix socket endpoints including <code>POST /unregister</code></li>
+<li><a href="/reference/register">Command: register</a> — Add a database to the daemon</li>
+<li><a href="/reference/replicate">Command: replicate</a> — Start the replication daemon</li>
 </ul>
 
 			<div class="docs-navigation d-flex justify-content-between">
 	
-	<a href="https://litestream.io/guides/kubernetes/">
+	<a href="https://litestream.io/reference/register/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; Running in a Kubernetes cluster
+					&larr; Command: register
 				</div>
 			</div>
 		</a>
-	<a class="ml-auto" href="https://litestream.io/guides/windows/">
+	<a class="ml-auto" href="https://litestream.io/reference/start/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					Running as a Windows Service &rarr;
+					Command: start &rarr;
 				</div>
 			</div>
 		</a>

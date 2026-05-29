@@ -72,6 +72,20 @@
       <description>v0.5.9 The sync command forces an immediate WAL-to-LTX sync for a database managed by the Litestream daemon. By default it triggers the sync and returns immediately (fire-and-forget). With the -wait flag it blocks until the sync completes, including remote replication.&#xA;The sync command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the control socket.</description>
     </item>
     <item>
+      <title>Command: info</title>
+      <link>https://litestream.io/reference/info/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/info/</guid>
+      <description>v0.5.12 The info command displays information about a running Litestream daemon, including version, process ID, uptime, and the number of databases being managed.&#xA;The info command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream info [arguments] Arguments -socket PATH Path to the control socket. Defaults to /var/run/litestream.sock -timeout SECONDS Maximum time to wait in seconds. Defaults to 10.</description>
+    </item>
+    <item>
+      <title>Command: list</title>
+      <link>https://litestream.io/reference/list/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/list/</guid>
+      <description>v0.5.12 The list command displays all databases currently managed by a running Litestream daemon, along with their replication status and last sync time.&#xA;The list command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream list [arguments] Arguments -socket PATH Path to the control socket. Defaults to /var/run/litestream.sock -timeout SECONDS Maximum time to wait in seconds. Defaults to 10.</description>
+    </item>
+    <item>
       <title>IPC Endpoints</title>
       <link>https://litestream.io/reference/ipc/</link>
       <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
@@ -84,6 +98,34 @@
       <pubDate>Sun, 01 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/reset/</guid>
       <description>v0.5.7 The reset command clears local Litestream state for a database, forcing a fresh snapshot on the next replication sync. This is useful for recovering from corrupted or missing LTX files without modifying the database itself.&#xA;The reset command only removes Litestream&amp;rsquo;s internal tracking files from the metadata directory (.db-litestream). It does not modify, delete, or otherwise alter your SQLite database file.&#xA;Usage litestream reset [arguments] DB_PATH Arguments -config PATH Specifies the configuration file.</description>
+    </item>
+    <item>
+      <title>Command: register</title>
+      <link>https://litestream.io/reference/register/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/register/</guid>
+      <description>v0.5.12 The register command dynamically adds a database to a running Litestream daemon without requiring a restart. This enables runtime database management for applications that create databases on-the-fly.&#xA;The register command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream register [arguments] DB_PATH Arguments -replica URL Replica destination URL (e.g., s3://bucket/prefix, file:///backup/path). Required. -socket PATH Path to the control socket.</description>
+    </item>
+    <item>
+      <title>Command: unregister</title>
+      <link>https://litestream.io/reference/unregister/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/unregister/</guid>
+      <description>v0.5.12 The unregister command dynamically removes a database from a running Litestream daemon without requiring a restart. Before completing, it performs a final sync to ensure all data is replicated.&#xA;The unregister command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream unregister [arguments] DB_PATH Arguments -socket PATH Path to the control socket. Defaults to /var/run/litestream.sock -timeout SECONDS Maximum time to wait in seconds.</description>
+    </item>
+    <item>
+      <title>Command: start</title>
+      <link>https://litestream.io/reference/start/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/start/</guid>
+      <description>v0.5.12 The start command resumes replication for a database that was previously stopped via the stop command. The database must already be registered with the daemon.&#xA;The start command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;💡 The `start` command is different from `litestream replicate`. Use `replicate` to launch the daemon process. Use `start` to resume replication for a specific database on an already-running daemon.</description>
+    </item>
+    <item>
+      <title>Command: stop</title>
+      <link>https://litestream.io/reference/stop/</link>
+      <pubDate>Thu, 28 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://litestream.io/reference/stop/</guid>
+      <description>v0.5.12 The stop command pauses replication for a database without removing it from the daemon. The database remains registered and can be resumed with the start command. Before stopping, it performs a final sync to ensure all data is replicated.&#xA;The stop command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.&#xA;Usage litestream stop [arguments] DB_PATH Arguments -socket PATH Path to the control socket.</description>
     </item>
     <item>
       <title>Command: version</title>
