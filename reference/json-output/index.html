@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+<noscript><style>img.lazyload { display: none; }</style></noscript>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <title>JSON Output Reference - Litestream</title>
+<meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
+<link rel="canonical" href="https://litestream.io/reference/json-output/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
+<meta name="twitter:title" content="JSON Output Reference">
+<meta name="twitter:description" content="Litestream commands that accept -json write a JSON document to stdout. This reference documents the stable output schemas and shared conventions for CLI consumers.
+Shared Conventions Stable Contract The fields documented on this page are the stable output contract for CLI consumers. New fields may be added in future releases, so consumers must ignore unknown fields. Existing fields will not be removed or change type within a major version.
+Empty Arrays v0.">
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<meta name="twitter:site" content="@litestreamio">
+<meta name="twitter:creator" content="@benbjohnson">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position":  1 ,
+        "name": "Home",
+        "item": "https:\/\/litestream.io\/"
+    },{
+        "@type": "ListItem",
+        "position":  2 ,
+        "name": "Reference",
+        "item": "https:\/\/litestream.io\/reference\/"
+    },{
+        "@type": "ListItem",
+        "position":  3 ,
+        "name": "JSON Output",
+        "item": "https:\/\/litestream.io\/reference\/json-output\/"
+    }]
+}
+</script>
+
+  <meta name="theme-color" content="#fff">
+<link rel="apple-touch-icon" sizes="180x180" href="https://litestream.io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://litestream.io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://litestream.io/favicon-16x16.png">
+<link rel="manifest" href="https://litestream.io/site.webmanifest">
+  
+</head>
+  <body class="reference single">
+    <header class="navbar fixed-top navbar-expand-md navbar-light">
+  <div class="container align-items-baseline">
+    <input class="menu-btn order-0" type="checkbox" id="menu-btn">
+
+    <label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+
+    <a class="navbar-brand order-1 order-md-0 mr-auto" href="https://litestream.io/">
+      <img class="d-md-inline d-none" src="/images/logo.svg" />
+      <span class="d-sm-inline d-md-none">Litestream</span>
+    </a>
+
+    <ul class="navbar-nav social-nav order-3 order-md-5">
+      <li class="nav-item">
+          <a class="nav-link" href="https://twitter.com/litestreamio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ml-2 sr-only">Twitter</span></a>
+        </li>
+      <li class="nav-item">
+          <a class="nav-link" href="https://github.com/benbjohnson/litestream"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ml-2 sr-only">GitHub</span></a>
+        </li>
+      </ul>
+
+    <div class="collapse navbar-collapse order-4 order-md-1">
+      <ul class="navbar-nav main-nav mr-auto order-5 order-md-2"><li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/install">Install</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/guides">Guides</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://litestream.io/reference">Reference</a>
+          </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/benbjohnson/litestream">GitHub</a>
+          </li>
+        </ul>
+      <div class="break order-6 d-md-none"></div>
+    </div>
+  </div>
+</header>
+    <div class="version-banner alert alert-warning text-center mb-0" role="alert" style="border-radius: 0;">
+  <div class="container">
+    <strong>v0.5.x</strong> - Latest - Actively maintained with new features and bug fixes| <a href="/v0.3/" class="alert-link">View v0.3.13 (Previous)</a></div>
+</div>
+    <div class="wrap container" role="document">
+      <div class="content">
+        
+	<div class="row flex-xl-nowrap">
+		<div class="col-lg-5 col-xl-4 docs-sidebar">
+			<nav class="docs-links" aria-label="Main navigation">
+				<h3>
+    <a href="https://litestream.io/install">Install</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/install/mac/">macOS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/linux/">Linux</a></li>
+    <li><a class="docs-link" href="https://litestream.io/install/source/">Build from Source</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/">General</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/getting-started/">Getting Started</a></li>
+    <li><a class="docs-link" href="https://litestream.io/tips/">Tips &amp; Caveats</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/">How it works</a></li>
+    <li><a class="docs-link" href="https://litestream.io/how-it-works/vfs/">Read Replicas with VFS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/alternatives/">Alternatives</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Infrastructure Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/docker/">Running in a Docker container</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/kubernetes/">Running in a Kubernetes cluster</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/systemd/">Running as a Systemd service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/windows/">Running as a Windows Service</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory-watcher/">Directory Watcher</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/guides/">Replica Guides</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/guides/global-defaults/">Global Replica Defaults</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3/">Replicating to Amazon S3</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/aws-sdk-v2/">AWS SDK v2 Migration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/alibaba-oss/">Replicating to Alibaba Cloud OSS</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs/">VFS Read Replicas</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/go-library/">Using Litestream as a Go Library</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-write-mode/">VFS Write Mode</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/vfs-hydration/">VFS Hydration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/azure/">Replicating to Azure Blob Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/s3-compatible/">Replicating to S3-Compatible Services</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/backblaze/">Replicating to Backblaze B2</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/digitalocean/">Replicating to DigitalOcean Spaces</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/scaleway/">Replicating to Scaleway Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/tigris/">Replicating to Tigris (Fly.io)</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/supabase/">Replicating to Supabase Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/gcs/">Replicating to Google Cloud Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/linode/">Replicating to Linode Object Storage</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/sftp/">Replicating to an SFTP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/file/">Replicating to a Local File Path</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/nats/">Replicating to NATS JetStream</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/directory/">Replicating Directories</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/webdav/">Replicating to a WebDAV Server</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/docs/">Help</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/docs/migration/">Migration Guide</a></li>
+    <li><a class="docs-link" href="https://litestream.io/guides/wal-truncate-threshold/">WAL Truncate Threshold Configuration</a></li>
+    <li><a class="docs-link" href="https://litestream.io/docs/troubleshooting/">Troubleshooting</a></li>
+    </ul>
+  <h3>
+    <a href="https://litestream.io/reference/">Reference</a>
+  </h3>
+  <ul class="list-unstyled">
+    <li><a class="docs-link" href="https://litestream.io/reference/config/">Configuration File</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/status/">Command: status</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/sync/">Command: sync</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/info/">Command: info</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/list/">Command: list</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/reset/">Command: reset</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/ipc/">IPC Endpoints</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/register/">Command: register</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/unregister/">Command: unregister</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/start/">Command: start</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/stop/">Command: stop</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/version/">Command: version</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/json-output/">JSON Output Reference</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/wal/">Command: wal</a></li>
+    </ul>
+  
+			</nav>        
+		</div>
+		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+			<div class="page-links">
+    <h3>On this page</h3>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#shared-conventions">Shared Conventions</a>
+      <ul>
+        <li><a href="#stable-contract">Stable Contract</a></li>
+        <li><a href="#empty-arrays">Empty Arrays</a></li>
+        <li><a href="#idempotent-status-values">Idempotent Status Values</a></li>
+        <li><a href="#errors-and-exit-codes">Errors and Exit Codes</a></li>
+      </ul>
+    </li>
+    <li><a href="#command-schemas">Command Schemas</a>
+      <ul>
+        <li><a href="#databases--json">databases -json</a></li>
+        <li><a href="#info--json">info -json</a></li>
+        <li><a href="#list--json">list -json</a></li>
+        <li><a href="#ltx--json">ltx -json</a></li>
+        <li><a href="#restore--json">restore -json</a></li>
+        <li><a href="#restore--dry-run--json">restore -dry-run -json</a></li>
+        <li><a href="#status--json">status -json</a></li>
+      </ul>
+    </li>
+    <li><a href="#see-also">See Also</a></li>
+  </ul>
+</nav>
+  </div>
+
+		</nav>
+		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
+		<h1>JSON Output Reference</h1>
+			<p class="lead"></p>
+			<p>Litestream commands that accept <code>-json</code> write a JSON document to stdout. This
+reference documents the stable output schemas and shared conventions for CLI
+consumers.</p>
+<h2 id="shared-conventions">Shared Conventions<a href="#shared-conventions" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="stable-contract">Stable Contract<a href="#stable-contract" class="anchor" aria-hidden="true">#</a> </h3>
+<p>The fields documented on this page are the stable output contract for CLI
+consumers. New fields may be added in future releases, so <strong>consumers must
+ignore unknown fields</strong>. Existing fields will not be removed or change type
+within a major version.</p>
+<h3 id="empty-arrays">Empty Arrays<a href="#empty-arrays" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Commands that return an array (<code>databases</code>,
+<code>status</code>, <code>ltx</code>) emit <code>[]</code> for an empty result, not <code>null</code>. This simplifies
+scripted parsing since consumers can rely on array iteration without null checks.</p>
+<h3 id="idempotent-status-values">Idempotent Status Values<a href="#idempotent-status-values" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Runtime commands use <code>status</code> values that name the completed state. When a
+command is already in its requested state, the status uses <code>already_&lt;state&gt;</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Normal Status</th>
+<th>Already-in-State Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register</code></td>
+<td><code>registered</code></td>
+<td><code>already_registered</code></td>
+</tr>
+<tr>
+<td><code>unregister</code></td>
+<td><code>unregistered</code></td>
+<td><code>already_unregistered</code></td>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td><code>started</code></td>
+<td><code>already_running</code></td>
+</tr>
+<tr>
+<td><code>stop</code></td>
+<td><code>stopped</code></td>
+<td><code>already_stopped</code></td>
+</tr>
+</tbody>
+</table>
+<p>These idempotent commands exit 0 in both cases, making them safe for repeated
+execution in automation scripts.</p>
+<h3 id="errors-and-exit-codes">Errors and Exit Codes<a href="#errors-and-exit-codes" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Top-level CLI user errors are written to
+<strong>stderr</strong> as plain text with optional hints, not slog-framed stdout records:</p>
+<pre tabindex="0"><code>Error: database path required
+Try: litestream register -replica s3://bucket/prefix /path/to/db
+</code></pre><p>This keeps stdout clean for JSON parsing. The <code>Try:</code> hint appears for commands
+that require arguments and suggests correct usage.</p>
+<p>Explicit <code>-help</code> requests exit 0 with usage written to stdout. Commands that
+fail due to missing arguments or validation errors exit non-zero.</p>
+<h2 id="command-schemas">Command Schemas<a href="#command-schemas" class="anchor" aria-hidden="true">#</a> </h2>
+<h3 id="databases--json">databases -json<a href="#databases--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Outputs an array of databases loaded from the
+configuration file.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;/var/lib/app.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;replica&#34;</span><span class="p">:</span> <span class="s2">&#34;s3&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>string</td>
+<td>SQLite database path</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>string</td>
+<td>Replica client type configured for the database</td>
+</tr>
+</tbody>
+</table>
+<p>When no databases are configured, the command emits an empty array (<code>[]</code>).</p>
+<p>See also: <a href="/reference/databases">Command: databases</a></p>
+<h3 id="info--json">info -json<a href="#info--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Outputs daemon process information from the
+control socket.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;v0.5.12&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;pid&#34;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;uptime_seconds&#34;</span><span class="p">:</span> <span class="mi">5400</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;started_at&#34;</span><span class="p">:</span> <span class="s2">&#34;2026-05-28T10:00:00Z&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;database_count&#34;</span><span class="p">:</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>version</code></td>
+<td>string</td>
+<td>Litestream version reported by the daemon</td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td>number</td>
+<td>Daemon process ID</td>
+</tr>
+<tr>
+<td><code>uptime_seconds</code></td>
+<td>number</td>
+<td>Daemon uptime in seconds</td>
+</tr>
+<tr>
+<td><code>started_at</code></td>
+<td>string</td>
+<td>Daemon start time in RFC 3339 format</td>
+</tr>
+<tr>
+<td><code>database_count</code></td>
+<td>number</td>
+<td>Number of databases currently managed by the daemon</td>
+</tr>
+</tbody>
+</table>
+<p>See also: <a href="/reference/info">Command: info</a></p>
+<h3 id="list--json">list -json<a href="#list--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Outputs databases managed by the running daemon.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;databases&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;/var/lib/app.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="s2">&#34;replicating&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;last_sync_at&#34;</span><span class="p">:</span> <span class="s2">&#34;2026-05-28T10:30:00Z&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>databases</code></td>
+<td>array</td>
+<td>Managed database summaries</td>
+</tr>
+<tr>
+<td><code>databases[].path</code></td>
+<td>string</td>
+<td>SQLite database path</td>
+</tr>
+<tr>
+<td><code>databases[].status</code></td>
+<td>string</td>
+<td>Current daemon state: <code>replicating</code>, <code>open</code>, or <code>stopped</code></td>
+</tr>
+<tr>
+<td><code>databases[].last_sync_at</code></td>
+<td>string</td>
+<td>Last successful replica sync time in RFC 3339 format; omitted if never synced</td>
+</tr>
+</tbody>
+</table>
+<p>When no databases are managed, <code>databases</code> is an empty array.</p>
+<p>See also: <a href="/reference/list">Command: list</a></p>
+<h3 id="ltx--json">ltx -json<a href="#ltx--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Outputs LTX file metadata for the selected database or replica URL.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;level&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;min_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000001&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;max_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000004&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;size&#34;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;timestamp&#34;</span><span class="p">:</span> <span class="s2">&#34;2026-04-24T12:00:00Z&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>level</code></td>
+<td>number</td>
+<td>LTX compaction level (0-9)</td>
+</tr>
+<tr>
+<td><code>min_txid</code></td>
+<td>string</td>
+<td>Minimum transaction ID in the LTX file</td>
+</tr>
+<tr>
+<td><code>max_txid</code></td>
+<td>string</td>
+<td>Maximum transaction ID in the LTX file</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td>LTX file size in bytes</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>string</td>
+<td>LTX file creation time in RFC 3339 format</td>
+</tr>
+</tbody>
+</table>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ When no LTX files are found, the command emits
+an empty array (<code>[]</code>).</p>
+<p>See also: <a href="/reference/ltx">Command: ltx</a></p>
+<h3 id="restore--json">restore -json<a href="#restore--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Outputs a final summary object after a restore
+completes. Restore logs are written to stderr so stdout remains parseable JSON.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;db_path&#34;</span><span class="p">:</span> <span class="s2">&#34;/tmp/my.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;replica&#34;</span><span class="p">:</span> <span class="s2">&#34;s3&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000004&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;duration_ms&#34;</span><span class="p">:</span> <span class="mi">125</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;integrity_check&#34;</span><span class="p">:</span> <span class="s2">&#34;none&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>db_path</code></td>
+<td>string</td>
+<td>Restored database path</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>string</td>
+<td>Replica client type used for the restore</td>
+</tr>
+<tr>
+<td><code>txid</code></td>
+<td>string</td>
+<td>Restored transaction ID, when available</td>
+</tr>
+<tr>
+<td><code>duration_ms</code></td>
+<td>number</td>
+<td>Restore duration in milliseconds</td>
+</tr>
+<tr>
+<td><code>integrity_check</code></td>
+<td>string</td>
+<td>Integrity check mode: <code>none</code>, <code>quick</code>, or <code>full</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="restore--dry-run--json">restore -dry-run -json<a href="#restore--dry-run--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ When <code>-dry-run</code> is combined with <code>-json</code>,
+<code>restore</code> outputs the restore plan instead of the final restore summary.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;s3://mybkt/my.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;target_path&#34;</span><span class="p">:</span> <span class="s2">&#34;/tmp/my.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;replica&#34;</span><span class="p">:</span> <span class="s2">&#34;s3&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;min_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000001&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;max_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000004&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;files&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;level&#34;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000001-0000000000000004.ltx&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;min_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000001&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;max_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000004&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;size&#34;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nt">&#34;timestamp&#34;</span><span class="p">:</span> <span class="s2">&#34;2026-04-24T12:00:00Z&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source</code></td>
+<td>string</td>
+<td>Database path or replica URL passed to <code>restore</code></td>
+</tr>
+<tr>
+<td><code>target_path</code></td>
+<td>string</td>
+<td>Database path that would be written by a restore</td>
+</tr>
+<tr>
+<td><code>replica</code></td>
+<td>string</td>
+<td>Replica client type used to build the plan</td>
+</tr>
+<tr>
+<td><code>min_txid</code></td>
+<td>string</td>
+<td>Minimum transaction ID included in the plan</td>
+</tr>
+<tr>
+<td><code>max_txid</code></td>
+<td>string</td>
+<td>Maximum transaction ID included in the plan</td>
+</tr>
+<tr>
+<td><code>files</code></td>
+<td>array</td>
+<td>LTX files that would be fetched</td>
+</tr>
+<tr>
+<td><code>files[].level</code></td>
+<td>number</td>
+<td>LTX compaction level</td>
+</tr>
+<tr>
+<td><code>files[].name</code></td>
+<td>string</td>
+<td>LTX file name</td>
+</tr>
+<tr>
+<td><code>files[].min_txid</code></td>
+<td>string</td>
+<td>Minimum transaction ID in the file</td>
+</tr>
+<tr>
+<td><code>files[].max_txid</code></td>
+<td>string</td>
+<td>Maximum transaction ID in the file</td>
+</tr>
+<tr>
+<td><code>files[].size</code></td>
+<td>number</td>
+<td>File size in bytes</td>
+</tr>
+<tr>
+<td><code>files[].timestamp</code></td>
+<td>string</td>
+<td>File creation time in RFC 3339 format</td>
+</tr>
+</tbody>
+</table>
+<p>See also: <a href="/reference/restore">Command: restore</a></p>
+<h3 id="status--json">status -json<a href="#status--json" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Outputs replication status for configured
+databases.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;database&#34;</span><span class="p">:</span> <span class="s2">&#34;/var/lib/app.db&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="s2">&#34;ok&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;local_txid&#34;</span><span class="p">:</span> <span class="s2">&#34;0000000000000004&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;wal_size&#34;</span><span class="p">:</span> <span class="s2">&#34;32 kB&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span></code></pre></div><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database</code></td>
+<td>string</td>
+<td>SQLite database path</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td>Current local replication status: <code>ok</code>, <code>not initialized</code>, <code>no database</code>, or <code>error</code></td>
+</tr>
+<tr>
+<td><code>local_txid</code></td>
+<td>string</td>
+<td>Latest local transaction ID, or <code>-</code> if unavailable</td>
+</tr>
+<tr>
+<td><code>wal_size</code></td>
+<td>string</td>
+<td>Current WAL file size as human-readable text, or <code>-</code> if unavailable</td>
+</tr>
+</tbody>
+</table>
+<p>When no databases are configured, the command emits an empty array (<code>[]</code>).</p>
+<p>See also: <a href="/reference/status">Command: status</a></p>
+<h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="/reference/databases">Command: databases</a> — List databases from config file</li>
+<li><a href="/reference/info">Command: info</a> — Show daemon information</li>
+<li><a href="/reference/list">Command: list</a> — List databases managed by the daemon</li>
+<li><a href="/reference/ltx">Command: ltx</a> — List LTX files for a database</li>
+<li><a href="/reference/restore">Command: restore</a> — Recover database from a replica</li>
+<li><a href="/reference/status">Command: status</a> — Report local replication status</li>
+</ul>
+
+			<div class="docs-navigation d-flex justify-content-between">
+	
+	<a href="https://litestream.io/reference/stop/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					&larr; Command: stop
+				</div>
+			</div>
+		</a>
+	<a class="ml-auto" href="https://litestream.io/reference/version/">
+			<div class="card my-1">
+				<div class="card-body py-2">
+					Command: version &rarr;
+				</div>
+			</div>
+		</a>
+	</div>
+
+		</main>
+	</div>
+
+      </div>
+    </div>
+    
+    
+    <footer>
+</footer>
+    
+    <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.d8f5e476bb38aa6e5d46c69b2d80d720c53aa36a5ac58c007ecdba8f37901667ae80f363425b578c037743ae3f5eae089ae324630132afe826096e36bc9acce1.js" integrity="sha512-2PXkdrs4qm5dRsabLYDXIMU6o2paxYwAfs26jzeQFmeugPNjQltXjAN3Q64/Xq4ImuMkYwEyr&#43;gmCW42vJrM4Q==" crossorigin="anonymous" defer></script>
+
+  </body>
+</html>
