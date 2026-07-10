@@ -380,7 +380,7 @@ Each database supports the following configuration options:
   Litestream automatically strips `sqlite://` and `sqlite3://` prefixes, allowing
   you to use the same `DATABASE_URL` with Litestream and other SQLite tools. See
   [SQLite Connection String Prefixes](#sqlite-connection-string-prefixes) below.
-- `meta-path`—Path to store Litestream metadata (defaults to `<path>-litestream`)
+- `meta-path`—Path to store Litestream metadata (defaults to a hidden `.<filename>-litestream` directory next to the database file, e.g. `/var/lib/db` → `/var/lib/.db-litestream`)
 - `monitor-interval`—How often to check for changes (default: `1s`)
 - `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
