@@ -8,9 +8,9 @@ menu:
 weight: 405
 ---
 
-This guide covers advanced S3 configuration options for tuning multipart upload
-performance. These settings control how Litestream uploads data to S3 and
-S3-compatible storage services.
+This guide covers advanced S3 configuration options, including multipart upload
+tuning and storage classes. These settings control how Litestream uploads data
+to S3 and S3-compatible storage services.
 
 {{< since version="0.5.0" >}} Part size and concurrency configuration options
 were added in Litestream v0.5.0.
@@ -232,6 +232,63 @@ Part size affects the number of API requests made to your storage provider:
 
 For high-volume databases with frequent syncs, consider larger part sizes to
 reduce the total number of API calls.
+
+## Storage Classes
+
+{{< since version="0.5.14" >}} The `storage-class` field sets the S3 storage
+class for objects that Litestream uploads. When it is not set, objects use
+the provider's default storage class (`STANDARD` on AWS S3).
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: db
+      storage-class: STANDARD_IA
+```
+
+The storage class can also be set as a URL query parameter:
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      url: s3://mybucket/db?storage-class=STANDARD_IA
+```
+
+The value is passed to S3 as-is, so any storage class supported by your
+provider works. Common AWS S3 choices:
+
+| Storage Class | Best For |
+|---------------|----------|
+| `STANDARD` | Default; frequent access, no retrieval fees |
+| `STANDARD_IA` | Long-retention replicas that are rarely restored |
+| `ONEZONE_IA` | Same as `STANDARD_IA` but single-AZ, lower cost |
+| `GLACIER_IR` | Archival storage with instant retrieval |
+| `INTELLIGENT_TIERING` | Automatic tiering based on access patterns |
+
+### Retention Caveats
+
+Infrequent-access and archival classes charge for a minimum storage duration
+(30 days for `STANDARD_IA` and `ONEZONE_IA`, 90 days for `GLACIER_IR`) and
+per-GB retrieval fees. Litestream continuously uploads new LTX files and
+deletes old ones during retention enforcement, so:
+
+- Objects deleted before the minimum storage duration still incur the full
+  minimum-duration charge. Use these classes only when your
+  [retention period](/reference/config#retention) is longer than the class's
+  minimum storage duration.
+- Restores read every LTX file needed to rebuild the database, so retrieval
+  fees apply to the full restore size.
+
+Avoid asynchronous archive classes such as `GLACIER` (Flexible Retrieval) and
+`DEEP_ARCHIVE`. Objects in these classes must be restored to S3 before they
+can be read, so `litestream restore` fails against them.
+
+S3-compatible providers support different storage class values — check your
+provider's documentation before setting this option.
 
 ## Troubleshooting
 
