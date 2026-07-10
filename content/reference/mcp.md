@@ -1,5 +1,5 @@
 ---
-title : "Command: mcp"
+title : "MCP Server"
 date: 2025-12-04T00:00:00Z
 layout: docs
 menu:
@@ -8,9 +8,13 @@ menu:
 weight: 525
 ---
 
-The `mcp` server provides [Model Context Protocol](https://modelcontextprotocol.io)
-integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact
+Litestream includes a built-in [Model Context Protocol](https://modelcontextprotocol.io)
+(MCP) server, allowing AI assistants like Claude, Copilot, Cursor, and others to interact
 with Litestream databases and replicas through a standardized HTTP API.
+
+There is no `litestream mcp` subcommand. The MCP server runs as part of the
+[`replicate`](/reference/replicate) command and is enabled by setting `mcp-addr`
+in the configuration file.
 
 ## Overview
 
@@ -38,7 +42,8 @@ mcp-addr: ":3001"
 ```
 
 The server starts automatically alongside the `replicate` command when this setting
-is configured.
+is configured. There is no equivalent command-line flag—the setting is only
+available in the configuration file.
 
 ### Security Considerations
 
@@ -72,7 +77,7 @@ The MCP server exposes these tools for AI assistants:
 ### litestream_info
 
 Returns a comprehensive summary of Litestream's current status including version,
-configured databases, generations, and snapshots.
+configured databases, and available LTX files.
 
 **Parameters:**
 
@@ -86,24 +91,20 @@ configured databases, generations, and snapshots.
 === Litestream Status Report ===
 
 Version Information:
-v0.5.0
+0.5.14
 
 Current Config Path:
 /etc/litestream.yml
 
 Databases:
-path                 replica
-/var/lib/myapp.db    s3
+path               replica
+/var/lib/myapp.db  s3
 
-Generations:
+LTX Files:
 Database: /var/lib/myapp.db
-name        generation          updated
-s3          abc123def456...     2025-01-15T10:30:00Z
-
-Snapshots:
-Database: /var/lib/myapp.db
-replica  generation        index  size    created
-s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
+level  min_txid          max_txid          size  created
+0      0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
+0      0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
 ```
 
 ### litestream_databases
@@ -119,9 +120,9 @@ Lists all configured databases and their replica status.
 **Example output:**
 
 ```
-path                 replica
-/var/lib/myapp.db    s3
-/var/lib/other.db    file
+path               replica
+/var/lib/myapp.db  s3
+/var/lib/other.db  file
 ```
 
 ### litestream_status
@@ -133,13 +134,14 @@ path                 replica
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `config` | No | Path to configuration file |
+| `path` | No | Filter output to a specific database path |
 
 **Example output:**
 
 ```
-path                 status    local_txid  wal_size
-/var/lib/myapp.db    ok        42          8192
-/var/lib/other.db    ok        17          4096
+database           status  local txid        wal size
+/var/lib/myapp.db  ok      0000000000000005  21 kB
+/var/lib/other.db  ok      0000000000000003  4.1 kB
 ```
 
 ### litestream_ltx
@@ -157,10 +159,10 @@ Use this to inspect available restore points.
 **Example output:**
 
 ```
-min_txid          max_txid          size  created
-0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
-0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
-0000000000000003  0000000000000003  663   2025-01-15T10:30:00Z
+level  min_txid          max_txid          size  created
+0      0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
+0      0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
+0      0000000000000003  0000000000000003  663   2025-01-15T10:30:00Z
 ```
 
 ### litestream_restore
@@ -199,7 +201,7 @@ Prints the Litestream version.
 **Example output:**
 
 ```
-v0.5.8
+0.5.14
 ```
 
 ### litestream_reset
@@ -397,8 +399,8 @@ If your AI client cannot connect to the MCP server:
 
    ```
    $ litestream replicate -config litestream.yml
-   INFO litestream version=v0.5.0
-   INFO Starting MCP server addr=:3001
+   INFO litestream version=0.5.14
+   INFO Starting MCP Streamable HTTP server addr=:3001
    ```
 
 2. Ensure the port matches your configuration.
