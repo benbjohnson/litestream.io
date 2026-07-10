@@ -48,10 +48,10 @@ Download and install the new version:
 
 ```bash
 # Download latest stable release (check https://github.com/benbjohnson/litestream/releases)
-wget https://github.com/benbjohnson/litestream/releases/download/v0.5.6/litestream-0.5.6-linux-x86_64.tar.gz
+wget https://github.com/benbjohnson/litestream/releases/download/v{{< version >}}/litestream-{{< version >}}-linux-x86_64.tar.gz
 
 # Extract and install
-tar -xzf litestream-0.5.6-linux-x86_64.tar.gz
+tar -xzf litestream-{{< version >}}-linux-x86_64.tar.gz
 sudo mv litestream /usr/local/bin/
 sudo chmod +x /usr/local/bin/litestream
 
@@ -181,8 +181,8 @@ If you need Age encryption, remain on v0.3.x until the feature is restored:
 litestream version
 
 # If you've already upgraded to v0.5, downgrade to latest v0.3
-wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz
-tar -xzf litestream-v0.3.13-linux-amd64.tar.gz
+wget https://github.com/benbjohnson/litestream/releases/download/v0.3.14/litestream-v0.3.14-linux-amd64.tar.gz
+tar -xzf litestream-v0.3.14-linux-amd64.tar.gz
 sudo mv litestream /usr/local/bin/
 sudo systemctl restart litestream
 ```
