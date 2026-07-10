@@ -472,7 +472,6 @@ hostname pattern:
 - **AWS S3**: Standard `s3://bucket/path` URLs
 - **Backblaze B2**: URLs containing `.backblazeb2.com`
 - **DigitalOcean Spaces**: URLs containing `.digitaloceanspaces.com`
-- **Linode Object Storage**: URLs containing `.linodeobjects.com`
 - **Scaleway**: URLs containing `.scw.cloud`
 
 For these providers, you can use both command line and configuration file approaches.

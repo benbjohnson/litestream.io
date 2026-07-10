@@ -29,8 +29,8 @@ _"Submit"_ button.
 </figure>
 
 After your bucket is created, you'll see a hostname for the bucket in the format
-of `BUCKETNAME.REGION.linodeobjects.com`. You'll need to use that later when
-configuring Litestream.
+of `BUCKETNAME.REGION.linodeobjects.com`. You'll need the bucket name and the
+region portion (`REGION.linodeobjects.com`) later when configuring Litestream.
 
 
 ### Create an access key
@@ -70,40 +70,36 @@ export LITESTREAM_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxx
 export LITESTREAM_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-Then you can specify your replica hostname as a replica URL on the command line.
-For example, you can replicate a database to your bucket with the following
-command. _Note that your region may be different._
+Then you can specify your bucket and the Linode endpoint as a replica URL on
+the command line. For example, you can replicate a database to your bucket with
+the following command. _Note that your region may be different._
 
 ```sh
-litestream replicate /path/to/db s3://BUCKETNAME.us-east-1.linodeobjects.com/db
+litestream replicate /path/to/db 's3://BUCKETNAME/db?endpoint=us-east-1.linodeobjects.com&region=us-east-1'
 ```
+
+The single quotes are required so your shell does not interpret the `&` in the
+URL.
 
 You can later restore your database from Linode Object Storage to a local `my.db`
 path with the following command.
 
 ```sh
-litestream restore -o my.db s3://BUCKETNAME.us-east-1.linodeobjects.com/db
+litestream restore -o my.db 's3://BUCKETNAME/db?endpoint=us-east-1.linodeobjects.com&region=us-east-1'
 ```
+
+{{< alert icon="⚠️" text="Litestream does not auto-detect Linode Object Storage from bucket hostnames. A URL such as `s3://BUCKETNAME.us-east-1.linodeobjects.com/db` is parsed as a bucket named `BUCKETNAME.us-east-1.linodeobjects.com` on AWS S3, so requests silently go to AWS and fail with an `InvalidAccessKeyId` error. Always specify the endpoint explicitly as shown above." >}}
 
 ### Configuration file usage
 
 Litestream is typically run as a background service which uses a configuration
-file. You can configure a replica for your database using the `url` format.
-_Note that your region may be different._
+file. You can configure a replica for your database by setting the `endpoint`
+field explicitly. _Note that your region may be different._
 
 ```yaml
 access-key-id: xxxxxxxxxxxxxxxxxxxx
 secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
-dbs:
-  - path: /path/to/local/db
-    replica:
-      url: s3://BUCKETNAME.us-east-1.linodeobjects.com/db
-```
-
-Or you can expand your configuration into multiple fields:
-
-```yaml
 dbs:
   - path: /path/to/local/db
     replica:
@@ -114,13 +110,27 @@ dbs:
       region:   us-east-1   # set to your region
 ```
 
+Alternatively, you can use the `url` format with the endpoint as a query
+parameter:
+
+```yaml
+dbs:
+  - path: /path/to/local/db
+    replica:
+      url: s3://BUCKETNAME/db?endpoint=us-east-1.linodeobjects.com&region=us-east-1
+```
+
 You may also specify your key credentials on a per-replica basis:
 
 ```yaml
 dbs:
   - path: /path/to/local/db
     replica:
-      url: s3://BUCKETNAME.us-east-1.linodeobjects.com/db
+      type: s3
+      bucket:   BUCKETNAME
+      path:     db
+      endpoint: us-east-1.linodeobjects.com
+      region:   us-east-1   # set to your region
       access-key-id: xxxxxxxxxxxxxxxxxxx
       secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
