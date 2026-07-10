@@ -36,10 +36,12 @@ Intel/AMD or `arm64` for ARM:
 
 ```
 litestream-{{< version >}}-windows-x86_64.zip
+litestream-{{< version >}}-windows-arm64.zip
 ```
 
 Extract the archive and copy `litestream.exe` to `C:\Litestream`. In
-PowerShell:
+PowerShell (replace `x86_64` with `arm64` if you downloaded the ARM
+archive):
 
 ```powershell
 Expand-Archive litestream-{{< version >}}-windows-x86_64.zip
