@@ -59,7 +59,8 @@ loading the extension if your client requires it.
 
 ## Configure the replica target
 
-Set `LITESTREAM_REPLICA_URL` to specify the replica location. The URL scheme
+Set `LITESTREAM_REPLICA_URL` to specify the replica location. This variable is
+**required**—the extension fails to initialize without it. The URL scheme
 determines the backend:
 
 ```sh
@@ -88,17 +89,9 @@ Standard cloud provider credentials are honored by their respective SDKs
 Additional configuration:
 
 - `LITESTREAM_LOG_LEVEL` — `DEBUG` or `INFO` (default).
-
-### Legacy S3 configuration
-
-The following S3-specific variables are still supported for backwards
-compatibility:
-
-- `LITESTREAM_S3_BUCKET`, `LITESTREAM_S3_PATH` — bucket and path to the replica.
-- `LITESTREAM_S3_REGION` — defaults to the bucket's region (or `us-east-1` with a custom endpoint).
-- `LITESTREAM_S3_ENDPOINT` — for S3-compatible stores (MinIO, R2, etc).
-- `LITESTREAM_S3_FORCE_PATH_STYLE` — `true` for path-style URLs (default: `false`).
-- `LITESTREAM_S3_SKIP_VERIFY` — `true` to skip TLS verification for testing (default: `false`).
+- `LITESTREAM_LOG_FILE` — append log output to a file instead of stdout.
+- `LITESTREAM_S3_ENDPOINT` — custom endpoint for S3-compatible stores (MinIO,
+  R2, etc.); alternative to the `endpoint` query parameter in the replica URL.
 
 
 ## Using the VFS as a loadable extension
@@ -286,7 +279,7 @@ SELECT litestream_set_time('5 minutes ago');  -- Set time travel point
 
 ## Limitations & constraints
 
-- Read-only: write attempts fail with `litestream is a read only vfs`.
+- Read-only: write attempts fail with `attempt to write a readonly database`.
 - CGO-only: requires `-tags vfs` and a CGO-enabled SQLite driver.
 - Network-bound latency: first access to a page incurs storage/network latency before it is cached.
 - High concurrency: designed for modest fan-out; very high reader counts will increase object-store requests.
@@ -360,7 +353,7 @@ a deeper explanation of the two-index isolation mechanism.
 
 - **"page not found" / non-contiguous errors**: ensure VFS retention is configured on the primary (`l0-retention` long enough) and the replica has no gaps.
 - **Slow queries**: reduce poll interval, enlarge cache, or run closer to the object store endpoint.
-- **TLS/endpoint issues with S3-compatible stores**: set `LITESTREAM_S3_ENDPOINT` and, if needed for testing only, `LITESTREAM_S3_SKIP_VERIFY=true`.
+- **TLS/endpoint issues with S3-compatible stores**: set the `endpoint` query parameter in the replica URL or the `LITESTREAM_S3_ENDPOINT` environment variable.
 - **No data visible**: VFS waits for an initial snapshot; confirm replication is running and the replica path is correct.
 
 

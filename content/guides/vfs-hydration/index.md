@@ -293,28 +293,20 @@ func main() {
 
 ## Monitoring hydration progress
 
-If implemented in your Litestream build, these SQL functions can monitor
-hydration status:
+Use these PRAGMAs to monitor hydration:
 
 ```sql
--- Get hydration progress as percentage (0-100)
-SELECT litestream_hydration_progress();
--- Returns: 75
+-- Get hydration progress as a percentage (0-100, one decimal place)
+PRAGMA litestream_hydration_progress;
+-- Returns: 75.0
 
--- Get hydration status
-SELECT litestream_hydration_status();
--- Returns: idle | restoring | catching_up | complete
+-- Get the local path of the hydrated database file
+PRAGMA litestream_hydration_file;
+-- Returns: /var/lib/litestream/hydrated.db
 ```
 
-| Status | Meaning |
-|--------|---------|
-| `idle` | Hydration not enabled or not started |
-| `restoring` | Initial database restoration in progress |
-| `catching_up` | Applying recent LTX files after initial restore |
-| `complete` | Hydration finished, all reads served locally |
-
-Check if your build includes these functions by attempting to call them. If not
-available, monitor the hydration file size as a rough progress indicator.
+`litestream_hydration_progress` returns `0` when hydration is not enabled and
+`100.0` once hydration is complete. Both PRAGMAs are read-only.
 
 
 ## Combining with write mode
