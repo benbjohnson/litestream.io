@@ -118,11 +118,11 @@ litestream_sync_seconds{db="/var/lib/myapp.db"} 0.523
 **Labels:** `db`, `mode`
 
 Number of checkpoint operations performed. The `mode` label indicates the
-checkpoint type: `passive` or `truncate`.
+checkpoint type: `PASSIVE`, `RESTART`, or `TRUNCATE`.
 
 ```
-litestream_checkpoint_count{db="/var/lib/myapp.db",mode="passive"} 60
-litestream_checkpoint_count{db="/var/lib/myapp.db",mode="truncate"} 1
+litestream_checkpoint_count{db="/var/lib/myapp.db",mode="PASSIVE"} 60
+litestream_checkpoint_count{db="/var/lib/myapp.db",mode="TRUNCATE"} 1
 ```
 
 
@@ -134,8 +134,8 @@ litestream_checkpoint_count{db="/var/lib/myapp.db",mode="truncate"} 1
 Number of checkpoint errors that have occurred, grouped by checkpoint mode.
 
 ```
-litestream_checkpoint_error_count{db="/var/lib/myapp.db",mode="passive"} 0
-litestream_checkpoint_error_count{db="/var/lib/myapp.db",mode="truncate"} 0
+litestream_checkpoint_error_count{db="/var/lib/myapp.db",mode="PASSIVE"} 0
+litestream_checkpoint_error_count{db="/var/lib/myapp.db",mode="TRUNCATE"} 0
 ```
 
 
@@ -147,7 +147,45 @@ litestream_checkpoint_error_count{db="/var/lib/myapp.db",mode="truncate"} 0
 Cumulative time spent checkpointing, in seconds, grouped by checkpoint mode.
 
 ```
-litestream_checkpoint_seconds{db="/var/lib/myapp.db",mode="passive"} 1.234
+litestream_checkpoint_seconds{db="/var/lib/myapp.db",mode="PASSIVE"} 1.234
+```
+
+
+### litestream_compaction_verify_error_count
+
+**Type:** Counter
+
+Number of post-compaction verification failures. Litestream verifies data
+integrity after compacting LTX files—any non-zero growth indicates a
+verification failure that should be investigated.
+
+```
+litestream_compaction_verify_error_count{db="/var/lib/myapp.db"} 0
+```
+
+
+### litestream_l0_retention_files_total
+
+**Type:** Gauge
+**Labels:** `db`, `status`
+
+Number of L0 (level zero) LTX files observed during retention enforcement,
+grouped by status. The `status` label is one of:
+
+- `eligible`: files eligible for deletion because they have been compacted
+  into L1 and are older than the retention window
+- `not_compacted`: files retained because they have not yet been compacted
+  into L1
+- `too_recent`: files retained because they are newer than the retention
+  window
+
+Unlike other database metrics, the `db` label contains the database filename
+rather than the absolute path.
+
+```
+litestream_l0_retention_files_total{db="myapp.db",status="eligible"} 3
+litestream_l0_retention_files_total{db="myapp.db",status="not_compacted"} 1
+litestream_l0_retention_files_total{db="myapp.db",status="too_recent"} 2
 ```
 
 
@@ -161,13 +199,13 @@ These metrics track operations performed against replicas (S3, GCS, Azure, etc.)
 **Labels:** `replica_type`, `operation`
 
 The number of replica operations performed. The `replica_type` label indicates
-the storage backend (e.g., `s3`, `gcs`, `abs`, `file`). The `operation` label
-indicates the operation type.
+the storage backend (e.g., `s3`, `gs`, `abs`, `file`). The `operation` label
+indicates the operation type: `PUT`, `GET`, `DELETE`, or `LIST`.
 
 ```
-litestream_replica_operation_total{replica_type="s3",operation="put"} 100
-litestream_replica_operation_total{replica_type="s3",operation="get"} 25
-litestream_replica_operation_total{replica_type="s3",operation="delete"} 10
+litestream_replica_operation_total{replica_type="s3",operation="PUT"} 100
+litestream_replica_operation_total{replica_type="s3",operation="GET"} 25
+litestream_replica_operation_total{replica_type="s3",operation="DELETE"} 10
 ```
 
 
@@ -179,8 +217,36 @@ litestream_replica_operation_total{replica_type="s3",operation="delete"} 10
 The number of bytes transferred by replica operations.
 
 ```
-litestream_replica_operation_bytes{replica_type="s3",operation="put"} 52428800
-litestream_replica_operation_bytes{replica_type="s3",operation="get"} 4194304
+litestream_replica_operation_bytes{replica_type="s3",operation="PUT"} 52428800
+litestream_replica_operation_bytes{replica_type="s3",operation="GET"} 4194304
+```
+
+
+### litestream_replica_operation_duration_seconds
+
+**Type:** Histogram
+**Labels:** `replica_type`, `operation`
+
+Duration of replica operations, in seconds. As a histogram, this metric
+exposes `_bucket`, `_sum`, and `_count` series.
+
+```
+litestream_replica_operation_duration_seconds_bucket{replica_type="s3",operation="DELETE",le="0.5"} 8
+litestream_replica_operation_duration_seconds_sum{replica_type="s3",operation="DELETE"} 1.25
+litestream_replica_operation_duration_seconds_count{replica_type="s3",operation="DELETE"} 10
+```
+
+
+### litestream_replica_operation_errors_total
+
+**Type:** Counter
+**Labels:** `replica_type`, `operation`, `code`
+
+Number of replica operation errors. The `code` label contains the error code
+returned by the storage provider.
+
+```
+litestream_replica_operation_errors_total{replica_type="s3",operation="DELETE",code="AccessDenied"} 1
 ```
 
 
@@ -207,7 +273,7 @@ rate(litestream_sync_error_count[5m])
 Calculate bytes uploaded to S3 per second:
 
 ```promql
-rate(litestream_replica_operation_bytes{operation="put"}[5m])
+rate(litestream_replica_operation_bytes{operation="PUT"}[5m])
 ```
 
 ### Database Growth
