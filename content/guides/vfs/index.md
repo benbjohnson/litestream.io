@@ -353,7 +353,7 @@ a deeper explanation of the two-index isolation mechanism.
 
 - **"page not found" / non-contiguous errors**: ensure VFS retention is configured on the primary (`l0-retention` long enough) and the replica has no gaps.
 - **Slow queries**: reduce poll interval, enlarge cache, or run closer to the object store endpoint.
-- **TLS/endpoint issues with S3-compatible stores**: set the `endpoint` query parameter in the replica URL or the `LITESTREAM_S3_ENDPOINT` environment variable.
+- **TLS/endpoint issues with S3-compatible stores**: set the `endpoint` query parameter in the replica URL or the `LITESTREAM_S3_ENDPOINT` environment variable. For self-signed certificates, add `skip-verify=true` to the replica URL (testing only).
 - **No data visible**: VFS waits for an initial snapshot; confirm replication is running and the replica path is correct.
 
 
