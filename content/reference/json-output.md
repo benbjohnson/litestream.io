@@ -268,6 +268,40 @@ When no databases are configured, the command emits an empty array (`[]`).
 See also: [Command: status](/reference/status)
 
 
+### sync -json
+
+{{< since version="0.5.12" >}} Outputs a summary object after forcing an
+immediate sync through the daemon control socket.
+
+```json
+{
+  "db_path": "/var/lib/app.db",
+  "txid": 42,
+  "duration_ms": 2
+}
+```
+
+With `-wait`, the output additionally includes `replica_txid`:
+
+```json
+{
+  "db_path": "/var/lib/app.db",
+  "txid": 42,
+  "replica_txid": 42,
+  "duration_ms": 150
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `db_path` | string | SQLite database path |
+| `txid` | number | Current local transaction ID |
+| `replica_txid` | number | Transaction ID confirmed replicated to remote storage; only present with `-wait` |
+| `duration_ms` | number | Sync duration in milliseconds |
+
+See also: [Command: sync](/reference/sync)
+
+
 ## See Also
 
 - [Command: databases](/reference/databases) — List databases from config file
@@ -276,3 +310,4 @@ See also: [Command: status](/reference/status)
 - [Command: ltx](/reference/ltx) — List LTX files for a database
 - [Command: restore](/reference/restore) — Recover database from a replica
 - [Command: status](/reference/status) — Report local replication status
+- [Command: sync](/reference/sync) — Force an immediate WAL-to-LTX sync for a database
