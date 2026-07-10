@@ -62,16 +62,10 @@ nats object store list
 
 ### Command line usage
 
-You can replicate to NATS JetStream from the command line by setting your
-NATS server URL via an environment variable:
-
-```sh
-export NATS_URL=nats://localhost:4222
-```
-
-You can then specify your bucket as a replica URL on the command line. For
-example, you can replicate a database to your bucket with the following
-command. Replace the placeholders for your server and bucket name.
+You can replicate to NATS JetStream from the command line by specifying your
+server and bucket as a replica URL. For example, you can replicate a database
+to your bucket with the following command. Replace the placeholders for your
+server and bucket name.
 
 ```sh
 litestream replicate /path/to/db nats://localhost:4222/BUCKETNAME

@@ -814,15 +814,14 @@ dbs:
          password: ${NATS_PASSWORD}
    ```
 
-3. **Create NATS bucket**:
+3. **Create NATS object store bucket**:
+
+   Litestream requires a JetStream Object Store bucket, and the bucket must
+   exist before Litestream starts:
 
    ```bash
-   # Create JetStream bucket
-   nats stream create my-app-bucket \
-     --subjects="my-app-bucket.>" \
-     --storage=file \
-     --retention=limits \
-     --max-age=168h
+   # Create JetStream Object Store bucket
+   nats object store add my-app-bucket
    ```
 
 ### Migrating Between Cloud Providers
