@@ -248,7 +248,7 @@ check fails, the restore command returns a non-zero exit code.
 |------|-------------|
 | `none` | No integrity check is performed. This is the default. |
 | `quick` | Runs `PRAGMA quick_check`, which validates the database structure but skips verifying index content and `UNIQUE` constraints. |
-| `full` | Runs `PRAGMA integrity_check`, which performs a complete validation of the database. |
+| `full` | Runs `PRAGMA integrity_check`, which performs a thorough structural validation of the database. Foreign-key constraints are not checked. |
 
 ```
 $ litestream restore -integrity-check quick -o /tmp/my.db s3://mybkt/my.db
