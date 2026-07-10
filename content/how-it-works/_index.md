@@ -44,7 +44,7 @@ a long-running read transaction to prevent any other process from checkpointing
 and restarting the WAL file. Instead, it continually reads new WAL pages and
 manually calls out to SQLite to perform checkpoints as necessary.
 
-New WAL pages are packaged into _LTX files_ (Litestream Transaction files).
+New WAL pages are packaged into _LTX files_ (Litestream Transaction Log files).
 Each sync assigns the next monotonically incrementing _transaction ID_ (TXID)
 to the batch of new WAL pages—which may span one or more SQLite write
 transactions—and writes them as an LTX file along with checksums to ensure
