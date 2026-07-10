@@ -234,8 +234,8 @@ func main() {
 
     vfs := litestream.NewVFS(client, nil)
     vfs.WriteEnabled = true
-    vfs.SyncInterval = 1 * time.Second
-    vfs.BufferPath = "/tmp/litestream-buffer.db"
+    vfs.WriteSyncInterval = 1 * time.Second
+    vfs.WriteBufferPath = "/tmp/litestream-buffer.db"
 
     if err := sqlite3vfs.RegisterVFS("litestream", vfs); err != nil {
         log.Fatal(err)
