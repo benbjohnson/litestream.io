@@ -52,10 +52,10 @@ Create an object store bucket for Litestream:
 
 ```bash
 # Create object store bucket
-nats object store add litestream-backups
+nats object add litestream-backups
 
 # Verify bucket creation
-nats object store list
+nats object ls
 ```
 
 ## Usage

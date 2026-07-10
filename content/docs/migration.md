@@ -821,7 +821,7 @@ dbs:
 
    ```bash
    # Create JetStream Object Store bucket
-   nats object store add my-app-bucket
+   nats object add my-app-bucket
    ```
 
 ### Migrating Between Cloud Providers
