@@ -45,10 +45,10 @@ and restarting the WAL file. Instead, it continually reads new WAL pages and
 manually calls out to SQLite to perform checkpoints as necessary.
 
 New WAL pages are packaged into _LTX files_ (Litestream Transaction files).
-Every write transaction is assigned a monotonically incrementing _transaction
-ID_ (TXID), and each LTX file contains the page data for a contiguous range of
-transactions along with checksums to ensure consistency. LTX files are named
-after the TXID range they cover—for example,
+Each sync assigns the next monotonically incrementing _transaction ID_ (TXID)
+to the batch of new WAL pages—which may span one or more SQLite write
+transactions—and writes them as an LTX file along with checksums to ensure
+consistency. LTX files are named after the TXID range they cover—for example,
 `0000000000000001-0000000000000005.ltx` covers TXIDs 1 through 5.
 
 LTX files are staged in a hidden directory next to your database (e.g.
@@ -83,11 +83,12 @@ intervals and snapshot frequency are configurable—see the
 
 ## Restoring a database
 
-To restore a database, Litestream fetches the most recent snapshot and then
-applies each subsequent LTX file in TXID order to bring the database up to the
-requested point in time. Because TXIDs form a contiguous sequence, Litestream
-can verify that no transactions are missing before restoring—any gap in the
-sequence would otherwise result in a corrupted database file.
+To restore a database, Litestream fetches the latest snapshot at or before the
+requested point in time and then applies each subsequent LTX file in TXID order
+to bring the database up to that point. Because TXIDs form a contiguous
+sequence, Litestream can verify that no transactions are missing before
+restoring—any gap in the sequence would otherwise result in a corrupted
+database file.
 
 Earlier v0.3.x releases tracked replication state using randomly-generated
 "generation" IDs and a directory of shadow WAL files. Litestream v0.5 replaces
