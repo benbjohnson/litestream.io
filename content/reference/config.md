@@ -724,6 +724,8 @@ s3://bucket/path?signPayload=true&requireContentMD5=false
 | `sse-customer-key-md5` | `sseCustomerKeyMD5` | — | SSE-C key MD5 digest |
 | `sse-kms-key-id` | `sseKmsKeyId` | — | SSE-KMS key ID |
 
+{{< alert icon="⚠️" text="The SSE, `part-size`, and `concurrency` query parameters are only honored on replica URLs passed directly to commands such as `litestream restore s3://...`. They are **silently ignored** in a configuration file's `url:` field — use the equivalent YAML settings described above instead. Configuration file URLs apply only the `endpoint`, `region`, `forcePathStyle`, `skipVerify`, `sign-payload`, `require-content-md5`, and `storage-class` parameters." >}}
+
 #### S3-Compatible Provider Requirements
 
 Different S3-compatible storage providers have varying requirements for payload
