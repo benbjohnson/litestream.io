@@ -96,7 +96,7 @@ export LITESTREAM_ACCESS_KEY_ID=minioadmin
 export LITESTREAM_SECRET_ACCESS_KEY=minioadmin
 ```
 
-Next, run Litesteam's `replicate` command to start replication:
+Next, run Litestream's `replicate` command to start replication:
 
 ```
 litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
@@ -106,7 +106,7 @@ You should see Litestream print some initialization commands and then wait
 indefinitely. Normally, Litestream is run as a background service so it
 continuously watches your database for new changes so the command does not exit.
 
-If you open the [MinIO Console](http://localhost:9000/minio/mybkt/),
+If you open the [MinIO Console](http://localhost:9001/browser/mybkt/),
 you will see there is a `fruits.db` directory in your bucket.
 
 
