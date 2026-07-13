@@ -49,7 +49,10 @@ AWS_REGION=auto
 BUCKET_NAME=my-bucket
 ```
 
-Save these values for use in your Litestream configuration.
+Save these values for use in your Litestream configuration. Give Litestream the
+endpoint through the `endpoint=` query parameter or the `endpoint:` config field
+shown below — not the `AWS_ENDPOINT_URL_S3` variable, which bypasses Tigris
+auto-detection (see [Environment Variables](#environment-variables)).
 
 
 ## Usage
@@ -65,8 +68,10 @@ export AWS_SECRET_ACCESS_KEY=tsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Then specify your bucket with the Tigris endpoint as a replica URL. Always
-quote the URL: the `?` and `&` characters are interpreted by your shell, which
-will otherwise truncate the URL or run part of it as a separate command.
+quote the URL, because your shell interprets the `?` and `&` characters: in
+`zsh` the unquoted `?` fails glob expansion (`no matches found`), and in
+`sh`/`bash` the `&` backgrounds Litestream with the URL truncated, running
+`region=auto` as a separate command.
 
 ```sh
 litestream replicate /path/to/db "s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&region=auto"

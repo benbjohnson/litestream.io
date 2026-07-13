@@ -59,8 +59,8 @@ export AWS_SECRET_ACCESS_KEY=your-secret-access-key
 ```
 
 Then specify your bucket with the Supabase endpoint as a replica URL. Always
-quote the URL: the `?` character is interpreted by your shell, which will
-otherwise fail to expand it or truncate the URL.
+quote the URL, because your shell interprets the `?` as a glob pattern: `zsh`
+aborts with `no matches found`, and other shells may mangle the URL.
 
 ```sh
 litestream replicate /path/to/db "s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3"
