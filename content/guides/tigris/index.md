@@ -64,16 +64,18 @@ export AWS_ACCESS_KEY_ID=tid_xxxxxxxxxxxxxxxxxxxx
 export AWS_SECRET_ACCESS_KEY=tsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-Then specify your bucket with the Tigris endpoint as a replica URL:
+Then specify your bucket with the Tigris endpoint as a replica URL. Always
+quote the URL: the `?` and `&` characters are interpreted by your shell, which
+will otherwise truncate the URL or run part of it as a separate command.
 
 ```sh
-litestream replicate /path/to/db s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&region=auto
+litestream replicate /path/to/db "s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&region=auto"
 ```
 
 You can later restore your database from Tigris to a local `my.db` path:
 
 ```sh
-litestream restore -o my.db s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&region=auto
+litestream restore -o my.db "s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&region=auto"
 ```
 
 ### Configuration file usage
@@ -173,8 +175,9 @@ Litestream supports standard AWS environment variables for Tigris credentials:
 |----------|-------------|
 | `AWS_ACCESS_KEY_ID` | Your Tigris access key (starts with `tid_`) |
 | `AWS_SECRET_ACCESS_KEY` | Your Tigris secret key (starts with `tsec_`) |
-| `AWS_ENDPOINT_URL_S3` | Set to `https://fly.storage.tigris.dev` |
 | `AWS_REGION` | Set to `auto` |
+
+{{< alert icon="⚠️" text="**Do not set the endpoint with `AWS_ENDPOINT_URL_S3`.** The AWS SDK honors it, but Litestream's own endpoint field stays empty, so [Tigris auto-detection](#auto-detection) is skipped — the `X-Tigris-Consistent` header and Tigris-specific defaults are never applied. Set the endpoint with the `endpoint=` query parameter on the replica URL, or the `endpoint:` field in your config file, instead." >}}
 
 You can also use the Litestream-specific environment variables:
 
