@@ -272,9 +272,9 @@ When enabled, the MCP server will start alongside replication and provide AI too
 
 {{< since version="0.3.12" >}} Log `type` can be set to "text" or "json".
 {{< since version="0.5.11" >}} A `pretty` type is also available, which produces
-colorized, human-readable output. Logging `level` can be set to "debug", "info",
-"warn" or "error". By setting `stderr` to `true` logs will be written to stderr
-instead of stdout.
+human-readable output that is colorized when written to a terminal. Logging
+`level` can be set to "debug", "info", "warn" or "error". By setting `stderr` to
+`true` logs will be written to stderr instead of stdout.
 
 {{< since version="0.5.11" >}} Setting `source` to `true` adds the source file
 and line number to each log record.
