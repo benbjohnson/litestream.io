@@ -72,11 +72,17 @@ text in configuration file to your S3 bucket name. This configuration file
 is set up to replicate a database at `/var/lib/myapp/db` to a remote S3 bucket.
 
 ```yml
+addr: ":9090"
 dbs:
   - path: /var/lib/myapp/db
     replica:
       url: s3://YOURBUCKET/db
 ```
+
+The `addr` setting enables Litestream's [Prometheus metrics][metrics] endpoint on
+port `9090`. Without it, the metrics server does not start.
+
+[metrics]: /reference/config#metrics
 
 Next, we'll need to add this as a ConfigMap in our Kubernetes cluster:
 
@@ -165,7 +171,7 @@ StatefulSet by setting the `spec.template.spec.initContainers` to:
 ```yml
 initContainers:
 - name: init-litestream
-  image: litestream/litestream:0.3
+  image: litestream/litestream:0.5
   args: ['restore', '-if-db-not-exists', '-if-replica-exists', '/var/lib/myapp/db']
   volumeMounts:
   - name: data
@@ -237,7 +243,7 @@ You can specify Litestream as the second container in the
 
 ```yml
 - name: litestream
-  image: litestream/litestream:0.3
+  image: litestream/litestream:0.5
   args: ['replicate']
   volumeMounts:
   - name: data
@@ -261,7 +267,8 @@ You can specify Litestream as the second container in the
     containerPort: 9090
 ```
 
-Additionally, we open port `9090` to provide Prometheus metrics.
+Additionally, we open port `9090` to expose the Prometheus metrics endpoint we
+enabled with `addr: ":9090"` in the ConfigMap above.
 
 
 ### Applying changes
@@ -329,22 +336,19 @@ Then delete the pod that is using it:
 kubectl delete pod myapp-0
 ```
 
-Once our pod is back up and running, we can read the logs from the init
-container to see that it was restored from S3:
+Once our pod is back up and running, the init container will have restored the
+database from S3. On success the `restore` command completes silently, so
+`kubectl logs myapp-0 init-litestream` shows no output. If you want a
+confirmation line in the logs, add `-integrity-check full` to the init
+container's `args`, which verifies the restored database and logs:
 
 ```sh
 $ kubectl logs myapp-0 init-litestream
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): restoring snapshot 24456b497507f0c5/00000000 to /var/lib/myapp/db.tmp
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): restoring wal files: generation=24456b497507f0c5 index=[00000000,00000001]
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): downloaded wal 24456b497507f0c5/00000000 elapsed=613.525612ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): downloaded wal 24456b497507f0c5/00000001 elapsed=599.573817ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): applied wal 24456b497507f0c5/00000000 elapsed=2.357647ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): applied wal 24456b497507f0c5/00000001 elapsed=1.800142ms
-2000/01/01 00:00:00.000000 /var/lib/myapp/db(s3): renaming database from temporary location
+time=2000-01-01T00:00:00.000Z level=INFO msg="post-restore integrity check passed" db=/var/lib/myapp/db replica=s3
 ```
 
-We can then cURL our endpoint again and see that the count continues from where
-it left off before the PVC deletion:
+Either way, we can cURL our endpoint again and see that the count continues from
+where it left off before the PVC deletion, confirming the database was restored:
 
 ```sh
 $ kubectl exec -it -c myapp myapp-0 -- curl localhost:8080
