@@ -8,7 +8,7 @@ menu:
 weight: 405
 ---
 
-{{< since version="0.5.0" >}} This guide will show you how to use Litestream's
+{{< since version="0.5.3" >}} This guide will show you how to use Litestream's
 native [Alibaba Cloud OSS][] support to replicate your database. You will need
 an [Alibaba Cloud][] account to complete this guide.
 

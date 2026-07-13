@@ -8,7 +8,7 @@ menu:
 weight: 545
 ---
 
-{{< since version="0.5.8" >}} Litestream exposes IPC (Inter-Process Communication)
+{{< since version="0.5.7" >}} Litestream exposes IPC (Inter-Process Communication)
 endpoints via a Unix domain socket. These endpoints allow local tools and scripts
 to query database status and collect profiling data without exposing an HTTP port.
 

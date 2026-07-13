@@ -8,7 +8,7 @@ menu:
 weight: 546
 ---
 
-{{< since version="0.5.12" >}} The `register` command dynamically adds a
+{{< since version="0.5.8" >}} The `register` command dynamically adds a
 database to a running Litestream daemon without requiring a restart. This
 enables runtime database management for applications that create databases
 on-the-fly.

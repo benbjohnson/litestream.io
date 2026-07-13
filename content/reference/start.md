@@ -8,7 +8,7 @@ menu:
 weight: 548
 ---
 
-{{< since version="0.5.12" >}} The `start` command resumes replication for a
+{{< since version="0.5.7" >}} The `start` command resumes replication for a
 database that was previously stopped via the `stop` command. The database must
 already be registered with the daemon.
 

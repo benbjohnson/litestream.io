@@ -8,7 +8,7 @@ menu:
 weight: 350
 ---
 
-{{< since version="0.5.0" >}} Global replica defaults eliminate configuration
+{{< since version="0.5.3" >}} Global replica defaults eliminate configuration
 duplication by allowing you to set default settings at the top level of your
 configuration file. These defaults are automatically inherited by all replicas
 while still allowing per-replica overrides.

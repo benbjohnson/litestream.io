@@ -8,7 +8,7 @@ menu:
 weight: 543
 ---
 
-{{< since version="0.5.12" >}} The `info` command displays information about a
+{{< since version="0.5.8" >}} The `info` command displays information about a
 running Litestream daemon, including version, process ID, uptime, and the number
 of databases being managed.
 

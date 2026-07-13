@@ -127,7 +127,7 @@ path               replica
 
 ### litestream_status
 
-{{< since version="0.5.8" >}} Returns replication health information for configured databases.
+{{< since version="0.5.7" >}} Returns replication health information for configured databases.
 
 **Parameters:**
 
@@ -206,7 +206,7 @@ Prints the Litestream version.
 
 ### litestream_reset
 
-{{< since version="0.5.8" >}} Clears local Litestream replication state for a database. This forces
+{{< since version="0.5.7" >}} Clears local Litestream replication state for a database. This forces
 a fresh snapshot on the next sync.
 
 **Parameters:**

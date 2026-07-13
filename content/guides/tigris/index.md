@@ -12,7 +12,7 @@ This guide will show you how to use [Tigris][tigris] as a database replica path
 for Litestream. Tigris is [Fly.io][flyio]'s globally distributed S3-compatible
 object storage. You will need a Fly.io account to complete this guide.
 
-{{< since version="0.5.0" >}} Litestream automatically detects Tigris endpoints,
+{{< since version="0.5.4" >}} Litestream automatically detects Tigris endpoints,
 configures the required settings, and enables strong consistency for you.
 
 
