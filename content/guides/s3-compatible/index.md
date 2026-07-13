@@ -24,9 +24,9 @@ for most providers.
 |----------|------------------|----------------------|
 | Backblaze B2 | `*.backblazeb2.com` | `sign-payload: true`, `force-path-style: true` |
 | Filebase | `*.filebase.com` | `sign-payload: true`, `force-path-style: true` |
-| MinIO | Any custom endpoint with a port (e.g. `host:9000`) | `sign-payload: true`, `force-path-style: true` |
+| MinIO | Custom endpoint with a port that isn't a known provider (e.g. `host:9000`) | `sign-payload: true`, `force-path-style: true` |
 | DigitalOcean Spaces | `*.digitaloceanspaces.com` | `sign-payload: true` |
-| Hetzner | `*.your-objectstorage.com` | `sign-payload: true` |
+| Hetzner | `*.your-objectstorage.com` | `sign-payload: true` (v0.5.9+) |
 | Scaleway | `*.scw.cloud` | `sign-payload: true` |
 | Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true`, `concurrency: 2` |
 | Supabase Storage | `*.supabase.co` | `sign-payload: true`, `force-path-style: true` |
@@ -311,11 +311,12 @@ dbs:
 
 - Endpoint format: `<location>.your-objectstorage.com` (for example,
   `fsn1.your-objectstorage.com`)
-- Litestream auto-detects the `.your-objectstorage.com` endpoint and sets
-  `sign-payload: true`, but **only when the endpoint is supplied through the
-  replica `url:` field** (as shown above). If you use the explicit `endpoint:`
-  configuration field instead, auto-detection does not apply — set
-  `sign-payload: true` manually:
+- **Litestream v0.5.9+** auto-detects the `.your-objectstorage.com` endpoint and
+  sets `sign-payload: true`, but **only when the endpoint is supplied through the
+  replica `url:` field** (as shown above). Auto-detection does not apply if you
+  use the explicit `endpoint:` configuration field, and it is not available at
+  all on releases before v0.5.9. In either case, set `sign-payload: true`
+  manually:
 
   ```yaml
   dbs:
@@ -567,7 +568,7 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.
 | Wasabi | Yes | Yes | No | — |
 | Cloudflare R2 | Yes | `auto` | No | ✓ |
 | DigitalOcean Spaces | Yes | Yes | No | ✓ |
-| Hetzner | Yes | Optional | No | ✓ (URL only) |
+| Hetzner | Yes | Optional | No | ✓ (URL only, v0.5.9+) |
 | Linode | Yes | Yes | No | — |
 | OCI | Yes | `us-east-1` | No | — |
 | Vultr | Yes | Yes | No | — |
