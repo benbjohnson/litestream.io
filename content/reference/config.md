@@ -381,6 +381,10 @@ Each database supports the following configuration options:
   you to use the same `DATABASE_URL` with Litestream and other SQLite tools. See
   [SQLite Connection String Prefixes](#sqlite-connection-string-prefixes) below.
 - `meta-path`—Path to store Litestream metadata (defaults to a hidden `.<filename>-litestream` directory next to the database file, e.g. `/var/lib/db` → `/var/lib/.db-litestream`)
+- `meta-dir`—{{< since version="0.5.13" >}} Root directory for per-database
+  metadata when using [directory replication](#directory-replication). Only
+  valid with `dir:`, not a single `path:`. See
+  [Metadata directory](#metadata-directory) below.
 - `monitor-interval`—How often to check for changes (default: `1s`)
 - `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
@@ -409,6 +413,8 @@ Directory configuration options:
 - `pattern`—Glob pattern for matching database files (e.g., `*.db`, `*.sqlite`)
 - `recursive`—Scan subdirectories recursively (default: `false`)
 - `watch`—Enable real-time directory monitoring (default: `false`)
+- `meta-dir`—{{< since version="0.5.13" >}} Root directory for per-database
+  metadata. See [Metadata directory](#metadata-directory) below.
 
 When `watch` is enabled, Litestream monitors the directory for new databases and
 automatically starts replication within seconds. Deleted databases are cleanly
@@ -431,6 +437,44 @@ the directory. For example, `/var/lib/app/tenants/acme/data.db` would replicate 
 
 See the [Directory Watcher Guide]({{< ref "directory-watcher" >}}) for detailed
 configuration examples and use cases.
+
+#### Metadata directory
+
+{{< since version="0.5.13" >}} Litestream stores a small amount of local
+metadata for each database (transaction tracking state) in a directory named
+`<path>-litestream`, placed next to the database file by default. With directory
+replication you can instead collect every database's metadata under a single
+root using the `meta-dir` field:
+
+```yaml
+dbs:
+  - dir: /var/lib/tenants
+    pattern: "*.db"
+    recursive: true
+    meta-dir: /var/lib/litestream-meta
+    replica:
+      url: s3://mybucket/tenants
+```
+
+Each discovered database is assigned a unique metadata directory of
+`<meta-dir>/<relative-path>-litestream`, preserving the source directory
+structure:
+
+| Local database path | Metadata directory |
+|---------------------|--------------------|
+| `/var/lib/tenants/tenant1.db` | `/var/lib/litestream-meta/tenant1.db-litestream` |
+| `/var/lib/tenants/team-a/db2.db` | `/var/lib/litestream-meta/team-a/db2.db-litestream` |
+
+This is useful when the database directory is read-only or on a temporary
+filesystem, or when you want all replication metadata gathered in one place.
+
+The `meta-dir` field is valid only with `dir:` and cannot be combined with
+`meta-path`:
+
+- Using `meta-dir` with a single `path:` database fails with
+  `'meta-dir' can only be used with a directory`.
+- Setting both `meta-path` and `meta-dir` fails with
+  `cannot specify both 'meta-path' and 'meta-dir'`.
 
 Example with database-level options:
 
@@ -505,6 +549,9 @@ Directory configurations support the following options:
 - `recursive`—Scan subdirectories when `true` (default: `false`)
 - `watch`—Enable real-time monitoring for new databases (default: `false`).
   See [Directory Watcher](/guides/directory-watcher) for details.
+- `meta-dir`—{{< since version="0.5.13" >}} Root directory for per-database
+  metadata (`<meta-dir>/<relative-path>-litestream`). Cannot be combined with
+  `meta-path`. See [Metadata directory](#metadata-directory).
 
 Each discovered database gets a unique replica path by appending its relative
 path from the directory root:

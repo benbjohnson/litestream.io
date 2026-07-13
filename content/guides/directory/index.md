@@ -119,6 +119,39 @@ The relative path from the directory root is appended to the configured replica
 path, preserving the directory structure.
 
 
+## Metadata location
+
+{{< since version="0.5.13" >}} Litestream keeps a small amount of local metadata
+for each database (transaction tracking state) in a directory named
+`<database>-litestream`. By default this sits next to each database file. When
+the database directory is read-only, on a temporary filesystem, or you simply
+want all metadata gathered in one place, use the `meta-dir` field to relocate
+it:
+
+```yaml
+dbs:
+  - dir: /var/lib/tenants
+    pattern: "*.db"
+    recursive: true
+    meta-dir: /var/lib/litestream-meta
+    replica:
+      url: s3://mybucket/tenants
+```
+
+Each database receives a unique metadata directory under the root, mirroring its
+relative path:
+
+| Local database path | Metadata directory |
+|---------------------|--------------------|
+| `/var/lib/tenants/tenant1.db` | `/var/lib/litestream-meta/tenant1.db-litestream` |
+| `/var/lib/tenants/team-a/db2.db` | `/var/lib/litestream-meta/team-a/db2.db-litestream` |
+
+The `meta-dir` field is only valid with `dir:` and cannot be combined with
+`meta-path`. Using it with a single `path:` database fails with
+`'meta-dir' can only be used with a directory`, and setting both `meta-path` and
+`meta-dir` fails with `cannot specify both 'meta-path' and 'meta-dir'`.
+
+
 ## Use cases
 
 ### Multi-tenant applications
