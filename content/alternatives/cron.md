@@ -107,7 +107,7 @@ above.
 set -e
 
 # Backup & compress our database to the temp directory.
-sqlite3 /path/to/db "VACUUM INTO '/path/to/backup'"
+sqlite3 /path/to/db "VACUUM INTO '/tmp/db'"
 gzip /tmp/db
 
 # Upload backup to S3 using a rolling daily naming scheme.

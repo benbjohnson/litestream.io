@@ -46,7 +46,7 @@ format:
 
 ```
 $ litestream info
-Litestream v0.5.12
+Litestream 0.5.12
   PID:        12345
   Uptime:     1h30m0s
   Started at: 2026-05-28T10:00:00Z
@@ -70,7 +70,7 @@ With the `-json` flag, it returns a JSON object:
 
 ```
 $ litestream info
-Litestream v0.5.12
+Litestream 0.5.12
   PID:        12345
   Uptime:     1h30m0s
   Started at: 2026-05-28T10:00:00Z
@@ -82,7 +82,7 @@ Litestream v0.5.12
 ```
 $ litestream info -json
 {
-  "version": "v0.5.12",
+  "version": "0.5.12",
   "pid": 12345,
   "uptime_seconds": 5400,
   "started_at": "2026-05-28T10:00:00Z",

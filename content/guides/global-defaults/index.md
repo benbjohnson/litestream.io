@@ -112,7 +112,7 @@ S3-compatible services:
 | `user` | Username for authentication |
 | `password` | Password for authentication |
 | `key-path` | Path to SSH private key file |
-| `concurrent-writes` | Number of concurrent upload operations |
+| `concurrent-writes` | Boolean toggle enabling concurrent writes (default: `true`) |
 
 ### NATS JetStream Settings
 

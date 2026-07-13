@@ -26,6 +26,7 @@ encounter issues, check the [Troubleshooting](/docs/troubleshooting) guide.
 
 - [Directory Replication](/guides/directory)
 - [Global Replica Defaults](/guides/global-defaults)
+- [WAL Truncate Threshold](/guides/wal-truncate-threshold)
 
 ### Migration guides
 

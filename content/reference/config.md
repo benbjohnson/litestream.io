@@ -1046,7 +1046,7 @@ The following settings are specific to OSS replicas:
 - `region`—OSS region (e.g., cn-hangzhou, us-west-1)
 - `path`—Path within the bucket
 - `part-size`—Part size for multipart uploads (default: 5MB)
-- `concurrency`—Number of parallel upload workers (default: 1)
+- `concurrency`—Number of parallel upload workers (default: 3)
 
 See the [Alibaba Cloud OSS Guide]({{< ref "alibaba-oss" >}}) for detailed setup instructions.
 
@@ -1171,11 +1171,33 @@ Validation checks each compaction level (except snapshot level 9) for:
 
 ### Encryption
 
-{{< alert icon="⚠️" text="**Age Encryption Not Available in v0.5.0+**: Age encryption was removed during the LTX storage layer refactor. Encryption will be re-implemented directly in LTX to support per-page encryption (more efficient for cloud storage). Configuration will be explicitly rejected with an error message. If you are using Age encryption with v0.3.x, please review the [migration guide](/docs/migration/#age-encryption-migration) before upgrading." >}}
+{{< alert icon="⛔️" text="**Age client-side encryption is unsupported in v0.5.x.** Since v0.5.1, a replica configuration whose `age:` block sets `identities` or `recipients` causes Litestream to exit at startup with the error `age encryption is not currently supported`. (v0.5.0 accepted age settings but silently ignored them.) Server-side encryption for S3 replicas via SSE-C / SSE-KMS is unaffected." >}}
 
-{{< since version="0.3.10" >}} Client-side encryption can be enabled per replica by adding an `age` section to
-the replica configuration with corresponding `identities` and `recipients`
-fields.
+Age client-side encryption was removed during the LTX storage-layer refactor.
+Starting with **v0.5.1**, any `age:` block that specifies `identities` or
+`recipients` is **hard-rejected** — the daemon refuses to start and prints
+`age encryption is not currently supported`. (An empty `age:` mapping is
+accepted but has no effect, and v0.5.0 accepted age settings without applying
+them.) Client-side encryption is expected to be re-implemented directly in LTX
+to support per-page encryption, which is more efficient for cloud storage.
+
+This affects only client-side `age` encryption. Server-side encryption remains
+available for S3 replicas: the S3 SSE-C options (`sse-customer-algorithm`,
+`sse-customer-key-md5`) are documented in the S3 replica settings above, and the
+S3 backend also supports SSE-KMS.
+
+If you are upgrading from v0.3.x with age encryption enabled, review the
+[migration guide](/docs/migration/#age-encryption-migration) before upgrading.
+
+#### Age encryption (v0.3.x only)
+
+The configuration in this section applies **only to Litestream v0.3.x** and is
+retained for historical reference. It does not work on v0.5.1 or later, where a
+non-empty `age:` block is rejected as described above.
+
+{{< since version="0.3.10" >}} On v0.3.x, client-side encryption could be enabled
+per replica by adding an `age` section to the replica configuration with
+corresponding `identities` and `recipients` fields.
 
 {{< alert icon="❗️" text="When enabling encryption restoring requires matching age identity to restore from the replica." >}}
 
@@ -1195,7 +1217,7 @@ To generate keys, refer to the
 age [README](https://github.com/FiloSottile/age/blob/main/README.md)
 how to install and use the command line tools.
 
-As of now identities must be a superset of recipients but key rotation can be
+On v0.3.x, identities must be a superset of recipients but key rotation can be
 achieved by adding a new identity while changing the recipient list to only have
 a key for it.
 
@@ -1204,9 +1226,8 @@ confuse Litestream so it is recommended the replica is empty when doing so.
 Restoring from a replica that has mixed encrypted and non-encrypted files will
 fail.
 
-#### Identity Files
-
-{{< since version="0.5.0" >}} You can also reference identity files instead of embedding keys directly:
+On v0.3.x you can also reference identity files instead of embedding keys
+directly:
 
 ```yaml
 dbs:

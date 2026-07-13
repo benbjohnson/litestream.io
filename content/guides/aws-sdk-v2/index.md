@@ -20,7 +20,7 @@ existing configurations.
 The upgrade from AWS SDK v1 to v2 introduces several improvements:
 
 - **Connection pooling** reduces latency for subsequent requests
-- **Adaptive retry mode** with up to 10 attempts for better resilience
+- **Standard retry mode** with up to 10 attempts for better resilience
 - **CRC32 checksum validation** ensures data integrity automatically
 - **Modern credential chain** with improved IAM role support
 - **24-hour HTTP timeout** for long-running operations on large databases
@@ -136,9 +136,9 @@ SDK v2 maintains a pool of HTTP connections, eliminating connection setup
 overhead for subsequent requests. This is especially beneficial during
 continuous replication.
 
-### Adaptive Retry Mode
+### Standard Retry Mode
 
-The SDK uses adaptive retry mode with up to 10 attempts. This automatically
+The SDK uses standard retry mode with up to 10 attempts. This automatically
 handles transient failures with exponential backoff, improving reliability
 during network issues or service throttling.
 

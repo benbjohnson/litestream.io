@@ -302,7 +302,7 @@ a `412 Precondition Failed` response and the instance waits.
 ```
 
 - `generation` — Monotonically increasing counter for lease generations
-- `expires_at` — Unix timestamp when the lease expires
+- `expires_at` — RFC 3339 timestamp when the lease expires
 - `owner` — Identifier of the instance holding the lease
 
 ### Failover Behavior

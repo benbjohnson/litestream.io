@@ -10,7 +10,7 @@ weight: 110
 
 ## Installation
 
-A [Homebrew](https://brew.sh/) tap to is provided to install Litestream in a
+A [Homebrew](https://brew.sh/) tap is provided to install Litestream in a
 single command. After installing Homebrew, run:
 
 ```sh
