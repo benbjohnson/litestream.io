@@ -161,8 +161,25 @@ use a [configuration file]({{< ref "config" >}}) instead.
     Executes a subcommand. Litestream will exit when the child
     process exits. Useful for simple process management.
 
+-once
+    Replicate once and exit. This performs a single sync of all
+    databases and their replicas, then exits. Cannot be used with -exec.
+
+-force-snapshot
+    Force a snapshot to be taken for all databases. Requires -once.
+
+-enforce-retention
+    Enforce retention policies for old snapshots. Requires -once.
+
+-log-level LEVEL
+    Sets the log level. Overrides the config file setting.
+    Valid values: trace, debug, info, warn, error
+
 -no-expand-env
     Disables environment variable expansion in configuration file.
+
+-restore-if-db-not-exists
+    Restores the database from the replica if it doesn't exist.
 ```
 
 ### Flag ordering example
@@ -174,6 +191,63 @@ litestream replicate -exec "myapp serve" /path/to/db s3://mybucket/db
 # ❌ Incorrect: flags after positional arguments
 litestream replicate /path/to/db s3://mybucket/db -exec "myapp serve"
 # Error: flag "-exec" must be positioned before DB_PATH and REPLICA_URL arguments
+```
+
+
+## Run-once mode
+
+{{< since version="0.5.6" >}} The `-once` flag performs a single sync of all
+databases and their replicas, then exits instead of running as a continuous
+server. This is useful for cron jobs, CI/CD pipelines, and backup scripts where
+you want a one-time replication rather than a long-running process.
+
+```bash
+litestream replicate -once /var/lib/mydb.db s3://mybucket/mydb
+```
+
+`-once` cannot be combined with `-exec`, since `-exec` manages a long-running
+child process.
+
+Two flags refine run-once behavior and both **require** `-once`:
+
+- `-force-snapshot`—Forces a new snapshot to be taken for all databases.
+  Useful for creating a complete backup before maintenance or when migrating
+  databases between hosts.
+- `-enforce-retention`—Applies the configured snapshot retention policy,
+  removing snapshots older than the retention period.
+
+```bash
+# Force a fresh snapshot during a one-time sync
+litestream replicate -once -force-snapshot /var/lib/mydb.db s3://mybucket/mydb
+
+# Apply retention while syncing once
+litestream replicate -once -enforce-retention /var/lib/mydb.db s3://mybucket/mydb
+```
+
+Using `-force-snapshot` or `-enforce-retention` without `-once` returns an error.
+
+
+## Restore if the database does not exist
+
+{{< since version="0.5.6" >}} The `-restore-if-db-not-exists` flag restores the
+database from its replica before replication starts if the local database file
+is missing. On first start with no existing backup, replication proceeds
+normally.
+
+```bash
+litestream replicate -restore-if-db-not-exists /var/lib/mydb.db s3://mybucket/mydb
+```
+
+
+## Log level
+
+{{< since version="0.5.7" >}} The `-log-level` flag sets the logging verbosity
+and overrides the [`logging`]({{< ref "config#logging" >}}) setting from the
+configuration file. Valid values are `trace`, `debug`, `info`, `warn`, and
+`error`.
+
+```bash
+litestream replicate -log-level debug /var/lib/mydb.db s3://mybucket/mydb
 ```
 
 
