@@ -45,6 +45,8 @@ Directory configurations support the following options:
 - `recursive`—Scan subdirectories when `true` (default: `false`)
 - `watch`—Enable real-time monitoring for new databases (default: `false`).
   See [Directory Watcher](/guides/directory-watcher) for details.
+- `meta-dir`—{{< since version="0.5.13" >}} Root directory for per-database
+  metadata. See [Metadata location](#metadata-location) below.
 
 All standard database options like `monitor-interval` and `checkpoint-interval`
 are also supported and apply to each discovered database.
@@ -122,11 +124,11 @@ path, preserving the directory structure.
 ## Metadata location
 
 {{< since version="0.5.13" >}} Litestream keeps a small amount of local metadata
-for each database (transaction tracking state) in a directory named
-`<database>-litestream`. By default this sits next to each database file. When
-the database directory is read-only, on a temporary filesystem, or you simply
-want all metadata gathered in one place, use the `meta-dir` field to relocate
-it:
+for each database (transaction tracking state) in a hidden directory named
+`.<database>-litestream`, placed next to each database file by default. To gather
+every database's metadata under a single root instead—keeping the per-database
+metadata directories out of the data directory or on separate storage—use the
+`meta-dir` field:
 
 ```yaml
 dbs:

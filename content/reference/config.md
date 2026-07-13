@@ -441,10 +441,10 @@ configuration examples and use cases.
 #### Metadata directory
 
 {{< since version="0.5.13" >}} Litestream stores a small amount of local
-metadata for each database (transaction tracking state) in a directory named
-`<path>-litestream`, placed next to the database file by default. With directory
-replication you can instead collect every database's metadata under a single
-root using the `meta-dir` field:
+metadata for each database (transaction tracking state) in a hidden directory
+named `.<filename>-litestream`, placed next to the database file by default.
+With directory replication you can instead collect every database's metadata
+under a single root using the `meta-dir` field:
 
 ```yaml
 dbs:
@@ -465,8 +465,11 @@ structure:
 | `/var/lib/tenants/tenant1.db` | `/var/lib/litestream-meta/tenant1.db-litestream` |
 | `/var/lib/tenants/team-a/db2.db` | `/var/lib/litestream-meta/team-a/db2.db-litestream` |
 
-This is useful when the database directory is read-only or on a temporary
-filesystem, or when you want all replication metadata gathered in one place.
+This is useful when you want all replication metadata gathered in one place, or
+kept out of the database directory—for example on separate storage, or to avoid
+scattering per-database metadata directories through your data directory. Note
+that Litestream still writes SQLite's `-wal` and `-shm` files next to each
+database, so the database directory itself must remain writable.
 
 The `meta-dir` field is valid only with `dir:` and cannot be combined with
 `meta-path`:
