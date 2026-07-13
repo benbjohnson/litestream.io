@@ -76,9 +76,10 @@ apply those old WAL pages to your new database. Litestream also tracks changes
 via the WAL so it can cause replication issues if the WAL file is leftover.
 
 Additionally, Litestream currently does not track database deletions. If you
-remove your database and recreate it, you should delete the hidden
-`.<filename>-litestream` metadata directory next to your database file (e.g.
-`.db-litestream` for a database named `db`) and restart Litestream.
+remove your database and recreate it, you should clear Litestream's local
+metadata and restart. Run [`litestream reset`](/reference/reset) on the database
+path, or delete the `.<filename>-litestream` metadata directory next to your
+database file (for example, `.mydb.sqlite-litestream` for `mydb.sqlite`).
 
 
 
@@ -123,18 +124,26 @@ implemented.
 
 ## Increase snapshots frequency to improve restore performance
 
-By default, the `snapshot-interval` on a replica is unset so a new snapshot is
-taken when the previous snapshot is removed because of retention. For example,
-if your retention policy is the default setting of `24h` then a new snapshot
-will be taken once per day.
+By default, Litestream takes a full snapshot of each database every `24h` and
+retains snapshots for `24h`. Between snapshots, changes are stored as
+incremental LTX files, and a restore replays every LTX file recorded since the
+most recent snapshot.
 
-However, if you're writing data often then WAL files will build up over that
-time period and increase your restore time. If you have frequent writes then it
-is recommended to either decrease your `retention` period or to set the
-`snapshot-interval` to something lower such as `1h`.
+If you're writing data often then these incremental files build up between
+snapshots and increase your restore time. If you have frequent writes, it is
+recommended to take snapshots more often by lowering the global
+`snapshot.interval` setting:
 
-For example, if your `retention` period is one day and your `snapshot-interval`
-is one hour then you will see a rolling set of 24 snapshots for your replica.
+```yaml
+snapshot:
+  interval: 1h
+  retention: 24h
+```
+
+The `snapshot` block is a global setting that applies to all databases; you can
+also override it per database under an individual `dbs` entry. With a `1h`
+interval and `24h` retention you will keep a rolling set of 24 snapshots. See
+the [configuration reference](/reference/config) for details.
 
 
 ## Disable autocheckpoints for high write load servers
@@ -151,8 +160,8 @@ lock on the database in between its checkpoint requests.
 However, under high load with many small write transactions (e.g. tens of
 thousands per second), the application's SQLite instance can perform a
 checkpoint in between Litestream-initiated checkpoints and cause Litestream
-to miss a WAL file. When Litestream notices this it will force a new
-generation and take a full snapshot to ensure consistency.
+to miss a WAL update. When Litestream detects this it takes a fresh full
+snapshot to ensure consistency.
 
 To prevent this, it is recommended to run your application with
 autocheckpointing disabled. To do this, run the following PRAGMA when you
@@ -171,17 +180,20 @@ guide](/guides/wal-truncate-threshold).
 Multiple applications replicating into the same bucket & path can cause situations
 where you will be unable to restore. It is _your_ responsibility to ensure you
 do not have multiple applications replicating concurrently. In the off-chance
-that it does happen, and you're unable to restore, you may see an error along
-the lines of:
+that it does happen, and you're unable to restore, recover from the replica as
+follows.
 
-```
-cannot find max wal index for restore: missing initial wal segment: generation=f6d6d1e96d38dafb index=00000093 offset=4152
-```
+First, attempt a normal restore with [`litestream restore`](/reference/restore),
+which reconstructs the database from the most recent snapshot and the LTX files
+recorded since. You can inspect the LTX files stored in a replica with the
+[`litestream ltx`](/reference/ltx) command to understand its state.
 
-In this case, manually copy your most recent snapshot in
-`generations/<id>/snapshots/<snapshot>.lz4` and decompress with `lz4`.
+If the local Litestream metadata has become inconsistent, run
+[`litestream reset`](/reference/reset) on the database to clear the local
+tracking state. Litestream will take a fresh full snapshot on the next sync.
 
-It's a good idea to perform an integrity check on the database using `sqlite3`:
+Once you have a restored copy, it's a good idea to perform an integrity check on
+the database using `sqlite3`:
 
 ```
 $ sqlite3 /path/to/db
@@ -189,7 +201,7 @@ sqlite> PRAGMA integrity_check;
 ok
 ```
 
-You now use this snapshot file as your application's database file and continue
+Use this restored file as your application's database file and continue
 replicating it again with Litestream.
 
 
