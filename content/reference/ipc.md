@@ -12,7 +12,7 @@ weight: 545
 endpoints via a Unix domain socket. These endpoints allow local tools and scripts
 to query database status and collect profiling data without exposing an HTTP port.
 
-## Socket Path
+## Enabling the Socket
 
 The control socket is **disabled by default**. Enable it with a `socket` block
 in your configuration file:

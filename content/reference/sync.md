@@ -14,7 +14,10 @@ it triggers the sync and returns immediately (fire-and-forget). With the
 `-wait` flag it blocks until the sync completes, including remote replication.
 
 The `sync` command communicates with a running `litestream replicate` process
-over the IPC control socket. The daemon must already be running.
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting `enabled: true` in the [`socket` block]({{< ref "config#control-socket" >}})
+of the configuration file.
 
 
 ## Usage

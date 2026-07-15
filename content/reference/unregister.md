@@ -13,7 +13,10 @@ database from a running Litestream daemon without requiring a restart. Before
 completing, it performs a final sync to ensure all data is replicated.
 
 The `unregister` command communicates with a running `litestream replicate` process
-over the IPC control socket. The daemon must already be running.
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting `enabled: true` in the [`socket` block]({{< ref "config#control-socket" >}})
+of the configuration file.
 
 
 ## Usage

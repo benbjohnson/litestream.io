@@ -251,8 +251,27 @@ litestream replicate -log-level debug /var/lib/mydb.db s3://mybucket/mydb
 ```
 
 
+## Control socket
+
+{{< since version="0.5.7" >}} The daemon can expose a Unix domain control
+socket that the daemon control commands ([`info`]({{< ref "info" >}}),
+[`list`]({{< ref "list" >}}), [`sync`]({{< ref "sync" >}}), and others) and
+the local [IPC endpoints]({{< ref "ipc" >}}) connect to. The socket is
+disabled by default. Enable it with a `socket` block in the configuration
+file:
+
+```yaml
+socket:
+  enabled: true
+```
+
+See the [`socket` configuration]({{< ref "config#control-socket" >}}) for the
+socket path and permission options.
+
+
 ## See Also
 
 - [Configuration Reference](/reference/config) - Complete configuration options
+- [IPC Endpoints](/reference/ipc) - Unix socket endpoints for local status queries and profiling
 - [Troubleshooting](/docs/troubleshooting) - Common issues and solutions
 - [Getting Started](/getting-started) - Tutorial for setting up replication
