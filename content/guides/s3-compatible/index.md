@@ -24,12 +24,13 @@ for most providers.
 |----------|------------------|----------------------|
 | Backblaze B2 | `*.backblazeb2.com` | `sign-payload: true`, `force-path-style: true` |
 | Filebase | `*.filebase.com` | `sign-payload: true`, `force-path-style: true` |
-| MinIO | `*.minio.*` | `sign-payload: true`, `force-path-style: true` |
+| MinIO | Custom endpoint with a port that isn't a known provider (e.g. `host:9000`) | `sign-payload: true`, `force-path-style: true` |
 | DigitalOcean Spaces | `*.digitaloceanspaces.com` | `sign-payload: true` |
+| Hetzner | `*.your-objectstorage.com` | `sign-payload: true` (v0.5.9+) |
 | Scaleway | `*.scw.cloud` | `sign-payload: true` |
 | Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true`, `concurrency: 2` |
 | Supabase Storage | `*.supabase.co` | `sign-payload: true`, `force-path-style: true` |
-| Tigris | `*.tigris.dev` | `sign-payload: true`, consistency header |
+| Tigris | `fly.storage.tigris.dev`, `t3.storage.dev` | `sign-payload: true`, disables MD5 |
 
 Auto-detection means you can use simpler configurations without worrying about
 provider-specific quirks. The provider examples below show configurations that
@@ -136,7 +137,8 @@ dbs:
 **Notes:**
 
 - Create access keys in the MinIO Console before configuring Litestream
-- The `region` field is required but MinIO ignores the value; use `us-east-1`
+- The `region` field is optional; MinIO ignores the value. Set `us-east-1` if
+  your tooling requires one
 - For self-signed certificates, add `skip-verify: true` (not for production)
 - Default credentials for new installations are `minioadmin`/`minioadmin`
 
@@ -288,6 +290,46 @@ dbs:
 - Connection resets may appear in logs; Litestream handles these automatically
 
 See the [DigitalOcean Spaces Guide](/guides/digitalocean/) for detailed setup.
+
+### Hetzner Object Storage
+
+[Hetzner Object Storage](https://www.hetzner.com/storage/object-storage/)
+provides S3-compatible storage in European data centers.
+
+**Configuration:**
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      url: s3://mybucket/db?endpoint=fsn1.your-objectstorage.com
+      access-key-id: ${HETZNER_ACCESS_KEY}
+      secret-access-key: ${HETZNER_SECRET_KEY}
+```
+
+**Notes:**
+
+- Endpoint format: `<location>.your-objectstorage.com` (for example,
+  `fsn1.your-objectstorage.com`)
+- **Litestream v0.5.9+** auto-detects the `.your-objectstorage.com` endpoint and
+  sets `sign-payload: true`, but **only when the endpoint is supplied through the
+  replica `url:` field** (as shown above). Auto-detection does not apply if you
+  use the explicit `endpoint:` configuration field, and it is not available at
+  all on releases before v0.5.9. In either case, set `sign-payload: true`
+  manually:
+
+  ```yaml
+  dbs:
+    - path: /path/to/db
+      replica:
+        type: s3
+        bucket: mybucket
+        path: db
+        endpoint: fsn1.your-objectstorage.com
+        sign-payload: true
+        access-key-id: ${HETZNER_ACCESS_KEY}
+        secret-access-key: ${HETZNER_SECRET_KEY}
+  ```
 
 ### Linode Object Storage
 
@@ -526,6 +568,7 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.
 | Wasabi | Yes | Yes | No | — |
 | Cloudflare R2 | Yes | `auto` | No | ✓ |
 | DigitalOcean Spaces | Yes | Yes | No | ✓ |
+| Hetzner | Yes | Optional | No | ✓ (URL only, v0.5.9+) |
 | Linode | Yes | Yes | No | — |
 | OCI | Yes | `us-east-1` | No | — |
 | Vultr | Yes | Yes | No | — |
@@ -686,7 +729,10 @@ Standard AWS environment variables are also supported:
 - `AWS_ACCESS_KEY_ID` or `LITESTREAM_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY` or `LITESTREAM_SECRET_ACCESS_KEY`
 
-Litestream-specific variables take precedence over AWS variables.
+The standard `AWS_*` variables take precedence. The `LITESTREAM_*` variables are
+fallback aliases: Litestream uses one only when the matching `AWS_*` variable is
+unset. Provide credentials through either pair, but if both are set for the same
+credential, the `AWS_*` value wins.
 
 
 ## See Also
