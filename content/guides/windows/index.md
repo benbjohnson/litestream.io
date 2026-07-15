@@ -24,28 +24,61 @@ Running Litestream as a Windows Service means that it will run in the background
 and continuously monitor and replicate your databases. This is the recommended
 way to run Litestream.
 
-To install, download and run the `.msi` installer from the [Litestream releases
-page][releases]. You'll be presented with a window asking if the app can make
-changes to your device. Click _"Yes"_.
+_Note: Litestream v0.3.x provided an `.msi` installer that registered the
+service automatically. Starting with v0.5.x, releases ship as a `.zip` archive
+and you register the service manually using the steps below._
 
-<center>
- <img src="msi.png" alt="Screenshot of Windows installer">
-</center>
-<br/>
+### Installing the binary
 
-Once the installer is done, your Litesteam service will be running. The
-[configuration file](/reference/config) for Litestream is installed at:
+Download the Windows `.zip` archive from the [Litestream releases
+page][releases]. Choose the file matching your architecture—`x86_64` for
+Intel/AMD or `arm64` for ARM:
+
+```
+litestream-{{< version >}}-windows-x86_64.zip
+litestream-{{< version >}}-windows-arm64.zip
+```
+
+Extract the archive and copy `litestream.exe` to `C:\Litestream`. In
+PowerShell (replace `x86_64` with `arm64` if you downloaded the ARM
+archive):
+
+```powershell
+Expand-Archive litestream-{{< version >}}-windows-x86_64.zip
+New-Item -ItemType Directory -Path C:\Litestream -Force
+Copy-Item litestream-{{< version >}}-windows-x86_64\litestream.exe C:\Litestream\
+```
+
+### Creating the configuration file
+
+When running as a service, Litestream reads its [configuration
+file](/reference/config) from:
 
 ```
 C:\Litestream\litestream.yml
 ```
 
+Create this file with your database and replica settings before starting the
+service. See the [configuration reference](/reference/config) for all available
+options.
+
+### Registering the service
+
+Register and start the service from an elevated (_Run as Administrator_)
+PowerShell or Command Prompt:
+
+```powershell
+sc.exe create Litestream binPath= "C:\Litestream\litestream.exe" start= auto
+sc.exe start Litestream
+```
+
+Note that `sc.exe` requires the space after each `=` sign.
+
 
 ### Managing the service
 
-When you first install Litestream, it will run using an empty [configuration
-file](/reference/config). Whenever you update this file, you'll need to restart
-the service.
+Whenever you update the [configuration file](/reference/config), you'll need to
+restart the service.
 
 Go to the _Services_ application and select the Litestream service. You should
 see links in the sidebar to _Stop_ and _Restart_ the service.
@@ -87,8 +120,9 @@ If you do not wish to run as a background service or you only need to perform
 a database restore then you can download the Litestream executable and run
 from the command line.
 
-You'll need to download the `litestream.exe` file from the [Litestream releases
-page][releases] and install it within your Windows `%PATH%`. The executable will
+You'll need to download the `.zip` archive from the [Litestream releases
+page][releases], extract `litestream.exe`, and install it within your Windows
+`%PATH%`. The executable will
 use `C:\Litestream\litestream.yml` as the default configuration path but you
 can override that with the `-config` flag.
 
