@@ -678,13 +678,11 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">\${NATS_PASSWORD}</span><span class="w">
 </span></span></span></code></pre></div></li>
 <li>
-<p><strong>Create NATS bucket</strong>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Create JetStream bucket</span>
-</span></span><span class="line"><span class="cl">nats stream create my-app-bucket <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --subjects<span class="o">=</span><span class="s2">&#34;my-app-bucket.&gt;&#34;</span> <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --storage<span class="o">=</span>file <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --retention<span class="o">=</span>limits <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --max-age<span class="o">=</span>168h
+<p><strong>Create NATS object store bucket</strong>:</p>
+<p>Litestream requires a JetStream Object Store bucket, and the bucket must
+exist before Litestream starts:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Create JetStream Object Store bucket</span>
+</span></span><span class="line"><span class="cl">nats object add my-app-bucket
 </span></span></code></pre></div></li>
 </ol>
 <h3 id="migrating-between-cloud-providers">Migrating Between Cloud Providers</h3>
