@@ -18,7 +18,7 @@ Pre-built binaries are available in
 
 ## Build requirements
 
-- Go 1.24+ with a working CGO toolchain (gcc/clang).
+- Go 1.25+ with a working CGO toolchain (gcc/clang).
 - Build with the VFS & extension tags using the repository Makefile (handles platform flags):
 
 ```sh

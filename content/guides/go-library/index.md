@@ -27,7 +27,7 @@ with your application lifecycle or want to customize replication behavior.
 
 ## Prerequisites
 
-- Go 1.24 or later.
+- Go 1.25 or later.
 - A SQLite driver. The examples use [`modernc.org/sqlite`](https://pkg.go.dev/modernc.org/sqlite) (pure Go, no CGO required).
 - Familiarity with Litestream concepts from the [Getting Started](/getting-started) guide.
 
@@ -281,7 +281,7 @@ The library supports all Litestream replica backends:
 |---------|---------------|------------|
 | Local filesystem | `github.com/benbjohnson/litestream/file` | `file://` |
 | Amazon S3 | `github.com/benbjohnson/litestream/s3` | `s3://` |
-| Google Cloud Storage | `github.com/benbjohnson/litestream/gcs` | `gs://` |
+| Google Cloud Storage | `github.com/benbjohnson/litestream/gs` | `gs://` |
 | Azure Blob Storage | `github.com/benbjohnson/litestream/abs` | `abs://` |
 | Alibaba Cloud OSS | `github.com/benbjohnson/litestream/oss` | `oss://` |
 | SFTP | `github.com/benbjohnson/litestream/sftp` | `sftp://` |
