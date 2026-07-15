@@ -38,6 +38,9 @@ litestream sync [arguments] DB_PATH
 -timeout SECONDS
     Maximum time to wait in seconds, best-effort.
     Defaults to 30.
+
+-json
+    Output raw JSON instead of human-readable text.
 ```
 
 
@@ -46,34 +49,32 @@ litestream sync [arguments] DB_PATH
 The `sync` command operates in two modes:
 
 - **Fire-and-forget** (default): Triggers WAL-to-LTX conversion and returns
-  immediately. The response status will be `synced_local` if changes were
-  synced, or `no_change` if the database was already up to date.
+  immediately. The output reports the current local transaction ID but does
+  not include the remote replication position.
 
 - **Blocking** (`-wait`): Blocks until both WAL-to-LTX conversion and
-  LTX-to-remote replication complete. The response status will be `synced`
-  when complete, or `no_change` if the database was already up to date.
+  LTX-to-remote replication complete. The output additionally reports the
+  transaction ID confirmed replicated to remote storage.
 
 
 ## Output
 
-The `sync` command returns JSON output with the following fields:
+{{< since version="0.5.12" >}} By default, the `sync` command prints
+human-readable `key: value` lines. Use the `-json` flag for machine-readable
+output. Earlier versions printed the raw JSON response from the
+[`POST /sync`](/reference/ipc#post-sync) IPC endpoint.
 
 | Field | Description |
 |-------|-------------|
-| `status` | Sync status: `synced_local`, `synced`, or `no_change` |
-| `path` | Absolute path to the database file |
+| `db_path` | Absolute path to the database file |
 | `txid` | Current local transaction ID |
-| `replicated_txid` | Transaction ID confirmed replicated to remote storage |
+| `replica_txid` | Transaction ID confirmed replicated to remote storage; only present with `-wait` |
+| `duration_ms` | Time the sync request took in milliseconds |
 
-The `replicated_txid` field indicates the last transaction ID that has been
-durably replicated to remote storage:
-
-- With `-wait`: Returns the confirmed replicated transaction ID, allowing you
-  to verify that writes have been durably replicated to remote storage.
-  The value will match `txid` since the command blocks until replication completes.
-- Without `-wait`: Returns the last known replicated position, which may lag
-  behind `txid` since the newly synced data has not yet been replicated to
-  remote storage.
+The `replica_txid` field only appears when `-wait` is set. Its value matches
+`txid` since the command blocks until replication completes. Without `-wait`,
+the field is omitted because the newly synced data has not yet been confirmed
+replicated to remote storage.
 
 
 ## Examples
@@ -84,12 +85,9 @@ Trigger an immediate sync for a database:
 
 ```
 $ litestream sync /path/to/my.db
-{
-  "status": "synced_local",
-  "path": "/path/to/my.db",
-  "txid": 42,
-  "replicated_txid": 40
-}
+db_path: /path/to/my.db
+txid: 42
+duration_ms: 2
 ```
 
 ### Sync and wait for completion
@@ -98,11 +96,22 @@ Block until the sync finishes, including remote replication:
 
 ```
 $ litestream sync -wait /path/to/my.db
+db_path: /path/to/my.db
+txid: 42
+replica_txid: 42
+duration_ms: 150
+```
+
+### JSON output
+
+Use `-json` for machine-readable output suitable for scripting:
+
+```
+$ litestream sync -json /path/to/my.db
 {
-  "status": "synced",
-  "path": "/path/to/my.db",
+  "db_path": "/path/to/my.db",
   "txid": 42,
-  "replicated_txid": 42
+  "duration_ms": 2
 }
 ```
 
@@ -117,6 +126,7 @@ $ litestream sync -wait -timeout 60 -socket /tmp/litestream.sock /path/to/my.db
 
 ## See Also
 
+- [JSON Output Reference](/reference/json-output#sync--json) — Schema for `-json` output
 - [IPC Endpoints](/reference/ipc) — Unix socket endpoints including `POST /sync`
 - [Command: replicate](/reference/replicate) — Start the replication daemon
 - [Configuration Reference](/reference/config) — Complete configuration options
