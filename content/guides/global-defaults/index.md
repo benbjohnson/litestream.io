@@ -79,8 +79,12 @@ These settings apply to all replica types:
 | `validation-interval` | How often to validate replica integrity | disabled |
 
 Note: Snapshot and retention settings (`snapshot.interval`, `snapshot.retention`)
-are configured separately at the top level under the `snapshot:` section. See the
-[Configuration Reference](/reference/config) for details.
+are configured separately at the top level under the `snapshot:` section. Since
+v0.5.12 you can also set `snapshot.interval`/`snapshot.retention` on an individual
+database, but those values are promoted to the global snapshot configuration
+rather than applied per-database — the effective snapshot schedule is always
+global. See the [Configuration Reference](/reference/config#per-database-snapshot-settings)
+for the promotion and conflict rules.
 
 ### S3 and S3-Compatible Settings
 

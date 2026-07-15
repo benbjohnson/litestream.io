@@ -349,6 +349,87 @@ l0-retention-check-interval: 15s
 ```
 
 
+### Compaction verification
+
+{{< since version="0.5.7" >}} The `verify-compaction` option checks TXID
+consistency at the destination level after each compaction. When enabled,
+Litestream logs a warning if it detects gaps or overlaps in the transaction
+ranges. This is primarily a diagnostic aid and is disabled by default.
+
+```yaml
+verify-compaction: true
+```
+
+- `verify-compaction`—Verify TXID consistency after each compaction and log
+  warnings on gaps or overlaps. Defaults to `false`.
+
+
+### Heartbeat monitoring
+
+{{< since version="0.5.6" >}} Litestream can send periodic heartbeat pings to an
+external URL as a dead-man's switch for backup-health monitoring services such as
+[Healthchecks.io](https://healthchecks.io/) or Better Stack. A ping is an HTTP
+`GET` request and is considered delivered when the endpoint returns a `2xx`
+status code.
+
+The heartbeat is health-gated, not a plain process-uptime signal: Litestream
+sends a ping only when **all** enabled databases have completed a successful sync
+within the heartbeat interval. If there are no enabled databases, or any database
+has fallen behind, no ping is sent — so a missed heartbeat means replication is
+unhealthy (or the daemon has stopped), not merely that the process exited.
+
+```yaml
+heartbeat-url: https://hc-ping.com/your-uuid-here
+heartbeat-interval: 1m
+```
+
+- `heartbeat-url`—URL to ping on each heartbeat interval. Heartbeats are disabled
+  when this is empty. Defaults to empty (disabled).
+- `heartbeat-interval`—How often to ping the heartbeat URL while all databases are
+  healthy. Must be at least `1m`; smaller values are rejected and Litestream fails
+  to start. Defaults to `5m`.
+
+
+### Shutdown sync
+
+{{< since version="0.5.6" >}} When Litestream receives a shutdown signal, it
+attempts a final sync of each database to its replica before exiting. These
+settings bound how long that final sync is allowed to take.
+
+```yaml
+shutdown-sync-timeout: 30s
+shutdown-sync-interval: 500ms
+```
+
+- `shutdown-sync-timeout`—Maximum time to wait for the final sync to complete
+  during shutdown. Defaults to `30s`.
+- `shutdown-sync-interval`—How frequently to retry the final sync while waiting
+  for it to succeed during shutdown. Defaults to `500ms`.
+
+
+### Control socket
+
+{{< since version="0.5.7" >}} The `socket` block configures the Unix domain
+socket used by the daemon control commands ([`stop`]({{< ref "stop" >}}),
+[`register`]({{< ref "register" >}}), and others) and the local
+[IPC endpoints]({{< ref "ipc" >}}). The socket is disabled by default and must be
+enabled explicitly.
+
+```yaml
+socket:
+  enabled: true
+  path: /var/run/litestream.sock
+  permissions: 0600
+```
+
+- `enabled`—Enables the control socket. When `false`, the daemon does not create
+  a socket and control commands cannot connect. Defaults to `false`.
+- `path`—Filesystem path for the Unix socket. Defaults to
+  `/var/run/litestream.sock`.
+- `permissions`—Octal file permissions for the socket. Defaults to `0600`
+  (owner read/write only).
+
+
 ## Database settings
 
 Litestream can monitor one or more database files that are specified in the
@@ -390,9 +471,42 @@ Each database supports the following configuration options:
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
 - `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
 - `truncate-page-n`—{{< since version="0.5.0" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocks both readers and writers**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
+- `restore-if-db-not-exists`—{{< since version="0.5.6" >}} When `true`, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to `false`. This is also available as the `-restore-if-db-not-exists` flag on the [`replicate`]({{< ref "replicate" >}}) command.
+- `snapshot`—{{< since version="0.5.12" >}} Per-database `interval` and `retention` for snapshots. See [Per-database snapshot settings](#per-database-snapshot-settings) below for the promotion semantics.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
 
 {{< alert icon="⚠️" text="The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead." >}}
+
+### Per-database snapshot settings
+
+{{< since version="0.5.12" >}} A `snapshot` block can be set on an individual
+database, but snapshot settings are ultimately applied globally. The per-database
+block is a convenience for expressing the global snapshot configuration from the
+database level:
+
+```yaml
+dbs:
+  - path: /var/lib/app.db
+    snapshot:
+      interval: 1h
+      retention: 24h
+    replica:
+      url: s3://mybucket/app
+```
+
+The promotion and conflict rules are:
+
+- A database-level `snapshot.interval` or `snapshot.retention` is promoted to the
+  global [`snapshot`](#complete-configuration-example) configuration **unless** the
+  global `snapshot` block explicitly sets that field.
+- An explicit global value always wins over a database-level value.
+- If two databases set **different** values for the same field, Litestream fails
+  to start with an error such as `conflicting database snapshot intervals: …`.
+
+Because the effective snapshot schedule is global, all databases share the same
+snapshot interval and retention. Use per-database blocks only to keep related
+settings next to the database they describe, not to give each database a distinct
+snapshot schedule.
 
 ### Directory replication
 
@@ -974,6 +1088,7 @@ The following settings are specific to ABS replicas:
 
 - `account-name`—Azure storage account name
 - `account-key`—Azure storage account key. Can be set via `LITESTREAM_AZURE_ACCOUNT_KEY` environment variable or injected via `${VAR}` syntax in config
+- `sas-token`—{{< since version="0.5.7" >}} Shared Access Signature (SAS) token for authentication, as an alternative to `account-key`
 - `bucket`—Container name within the storage account
 - `path`—Path within the container
 - `endpoint`—Custom endpoint URL (optional)
@@ -1010,6 +1125,7 @@ The following settings are specific to SFTP replicas:
 - `user`—Username for authentication
 - `password`—Password for authentication (not recommended for production)
 - `key-path`—Path to SSH private key file for key-based authentication
+- `host-key`—{{< since version="0.5.3" >}} Expected SSH host public key in `authorized_keys` format (e.g. `ssh-ed25519 AAAA…`), used to verify the server's identity. When set, Litestream rejects connections whose host key does not match. When empty, the host key is not verified
 - `path`—Remote path where replica files will be stored
 - `concurrent-writes`—Enables concurrent writes for improved throughput (defaults
   to `true`). When enabled, failed uploads must restart from the beginning. Set
@@ -1213,6 +1329,12 @@ old LTX files are dropped through a process called "retention".
 Retention is controlled globally via the `snapshot.retention` field in the root
 configuration, not per-replica. See the [Complete Configuration Example](#complete-configuration-example)
 section for an example of how to configure snapshot settings.
+
+{{< since version="0.5.12" >}} You can also set `snapshot.interval` and
+`snapshot.retention` on an individual database, but these values are promoted to
+the global snapshot configuration rather than applied per-database. See
+[Per-database snapshot settings](#per-database-snapshot-settings) for the exact
+promotion and conflict rules.
 
 Duration values can be specified using second (`s`), minute (`m`), or hour (`h`)
 but days, weeks, & years are not supported.
