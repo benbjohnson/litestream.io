@@ -280,12 +280,12 @@ database. Make sure both terminal windows are using the same working directory.<
 <p>First, we&rsquo;ll set our MinIO credentials to our environment variables:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>minioadmin
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>minioadmin
-</span></span></code></pre></div><p>Next, run Litesteam&rsquo;s <code>replicate</code> command to start replication:</p>
+</span></span></code></pre></div><p>Next, run Litestream&rsquo;s <code>replicate</code> command to start replication:</p>
 <pre tabindex="0"><code>litestream replicate fruits.db s3://mybkt.localhost:9000/fruits.db
 </code></pre><p>You should see Litestream print some initialization commands and then wait
 indefinitely. Normally, Litestream is run as a background service so it
 continuously watches your database for new changes so the command does not exit.</p>
-<p>If you open the <a href="http://localhost:9000/minio/mybkt/">MinIO Console</a>,
+<p>If you open the <a href="http://localhost:9001/browser/mybkt/">MinIO Console</a>,
 you will see there is a <code>fruits.db</code> directory in your bucket.</p>
 <h2 id="restoring-your-database">Restoring your database<a href="#restoring-your-database" class="anchor" aria-hidden="true">#</a> </h2>
 <p><strong>In a third terminal window</strong>, we&rsquo;ll restore our database to a new file. First,
