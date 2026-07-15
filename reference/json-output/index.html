@@ -180,7 +180,7 @@ Empty Arrays v0.">
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -223,7 +223,6 @@ Empty Arrays v0.">
         <li><a href="#restore--json">restore -json</a></li>
         <li><a href="#restore--dry-run--json">restore -dry-run -json</a></li>
         <li><a href="#status--json">status -json</a></li>
-        <li><a href="#sync--json">sync -json</a></li>
       </ul>
     </li>
     <li><a href="#see-also">See Also</a></li>
@@ -676,56 +675,6 @@ databases.</p>
 </table>
 <p>When no databases are configured, the command emits an empty array (<code>[]</code>).</p>
 <p>See also: <a href="/reference/status">Command: status</a></p>
-<h3 id="sync--json">sync -json<a href="#sync--json" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
-    v0.5.12
-</span>
- Outputs a summary object after forcing an
-immediate sync through the daemon control socket.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;db_path&#34;</span><span class="p">:</span> <span class="s2">&#34;/var/lib/app.db&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;txid&#34;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;duration_ms&#34;</span><span class="p">:</span> <span class="mi">2</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>With <code>-wait</code>, the output additionally includes <code>replica_txid</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;db_path&#34;</span><span class="p">:</span> <span class="s2">&#34;/var/lib/app.db&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;txid&#34;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;replica_txid&#34;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;duration_ms&#34;</span><span class="p">:</span> <span class="mi">150</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>db_path</code></td>
-<td>string</td>
-<td>SQLite database path</td>
-</tr>
-<tr>
-<td><code>txid</code></td>
-<td>number</td>
-<td>Current local transaction ID</td>
-</tr>
-<tr>
-<td><code>replica_txid</code></td>
-<td>number</td>
-<td>Transaction ID confirmed replicated to remote storage; only present with <code>-wait</code></td>
-</tr>
-<tr>
-<td><code>duration_ms</code></td>
-<td>number</td>
-<td>Sync duration in milliseconds</td>
-</tr>
-</tbody>
-</table>
-<p>See also: <a href="/reference/sync">Command: sync</a></p>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/reference/databases">Command: databases</a> — List databases from config file</li>
@@ -734,7 +683,6 @@ immediate sync through the daemon control socket.</p>
 <li><a href="/reference/ltx">Command: ltx</a> — List LTX files for a database</li>
 <li><a href="/reference/restore">Command: restore</a> — Recover database from a replica</li>
 <li><a href="/reference/status">Command: status</a> — Report local replication status</li>
-<li><a href="/reference/sync">Command: sync</a> — Force an immediate WAL-to-LTX sync for a database</li>
 </ul>
 
 			<div class="docs-navigation d-flex justify-content-between">
@@ -766,7 +714,7 @@ immediate sync through the daemon control socket.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

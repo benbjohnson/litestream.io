@@ -180,7 +180,7 @@ Setup Install the Fly CLI If you haven&rsquo;t already, install the Fly CLI by f
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -259,24 +259,17 @@ AWS_SECRET_ACCESS_KEY=tsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 AWS_ENDPOINT_URL_S3=https://fly.storage.tigris.dev
 AWS_REGION=auto
 BUCKET_NAME=my-bucket
-</code></pre><p>Save these values for use in your Litestream configuration. Give Litestream the
-endpoint through the <code>endpoint=</code> query parameter or the <code>endpoint:</code> config field
-shown below — not the <code>AWS_ENDPOINT_URL_S3</code> variable, which bypasses Tigris
-auto-detection (see <a href="#environment-variables">Environment Variables</a>).</p>
+</code></pre><p>Save these values for use in your Litestream configuration.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>You can replicate to Tigris from the command line by setting environment
 variables with the credentials from bucket creation:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>tid_xxxxxxxxxxxxxxxxxxxx
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>tsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-</span></span></code></pre></div><p>Then specify your bucket with the Tigris endpoint as a replica URL. Always
-quote the URL, because your shell interprets the <code>?</code> and <code>&amp;</code> characters: in
-<code>zsh</code> the unquoted <code>?</code> fails glob expansion (<code>no matches found</code>), and in
-<code>sh</code>/<code>bash</code> the <code>&amp;</code> backgrounds Litestream with the URL truncated, running
-<code>region=auto</code> as a separate command.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db <span class="s2">&#34;s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&amp;region=auto&#34;</span>
+</span></span></code></pre></div><p>Then specify your bucket with the Tigris endpoint as a replica URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db s3://BUCKETNAME?endpoint<span class="o">=</span>fly.storage.tigris.dev<span class="p">&amp;</span><span class="nv">region</span><span class="o">=</span>auto
 </span></span></code></pre></div><p>You can later restore your database from Tigris to a local <code>my.db</code> path:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db <span class="s2">&#34;s3://BUCKETNAME?endpoint=fly.storage.tigris.dev&amp;region=auto&#34;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db s3://BUCKETNAME?endpoint<span class="o">=</span>fly.storage.tigris.dev<span class="p">&amp;</span><span class="nv">region</span><span class="o">=</span>auto
 </span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream is typically run as a background service which uses a configuration
 file. You can configure a replica for your database using the <code>url</code> format:</p>
@@ -359,15 +352,15 @@ for Tigris endpoints and cannot be disabled.</p>
 <td>Your Tigris secret key (starts with <code>tsec_</code>)</td>
 </tr>
 <tr>
+<td><code>AWS_ENDPOINT_URL_S3</code></td>
+<td>Set to <code>https://fly.storage.tigris.dev</code></td>
+</tr>
+<tr>
 <td><code>AWS_REGION</code></td>
 <td>Set to <code>auto</code></td>
 </tr>
 </tbody>
 </table>
-<div class="alert alert-warning d-flex" role="alert">
-  <div class="flex-shrink-1 alert-icon">⚠️</div>
-  <div class="w-100">**Do not set the endpoint with `AWS_ENDPOINT_URL_S3`.** The AWS SDK honors it, but Litestream's own endpoint field stays empty, so [Tigris auto-detection](#auto-detection) is skipped — the `X-Tigris-Consistent` header and Tigris-specific defaults are never applied. Set the endpoint with the `endpoint=` query parameter on the replica URL, or the `endpoint:` field in your config file, instead.</div>
-</div>
 <p>You can also use the Litestream-specific environment variables:</p>
 <table>
 <thead>
@@ -440,7 +433,7 @@ replication.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

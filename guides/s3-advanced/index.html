@@ -20,7 +20,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="S3 Advanced Configuration">
-<meta name="twitter:description" content="This guide covers advanced S3 configuration options, including multipart upload tuning and storage classes. These settings control how Litestream uploads data to S3 and S3-compatible storage services.
+<meta name="twitter:description" content="This guide covers advanced S3 configuration options for tuning multipart upload performance. These settings control how Litestream uploads data to S3 and S3-compatible storage services.
 v0.5.0 Part size and concurrency configuration options were added in Litestream v0.5.0.
 Overview When Litestream uploads files to S3, it uses multipart uploads for efficient data transfer. Two key settings control this behavior:
 Part Size: The size of each chunk uploaded to S3 Concurrency: The number of parts uploaded simultaneously Understanding these settings helps you optimize performance for your specific network conditions, storage provider, and resource constraints.">
@@ -181,7 +181,7 @@ Part Size: The size of each chunk uploaded to S3 Concurrency: The number of part
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -238,11 +238,6 @@ Part Size: The size of each chunk uploaded to S3 Concurrency: The number of part
       </ul>
     </li>
     <li><a href="#cost-considerations">Cost Considerations</a></li>
-    <li><a href="#storage-classes">Storage Classes</a>
-      <ul>
-        <li><a href="#retention-caveats">Retention Caveats</a></li>
-      </ul>
-    </li>
     <li><a href="#troubleshooting">Troubleshooting</a>
       <ul>
         <li><a href="#upload-failures-with-small-part-size">Upload Failures with Small Part Size</a></li>
@@ -268,9 +263,9 @@ Part Size: The size of each chunk uploaded to S3 Concurrency: The number of part
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
 		<h1>S3 Advanced Configuration</h1>
 			<p class="lead"></p>
-			<p>This guide covers advanced S3 configuration options, including multipart upload
-tuning and storage classes. These settings control how Litestream uploads data
-to S3 and S3-compatible storage services.</p>
+			<p>This guide covers advanced S3 configuration options for tuning multipart upload
+performance. These settings control how Litestream uploads data to S3 and
+S3-compatible storage services.</p>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
 </span>
@@ -457,75 +452,6 @@ Most services follow the standard S3 limits (5 MiB minimum part size).</p>
 </ul>
 <p>For high-volume databases with frequent syncs, consider larger part sizes to
 reduce the total number of API calls.</p>
-<h2 id="storage-classes">Storage Classes<a href="#storage-classes" class="anchor" aria-hidden="true">#</a> </h2>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.14">
-    v0.5.14
-</span>
- The <code>storage-class</code> field sets the S3 storage
-class for objects that Litestream uploads. When it is not set, objects use
-the provider&rsquo;s default storage class (<code>STANDARD</code> on AWS S3).</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">storage-class</span><span class="p">:</span><span class="w"> </span><span class="l">STANDARD_IA</span><span class="w">
-</span></span></span></code></pre></div><p>The storage class can also be set as a URL query parameter:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db?storage-class=STANDARD_IA</span><span class="w">
-</span></span></span></code></pre></div><p>The value is passed to S3 as-is, so any storage class supported by your
-provider works. Common AWS S3 choices:</p>
-<table>
-<thead>
-<tr>
-<th>Storage Class</th>
-<th>Best For</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>STANDARD</code></td>
-<td>Default; frequent access, no retrieval fees</td>
-</tr>
-<tr>
-<td><code>STANDARD_IA</code></td>
-<td>Long-retention replicas that are rarely restored</td>
-</tr>
-<tr>
-<td><code>ONEZONE_IA</code></td>
-<td>Same as <code>STANDARD_IA</code> but single-AZ, lower cost</td>
-</tr>
-<tr>
-<td><code>GLACIER_IR</code></td>
-<td>Archival storage with instant retrieval</td>
-</tr>
-<tr>
-<td><code>INTELLIGENT_TIERING</code></td>
-<td>Automatic tiering based on access patterns</td>
-</tr>
-</tbody>
-</table>
-<h3 id="retention-caveats">Retention Caveats<a href="#retention-caveats" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Infrequent-access and archival classes charge for a minimum storage duration
-(30 days for <code>STANDARD_IA</code> and <code>ONEZONE_IA</code>, 90 days for <code>GLACIER_IR</code>) and
-per-GB retrieval fees. Litestream continuously uploads new LTX files and
-deletes old ones during retention enforcement, so:</p>
-<ul>
-<li>Objects deleted before the minimum storage duration still incur the full
-minimum-duration charge. Use these classes only when your
-<a href="/reference/config#retention">retention period</a> is longer than the class&rsquo;s
-minimum storage duration.</li>
-<li>Restores read every LTX file needed to rebuild the database, so retrieval
-fees apply to the full restore size.</li>
-</ul>
-<p>Avoid asynchronous archive classes such as <code>GLACIER</code> (Flexible Retrieval) and
-<code>DEEP_ARCHIVE</code>. Objects in these classes must be restored to S3 before they
-can be read, so <code>litestream restore</code> fails against them.</p>
-<p>S3-compatible providers support different storage class values — check your
-provider&rsquo;s documentation before setting this option.</p>
 <h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="upload-failures-with-small-part-size">Upload Failures with Small Part Size<a href="#upload-failures-with-small-part-size" class="anchor" aria-hidden="true">#</a> </h3>
 <p>If you see errors about part size being too small, ensure your <code>part-size</code>
@@ -575,7 +501,7 @@ a <code>412 Precondition Failed</code> response and the instance waits.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;generation&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&#34;expires_at&#34;</span><span class="p">:</span> <span class="s2">&#34;2025-02-21T15:04:33.206179Z&#34;</span><span class="p">,</span> <span class="nt">&#34;owner&#34;</span><span class="p">:</span> <span class="s2">&#34;hostname:pid&#34;</span><span class="p">}</span>
 </span></span></code></pre></div><ul>
 <li><code>generation</code> — Monotonically increasing counter for lease generations</li>
-<li><code>expires_at</code> — RFC 3339 timestamp when the lease expires</li>
+<li><code>expires_at</code> — Unix timestamp when the lease expires</li>
 <li><code>owner</code> — Identifier of the instance holding the lease</li>
 </ul>
 <h3 id="failover-behavior">Failover Behavior<a href="#failover-behavior" class="anchor" aria-hidden="true">#</a> </h3>
@@ -625,7 +551,7 @@ AWS S3 supports this natively. Check your provider&rsquo;s documentation for
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

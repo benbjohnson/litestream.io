@@ -180,7 +180,7 @@ Usage litestream info [arguments] Arguments -socket PATH Path to the control soc
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -250,7 +250,7 @@ over the IPC control socket. The daemon must already be running.</p>
 <p>By default, the <code>info</code> command displays daemon information in a human-readable
 format:</p>
 <pre tabindex="0"><code>$ litestream info
-Litestream 0.5.12
+Litestream v0.5.12
   PID:        12345
   Uptime:     1h30m0s
   Started at: 2026-05-28T10:00:00Z
@@ -289,7 +289,7 @@ Litestream 0.5.12
 <h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="basic-daemon-info">Basic daemon info<a href="#basic-daemon-info" class="anchor" aria-hidden="true">#</a> </h3>
 <pre tabindex="0"><code>$ litestream info
-Litestream 0.5.12
+Litestream v0.5.12
   PID:        12345
   Uptime:     1h30m0s
   Started at: 2026-05-28T10:00:00Z
@@ -297,7 +297,7 @@ Litestream 0.5.12
 </code></pre><h3 id="json-output">JSON output<a href="#json-output" class="anchor" aria-hidden="true">#</a> </h3>
 <pre tabindex="0"><code>$ litestream info -json
 {
-  &#34;version&#34;: &#34;0.5.12&#34;,
+  &#34;version&#34;: &#34;v0.5.12&#34;,
   &#34;pid&#34;: 12345,
   &#34;uptime_seconds&#34;: 5400,
   &#34;started_at&#34;: &#34;2026-05-28T10:00:00Z&#34;,
@@ -342,7 +342,7 @@ Litestream 0.5.12
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

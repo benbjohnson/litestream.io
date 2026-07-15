@@ -14,15 +14,15 @@
   <meta name="robots" content="index, follow">
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <title>MCP Server - Litestream</title>
+  <title>Command: mcp - Litestream</title>
 <meta name="description" content="Litestream replicates SQLite databases in real-time to S3.">
 <link rel="canonical" href="https://litestream.io/reference/mcp/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
-<meta name="twitter:title" content="MCP Server">
-<meta name="twitter:description" content="Litestream includes a built-in Model Context Protocol (MCP) server, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.
-There is no litestream mcp subcommand. The MCP server runs as part of the replicate command and is enabled by setting mcp-addr in the configuration file.
-Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems.">
+<meta name="twitter:title" content="Command: mcp">
+<meta name="twitter:description" content="The mcp server provides Model Context Protocol integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.
+Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems. Litestream&rsquo;s MCP server exposes tools that allow AI assistants to:
+View database and replica status Monitor replication health and sync state List available transaction log (LTX) files Restore databases to specific points in time Reset local replication state Print version information This integration enables natural language interaction with your Litestream deployment, making it easier to inspect backups, troubleshoot issues, and perform restores through conversational AI interfaces.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -180,7 +180,7 @@ Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enable
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link active" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link active" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -252,14 +252,11 @@ Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enable
 
 		</nav>
 		<main class="docs-content col-lg-11 col-xl-9 mx-xl-auto">
-		<h1>MCP Server</h1>
+		<h1>Command: mcp</h1>
 			<p class="lead"></p>
-			<p>Litestream includes a built-in <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
-(MCP) server, allowing AI assistants like Claude, Copilot, Cursor, and others to interact
+			<p>The <code>mcp</code> server provides <a href="https://modelcontextprotocol.io">Model Context Protocol</a>
+integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact
 with Litestream databases and replicas through a standardized HTTP API.</p>
-<p>There is no <code>litestream mcp</code> subcommand. The MCP server runs as part of the
-<a href="/reference/replicate"><code>replicate</code></a> command and is enabled by setting <code>mcp-addr</code>
-in the configuration file.</p>
 <h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -282,8 +279,7 @@ conversational AI interfaces.</p>
 <p>Enable the MCP server by adding the <code>mcp-addr</code> setting to your configuration file:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
 </span></span></span></code></pre></div><p>The server starts automatically alongside the <code>replicate</code> command when this setting
-is configured. There is no equivalent command-line flag—the setting is only
-available in the configuration file.</p>
+is configured.</p>
 <h3 id="security-considerations">Security Considerations<a href="#security-considerations" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The MCP server provides access to database information and restore capabilities.
 Follow these guidelines to secure your deployment:</p>
@@ -305,7 +301,7 @@ details. Ensure your deployment environment restricts access to authorized users
 <p>The MCP server exposes these tools for AI assistants:</p>
 <h3 id="litestream_info">litestream_info<a href="#litestream_info" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Returns a comprehensive summary of Litestream&rsquo;s current status including version,
-configured databases, and available LTX files.</p>
+configured databases, generations, and snapshots.</p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -327,20 +323,24 @@ configured databases, and available LTX files.</p>
 <pre tabindex="0"><code>=== Litestream Status Report ===
 
 Version Information:
-0.5.14
+v0.5.0
 
 Current Config Path:
 /etc/litestream.yml
 
 Databases:
-path               replica
-/var/lib/myapp.db  s3
+path                 replica
+/var/lib/myapp.db    s3
 
-LTX Files:
+Generations:
 Database: /var/lib/myapp.db
-level  min_txid          max_txid          size  created
-0      0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
-0      0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
+name        generation          updated
+s3          abc123def456...     2025-01-15T10:30:00Z
+
+Snapshots:
+Database: /var/lib/myapp.db
+replica  generation        index  size    created
+s3       abc123def456...   0      4096    2025-01-15T10:00:00Z
 </code></pre><h3 id="litestream_databases">litestream_databases<a href="#litestream_databases" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Lists all configured databases and their replica status.</p>
 <p><strong>Parameters:</strong></p>
@@ -361,9 +361,9 @@ level  min_txid          max_txid          size  created
 </tbody>
 </table>
 <p><strong>Example output:</strong></p>
-<pre tabindex="0"><code>path               replica
-/var/lib/myapp.db  s3
-/var/lib/other.db  file
+<pre tabindex="0"><code>path                 replica
+/var/lib/myapp.db    s3
+/var/lib/other.db    file
 </code></pre><h3 id="litestream_status">litestream_status<a href="#litestream_status" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
     v0.5.8
@@ -384,17 +384,12 @@ level  min_txid          max_txid          size  created
 <td>No</td>
 <td>Path to configuration file</td>
 </tr>
-<tr>
-<td><code>path</code></td>
-<td>No</td>
-<td>Filter output to a specific database path</td>
-</tr>
 </tbody>
 </table>
 <p><strong>Example output:</strong></p>
-<pre tabindex="0"><code>database           status  local txid        wal size
-/var/lib/myapp.db  ok      0000000000000005  21 kB
-/var/lib/other.db  ok      0000000000000003  4.1 kB
+<pre tabindex="0"><code>path                 status    local_txid  wal_size
+/var/lib/myapp.db    ok        42          8192
+/var/lib/other.db    ok        17          4096
 </code></pre><h3 id="litestream_ltx">litestream_ltx<a href="#litestream_ltx" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Lists available LTX (Litestream Transaction Log) files for a database or replica.
 Use this to inspect available restore points.</p>
@@ -421,10 +416,10 @@ Use this to inspect available restore points.</p>
 </tbody>
 </table>
 <p><strong>Example output:</strong></p>
-<pre tabindex="0"><code>level  min_txid          max_txid          size  created
-0      0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
-0      0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
-0      0000000000000003  0000000000000003  663   2025-01-15T10:30:00Z
+<pre tabindex="0"><code>min_txid          max_txid          size  created
+0000000000000001  0000000000000001  657   2025-01-15T10:00:00Z
+0000000000000002  0000000000000002  209   2025-01-15T10:15:00Z
+0000000000000003  0000000000000003  663   2025-01-15T10:30:00Z
 </code></pre><h3 id="litestream_restore">litestream_restore<a href="#litestream_restore" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Restores a database to a specific point in time.</p>
 <p><strong>Parameters:</strong></p>
@@ -489,7 +484,7 @@ Use this to inspect available restore points.</p>
 <p>Prints the Litestream version.</p>
 <p><strong>Parameters:</strong> None.</p>
 <p><strong>Example output:</strong></p>
-<pre tabindex="0"><code>0.5.14
+<pre tabindex="0"><code>v0.5.8
 </code></pre><h3 id="litestream_reset">litestream_reset<a href="#litestream_reset" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
     v0.5.8
@@ -662,8 +657,8 @@ with its knowledge of Litestream to provide troubleshooting guidance.</p>
 <li>
 <p>Verify Litestream is running with MCP enabled:</p>
 <pre tabindex="0"><code>$ litestream replicate -config litestream.yml
-INFO litestream version=0.5.14
-INFO Starting MCP Streamable HTTP server addr=:3001
+INFO litestream version=v0.5.0
+INFO Starting MCP server addr=:3001
 </code></pre></li>
 <li>
 <p>Ensure the port matches your configuration.</p>
@@ -731,7 +726,7 @@ over HTTP using JSON-RPC 2.0 at the root endpoint (<code>/</code>).</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

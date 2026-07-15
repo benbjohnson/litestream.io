@@ -173,7 +173,7 @@
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -201,7 +201,6 @@
   <ul>
     <li><a href="#commands">Commands</a></li>
     <li><a href="#daemon-control-commands">Daemon Control Commands</a></li>
-    <li><a href="#mcp-server">MCP Server</a></li>
     <li><a href="#vfs-extension">VFS Extension</a></li>
     <li><a href="#ipc-endpoints">IPC Endpoints</a></li>
     <li><a href="#prometheus-metrics">Prometheus Metrics</a></li>
@@ -222,8 +221,8 @@ about the options available and different modes of operation.</p>
 <ul>
 <li><a href="/reference/databases"><code>litestream databases</code></a> — Lists databases specified in config file.</li>
 <li><a href="/reference/ltx"><code>litestream ltx</code></a> — List available LTX files for a database.</li>
+<li><a href="/reference/mcp"><code>litestream mcp</code></a> — MCP server for AI assistant integration.</li>
 <li><a href="/reference/replicate"><code>litestream replicate</code></a> — Runs a server to replicate databases.</li>
-<li><a href="/reference/reset"><code>litestream reset</code></a> — Clears local Litestream state, forcing a fresh snapshot on the next sync.</li>
 <li><a href="/reference/restore"><code>litestream restore</code></a> — Recovers database backup from a replica.</li>
 <li><a href="/reference/status"><code>litestream status</code></a> — Reports local replication status for configured databases.</li>
 <li><a href="/reference/sync"><code>litestream sync</code></a> — Forces immediate WAL-to-LTX sync for a database.</li>
@@ -240,10 +239,6 @@ IPC control socket. They require a running daemon with the socket enabled.</p>
 <li><a href="/reference/unregister"><code>litestream unregister</code></a> — Removes a database from the daemon.</li>
 <li><a href="/reference/start"><code>litestream start</code></a> — Resumes replication for a stopped database.</li>
 <li><a href="/reference/stop"><code>litestream stop</code></a> — Pauses replication for a database.</li>
-</ul>
-<h2 id="mcp-server">MCP Server<a href="#mcp-server" class="anchor" aria-hidden="true">#</a> </h2>
-<ul>
-<li><a href="/reference/mcp">MCP Server</a> — Model Context Protocol integration for AI assistants, enabled via the <code>replicate</code> command&rsquo;s <code>mcp-addr</code> config setting.</li>
 </ul>
 <h2 id="vfs-extension">VFS Extension<a href="#vfs-extension" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
@@ -274,7 +269,7 @@ IPC control socket. They require a running daemon with the socket enabled.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

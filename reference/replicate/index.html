@@ -180,7 +180,7 @@ litestream replicate [arguments] Replicate a single file (Command-line mode) Thi
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link active" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -217,9 +217,6 @@ litestream replicate [arguments] Replicate a single file (Command-line mode) Thi
         <li><a href="#flag-ordering-example">Flag ordering example</a></li>
       </ul>
     </li>
-    <li><a href="#run-once-mode">Run-once mode</a></li>
-    <li><a href="#restore-if-the-database-does-not-exist">Restore if the database does not exist</a></li>
-    <li><a href="#log-level">Log level</a></li>
     <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -385,25 +382,8 @@ use a <a href="https://litestream.io/reference/config/">configuration file</a> i
     Executes a subcommand. Litestream will exit when the child
     process exits. Useful for simple process management.
 
--once
-    Replicate once and exit. This performs a single sync of all
-    databases and their replicas, then exits. Cannot be used with -exec.
-
--force-snapshot
-    Force a snapshot to be taken for all databases. Requires -once.
-
--enforce-retention
-    Enforce retention policies for old snapshots. Requires -once.
-
--log-level LEVEL
-    Sets the log level. Overrides the config file setting.
-    Valid values: trace, debug, info, warn, error
-
 -no-expand-env
     Disables environment variable expansion in configuration file.
-
--restore-if-db-not-exists
-    Restores the database from the replica if it doesn&#39;t exist.
 </code></pre><h3 id="flag-ordering-example">Flag ordering example<a href="#flag-ordering-example" class="anchor" aria-hidden="true">#</a> </h3>
 <pre tabindex="0"><code># ✅ Correct: flags before positional arguments
 litestream replicate -exec &#34;myapp serve&#34; /path/to/db s3://mybucket/db
@@ -411,50 +391,7 @@ litestream replicate -exec &#34;myapp serve&#34; /path/to/db s3://mybucket/db
 # ❌ Incorrect: flags after positional arguments
 litestream replicate /path/to/db s3://mybucket/db -exec &#34;myapp serve&#34;
 # Error: flag &#34;-exec&#34; must be positioned before DB_PATH and REPLICA_URL arguments
-</code></pre><h2 id="run-once-mode">Run-once mode<a href="#run-once-mode" class="anchor" aria-hidden="true">#</a> </h2>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
-    v0.5.6
-</span>
- The <code>-once</code> flag performs a single sync of all
-databases and their replicas, then exits instead of running as a continuous
-server. This is useful for cron jobs, CI/CD pipelines, and backup scripts where
-you want a one-time replication rather than a long-running process.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream replicate -once /var/lib/mydb.db s3://mybucket/mydb
-</span></span></code></pre></div><p><code>-once</code> cannot be combined with <code>-exec</code>, since <code>-exec</code> manages a long-running
-child process.</p>
-<p>Two flags refine run-once behavior and both <strong>require</strong> <code>-once</code>:</p>
-<ul>
-<li><code>-force-snapshot</code>—Forces a new snapshot to be taken for all databases.
-Useful for creating a complete backup before maintenance or when migrating
-databases between hosts.</li>
-<li><code>-enforce-retention</code>—Applies the configured snapshot retention policy,
-removing snapshots older than the retention period.</li>
-</ul>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Force a fresh snapshot during a one-time sync</span>
-</span></span><span class="line"><span class="cl">litestream replicate -once -force-snapshot /var/lib/mydb.db s3://mybucket/mydb
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Apply retention while syncing once</span>
-</span></span><span class="line"><span class="cl">litestream replicate -once -enforce-retention /var/lib/mydb.db s3://mybucket/mydb
-</span></span></code></pre></div><p>Using <code>-force-snapshot</code> or <code>-enforce-retention</code> without <code>-once</code> returns an error.</p>
-<h2 id="restore-if-the-database-does-not-exist">Restore if the database does not exist<a href="#restore-if-the-database-does-not-exist" class="anchor" aria-hidden="true">#</a> </h2>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
-    v0.5.6
-</span>
- The <code>-restore-if-db-not-exists</code> flag restores the
-database from its replica before replication starts if the local database file
-is missing. On first start with no existing backup, replication proceeds
-normally.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream replicate -restore-if-db-not-exists /var/lib/mydb.db s3://mybucket/mydb
-</span></span></code></pre></div><h2 id="log-level">Log level<a href="#log-level" class="anchor" aria-hidden="true">#</a> </h2>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
-    v0.5.7
-</span>
- The <code>-log-level</code> flag sets the logging verbosity
-and overrides the <a href="https://litestream.io/reference/config/#logging"><code>logging</code></a> setting from the
-configuration file. Valid values are <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, and
-<code>error</code>.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream replicate -log-level debug /var/lib/mydb.db s3://mybucket/mydb
-</span></span></code></pre></div><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+</code></pre><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/reference/config">Configuration Reference</a> - Complete configuration options</li>
 <li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
@@ -466,7 +403,7 @@ configuration file. Valid values are <code>trace</code>, <code>debug</code>, <co
 	<a href="https://litestream.io/reference/mcp/">
 			<div class="card my-1">
 				<div class="card-body py-2">
-					&larr; MCP Server
+					&larr; Command: mcp
 				</div>
 			</div>
 		</a>
@@ -490,7 +427,7 @@ configuration file. Valid values are <code>trace</code>, <code>debug</code>, <co
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

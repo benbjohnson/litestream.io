@@ -180,7 +180,7 @@ Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the con
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -214,7 +214,6 @@ Usage litestream sync [arguments] DB_PATH Arguments -socket PATH Path to the con
       <ul>
         <li><a href="#basic-sync">Basic sync</a></li>
         <li><a href="#sync-and-wait-for-completion">Sync and wait for completion</a></li>
-        <li><a href="#json-output">JSON output</a></li>
         <li><a href="#sync-with-custom-timeout-and-socket">Sync with custom timeout and socket</a></li>
       </ul>
     </li>
@@ -250,31 +249,22 @@ over the IPC control socket. The daemon must already be running.</p>
 -timeout SECONDS
     Maximum time to wait in seconds, best-effort.
     Defaults to 30.
-
--json
-    Output raw JSON instead of human-readable text.
 </code></pre><h2 id="behavior">Behavior<a href="#behavior" class="anchor" aria-hidden="true">#</a> </h2>
 <p>The <code>sync</code> command operates in two modes:</p>
 <ul>
 <li>
 <p><strong>Fire-and-forget</strong> (default): Triggers WAL-to-LTX conversion and returns
-immediately. The output reports the current local transaction ID but does
-not include the remote replication position.</p>
+immediately. The response status will be <code>synced_local</code> if changes were
+synced, or <code>no_change</code> if the database was already up to date.</p>
 </li>
 <li>
 <p><strong>Blocking</strong> (<code>-wait</code>): Blocks until both WAL-to-LTX conversion and
-LTX-to-remote replication complete. The output additionally reports the
-transaction ID confirmed replicated to remote storage.</p>
+LTX-to-remote replication complete. The response status will be <code>synced</code>
+when complete, or <code>no_change</code> if the database was already up to date.</p>
 </li>
 </ul>
 <h2 id="output">Output<a href="#output" class="anchor" aria-hidden="true">#</a> </h2>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
-    v0.5.12
-</span>
- By default, the <code>sync</code> command prints
-human-readable <code>key: value</code> lines. Use the <code>-json</code> flag for machine-readable
-output. Earlier versions printed the raw JSON response from the
-<a href="/reference/ipc#post-sync"><code>POST /sync</code></a> IPC endpoint.</p>
+<p>The <code>sync</code> command returns JSON output with the following fields:</p>
 <table>
 <thead>
 <tr>
@@ -284,7 +274,11 @@ output. Earlier versions printed the raw JSON response from the
 </thead>
 <tbody>
 <tr>
-<td><code>db_path</code></td>
+<td><code>status</code></td>
+<td>Sync status: <code>synced_local</code>, <code>synced</code>, or <code>no_change</code></td>
+</tr>
+<tr>
+<td><code>path</code></td>
 <td>Absolute path to the database file</td>
 </tr>
 <tr>
@@ -292,47 +286,45 @@ output. Earlier versions printed the raw JSON response from the
 <td>Current local transaction ID</td>
 </tr>
 <tr>
-<td><code>replica_txid</code></td>
-<td>Transaction ID confirmed replicated to remote storage; only present with <code>-wait</code></td>
-</tr>
-<tr>
-<td><code>duration_ms</code></td>
-<td>Time the sync request took in milliseconds</td>
+<td><code>replicated_txid</code></td>
+<td>Transaction ID confirmed replicated to remote storage</td>
 </tr>
 </tbody>
 </table>
-<p>The <code>replica_txid</code> field only appears when <code>-wait</code> is set. Its value matches
-<code>txid</code> since the command blocks until replication completes. Without <code>-wait</code>,
-the field is omitted because the newly synced data has not yet been confirmed
-replicated to remote storage.</p>
+<p>The <code>replicated_txid</code> field indicates the last transaction ID that has been
+durably replicated to remote storage:</p>
+<ul>
+<li>With <code>-wait</code>: Returns the confirmed replicated transaction ID, allowing you
+to verify that writes have been durably replicated to remote storage.
+The value will match <code>txid</code> since the command blocks until replication completes.</li>
+<li>Without <code>-wait</code>: Returns the last known replicated position, which may lag
+behind <code>txid</code> since the newly synced data has not yet been replicated to
+remote storage.</li>
+</ul>
 <h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="basic-sync">Basic sync<a href="#basic-sync" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Trigger an immediate sync for a database:</p>
 <pre tabindex="0"><code>$ litestream sync /path/to/my.db
-db_path: /path/to/my.db
-txid: 42
-duration_ms: 2
+{
+  &#34;status&#34;: &#34;synced_local&#34;,
+  &#34;path&#34;: &#34;/path/to/my.db&#34;,
+  &#34;txid&#34;: 42,
+  &#34;replicated_txid&#34;: 40
+}
 </code></pre><h3 id="sync-and-wait-for-completion">Sync and wait for completion<a href="#sync-and-wait-for-completion" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Block until the sync finishes, including remote replication:</p>
 <pre tabindex="0"><code>$ litestream sync -wait /path/to/my.db
-db_path: /path/to/my.db
-txid: 42
-replica_txid: 42
-duration_ms: 150
-</code></pre><h3 id="json-output">JSON output<a href="#json-output" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Use <code>-json</code> for machine-readable output suitable for scripting:</p>
-<pre tabindex="0"><code>$ litestream sync -json /path/to/my.db
 {
-  &#34;db_path&#34;: &#34;/path/to/my.db&#34;,
+  &#34;status&#34;: &#34;synced&#34;,
+  &#34;path&#34;: &#34;/path/to/my.db&#34;,
   &#34;txid&#34;: 42,
-  &#34;duration_ms&#34;: 2
+  &#34;replicated_txid&#34;: 42
 }
 </code></pre><h3 id="sync-with-custom-timeout-and-socket">Sync with custom timeout and socket<a href="#sync-with-custom-timeout-and-socket" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Specify a longer timeout and a non-default socket path:</p>
 <pre tabindex="0"><code>$ litestream sync -wait -timeout 60 -socket /tmp/litestream.sock /path/to/my.db
 </code></pre><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li><a href="/reference/json-output#sync--json">JSON Output Reference</a> — Schema for <code>-json</code> output</li>
 <li><a href="/reference/ipc">IPC Endpoints</a> — Unix socket endpoints including <code>POST /sync</code></li>
 <li><a href="/reference/replicate">Command: replicate</a> — Start the replication daemon</li>
 <li><a href="/reference/config">Configuration Reference</a> — Complete configuration options</li>
@@ -367,7 +359,7 @@ duration_ms: 150
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
