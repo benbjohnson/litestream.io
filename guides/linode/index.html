@@ -241,8 +241,8 @@ on your account if you have not already.</p>
  <img src="bucket_0.png" alt="Screenshot of Linode create bucket UI">
 </figure>
 <p>After your bucket is created, you&rsquo;ll see a hostname for the bucket in the format
-of <code>BUCKETNAME.REGION.linodeobjects.com</code>. You&rsquo;ll need to use that later when
-configuring Litestream.</p>
+of <code>BUCKETNAME.REGION.linodeobjects.com</code>. You&rsquo;ll need the bucket name and the
+region portion (<code>REGION.linodeobjects.com</code>) later when configuring Litestream.</p>
 <h3 id="create-an-access-key">Create an access key<a href="#create-an-access-key" class="anchor" aria-hidden="true">#</a> </h3>
 <p>You&rsquo;ll need to create a key to authenticate Litestream to your account so it can
 access the bucket. In the <a href="https://cloud.linode.com/object-storage">Object Storage
@@ -266,25 +266,41 @@ line by setting environment variables with the credentials you obtained after
 creating your key:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_ACCESS_KEY_ID</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxx
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_SECRET_ACCESS_KEY</span><span class="o">=</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-</span></span></code></pre></div><p>Then you can specify your replica hostname as a replica URL on the command line.
-For example, you can replicate a database to your bucket with the following
-command. <em>Note that your region may be different.</em></p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db s3://BUCKETNAME.us-east-1.linodeobjects.com/db
-</span></span></code></pre></div><p>You can later restore your database from Linode Object Storage to a local <code>my.db</code>
+</span></span></code></pre></div><p>Then you can specify your bucket and the Linode endpoint as a replica URL on
+the command line. For example, you can replicate a database to your bucket with
+the following command. <em>Note that your region may be different.</em></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db <span class="s1">&#39;s3://BUCKETNAME/db?endpoint=us-east-1.linodeobjects.com&amp;region=us-east-1&#39;</span>
+</span></span></code></pre></div><p>The single quotes are required so your shell does not interpret the <code>&amp;</code> in the
+URL.</p>
+<p>You can later restore your database from Linode Object Storage to a local <code>my.db</code>
 path with the following command.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db s3://BUCKETNAME.us-east-1.linodeobjects.com/db
-</span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db <span class="s1">&#39;s3://BUCKETNAME/db?endpoint=us-east-1.linodeobjects.com&amp;region=us-east-1&#39;</span>
+</span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Litestream does not auto-detect Linode Object Storage from bucket hostnames. A URL such as `s3://BUCKETNAME.us-east-1.linodeobjects.com/db` is parsed as a bucket named `BUCKETNAME.us-east-1.linodeobjects.com` on AWS S3, so requests silently go to AWS and fail with an `InvalidAccessKeyId` error. Always specify the endpoint explicitly as shown above.</div>
+</div>
+<h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream is typically run as a background service which uses a configuration
-file. You can configure a replica for your database using the <code>url</code> format.
-<em>Note that your region may be different.</em></p>
+file. You can configure a replica for your database by setting the <code>endpoint</code>
+field explicitly. <em>Note that your region may be different.</em></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxx</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKETNAME.us-east-1.linodeobjects.com/db</span><span class="w">
-</span></span></span></code></pre></div><p>Or you can expand your configuration into multiple fields:</p>
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w">   </span><span class="l">BUCKETNAME</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1.linodeobjects.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w">   </span><span class="l">us-east-1  </span><span class="w"> </span><span class="c"># set to your region</span><span class="w">
+</span></span></span></code></pre></div><p>Alternatively, you can use the <code>url</code> format with the endpoint as a query
+parameter:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKETNAME/db?endpoint=us-east-1.linodeobjects.com&amp;region=us-east-1</span><span class="w">
+</span></span></span></code></pre></div><p>You may also specify your key credentials on a per-replica basis:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
@@ -293,11 +309,6 @@ file. You can configure a replica for your database using the <code>url</code> f
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">us-east-1.linodeobjects.com</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w">   </span><span class="l">us-east-1  </span><span class="w"> </span><span class="c"># set to your region</span><span class="w">
-</span></span></span></code></pre></div><p>You may also specify your key credentials on a per-replica basis:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/local/db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://BUCKETNAME.us-east-1.linodeobjects.com/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxx</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span><span class="w">
 </span></span></span></code></pre></div><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>

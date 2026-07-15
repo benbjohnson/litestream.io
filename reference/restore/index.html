@@ -227,6 +227,7 @@ Restoration will only run if the output database file does not exist so you cann
       </ul>
     </li>
     <li><a href="#force-overwrite">Force Overwrite</a></li>
+    <li><a href="#integrity-check">Integrity Check</a></li>
     <li><a href="#json-output-1">JSON Output</a></li>
     <li><a href="#follow-mode">Follow Mode</a>
       <ul>
@@ -323,6 +324,11 @@ as on a development machine.</p>
 -force
     Overwrite an existing non-empty database file.
     Required when the output path already exists and is not empty.
+
+-integrity-check MODE
+    Run a post-restore integrity check on the database.
+    MODE is one of: none, quick, full.
+    Defaults to none.
 
 -json
     Output raw JSON instead of human-readable text.
@@ -460,6 +466,38 @@ like <code>-wal</code>, <code>-shm</code>, or <code>-journal</code> exist), the 
 </code></pre><p>The <code>-if-db-not-exists</code> flag continues to work as before — it returns exit code
 0 if the database already exists, without attempting to overwrite. The <code>-force</code>
 flag is for cases where you explicitly want to replace an existing database.</p>
+<h2 id="integrity-check">Integrity Check<a href="#integrity-check" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.10">
+    v0.5.10
+</span>
+ The <code>-integrity-check</code> flag runs a SQLite
+integrity check on the restored database after the restore completes. If the
+check fails, the restore command returns a non-zero exit code.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>No integrity check is performed. This is the default.</td>
+</tr>
+<tr>
+<td><code>quick</code></td>
+<td>Runs <code>PRAGMA quick_check</code>, which validates the database structure but skips verifying index content and <code>UNIQUE</code> constraints.</td>
+</tr>
+<tr>
+<td><code>full</code></td>
+<td>Runs <code>PRAGMA integrity_check</code>, which performs a thorough structural validation of the database. Foreign-key constraints are not checked.</td>
+</tr>
+</tbody>
+</table>
+<pre tabindex="0"><code>$ litestream restore -integrity-check quick -o /tmp/my.db s3://mybkt/my.db
+</code></pre><p>When the <code>replicate</code> command automatically restores a missing database from a
+replica on startup, it always uses <code>quick</code> mode.</p>
 <h2 id="json-output-1">JSON Output<a href="#json-output-1" class="anchor" aria-hidden="true">#</a> </h2>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
     v0.5.12
