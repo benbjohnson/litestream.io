@@ -76,8 +76,9 @@ apply those old WAL pages to your new database. Litestream also tracks changes
 via the WAL so it can cause replication issues if the WAL file is leftover.
 
 Additionally, Litestream currently does not track database deletions. If you
-remove your database and recreate it, you should delete the `-litestream`
-directory next to your database file and restart Litestream.
+remove your database and recreate it, you should delete the hidden
+`.<filename>-litestream` metadata directory next to your database file (e.g.
+`.db-litestream` for a database named `db`) and restart Litestream.
 
 
 

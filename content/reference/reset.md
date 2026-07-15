@@ -49,10 +49,10 @@ them. This allows you to preview the reset operation before committing to it.
 ```
 $ litestream reset -dry-run /var/lib/db
 Dry run: local Litestream state would be reset for: /var/lib/db
-Would remove: /var/lib/db-litestream/ltx
+Would remove: /var/lib/.db-litestream/ltx
 Files that would be removed:
-  /var/lib/db-litestream/ltx/0000000000000001-0000000000000001.ltx
-  /var/lib/db-litestream/ltx/0000000000000002-0000000000000002.ltx
+  /var/lib/.db-litestream/ltx/0/0000000000000001-0000000000000001.ltx
+  /var/lib/.db-litestream/ltx/0/0000000000000002-0000000000000002.ltx
 No files were removed.
 ```
 
@@ -61,7 +61,7 @@ If no local LTX files exist, the dry run reports that:
 ```
 $ litestream reset -dry-run /var/lib/db
 Dry run: local Litestream state would be reset for: /var/lib/db
-Would remove: /var/lib/db-litestream/ltx
+Would remove: /var/lib/.db-litestream/ltx
 No local LTX files would be removed.
 ```
 
