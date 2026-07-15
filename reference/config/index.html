@@ -286,8 +286,8 @@ is set then it will be replaced with an empty string.</p>
 dollar sign followed by characters—for example, a password. In this case, you
 can set the <code>-no-expand-env</code> flag on any <code>litestream</code> command to disable
 expansion.</p>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
 </span>
  Litestream automatically sets <code>$PID</code> during config
 file parsing, expanding to the current process ID. This is useful for creating
@@ -416,8 +416,8 @@ when retention is disabled.</p>
 need <code>DeleteObject</code> permissions. This limits the blast radius if credentials
 are compromised — an attacker with leaked credentials cannot delete your backups.</p>
 <h3 id="global-replica-defaults">Global replica defaults<a href="#global-replica-defaults" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Global replica defaults allow you to set default
 settings at the top level of your configuration file. These defaults are
@@ -519,8 +519,8 @@ and line number to each log record.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span></code></pre></div><h3 id="l0-retention">L0 Retention<a href="#l0-retention" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  L0 retention controls how long L0 (level 0) files
 are kept after being compacted into L1 files. This setting is important when
@@ -705,8 +705,8 @@ valid with <code>dir:</code>, not a single <code>path:</code>. See
 <li><code>checkpoint-interval</code>—How often to perform WAL checkpoints using PASSIVE mode (default: <code>1m</code>, non-blocking)</li>
 <li><code>busy-timeout</code>—SQLite busy timeout (default: <code>1s</code>)</li>
 <li><code>min-checkpoint-page-count</code>—Minimum pages before PASSIVE checkpoint (default: <code>1000</code>, ~4MB, non-blocking)</li>
-<li><code>truncate-page-n</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<li><code>truncate-page-n</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Emergency threshold for TRUNCATE checkpoint (default: <code>121359</code>, ~500MB, <strong>blocks both readers and writers</strong>). Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
 <li><code>restore-if-db-not-exists</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
@@ -853,8 +853,8 @@ database, so the database directory itself must remain writable.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/myapp</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
 </span></span></span></code></pre></div><h3 id="sqlite-connection-string-prefixes">SQLite Connection String Prefixes<a href="#sqlite-connection-string-prefixes" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Litestream automatically strips <code>sqlite://</code> and
 <code>sqlite3://</code> prefixes from database paths. This allows you to use a single
@@ -879,8 +879,8 @@ other ORMs that expect connection string URLs:</p>
 </span></span><span class="line"><span class="cl">python manage.py migrate  <span class="c1"># Django</span>
 </span></span><span class="line"><span class="cl">prisma migrate deploy     <span class="c1"># Prisma</span>
 </span></span></code></pre></div><h3 id="directory-configuration">Directory configuration<a href="#directory-configuration" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Litestream can replicate all SQLite databases in a
 directory using the <code>dir</code> field instead of <code>path</code>. This is useful for
@@ -1009,8 +1009,8 @@ next sync.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybkt.litestream.io/db</span><span class="w">
-</span></span></span></code></pre></div><p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+</span></span></span></code></pre></div><p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  You can also use S3 access point ARNs for VPC-only
 configurations and simplified access control:</p>
@@ -1071,8 +1071,8 @@ This is automatically enabled if <code>endpoint</code> is set.</p>
 a local node such as MinIO and you are using self-signed certificates.</p>
 </li>
 <li>
-<p><code>part-size</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><code>part-size</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Size of each part in multipart uploads. Accepts
 human-readable sizes like <code>5MB</code>, <code>10MB</code>, or <code>1GB</code>. Default is 5 MiB. Minimum
@@ -1080,8 +1080,8 @@ is 5 MiB (S3 requirement), maximum is 5 GiB. See the
 <a href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration Guide</a> for tuning recommendations.</p>
 </li>
 <li>
-<p><code>concurrency</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><code>concurrency</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Number of parts to upload in parallel during
 multipart uploads. Default is 5. Higher values improve throughput on fast
@@ -1089,8 +1089,8 @@ networks but use more memory. See the
 <a href="https://litestream.io/guides/s3-advanced/">S3 Advanced Configuration Guide</a> for tuning recommendations.</p>
 </li>
 <li>
-<p><code>sign-payload</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><code>sign-payload</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Signs the request payload.
 <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.5">
@@ -1102,8 +1102,8 @@ and most S3-compatible providers. Previously defaulted to <code>false</code>, wh
 your specific provider requires unsigned payloads.</p>
 </li>
 <li>
-<p><code>require-content-md5</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><code>require-content-md5</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Adds Content-MD5 header to
 requests. Some S3-compatible providers don&rsquo;t support this header on certain
@@ -1300,8 +1300,8 @@ for popular providers:</p>
 </tbody>
 </table>
 <h3 id="tigris-flyio-configuration">Tigris (Fly.io) Configuration<a href="#tigris-flyio-configuration" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  <a href="https://www.tigrisdata.com/">Tigris</a> is Fly.io&rsquo;s
 globally distributed S3-compatible object storage. Litestream automatically
@@ -1533,8 +1533,8 @@ configured. All certificate files must be in PEM format.</p>
 </ul>
 <p>See the <a href="https://litestream.io/guides/nats/">NATS Integration Guide</a> for detailed TLS setup instructions.</p>
 <h3 id="alibaba-cloud-oss-replica">Alibaba Cloud OSS replica<a href="#alibaba-cloud-oss-replica" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Native Alibaba Cloud OSS support using the official SDK.</p>
 <p>OSS replicas can be configured using the <code>url</code> field:</p>
@@ -1562,8 +1562,8 @@ configured. All certificate files must be in PEM format.</p>
 </ul>
 <p>See the <a href="https://litestream.io/guides/alibaba-oss/">Alibaba Cloud OSS Guide</a> for detailed setup instructions.</p>
 <h3 id="webdav-replica">WebDAV replica<a href="#webdav-replica" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  WebDAV replicas allow replication to any RFC 4918 compliant WebDAV server,
 including Nextcloud, ownCloud, and Apache mod_dav.</p>
@@ -1640,8 +1640,8 @@ promotion and conflict rules.</p>
 <p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
 but days, weeks, &amp; years are not supported.</p>
 <h3 id="validation">Validation<a href="#validation" class="anchor" aria-hidden="true">#</a> </h3>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
 </span>
  Litestream periodically validates replica integrity
 by checking LTX files for sort order and contiguity. The background validation
@@ -1880,7 +1880,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.e948d61490963e338b04309e5410847403d60009cbcd9ebf4f8c040a537e13300b5b6ffb4521f512bead9374b3af3b6104a85e9789df5cbd09c3c7263e8fdeb8.js" integrity="sha512-6UjWFJCWPjOLBDCeVBCEdAPWAAnLzZ6/T4wEClN&#43;EzALW2/7RSH1Er6tk3SzrzthBKhel4nfXL0Jw8cmPo/euA==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

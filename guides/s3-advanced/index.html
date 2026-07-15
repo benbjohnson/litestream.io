@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="S3 Advanced Configuration">
 <meta name="twitter:description" content="This guide covers advanced S3 configuration options, including multipart upload tuning and storage classes. These settings control how Litestream uploads data to S3 and S3-compatible storage services.
-v0.5.0 Part size and concurrency configuration options were added in Litestream v0.5.0.
+v0.5.3 Part size and concurrency configuration options were added in Litestream v0.5.3.
 Overview When Litestream uploads files to S3, it uses multipart uploads for efficient data transfer. Two key settings control this behavior:
 Part Size: The size of each chunk uploaded to S3 Concurrency: The number of parts uploaded simultaneously Understanding these settings helps you optimize performance for your specific network conditions, storage provider, and resource constraints.">
 <meta name="twitter:site" content="@litestreamio">
@@ -271,11 +271,11 @@ Part Size: The size of each chunk uploaded to S3 Concurrency: The number of part
 			<p>This guide covers advanced S3 configuration options, including multipart upload
 tuning and storage classes. These settings control how Litestream uploads data
 to S3 and S3-compatible storage services.</p>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
 </span>
  Part size and concurrency configuration options
-were added in Litestream v0.5.0.</p>
+were added in Litestream v0.5.3.</p>
 <h2 id="overview">Overview<a href="#overview" class="anchor" aria-hidden="true">#</a> </h2>
 <p>When Litestream uploads files to S3, it uses multipart uploads for efficient
 data transfer. Two key settings control this behavior:</p>
@@ -625,7 +625,7 @@ AWS S3 supports this natively. Check your provider&rsquo;s documentation for
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.e948d61490963e338b04309e5410847403d60009cbcd9ebf4f8c040a537e13300b5b6ffb4521f512bead9374b3af3b6104a85e9789df5cbd09c3c7263e8fdeb8.js" integrity="sha512-6UjWFJCWPjOLBDCeVBCEdAPWAAnLzZ6/T4wEClN&#43;EzALW2/7RSH1Er6tk3SzrzthBKhel4nfXL0Jw8cmPo/euA==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

@@ -41,14 +41,14 @@
       <link>https://litestream.io/guides/directory-watcher/</link>
       <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/directory-watcher/</guid>
-      <description>This guide will show you how to use the directory watcher feature for automatic database discovery. This is useful for multi-tenant applications where databases are dynamically created and removed at runtime.&#xA;v0.5.0 Overview Litestream supports two modes for managing multiple databases in a directory:&#xA;Static directory replication scans a directory at startup and replicates all matching databases. New databases require a restart to be picked up.&#xA;Directory watcher monitors a directory in real-time and automatically starts replication for new databases within seconds.</description>
+      <description>This guide will show you how to use the directory watcher feature for automatic database discovery. This is useful for multi-tenant applications where databases are dynamically created and removed at runtime.&#xA;v0.5.4 Overview Litestream supports two modes for managing multiple databases in a directory:&#xA;Static directory replication scans a directory at startup and replicates all matching databases. New databases require a restart to be picked up.&#xA;Directory watcher monitors a directory in real-time and automatically starts replication for new databases within seconds.</description>
     </item>
     <item>
       <title>Global Replica Defaults</title>
       <link>https://litestream.io/guides/global-defaults/</link>
       <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/global-defaults/</guid>
-      <description>v0.5.0 Global replica defaults eliminate configuration duplication by allowing you to set default settings at the top level of your configuration file. These defaults are automatically inherited by all replicas while still allowing per-replica overrides.&#xA;Overview When managing multiple databases with Litestream, you often need the same credentials, regions, and timing settings across all replicas. Previously, this required duplicating settings for each database entry. Global defaults solve this by letting you define shared settings once.</description>
+      <description>v0.5.3 Global replica defaults eliminate configuration duplication by allowing you to set default settings at the top level of your configuration file. These defaults are automatically inherited by all replicas while still allowing per-replica overrides.&#xA;Overview When managing multiple databases with Litestream, you often need the same credentials, regions, and timing settings across all replicas. Previously, this required duplicating settings for each database entry. Global defaults solve this by letting you define shared settings once.</description>
     </item>
     <item>
       <title>Replicating to Amazon S3</title>
@@ -69,14 +69,14 @@
       <link>https://litestream.io/guides/alibaba-oss/</link>
       <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/alibaba-oss/</guid>
-      <description>v0.5.0 This guide will show you how to use Litestream&amp;rsquo;s native Alibaba Cloud OSS support to replicate your database. You will need an Alibaba Cloud account to complete this guide.&#xA;Setup Create a bucket In the OSS Console, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a unique bucket name and select your preferred region (e.g., cn-hangzhou, us-west-1). Remember your bucket name and region as you&amp;rsquo;ll need those later.&#xA;Create access credentials From the RAM Console, navigate to &amp;ldquo;AccessKey Management&amp;rdquo; under your account.</description>
+      <description>v0.5.3 This guide will show you how to use Litestream&amp;rsquo;s native Alibaba Cloud OSS support to replicate your database. You will need an Alibaba Cloud account to complete this guide.&#xA;Setup Create a bucket In the OSS Console, click the &amp;ldquo;Create Bucket&amp;rdquo; button. Enter a unique bucket name and select your preferred region (e.g., cn-hangzhou, us-west-1). Remember your bucket name and region as you&amp;rsquo;ll need those later.&#xA;Create access credentials From the RAM Console, navigate to &amp;ldquo;AccessKey Management&amp;rdquo; under your account.</description>
     </item>
     <item>
       <title>S3 Advanced Configuration</title>
       <link>https://litestream.io/guides/s3-advanced/</link>
       <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/s3-advanced/</guid>
-      <description>This guide covers advanced S3 configuration options, including multipart upload tuning and storage classes. These settings control how Litestream uploads data to S3 and S3-compatible storage services.&#xA;v0.5.0 Part size and concurrency configuration options were added in Litestream v0.5.0.&#xA;Overview When Litestream uploads files to S3, it uses multipart uploads for efficient data transfer. Two key settings control this behavior:&#xA;Part Size: The size of each chunk uploaded to S3 Concurrency: The number of parts uploaded simultaneously Understanding these settings helps you optimize performance for your specific network conditions, storage provider, and resource constraints.</description>
+      <description>This guide covers advanced S3 configuration options, including multipart upload tuning and storage classes. These settings control how Litestream uploads data to S3 and S3-compatible storage services.&#xA;v0.5.3 Part size and concurrency configuration options were added in Litestream v0.5.3.&#xA;Overview When Litestream uploads files to S3, it uses multipart uploads for efficient data transfer. Two key settings control this behavior:&#xA;Part Size: The size of each chunk uploaded to S3 Concurrency: The number of parts uploaded simultaneously Understanding these settings helps you optimize performance for your specific network conditions, storage provider, and resource constraints.</description>
     </item>
     <item>
       <title>VFS Read Replicas</title>
@@ -146,7 +146,7 @@
       <link>https://litestream.io/guides/tigris/</link>
       <pubDate>Wed, 03 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/tigris/</guid>
-      <description>This guide will show you how to use Tigris as a database replica path for Litestream. Tigris is Fly.io&amp;rsquo;s globally distributed S3-compatible object storage. You will need a Fly.io account to complete this guide.&#xA;v0.5.0 Litestream automatically detects Tigris endpoints, configures the required settings, and enables strong consistency for you.&#xA;Setup Install the Fly CLI If you haven&amp;rsquo;t already, install the Fly CLI by following the installation instructions. Once installed, authenticate with your account:</description>
+      <description>This guide will show you how to use Tigris as a database replica path for Litestream. Tigris is Fly.io&amp;rsquo;s globally distributed S3-compatible object storage. You will need a Fly.io account to complete this guide.&#xA;v0.5.4 Litestream automatically detects Tigris endpoints, configures the required settings, and enables strong consistency for you.&#xA;Setup Install the Fly CLI If you haven&amp;rsquo;t already, install the Fly CLI by following the installation instructions. Once installed, authenticate with your account:</description>
     </item>
     <item>
       <title>Replicating to Supabase Storage</title>
@@ -195,7 +195,7 @@
       <link>https://litestream.io/guides/directory/</link>
       <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/directory/</guid>
-      <description>This guide will show you how to use Litestream to replicate entire directories of SQLite databases. Directory replication is useful for:&#xA;Multi-tenant applications where each tenant has their own database Applications managing multiple SQLite databases Batch replication without listing each database individually v0.5.0 Configuration Directory replication uses the dir field instead of path in your database configuration. Litestream will scan the directory and replicate all matching SQLite databases.&#xA;dbs: - dir: /var/lib/tenants pattern: &amp;#34;*.</description>
+      <description>This guide will show you how to use Litestream to replicate entire directories of SQLite databases. Directory replication is useful for:&#xA;Multi-tenant applications where each tenant has their own database Applications managing multiple SQLite databases Batch replication without listing each database individually v0.5.3 Configuration Directory replication uses the dir field instead of path in your database configuration. Litestream will scan the directory and replicate all matching SQLite databases.&#xA;dbs: - dir: /var/lib/tenants pattern: &amp;#34;*.</description>
     </item>
     <item>
       <title>Replicating to a WebDAV Server</title>

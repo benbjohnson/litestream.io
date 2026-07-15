@@ -73,8 +73,8 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 </ul>
 </li>
 <li>
-<p><strong>Transparent v0.3.x Restore</strong> <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><strong>Transparent v0.3.x Restore</strong> <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
 </span>
 :</p>
 <ul>
