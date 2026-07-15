@@ -14,7 +14,6 @@ The `litestream` commands are:
 
 - [`litestream databases`](/reference/databases) — Lists databases specified in config file.
 - [`litestream ltx`](/reference/ltx) — List available LTX files for a database.
-- [`litestream mcp`](/reference/mcp) — MCP server for AI assistant integration.
 - [`litestream replicate`](/reference/replicate) — Runs a server to replicate databases.
 - [`litestream restore`](/reference/restore) — Recovers database backup from a replica.
 - [`litestream status`](/reference/status) — Reports local replication status for configured databases.
@@ -34,6 +33,11 @@ IPC control socket. They require a running daemon with the socket enabled.
 - [`litestream unregister`](/reference/unregister) — Removes a database from the daemon.
 - [`litestream start`](/reference/start) — Resumes replication for a stopped database.
 - [`litestream stop`](/reference/stop) — Pauses replication for a database.
+
+
+## MCP Server
+
+- [MCP Server](/reference/mcp) — Model Context Protocol integration for AI assistants, enabled via the `replicate` command's `mcp-addr` config setting.
 
 
 ## VFS Extension
