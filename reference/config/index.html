@@ -606,6 +606,13 @@ Litestream automatically strips <code>sqlite://</code> and <code>sqlite3://</cod
 you to use the same <code>DATABASE_URL</code> with Litestream and other SQLite tools. See
 <a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a> below.</li>
 <li><code>meta-path</code>—Path to store Litestream metadata (defaults to a hidden <code>.&lt;filename&gt;-litestream</code> directory next to the database file, e.g. <code>/var/lib/db</code> → <code>/var/lib/.db-litestream</code>)</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata when using <a href="#directory-replication">directory replication</a>. Only
+valid with <code>dir:</code>, not a single <code>path:</code>. See
+<a href="#metadata-directory">Metadata directory</a> below.</li>
 <li><code>monitor-interval</code>—How often to check for changes (default: <code>1s</code>)</li>
 <li><code>checkpoint-interval</code>—How often to perform WAL checkpoints using PASSIVE mode (default: <code>1m</code>, non-blocking)</li>
 <li><code>busy-timeout</code>—SQLite busy timeout (default: <code>1s</code>)</li>
@@ -637,6 +644,11 @@ configure Litestream to replicate all databases in a directory using the <code>d
 <li><code>pattern</code>—Glob pattern for matching database files (e.g., <code>*.db</code>, <code>*.sqlite</code>)</li>
 <li><code>recursive</code>—Scan subdirectories recursively (default: <code>false</code>)</li>
 <li><code>watch</code>—Enable real-time directory monitoring (default: <code>false</code>)</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata. See <a href="#metadata-directory">Metadata directory</a> below.</li>
 </ul>
 <p>When <code>watch</code> is enabled, Litestream monitors the directory for new databases and
 automatically starts replication within seconds. Deleted databases are cleanly
@@ -654,6 +666,56 @@ the directory. For example, <code>/var/lib/app/tenants/acme/data.db</code> would
 <code>s3://mybucket/tenants/acme/data.db/</code>.</p>
 <p>See the <a href="https://litestream.io/guides/directory-watcher/">Directory Watcher Guide</a> for detailed
 configuration examples and use cases.</p>
+<h4 id="metadata-directory">Metadata directory<a href="#metadata-directory" class="anchor" aria-hidden="true">#</a> </h4>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Litestream stores a small amount of local
+metadata for each database (transaction tracking state) in a hidden directory
+named <code>.&lt;filename&gt;-litestream</code>, placed next to the database file by default.
+With directory replication you can instead collect every database&rsquo;s metadata
+under a single root using the <code>meta-dir</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">meta-dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/litestream-meta</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/tenants</span><span class="w">
+</span></span></span></code></pre></div><p>Each discovered database is assigned a unique metadata directory of
+<code>&lt;meta-dir&gt;/&lt;relative-path&gt;-litestream</code>, preserving the source directory
+structure:</p>
+<table>
+<thead>
+<tr>
+<th>Local database path</th>
+<th>Metadata directory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/var/lib/tenants/tenant1.db</code></td>
+<td><code>/var/lib/litestream-meta/tenant1.db-litestream</code></td>
+</tr>
+<tr>
+<td><code>/var/lib/tenants/team-a/db2.db</code></td>
+<td><code>/var/lib/litestream-meta/team-a/db2.db-litestream</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is useful when you want all replication metadata gathered in one place, or
+kept out of the database directory—for example on separate storage, or to avoid
+scattering per-database metadata directories through your data directory. Note
+that Litestream still writes SQLite&rsquo;s <code>-wal</code> and <code>-shm</code> files next to each
+database, so the database directory itself must remain writable.</p>
+<p>The <code>meta-dir</code> field is valid only with <code>dir:</code> and cannot be combined with
+<code>meta-path</code>:</p>
+<ul>
+<li>Using <code>meta-dir</code> with a single <code>path:</code> database fails with
+<code>'meta-dir' can only be used with a directory</code>.</li>
+<li>Setting both <code>meta-path</code> and <code>meta-dir</code> fails with
+<code>cannot specify both 'meta-path' and 'meta-dir'</code>.</li>
+</ul>
 <p>Example with database-level options:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp.db</span><span class="w">
@@ -714,6 +776,12 @@ multi-tenant applications where each tenant has their own database.</p>
 <li><code>recursive</code>—Scan subdirectories when <code>true</code> (default: <code>false</code>)</li>
 <li><code>watch</code>—Enable real-time monitoring for new databases (default: <code>false</code>).
 See <a href="/guides/directory-watcher">Directory Watcher</a> for details.</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata (<code>&lt;meta-dir&gt;/&lt;relative-path&gt;-litestream</code>). Cannot be combined with
+<code>meta-path</code>. See <a href="#metadata-directory">Metadata directory</a>.</li>
 </ul>
 <p>Each discovered database gets a unique replica path by appending its relative
 path from the directory root:</p>

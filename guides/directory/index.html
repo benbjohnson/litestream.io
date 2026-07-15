@@ -214,6 +214,7 @@ dbs: - dir: /var/lib/tenants pattern: &#34;*.">
       </ul>
     </li>
     <li><a href="#replica-path-behavior">Replica path behavior</a></li>
+    <li><a href="#metadata-location">Metadata location</a></li>
     <li><a href="#use-cases">Use cases</a>
       <ul>
         <li><a href="#multi-tenant-applications">Multi-tenant applications</a></li>
@@ -264,6 +265,11 @@ matching SQLite databases.</p>
 <li><code>recursive</code>—Scan subdirectories when <code>true</code> (default: <code>false</code>)</li>
 <li><code>watch</code>—Enable real-time monitoring for new databases (default: <code>false</code>).
 See <a href="/guides/directory-watcher">Directory Watcher</a> for details.</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata. See <a href="#metadata-location">Metadata location</a> below.</li>
 </ul>
 <p>All standard database options like <code>monitor-interval</code> and <code>checkpoint-interval</code>
 are also supported and apply to each discovered database.</p>
@@ -326,6 +332,47 @@ collision risk.</p>
 </table>
 <p>The relative path from the directory root is appended to the configured replica
 path, preserving the directory structure.</p>
+<h2 id="metadata-location">Metadata location<a href="#metadata-location" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Litestream keeps a small amount of local metadata
+for each database (transaction tracking state) in a hidden directory named
+<code>.&lt;database&gt;-litestream</code>, placed next to each database file by default. To gather
+every database&rsquo;s metadata under a single root instead—keeping the per-database
+metadata directories out of the data directory or on separate storage—use the
+<code>meta-dir</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">meta-dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/litestream-meta</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/tenants</span><span class="w">
+</span></span></span></code></pre></div><p>Each database receives a unique metadata directory under the root, mirroring its
+relative path:</p>
+<table>
+<thead>
+<tr>
+<th>Local database path</th>
+<th>Metadata directory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/var/lib/tenants/tenant1.db</code></td>
+<td><code>/var/lib/litestream-meta/tenant1.db-litestream</code></td>
+</tr>
+<tr>
+<td><code>/var/lib/tenants/team-a/db2.db</code></td>
+<td><code>/var/lib/litestream-meta/team-a/db2.db-litestream</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>meta-dir</code> field is only valid with <code>dir:</code> and cannot be combined with
+<code>meta-path</code>. Using it with a single <code>path:</code> database fails with
+<code>'meta-dir' can only be used with a directory</code>, and setting both <code>meta-path</code> and
+<code>meta-dir</code> fails with <code>cannot specify both 'meta-path' and 'meta-dir'</code>.</p>
 <h2 id="use-cases">Use cases<a href="#use-cases" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="multi-tenant-applications">Multi-tenant applications<a href="#multi-tenant-applications" class="anchor" aria-hidden="true">#</a> </h3>
 <p>For applications where each tenant has their own database file:</p>
