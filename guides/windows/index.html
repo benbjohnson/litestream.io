@@ -209,6 +209,9 @@ Running as a Windows Service Running Litestream as a Windows Service means that 
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#running-as-a-windows-service">Running as a Windows Service</a>
       <ul>
+        <li><a href="#installing-the-binary">Installing the binary</a></li>
+        <li><a href="#creating-the-configuration-file">Creating the configuration file</a></li>
+        <li><a href="#registering-the-service">Registering the service</a></li>
         <li><a href="#managing-the-service">Managing the service</a></li>
         <li><a href="#viewing-the-event-log">Viewing the event log</a></li>
       </ul>
@@ -232,20 +235,37 @@ tutorial already. Please read that to understand the basic operation of Litestre
 <p>Running Litestream as a Windows Service means that it will run in the background
 and continuously monitor and replicate your databases. This is the recommended
 way to run Litestream.</p>
-<p>To install, download and run the <code>.msi</code> installer from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
-page</a>. You&rsquo;ll be presented with a window asking if the app can make
-changes to your device. Click <em>&ldquo;Yes&rdquo;</em>.</p>
-<center>
- <img src="msi.png" alt="Screenshot of Windows installer">
-</center>
-<br/>
-<p>Once the installer is done, your Litesteam service will be running. The
-<a href="/reference/config">configuration file</a> for Litestream is installed at:</p>
+<p><em>Note: Litestream v0.3.x provided an <code>.msi</code> installer that registered the
+service automatically. Starting with v0.5.x, releases ship as a <code>.zip</code> archive
+and you register the service manually using the steps below.</em></p>
+<h3 id="installing-the-binary">Installing the binary<a href="#installing-the-binary" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Download the Windows <code>.zip</code> archive from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
+page</a>. Choose the file matching your architecture—<code>x86_64</code> for
+Intel/AMD or <code>arm64</code> for ARM:</p>
+<pre tabindex="0"><code>litestream-0.5.14-windows-x86_64.zip
+litestream-0.5.14-windows-arm64.zip
+</code></pre><p>Extract the archive and copy <code>litestream.exe</code> to <code>C:\Litestream</code>. In
+PowerShell (replace <code>x86_64</code> with <code>arm64</code> if you downloaded the ARM
+archive):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="nb">Expand-Archive</span> <span class="nb">litestream-0.5.14</span><span class="n">-windows-x86_64</span><span class="p">.</span><span class="py">zip</span>
+</span></span><span class="line"><span class="cl"><span class="nb">New-Item</span> <span class="n">-ItemType</span> <span class="n">Directory</span> <span class="n">-Path</span> <span class="n">C:</span><span class="p">\</span><span class="n">Litestream</span> <span class="n">-Force</span>
+</span></span><span class="line"><span class="cl"><span class="nb">Copy-Item</span> <span class="nb">litestream-0.5.14</span><span class="n">-windows-x86_64</span><span class="p">\</span><span class="n">litestream</span><span class="p">.</span><span class="py">exe</span> <span class="n">C:</span><span class="p">\</span><span class="n">Litestream</span><span class="p">\</span>
+</span></span></code></pre></div><h3 id="creating-the-configuration-file">Creating the configuration file<a href="#creating-the-configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
+<p>When running as a service, Litestream reads its <a href="/reference/config">configuration
+file</a> from:</p>
 <pre tabindex="0"><code>C:\Litestream\litestream.yml
-</code></pre><h3 id="managing-the-service">Managing the service<a href="#managing-the-service" class="anchor" aria-hidden="true">#</a> </h3>
-<p>When you first install Litestream, it will run using an empty <a href="/reference/config">configuration
-file</a>. Whenever you update this file, you&rsquo;ll need to restart
-the service.</p>
+</code></pre><p>Create this file with your database and replica settings before starting the
+service. See the <a href="/reference/config">configuration reference</a> for all available
+options.</p>
+<h3 id="registering-the-service">Registering the service<a href="#registering-the-service" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Register and start the service from an elevated (<em>Run as Administrator</em>)
+PowerShell or Command Prompt:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">sc</span><span class="p">.</span><span class="py">exe</span> <span class="n">create</span> <span class="n">Litestream</span> <span class="n">binPath</span><span class="p">=</span> <span class="s2">&#34;C:\Litestream\litestream.exe&#34;</span> <span class="n">start</span><span class="p">=</span> <span class="n">auto</span>
+</span></span><span class="line"><span class="cl"><span class="n">sc</span><span class="p">.</span><span class="py">exe</span> <span class="nb">start </span><span class="n">Litestream</span>
+</span></span></code></pre></div><p>Note that <code>sc.exe</code> requires the space after each <code>=</code> sign.</p>
+<h3 id="managing-the-service">Managing the service<a href="#managing-the-service" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Whenever you update the <a href="/reference/config">configuration file</a>, you&rsquo;ll need to
+restart the service.</p>
 <p>Go to the <em>Services</em> application and select the Litestream service. You should
 see links in the sidebar to <em>Stop</em> and <em>Restart</em> the service.</p>
 <figure>
@@ -270,8 +290,9 @@ Viewer</em> application or you can view them from PowerShell.</p>
 <p>If you do not wish to run as a background service or you only need to perform
 a database restore then you can download the Litestream executable and run
 from the command line.</p>
-<p>You&rsquo;ll need to download the <code>litestream.exe</code> file from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
-page</a> and install it within your Windows <code>%PATH%</code>. The executable will
+<p>You&rsquo;ll need to download the <code>.zip</code> archive from the <a href="https://github.com/benbjohnson/litestream/releases">Litestream releases
+page</a>, extract <code>litestream.exe</code>, and install it within your Windows
+<code>%PATH%</code>. The executable will
 use <code>C:\Litestream\litestream.yml</code> as the default configuration path but you
 can override that with the <code>-config</code> flag.</p>
 <p>All logging messages will go to the terminal window when running from the

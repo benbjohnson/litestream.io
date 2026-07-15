@@ -918,16 +918,45 @@ requests. Some S3-compatible providers don&rsquo;t support this header on certai
 operations. Automatically disabled for Tigris endpoints. Defaults to <code>true</code>.</p>
 </li>
 <li>
-<p><code>sse-customer-algorithm</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><code>storage-class</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.14">
+    v0.5.14
 </span>
- SSE-C encryption algorithm.</p>
+ Storage class applied to
+objects uploaded to S3 (e.g. <code>STANDARD_IA</code>, <code>GLACIER_IR</code>). If not set, the
+provider&rsquo;s default storage class is used. See the
+<a href="https://litestream.io/guides/s3-advanced/#storage-classes">S3 Advanced Configuration Guide</a>
+for cost trade-offs and retrieval caveats.</p>
 </li>
 <li>
-<p><code>sse-customer-key-md5</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><code>sse-customer-algorithm</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
 </span>
- Base64-encoded MD5 digest of the SSE-C encryption key.</p>
+ SSE-C encryption
+algorithm. Only <code>AES256</code> is supported. Defaults to <code>AES256</code> when an SSE-C
+key is provided, so it can usually be omitted.</p>
+</li>
+<li>
+<p><code>sse-customer-key</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ Base64-encoded 256-bit
+encryption key for SSE-C. The key&rsquo;s MD5 digest is computed automatically.
+Mutually exclusive with <code>sse-kms-key-id</code>.</p>
+</li>
+<li>
+<p><code>sse-customer-key-path</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ Path to a file
+containing the base64-encoded SSE-C encryption key. Takes precedence over
+<code>sse-customer-key</code>. Supports <code>~</code> expansion.</p>
+</li>
+<li>
+<p><code>sse-kms-key-id</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ AWS KMS key ID or ARN for
+SSE-KMS encryption. Mutually exclusive with the SSE-C settings.</p>
 </li>
 </ul>
 <p>These options can also be set via URL query parameters. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
@@ -985,19 +1014,41 @@ s3://bucket/path?signPayload=true&amp;requireContentMD5=false
 <td>Add Content-MD5 header</td>
 </tr>
 <tr>
+<td><code>storage-class</code></td>
+<td><code>storageClass</code></td>
+<td>—</td>
+<td>S3 storage class</td>
+</tr>
+<tr>
 <td><code>sse-customer-algorithm</code></td>
 <td><code>sseCustomerAlgorithm</code></td>
 <td>—</td>
 <td>SSE-C algorithm</td>
 </tr>
 <tr>
+<td><code>sse-customer-key</code></td>
+<td><code>sseCustomerKey</code></td>
+<td>—</td>
+<td>SSE-C key (base64)</td>
+</tr>
+<tr>
 <td><code>sse-customer-key-md5</code></td>
 <td><code>sseCustomerKeyMD5</code></td>
 <td>—</td>
-<td>SSE-C key MD5</td>
+<td>SSE-C key MD5 digest</td>
+</tr>
+<tr>
+<td><code>sse-kms-key-id</code></td>
+<td><code>sseKmsKeyId</code></td>
+<td>—</td>
+<td>SSE-KMS key ID</td>
 </tr>
 </tbody>
 </table>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The SSE, `part-size`, and `concurrency` query parameters are only honored on replica URLs passed directly to commands such as `litestream restore s3://...`. They are **silently ignored** in a configuration file's `url:` field — use the equivalent YAML settings described above instead. Configuration file URLs apply only the `endpoint`, `region`, `forcePathStyle`, `skipVerify`, `sign-payload`, `require-content-md5`, and `storage-class` parameters.</div>
+</div>
 <h4 id="s3-compatible-provider-requirements">S3-Compatible Provider Requirements<a href="#s3-compatible-provider-requirements" class="anchor" aria-hidden="true">#</a> </h4>
 <p>Different S3-compatible storage providers have varying requirements for payload
 signing and Content-MD5 headers. The table below shows the recommended settings
