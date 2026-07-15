@@ -276,7 +276,7 @@ manager, and no OS distribution files.</p>
 </tr>
 <tr>
 <td>Hardened (Scratch)</td>
-<td><code>latest-scratch</code>, <code>0.5.14-scratch</code></td>
+<td><code>0.5-scratch</code>, <code>0.5.14-scratch</code></td>
 <td><code>scratch</code></td>
 </tr>
 </tbody>
@@ -294,9 +294,11 @@ continue to produce the Debian image.</p>
   <div class="w-100">The scratch image omits the loadable VFS extension (.so). VFS extensions require glibc, which is not available in a scratch image. If your workflow depends on custom VFS extensions, use the default Debian image instead.</div>
 </div>
 <h3 id="pulling-the-scratch-image">Pulling the scratch image<a href="#pulling-the-scratch-image" class="anchor" aria-hidden="true">#</a> </h3>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker pull litestream/litestream:latest-scratch
-</span></span></code></pre></div><p>Replace <code>litestream/litestream</code> with <code>litestream/litestream:latest-scratch</code> (or
-a version-pinned tag like <code>0.5.14-scratch</code>) in your Dockerfiles and run commands.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">docker pull litestream/litestream:0.5-scratch
+</span></span></code></pre></div><p>Replace <code>litestream/litestream</code> with <code>litestream/litestream:0.5-scratch</code> (or
+a version-pinned tag like <code>0.5.14-scratch</code>) in your Dockerfiles and run commands.
+Note that there is no <code>latest-scratch</code> tag — use the minor version tag
+(<code>0.5-scratch</code>) to track the latest scratch release.</p>
 <h2 id="running-as-a-sidecar">Running as a sidecar<a href="#running-as-a-sidecar" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream provides an <a href="https://hub.docker.com/r/litestream/litestream">official image</a> via Docker Hub. You can use it
 with a configuration file or with a replica URL.</p>
@@ -363,10 +365,10 @@ Litestream&rsquo;s built-in process supervision. You can specify your applicatio
 process and flags by passing them to the <code>-exec</code> flag:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate -exec <span class="s2">&#34;myapp -myflag myarg&#34;</span>
 </span></span></code></pre></div><p>Or you can pass them in via the config file:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">exec: myapp -myflag myarg
-</span></span><span class="line"><span class="cl">dbs:
-</span></span><span class="line"><span class="cl">  - path: /path/to/db
-</span></span></code></pre></div><p>Litestream will monitor your application&rsquo;s process and automatically shutdown
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">exec</span><span class="p">:</span><span class="w"> </span><span class="l">myapp -myflag myarg</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span></code></pre></div><p>Litestream will monitor your application&rsquo;s process and automatically shutdown
 when it closes. You can find an example application in the
 <a href="https://github.com/benbjohnson/litestream-docker-example">litestream-docker-example</a> repository.</p>
 <p>If you need to monitor multiple application processes, you can also use <a href="http://skarnet.org/software/s6">s6</a>
