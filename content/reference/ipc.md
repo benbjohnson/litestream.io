@@ -14,14 +14,22 @@ to query database status and collect profiling data without exposing an HTTP por
 
 ## Socket Path
 
-The IPC socket is created at:
+The control socket is **disabled by default**. Enable it with a `socket` block
+in your configuration file:
 
-```
-/var/run/litestream.sock
+```yaml
+socket:
+  enabled: true            # default: false
+  path: /var/run/litestream.sock
+  permissions: 0600
 ```
 
-The socket is automatically created when Litestream starts replication and
-removed on shutdown.
+The `path` defaults to `/var/run/litestream.sock` and `permissions` defaults to
+`0600`.
+
+Once enabled, the socket is created when the Litestream daemon starts and
+removed on shutdown. The CLI commands and `curl` examples below assume the
+default path; pass `-socket <path>` (or `--unix-socket <path>`) if you changed it.
 
 
 ## Endpoints
@@ -36,8 +44,16 @@ last sync time.
 ```bash
 $ curl --unix-socket /var/run/litestream.sock \
     http://localhost/list
-{"databases":[{"path":"/path/to/my.db","status":"active","last_sync_at":"2026-02-12T00:00:00Z"}]}
+{"databases":[{"path":"/path/to/my.db","status":"replicating","last_sync_at":"2026-02-12T00:00:00Z"}]}
 ```
+
+**Status values:**
+
+| Status | Description |
+|--------|-------------|
+| `replicating` | Database is open and actively replicating to a replica |
+| `open` | Database is open but has no replica monitoring enabled |
+| `stopped` | Database is registered but replication is not running |
 
 **CLI equivalent:** `litestream list -socket /var/run/litestream.sock`
 
@@ -101,6 +117,72 @@ $ curl --unix-socket /var/run/litestream.sock \
 ```
 
 **CLI equivalent:** `litestream unregister -socket /var/run/litestream.sock /path/to/my.db`
+
+---
+
+### POST /start
+
+Starts replication for a database that is registered but stopped, without
+restarting the daemon.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+| `timeout` | No | Maximum wait time in seconds. If omitted, the request runs without a timeout. |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/start \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db"}'
+{"status":"started","path":"/path/to/my.db","txid":42}
+```
+
+**Response statuses:**
+
+| Status | Description |
+|--------|-------------|
+| `started` | Replication was started for the database |
+| `already_running` | Database was already open. {{< since version="0.5.12" >}} |
+
+**CLI equivalent:** `litestream start -socket /var/run/litestream.sock /path/to/my.db`
+
+---
+
+### POST /stop
+
+Stops replication for a database without unregistering it or restarting the
+daemon.
+
+**Request body (JSON):**
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `path` | Yes | Absolute path to the SQLite database file |
+| `timeout` | No | Maximum wait time in seconds (default: `30`) |
+
+**Example:**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    -X POST http://localhost/stop \
+    -H "Content-Type: application/json" \
+    -d '{"path":"/path/to/my.db"}'
+{"status":"stopped","path":"/path/to/my.db","txid":42}
+```
+
+**Response statuses:**
+
+| Status | Description |
+|--------|-------------|
+| `stopped` | Replication was stopped for the database |
+| `already_stopped` | Database was already stopped. {{< since version="0.5.12" >}} |
+
+**CLI equivalent:** `litestream stop -socket /var/run/litestream.sock /path/to/my.db`
 
 ---
 
@@ -175,6 +257,60 @@ $ curl --unix-socket /var/run/litestream.sock \
 | `no_change` | Database was already up to date |
 
 **CLI equivalent:** `litestream sync -socket /var/run/litestream.sock /path/to/my.db`
+
+---
+
+### GET /debug/sync-status
+
+{{< since version="0.5.12" >}} Returns detailed sync diagnostics for the
+databases tracked by the daemon. This is useful for observing in-progress sync
+and checkpoint operations. Without the `path` parameter, diagnostics for all
+databases are returned.
+
+**Query parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `path` | No | Absolute path to a single database. Returns `404` if the path is not registered. |
+
+**Example (all databases):**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    http://localhost/debug/sync-status
+{"databases":[{"path":"/path/to/my.db","active":true,"operation":"sync","phase":"write_ltx_from_wal","started_at":"2026-02-12T00:00:00Z","updated_at":"2026-02-12T00:00:01Z","elapsed_seconds":1.2,"txid":42,"wal_size":32768,"last_synced_wal_offset":16384}]}
+```
+
+**Example (single database):**
+
+```bash
+$ curl --unix-socket /var/run/litestream.sock \
+    "http://localhost/debug/sync-status?path=/path/to/my.db"
+```
+
+**Response fields:**
+
+Each entry in `databases` contains the following fields. `path` and `active`
+are always present; the remaining fields are omitted when empty or zero. When
+`active` is `false`, the operation-specific fields describe the most recently
+completed operation rather than work in progress.
+
+| Field | Description |
+|-------|-------------|
+| `path` | Absolute path to the database file |
+| `active` | Whether a sync or checkpoint operation is currently in progress |
+| `operation` | Operation type: `sync` or `checkpoint` |
+| `phase` | Fine-grained phase within the operation (e.g. `starting`, `write_ltx_from_wal`, `checkpoint_exec`) |
+| `started_at` | Timestamp when the operation started |
+| `updated_at` | Timestamp of the most recent phase transition |
+| `elapsed_seconds` | Seconds elapsed since the operation started |
+| `txid` | LTX transaction ID being generated by the operation (may be `0` before it is assigned) |
+| `wal_size` | WAL size in bytes; during sync phases this reflects the WAL bytes being processed rather than the full file size |
+| `last_synced_wal_offset` | Byte offset of the last WAL data synced to LTX |
+| `snapshotting` | Whether a full snapshot is in progress |
+| `checkpoint_mode` | Checkpoint mode when a checkpoint is running (e.g. `PASSIVE`, `RESTART`, `TRUNCATE`) |
+| `reason` | Why a full snapshot was required (e.g. WAL truncated or salt reset), when applicable |
+| `error` | Error message if the last operation failed |
 
 ---
 
