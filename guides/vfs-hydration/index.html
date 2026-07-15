@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.27f17caee5a35535305fd30bc82e4f798fbfd649c97eb69d7839e3c511cfc2dbbf227837024305b59a258387799eb2cc14b67d5b1d3f612000f9420f53cba939.css" integrity="sha512-J/F8ruWjVTUwX9MLyC5PeY&#43;/1knJfradeDnjxRHPwtu/Ing3AkMFtZolg4d5nrLMFLZ9Wx0/YSAA&#43;UIPU8upOQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -559,43 +559,16 @@ limited benefit since those queries always read from remote LTX files.</p>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><h2 id="monitoring-hydration-progress">Monitoring hydration progress<a href="#monitoring-hydration-progress" class="anchor" aria-hidden="true">#</a> </h2>
-<p>If implemented in your Litestream build, these SQL functions can monitor
-hydration status:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Get hydration progress as percentage (0-100)
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_hydration_progress</span><span class="p">();</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 75
+<p>Use these PRAGMAs to monitor hydration:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- Get hydration progress as a percentage (0-100, one decimal place)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_hydration_progress</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 75.0
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Get hydration status
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_hydration_status</span><span class="p">();</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: idle | restoring | catching_up | complete
-</span></span></span></code></pre></div><table>
-<thead>
-<tr>
-<th>Status</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>idle</code></td>
-<td>Hydration not enabled or not started</td>
-</tr>
-<tr>
-<td><code>restoring</code></td>
-<td>Initial database restoration in progress</td>
-</tr>
-<tr>
-<td><code>catching_up</code></td>
-<td>Applying recent LTX files after initial restore</td>
-</tr>
-<tr>
-<td><code>complete</code></td>
-<td>Hydration finished, all reads served locally</td>
-</tr>
-</tbody>
-</table>
-<p>Check if your build includes these functions by attempting to call them. If not
-available, monitor the hydration file size as a rough progress indicator.</p>
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Get the local path of the hydrated database file
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_hydration_file</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: /var/lib/litestream/hydrated.db
+</span></span></span></code></pre></div><p><code>litestream_hydration_progress</code> returns <code>0</code> when hydration is not enabled and
+<code>100.0</code> once hydration is complete. Both PRAGMAs are read-only.</p>
 <h2 id="combining-with-write-mode">Combining with write mode<a href="#combining-with-write-mode" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Hydration can be used together with write mode. When both are enabled:</p>
 <ul>

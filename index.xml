@@ -38,8 +38,8 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       
       <guid>https://litestream.io/how-it-works/</guid>
-      <description>Litestream is a streaming replication tool for SQLite databases. It runs as a separate background process and continuously copies write-ahead log pages from disk to one or more replicas. This asynchronous replication provides disaster recovery similar to what is available with database servers like Postgres or MySQL.
-Understanding the WAL SQLite has a journaling mode called &amp;ldquo;WAL&amp;rdquo; (write-ahead log) which writes database page changes to a separate -wal file first before later copying those pages back into the main database file.</description>
+      <description>Litestream is a streaming replication tool for SQLite databases. It runs as a separate background process and continuously copies write-ahead log pages from disk to a replica. This asynchronous replication provides disaster recovery similar to what is available with database servers like Postgres or MySQL.
+Each database replicates to a single replica destination. If you need multiple backup destinations, see the replica settings section of the configuration reference for alternatives.</description>
     </item>
     
     <item>

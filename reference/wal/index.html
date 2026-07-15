@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.27f17caee5a35535305fd30bc82e4f798fbfd649c97eb69d7839e3c511cfc2dbbf227837024305b59a258387799eb2cc14b67d5b1d3f612000f9420f53cba939.css" integrity="sha512-J/F8ruWjVTUwX9MLyC5PeY&#43;/1knJfradeDnjxRHPwtu/Ing3AkMFtZolg4d5nrLMFLZ9Wx0/YSAA&#43;UIPU8upOQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -20,9 +20,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: wal">
-<meta name="twitter:description" content="⚠️ The wal command has been deprecated in v0.5.0 and replaced with the ltx command. The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.
-For Litestream v0.5.0&#43;, use the ltx command instead.
-Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:">
+<meta name="twitter:description" content="⚠️ The wal command has been deprecated in v0.5.0 and replaced with the ltx command. The wal command is a deprecated alias for the ltx command. Running it prints a deprecation warning and then executes ltx with the same arguments:
+$ litestream wal /var/lib/db Warning: &#39;wal&#39; command is deprecated, please use &#39;ltx&#39; instead It accepts only the ltx flags (-config, -no-expand-env, -level, -json). See the ltx command reference for usage, arguments, and examples.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -204,24 +203,7 @@ Usage List by database This command lists all WAL files across all replicas for 
 		<nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
 			<div class="page-links">
     <h3>On this page</h3>
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#usage">Usage</a>
-      <ul>
-        <li><a href="#list-by-database">List by database</a></li>
-        <li><a href="#list-by-replica-url">List by replica URL</a></li>
-      </ul>
-    </li>
-    <li><a href="#arguments">Arguments</a></li>
-    <li><a href="#example">Example</a>
-      <ul>
-        <li><a href="#database-wal-files">Database WAL files</a></li>
-        <li><a href="#filter-by-replica-name">Filter by replica name</a></li>
-        <li><a href="#replica-url-wal-files">Replica URL WAL files</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
+    <nav id="TableOfContents"></nav>
   </div>
 
 		</nav>
@@ -232,43 +214,15 @@ Usage List by database This command lists all WAL files across all replicas for 
   <div class="flex-shrink-1 alert-icon">⚠️</div>
   <div class="w-100">The wal command has been deprecated in v0.5.0 and replaced with the ltx command.</div>
 </div>
-<p>The <code>wal</code> command lists WAL files available for a database or replica. This
-command is not typically used in normal usage and is mainly used for debugging.</p>
-<p><strong>For Litestream v0.5.0+, use the <a href="https://litestream.io/reference/ltx/"><code>ltx</code> command</a> instead.</strong></p>
-<h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="list-by-database">List by database<a href="#list-by-database" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all WAL files across all replicas for a database specified
-in the Litestream configuration file:</p>
-<pre tabindex="0"><code>litestream wal [arguments] DB_PATH
-</code></pre><h3 id="list-by-replica-url">List by replica URL<a href="#list-by-replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>This command lists all WAL files for a single replica URL. This approach is
-useful when you do not have a configuration file.</p>
-<pre tabindex="0"><code>litestream wal [arguments] REPLICA_URL
-</code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>
-<pre tabindex="0"><code>-config PATH
-    Specifies the configuration file.
-    Defaults to /etc/litestream.yml
-
--no-expand-env
-    Disables environment variable expansion in configuration file.
-
--replica NAME
-    Optional, filters by replica.
-    Only applies when listing database snapshots.
-
--generation NAME
-    Optional, filter by a specific generation.
-</code></pre><h2 id="example">Example<a href="#example" class="anchor" aria-hidden="true">#</a> </h2>
-<h3 id="database-wal-files">Database WAL files<a href="#database-wal-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>List all WAL files across all replicas for the <code>/var/lib/db</code> database:</p>
+<p>The <code>wal</code> command is a deprecated alias for the <a href="https://litestream.io/reference/ltx/"><code>ltx</code> command</a>.
+Running it prints a deprecation warning and then executes <code>ltx</code> with the same
+arguments:</p>
 <pre tabindex="0"><code>$ litestream wal /var/lib/db
-</code></pre><h3 id="filter-by-replica-name">Filter by replica name<a href="#filter-by-replica-name" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all WAL files for the <code>/var/lib/db</code> database but filters by the <code>s3</code> replica:</p>
-<pre tabindex="0"><code>$ litestream wal -replica s3 /var/lib/db
-</code></pre><h3 id="replica-url-wal-files">Replica URL WAL files<a href="#replica-url-wal-files" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Lists all WAL files for a single replica URL:</p>
-<pre tabindex="0"><code>$ litestream wal s3://mybkt.litestream.io/db
-</code></pre>
+Warning: &#39;wal&#39; command is deprecated, please use &#39;ltx&#39; instead
+</code></pre><p>It accepts only the <code>ltx</code> flags (<code>-config</code>, <code>-no-expand-env</code>, <code>-level</code>,
+<code>-json</code>). See the <a href="https://litestream.io/reference/ltx/"><code>ltx</code> command reference</a> for usage,
+arguments, and examples.</p>
+
 			<div class="docs-navigation d-flex justify-content-between">
 	
 	<a href="https://litestream.io/reference/version/">

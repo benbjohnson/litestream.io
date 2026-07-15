@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.27f17caee5a35535305fd30bc82e4f798fbfd649c97eb69d7839e3c511cfc2dbbf227837024305b59a258387799eb2cc14b67d5b1d3f612000f9420f53cba939.css" integrity="sha512-J/F8ruWjVTUwX9MLyC5PeY&#43;/1knJfradeDnjxRHPwtu/Ing3AkMFtZolg4d5nrLMFLZ9Wx0/YSAA&#43;UIPU8upOQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -220,12 +220,16 @@ Database Metrics These metrics track the state and operations of each replicated
         <li><a href="#litestream_checkpoint_count">litestream_checkpoint_count</a></li>
         <li><a href="#litestream_checkpoint_error_count">litestream_checkpoint_error_count</a></li>
         <li><a href="#litestream_checkpoint_seconds">litestream_checkpoint_seconds</a></li>
+        <li><a href="#litestream_compaction_verify_error_count">litestream_compaction_verify_error_count</a></li>
+        <li><a href="#litestream_l0_retention_files_total">litestream_l0_retention_files_total</a></li>
       </ul>
     </li>
     <li><a href="#replica-metrics">Replica Metrics</a>
       <ul>
         <li><a href="#litestream_replica_operation_total">litestream_replica_operation_total</a></li>
         <li><a href="#litestream_replica_operation_bytes">litestream_replica_operation_bytes</a></li>
+        <li><a href="#litestream_replica_operation_duration_seconds">litestream_replica_operation_duration_seconds</a></li>
+        <li><a href="#litestream_replica_operation_errors_total">litestream_replica_operation_errors_total</a></li>
       </ul>
     </li>
     <li><a href="#example-prometheus-queries">Example Prometheus Queries</a>
@@ -295,37 +299,75 @@ to get average sync duration.</p>
 <p><strong>Type:</strong> Counter
 <strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
 <p>Number of checkpoint operations performed. The <code>mode</code> label indicates the
-checkpoint type: <code>passive</code> or <code>truncate</code>.</p>
-<pre tabindex="0"><code>litestream_checkpoint_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;passive&#34;} 60
-litestream_checkpoint_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;truncate&#34;} 1
+checkpoint type: <code>PASSIVE</code>, <code>RESTART</code>, or <code>TRUNCATE</code>.</p>
+<pre tabindex="0"><code>litestream_checkpoint_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;PASSIVE&#34;} 60
+litestream_checkpoint_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;TRUNCATE&#34;} 1
 </code></pre><h3 id="litestream_checkpoint_error_count">litestream_checkpoint_error_count<a href="#litestream_checkpoint_error_count" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter
 <strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
 <p>Number of checkpoint errors that have occurred, grouped by checkpoint mode.</p>
-<pre tabindex="0"><code>litestream_checkpoint_error_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;passive&#34;} 0
-litestream_checkpoint_error_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;truncate&#34;} 0
+<pre tabindex="0"><code>litestream_checkpoint_error_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;PASSIVE&#34;} 0
+litestream_checkpoint_error_count{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;TRUNCATE&#34;} 0
 </code></pre><h3 id="litestream_checkpoint_seconds">litestream_checkpoint_seconds<a href="#litestream_checkpoint_seconds" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter
 <strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
 <p>Cumulative time spent checkpointing, in seconds, grouped by checkpoint mode.</p>
-<pre tabindex="0"><code>litestream_checkpoint_seconds{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;passive&#34;} 1.234
+<pre tabindex="0"><code>litestream_checkpoint_seconds{db=&#34;/var/lib/myapp.db&#34;,mode=&#34;PASSIVE&#34;} 1.234
+</code></pre><h3 id="litestream_compaction_verify_error_count">litestream_compaction_verify_error_count<a href="#litestream_compaction_verify_error_count" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter</p>
+<p>Number of post-compaction verification failures. Litestream verifies data
+integrity after compacting LTX files—any non-zero growth indicates a
+verification failure that should be investigated.</p>
+<pre tabindex="0"><code>litestream_compaction_verify_error_count{db=&#34;/var/lib/myapp.db&#34;} 0
+</code></pre><h3 id="litestream_l0_retention_files_total">litestream_l0_retention_files_total<a href="#litestream_l0_retention_files_total" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Gauge
+<strong>Labels:</strong> <code>db</code>, <code>status</code></p>
+<p>Number of L0 (level zero) LTX files observed during retention enforcement,
+grouped by status. The <code>status</code> label is one of:</p>
+<ul>
+<li><code>eligible</code>: files eligible for deletion because they have been compacted
+into L1 and are older than the retention window</li>
+<li><code>not_compacted</code>: files retained because they have not yet been compacted
+into L1</li>
+<li><code>too_recent</code>: files retained because they are newer than the retention
+window</li>
+</ul>
+<p>Unlike other database metrics, the <code>db</code> label contains the database filename
+rather than the absolute path.</p>
+<pre tabindex="0"><code>litestream_l0_retention_files_total{db=&#34;myapp.db&#34;,status=&#34;eligible&#34;} 3
+litestream_l0_retention_files_total{db=&#34;myapp.db&#34;,status=&#34;not_compacted&#34;} 1
+litestream_l0_retention_files_total{db=&#34;myapp.db&#34;,status=&#34;too_recent&#34;} 2
 </code></pre><h2 id="replica-metrics">Replica Metrics<a href="#replica-metrics" class="anchor" aria-hidden="true">#</a> </h2>
 <p>These metrics track operations performed against replicas (S3, GCS, Azure, etc.).</p>
 <h3 id="litestream_replica_operation_total">litestream_replica_operation_total<a href="#litestream_replica_operation_total" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter
 <strong>Labels:</strong> <code>replica_type</code>, <code>operation</code></p>
 <p>The number of replica operations performed. The <code>replica_type</code> label indicates
-the storage backend (e.g., <code>s3</code>, <code>gcs</code>, <code>abs</code>, <code>file</code>). The <code>operation</code> label
-indicates the operation type.</p>
-<pre tabindex="0"><code>litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;put&#34;} 100
-litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;get&#34;} 25
-litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;delete&#34;} 10
+the storage backend (e.g., <code>s3</code>, <code>gs</code>, <code>abs</code>, <code>file</code>). The <code>operation</code> label
+indicates the operation type: <code>PUT</code>, <code>GET</code>, <code>DELETE</code>, or <code>LIST</code>.</p>
+<pre tabindex="0"><code>litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;PUT&#34;} 100
+litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;GET&#34;} 25
+litestream_replica_operation_total{replica_type=&#34;s3&#34;,operation=&#34;DELETE&#34;} 10
 </code></pre><h3 id="litestream_replica_operation_bytes">litestream_replica_operation_bytes<a href="#litestream_replica_operation_bytes" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter
 <strong>Labels:</strong> <code>replica_type</code>, <code>operation</code></p>
 <p>The number of bytes transferred by replica operations.</p>
-<pre tabindex="0"><code>litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;put&#34;} 52428800
-litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;get&#34;} 4194304
+<pre tabindex="0"><code>litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;PUT&#34;} 52428800
+litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;GET&#34;} 4194304
+</code></pre><h3 id="litestream_replica_operation_duration_seconds">litestream_replica_operation_duration_seconds<a href="#litestream_replica_operation_duration_seconds" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Histogram
+<strong>Labels:</strong> <code>replica_type</code>, <code>operation</code></p>
+<p>Duration of replica operations, in seconds. As a histogram, this metric
+exposes <code>_bucket</code>, <code>_sum</code>, and <code>_count</code> series.</p>
+<pre tabindex="0"><code>litestream_replica_operation_duration_seconds_bucket{replica_type=&#34;s3&#34;,operation=&#34;DELETE&#34;,le=&#34;0.5&#34;} 8
+litestream_replica_operation_duration_seconds_sum{replica_type=&#34;s3&#34;,operation=&#34;DELETE&#34;} 1.25
+litestream_replica_operation_duration_seconds_count{replica_type=&#34;s3&#34;,operation=&#34;DELETE&#34;} 10
+</code></pre><h3 id="litestream_replica_operation_errors_total">litestream_replica_operation_errors_total<a href="#litestream_replica_operation_errors_total" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Counter
+<strong>Labels:</strong> <code>replica_type</code>, <code>operation</code>, <code>code</code></p>
+<p>Number of replica operation errors. The <code>code</code> label contains the error code
+returned by the storage provider.</p>
+<pre tabindex="0"><code>litestream_replica_operation_errors_total{replica_type=&#34;s3&#34;,operation=&#34;DELETE&#34;,code=&#34;AccessDenied&#34;} 1
 </code></pre><h2 id="example-prometheus-queries">Example Prometheus Queries<a href="#example-prometheus-queries" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="replication-lag">Replication Lag<a href="#replication-lag" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Calculate the average sync duration over the last 5 minutes:</p>
@@ -335,7 +377,7 @@ litestream_replica_operation_bytes{replica_type=&#34;s3&#34;,operation=&#34;get&
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_sync_error_count</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
 </span></span></span></code></pre></div><h3 id="data-transfer-rate">Data Transfer Rate<a href="#data-transfer-rate" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Calculate bytes uploaded to S3 per second:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_replica_operation_bytes</span><span class="p">{</span><span class="nl">operation</span><span class="o">=</span><span class="p">&#34;</span><span class="s">put</span><span class="p">&#34;}[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="kr">rate</span><span class="o">(</span><span class="nv">litestream_replica_operation_bytes</span><span class="p">{</span><span class="nl">operation</span><span class="o">=</span><span class="p">&#34;</span><span class="s">PUT</span><span class="p">&#34;}[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w">
 </span></span></span></code></pre></div><h3 id="database-growth">Database Growth<a href="#database-growth" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Track database size growth:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-promql" data-lang="promql"><span class="line"><span class="cl"><span class="nv">litestream_db_size</span><span class="w">

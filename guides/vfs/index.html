@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.27f17caee5a35535305fd30bc82e4f798fbfd649c97eb69d7839e3c511cfc2dbbf227837024305b59a258387799eb2cc14b67d5b1d3f612000f9420f53cba939.css" integrity="sha512-J/F8ruWjVTUwX9MLyC5PeY&#43;/1knJfradeDnjxRHPwtu/Ing3AkMFtZolg4d5nrLMFLZ9Wx0/YSAA&#43;UIPU8upOQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -208,11 +208,7 @@
     <li><a href="#when-to-use-the-vfs">When to use the VFS</a></li>
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#build-the-litestream-vfs-extension">Build the <code>litestream-vfs</code> extension</a></li>
-    <li><a href="#configure-the-replica-target">Configure the replica target</a>
-      <ul>
-        <li><a href="#legacy-s3-configuration">Legacy S3 configuration</a></li>
-      </ul>
-    </li>
+    <li><a href="#configure-the-replica-target">Configure the replica target</a></li>
     <li><a href="#using-the-vfs-as-a-loadable-extension">Using the VFS as a loadable extension</a>
       <ul>
         <li><a href="#sqlite-cli">SQLite CLI</a></li>
@@ -289,7 +285,8 @@ LTX files.</p>
 <p>The SQLite entrypoint symbol is <code>sqlite3_litestreamvfs_init</code>; pass this when
 loading the extension if your client requires it.</p>
 <h2 id="configure-the-replica-target">Configure the replica target<a href="#configure-the-replica-target" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Set <code>LITESTREAM_REPLICA_URL</code> to specify the replica location. The URL scheme
+<p>Set <code>LITESTREAM_REPLICA_URL</code> to specify the replica location. This variable is
+<strong>required</strong>—the extension fails to initialize without it. The URL scheme
 determines the backend:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="c1"># AWS S3</span>
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span><span class="s2">&#34;s3://mybucket/db&#34;</span>
@@ -313,16 +310,9 @@ determines the backend:</p>
 <p>Additional configuration:</p>
 <ul>
 <li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
-</ul>
-<h3 id="legacy-s3-configuration">Legacy S3 configuration<a href="#legacy-s3-configuration" class="anchor" aria-hidden="true">#</a> </h3>
-<p>The following S3-specific variables are still supported for backwards
-compatibility:</p>
-<ul>
-<li><code>LITESTREAM_S3_BUCKET</code>, <code>LITESTREAM_S3_PATH</code> — bucket and path to the replica.</li>
-<li><code>LITESTREAM_S3_REGION</code> — defaults to the bucket&rsquo;s region (or <code>us-east-1</code> with a custom endpoint).</li>
-<li><code>LITESTREAM_S3_ENDPOINT</code> — for S3-compatible stores (MinIO, R2, etc).</li>
-<li><code>LITESTREAM_S3_FORCE_PATH_STYLE</code> — <code>true</code> for path-style URLs (default: <code>false</code>).</li>
-<li><code>LITESTREAM_S3_SKIP_VERIFY</code> — <code>true</code> to skip TLS verification for testing (default: <code>false</code>).</li>
+<li><code>LITESTREAM_LOG_FILE</code> — append log output to a file instead of stdout.</li>
+<li><code>LITESTREAM_S3_ENDPOINT</code> — custom endpoint for S3-compatible stores (MinIO,
+R2, etc.); alternative to the <code>endpoint</code> query parameter in the replica URL.</li>
 </ul>
 <h2 id="using-the-vfs-as-a-loadable-extension">Using the VFS as a loadable extension<a href="#using-the-vfs-as-a-loadable-extension" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="sqlite-cli">SQLite CLI<a href="#sqlite-cli" class="anchor" aria-hidden="true">#</a> </h3>
@@ -477,7 +467,7 @@ See the <a href="/reference/config#l0-retention-vfs-read-replicas">L0 retention 
 </ul>
 <h2 id="limitations--constraints">Limitations &amp; constraints<a href="#limitations--constraints" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li>Read-only: write attempts fail with <code>litestream is a read only vfs</code>.</li>
+<li>Read-only: write attempts fail with <code>attempt to write a readonly database</code>.</li>
 <li>CGO-only: requires <code>-tags vfs</code> and a CGO-enabled SQLite driver.</li>
 <li>Network-bound latency: first access to a page incurs storage/network latency before it is cached.</li>
 <li>High concurrency: designed for modest fan-out; very high reader counts will increase object-store requests.</li>
@@ -582,7 +572,7 @@ a deeper explanation of the two-index isolation mechanism.</p>
 <ul>
 <li><strong>&ldquo;page not found&rdquo; / non-contiguous errors</strong>: ensure VFS retention is configured on the primary (<code>l0-retention</code> long enough) and the replica has no gaps.</li>
 <li><strong>Slow queries</strong>: reduce poll interval, enlarge cache, or run closer to the object store endpoint.</li>
-<li><strong>TLS/endpoint issues with S3-compatible stores</strong>: set <code>LITESTREAM_S3_ENDPOINT</code> and, if needed for testing only, <code>LITESTREAM_S3_SKIP_VERIFY=true</code>.</li>
+<li><strong>TLS/endpoint issues with S3-compatible stores</strong>: set the <code>endpoint</code> query parameter in the replica URL or the <code>LITESTREAM_S3_ENDPOINT</code> environment variable. For self-signed certificates, add <code>skip-verify=true</code> to the replica URL (testing only).</li>
 <li><strong>No data visible</strong>: VFS waits for an initial snapshot; confirm replication is running and the replica path is correct.</li>
 </ul>
 <h2 id="common-use-cases">Common use cases<a href="#common-use-cases" class="anchor" aria-hidden="true">#</a> </h2>

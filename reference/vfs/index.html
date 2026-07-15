@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.27f17caee5a35535305fd30bc82e4f798fbfd649c97eb69d7839e3c511cfc2dbbf227837024305b59a258387799eb2cc14b67d5b1d3f612000f9420f53cba939.css" integrity="sha512-J/F8ruWjVTUwX9MLyC5PeY&#43;/1knJfradeDnjxRHPwtu/Ing3AkMFtZolg4d5nrLMFLZ9Wx0/YSAA&#43;UIPU8upOQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -212,7 +212,6 @@ Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build 
       <ul>
         <li><a href="#replica-url">Replica URL</a></li>
         <li><a href="#other-configuration">Other configuration</a></li>
-        <li><a href="#legacy-s3-configuration">Legacy S3 configuration</a></li>
         <li><a href="#runtime-tuning">Runtime tuning</a></li>
         <li><a href="#write-mode-configuration">Write mode configuration</a></li>
         <li><a href="#hydration-configuration">Hydration configuration</a></li>
@@ -224,8 +223,9 @@ Build requirements Go 1.24&#43; with a working CGO toolchain (gcc/clang). Build 
         <li><a href="#pragma-litestream_lag">PRAGMA litestream_lag</a></li>
         <li><a href="#pragma-litestream_time">PRAGMA litestream_time</a></li>
         <li><a href="#sql-function-equivalents">SQL function equivalents</a></li>
-        <li><a href="#hydration-monitoring-functions">Hydration monitoring functions</a></li>
-        <li><a href="#write-mode-functions">Write mode functions</a></li>
+        <li><a href="#pragma-litestream_hydration_progress">PRAGMA litestream_hydration_progress</a></li>
+        <li><a href="#pragma-litestream_hydration_file">PRAGMA litestream_hydration_file</a></li>
+        <li><a href="#pragma-litestream_write_enabled">PRAGMA litestream_write_enabled</a></li>
       </ul>
     </li>
     <li><a href="#performance-characteristics">Performance characteristics</a></li>
@@ -296,7 +296,8 @@ cleaned up automatically.</li>
 </ul>
 <h2 id="configuration-environment-variables">Configuration (environment variables)<a href="#configuration-environment-variables" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="replica-url">Replica URL<a href="#replica-url" class="anchor" aria-hidden="true">#</a> </h3>
-<p>Set <code>LITESTREAM_REPLICA_URL</code> to specify the replica location using a URL format:</p>
+<p>Set <code>LITESTREAM_REPLICA_URL</code> to specify the replica location using a URL format.
+This variable is <strong>required</strong>—the loadable extension fails to initialize without it.</p>
 <table>
 <thead>
 <tr>
@@ -362,20 +363,16 @@ cleaned up automatically.</li>
 </span></span></code></pre></div><h3 id="other-configuration">Other configuration<a href="#other-configuration" class="anchor" aria-hidden="true">#</a> </h3>
 <ul>
 <li><code>LITESTREAM_LOG_LEVEL</code> — <code>DEBUG</code> or <code>INFO</code> (default).</li>
+<li><code>LITESTREAM_LOG_FILE</code> — append log output to a file instead of stdout.
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+      v0.5.7
+  </span>
+</li>
+<li><code>LITESTREAM_S3_ENDPOINT</code> — custom endpoint for S3-compatible storage
+(alternative to the <code>endpoint</code> query parameter in the replica URL).</li>
 <li>Standard cloud provider credentials (AWS, GCP, Azure) are honored by their
 respective SDKs. For example: <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>,
 <code>AWS_PROFILE</code>, <code>GOOGLE_APPLICATION_CREDENTIALS</code>, <code>AZURE_STORAGE_ACCOUNT</code>.</li>
-</ul>
-<h3 id="legacy-s3-configuration">Legacy S3 configuration<a href="#legacy-s3-configuration" class="anchor" aria-hidden="true">#</a> </h3>
-<p>The following S3-specific variables are still supported for backwards
-compatibility but <code>LITESTREAM_REPLICA_URL</code> is preferred:</p>
-<ul>
-<li><code>LITESTREAM_S3_BUCKET</code> — bucket containing the replica.</li>
-<li><code>LITESTREAM_S3_PATH</code> — prefix/path to the database replica.</li>
-<li><code>LITESTREAM_S3_REGION</code> — defaults to the bucket&rsquo;s region, or <code>us-east-1</code> when using a custom endpoint.</li>
-<li><code>LITESTREAM_S3_ENDPOINT</code> — custom endpoint for S3-compatible storage.</li>
-<li><code>LITESTREAM_S3_FORCE_PATH_STYLE</code> — <code>true</code> to force path-style URLs (default <code>false</code>).</li>
-<li><code>LITESTREAM_S3_SKIP_VERIFY</code> — <code>true</code> to skip TLS verification (default <code>false</code>; testing only).</li>
 </ul>
 <h3 id="runtime-tuning">Runtime tuning<a href="#runtime-tuning" class="anchor" aria-hidden="true">#</a> </h3>
 <p>VFS runtime tuning is set in code (Go) by adjusting <code>VFS.PollInterval</code> (default
@@ -517,48 +514,35 @@ so historical LTX files remain available.</p>
 <p>Example:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_txid</span><span class="p">(),</span><span class="w"> </span><span class="n">litestream_lag</span><span class="p">(),</span><span class="w"> </span><span class="n">litestream_time</span><span class="p">();</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_set_time</span><span class="p">(</span><span class="s1">&#39;10 minutes ago&#39;</span><span class="p">);</span><span class="w">
-</span></span></span></code></pre></div><h3 id="hydration-monitoring-functions">Hydration monitoring functions<a href="#hydration-monitoring-functions" class="anchor" aria-hidden="true">#</a> </h3>
-<p>These functions are available when hydration is enabled:</p>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>litestream_hydration_progress()</code></td>
-<td>Returns hydration progress as percentage (0-100)</td>
-</tr>
-<tr>
-<td><code>litestream_hydration_status()</code></td>
-<td>Returns status: <code>idle</code>, <code>restoring</code>, <code>catching_up</code>, <code>complete</code></td>
-</tr>
-</tbody>
-</table>
-<p>Example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_hydration_status</span><span class="p">(),</span><span class="w"> </span><span class="n">litestream_hydration_progress</span><span class="p">();</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: restoring, 45
-</span></span></span></code></pre></div><h3 id="write-mode-functions">Write mode functions<a href="#write-mode-functions" class="anchor" aria-hidden="true">#</a> </h3>
-<p>These functions are available when write mode is enabled:</p>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>litestream_write_buffer_size()</code></td>
-<td>Returns current write buffer size in bytes</td>
-</tr>
-</tbody>
-</table>
-<p>Example:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">litestream_write_buffer_size</span><span class="p">();</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 8192
+</span></span></span></code></pre></div><h3 id="pragma-litestream_hydration_progress">PRAGMA litestream_hydration_progress<a href="#pragma-litestream_hydration_progress" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ Returns <a href="/guides/vfs-hydration">hydration</a> progress
+as a percentage (0–100, one decimal place). Returns <code>0</code> when hydration is not
+enabled. Read-only.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_hydration_progress</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 45.0
+</span></span></span></code></pre></div><h3 id="pragma-litestream_hydration_file">PRAGMA litestream_hydration_file<a href="#pragma-litestream_hydration_file" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ Returns the local file path of the hydrated
+database. Read-only.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_hydration_file</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: /var/lib/litestream/hydrated.db
+</span></span></span></code></pre></div><h3 id="pragma-litestream_write_enabled">PRAGMA litestream_write_enabled<a href="#pragma-litestream_write_enabled" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.9">
+    v0.5.9
+</span>
+ Gets or sets <a href="/guides/vfs-write-mode">write mode</a>
+at runtime.</p>
+<p><strong>Get current state:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_write_enabled</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">-- Returns: 0 (disabled) or 1 (enabled)
+</span></span></span></code></pre></div><p><strong>Enable or disable:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_write_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">   </span><span class="c1">-- also accepts true, on
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">PRAGMA</span><span class="w"> </span><span class="n">litestream_write_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">   </span><span class="c1">-- also accepts false, off
 </span></span></span></code></pre></div><h2 id="performance-characteristics">Performance characteristics<a href="#performance-characteristics" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li>On-demand page fetch with LRU caching sized by <code>CacheSize</code> (default 10MB).</li>
@@ -572,7 +556,7 @@ for memory considerations with long-held transactions.</li>
 </ul>
 <h2 id="limitations--constraints">Limitations &amp; constraints<a href="#limitations--constraints" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
-<li><strong>Default read-only</strong>: Write attempts return <code>litestream is a read only vfs</code> unless
+<li><strong>Default read-only</strong>: Write attempts fail with <code>attempt to write a readonly database</code> unless
 <a href="/guides/vfs-write-mode">write mode</a> is enabled with <code>LITESTREAM_WRITE_ENABLED=true</code>.</li>
 <li><strong>Write mode constraints</strong>: When enabled, write mode assumes a single writer. Multiple
 concurrent writers trigger conflict detection (not prevention). Applications must handle

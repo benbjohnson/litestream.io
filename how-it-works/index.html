@@ -5,7 +5,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
-  <link rel="stylesheet" href="/main.211f27ab66d952d637fa741b575d7cfdf53f25b5ea7d6f38193f667a756f6b85f1e0e59a36a863834fb2e4ef66f1928cff1358b23bb8a5956101d4994514962f.css" integrity="sha512-IR8nq2bZUtY3&#43;nQbV118/fU/JbXqfW84GT9menVva4Xx4OWaNqhjg0&#43;y5O9m8ZKM/xNYsju4pZVhAdSZRRSWLw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="/main.27f17caee5a35535305fd30bc82e4f798fbfd649c97eb69d7839e3c511cfc2dbbf227837024305b59a258387799eb2cc14b67d5b1d3f612000f9420f53cba939.css" integrity="sha512-J/F8ruWjVTUwX9MLyC5PeY&#43;/1knJfradeDnjxRHPwtu/Ing3AkMFtZolg4d5nrLMFLZ9Wx0/YSAA&#43;UIPU8upOQ==" crossorigin="anonymous">
 <noscript><style>img.lazyload { display: none; }</style></noscript>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -200,8 +200,9 @@
     <nav id="TableOfContents">
   <ul>
     <li><a href="#understanding-the-wal">Understanding the WAL</a></li>
-    <li><a href="#the-shadow-wal">The shadow WAL</a></li>
-    <li><a href="#snapshots--generations">Snapshots &amp; generations</a></li>
+    <li><a href="#from-wal-to-ltx">From WAL to LTX</a></li>
+    <li><a href="#compaction--snapshots">Compaction &amp; snapshots</a></li>
+    <li><a href="#restoring-a-database">Restoring a database</a></li>
     <li><a href="#retention">Retention</a></li>
     <li><a href="#read-replicas-with-vfs">Read replicas with VFS</a></li>
     <li><a href="#see-also">See Also</a></li>
@@ -215,9 +216,11 @@
 			<p class="lead"></p>
 			<p>Litestream is a streaming replication tool for SQLite databases. It runs as a
 separate background process and continuously copies write-ahead log pages from
-disk to one or more replicas. This asynchronous replication provides disaster
-recovery similar to what is available with database servers like Postgres or
-MySQL.</p>
+disk to a replica. This asynchronous replication provides disaster recovery
+similar to what is available with database servers like Postgres or MySQL.</p>
+<p>Each database replicates to a single replica destination. If you need multiple
+backup destinations, see the <a href="/reference/config/#legacy-multiple-replicas">replica settings</a>
+section of the configuration reference for alternatives.</p>
 <h2 id="understanding-the-wal">Understanding the WAL<a href="#understanding-the-wal" class="anchor" aria-hidden="true">#</a> </h2>
 <p>SQLite has a journaling mode called &ldquo;WAL&rdquo; (write-ahead log) which writes
 database page changes to a separate <code>-wal</code> file first before later copying
@@ -232,53 +235,64 @@ instances of the same database page spread across the database file &amp; WAL.</
 the database file so the WAL can be restarted. This process is called
 <em>checkpointing</em> and can only be done when no transactions are active. That is
 the crux of what lets Litestream replicate SQLite.</p>
-<h2 id="the-shadow-wal">The shadow WAL<a href="#the-shadow-wal" class="anchor" aria-hidden="true">#</a> </h2>
+<h2 id="from-wal-to-ltx">From WAL to LTX<a href="#from-wal-to-ltx" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream works by effectively taking over the checkpointing process. It starts
 a long-running read transaction to prevent any other process from checkpointing
-and restarting the WAL file. Instead, it continually copies over new WAL pages
-to a staging area called the <em>shadow WAL</em> and manually calls out to SQLite to
-perform checkpoints as necessary.</p>
-<p>The shadow WAL is a directory next to your SQLite database where WAL files are
-effectively recreated as a sequence. The first shadow WAL file starts with
-<code>00000000.wal</code> and when a checkpoint occurs then it starts copying to
-<code>00000001.wal</code>.</p>
-<p>These WAL files contain the original WAL frames &amp; checksums to ensure
-consistency. To restore a database, we can simply start from a snapshot of the
-database at some point in time and replay each WAL afterward to get it to the
-current state.</p>
+and restarting the WAL file. Instead, it continually reads new WAL pages and
+manually calls out to SQLite to perform checkpoints as necessary.</p>
+<p>New WAL pages are packaged into <em>LTX files</em> (Litestream Transaction Log files).
+Each sync assigns the next monotonically incrementing <em>transaction ID</em> (TXID)
+to the batch of new WAL pages—which may span one or more SQLite write
+transactions—and writes them as an LTX file along with checksums to ensure
+consistency. LTX files are named after the TXID range they cover—for example,
+<code>0000000000000001-0000000000000005.ltx</code> covers TXIDs 1 through 5.</p>
+<p>LTX files are staged in a hidden directory next to your database (e.g.
+<code>/var/lib/.db-litestream</code> for a database at <code>/var/lib/db</code>) and then uploaded to
+the replica, where they are organized by compaction level under an <code>ltx/</code>
+prefix.</p>
 <p>For more information about Litestream&rsquo;s checkpoint strategy and configuration
 options, see the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Configuration
 guide</a>.</p>
-<h2 id="snapshots--generations">Snapshots &amp; generations<a href="#snapshots--generations" class="anchor" aria-hidden="true">#</a> </h2>
-<p>In order to accurately restore a database, a snapshot and all subsequent WAL
-frames must be available. Any break in the WAL frames would result in a
-corrupted restored database file. This collection of snapshots &amp; contiguous
-WAL files is called a <em>generation</em> in Litestream.</p>
-<p>When Litestream first starts replicating a database, it creates a new
-generation. This is simply a 16-character random hex string. A snapshot is
-created by copying the current state of the database and then all WAL files
-created after are named as 8-character incrementing hex values starting with
-zero.</p>
-<p>If Litestream detects that there is a break in the WAL frames then it will
-automatically start a new generation with a new random hex string and a
-snapshot. This ensures we always have a contiguous set of files to replay even
-if Litestream is stopped and misses WAL frames being written.</p>
-<p>This approach also has the benefit that two servers that accidentally share
-the same replica destination will not overwrite each other&rsquo;s data. However,
-note that it is not recommended to replicate two databases to the same exact
-replica path.</p>
+<h2 id="compaction--snapshots">Compaction &amp; snapshots<a href="#compaction--snapshots" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Litestream writes LTX files continuously as transactions occur, so the lowest
+level—called <em>L0</em>—accumulates many small files. To keep restores fast, a
+background compaction process periodically merges files from one level into
+larger files at the next level:</p>
+<ul>
+<li><strong>L0</strong> — raw transaction files written continuously during replication.</li>
+<li><strong>L1, L2, L3</strong> — compacted files, merged every 30 seconds, 5 minutes, and
+1 hour by default.</li>
+<li><strong>Snapshot level</strong> — a full copy of the database, created every 24 hours by
+default.</li>
+</ul>
+<p>This tiered approach means recent changes are available at fine granularity
+while older history is consolidated into fewer, larger files. Compaction
+intervals and snapshot frequency are configurable—see the
+<a href="/reference/config">Configuration Reference</a> for details, and the
+<a href="/reference/ltx"><code>ltx</code> command</a> for inspecting files at each level.</p>
+<h2 id="restoring-a-database">Restoring a database<a href="#restoring-a-database" class="anchor" aria-hidden="true">#</a> </h2>
+<p>To restore a database, Litestream fetches the latest snapshot at or before the
+requested point in time and then applies each subsequent LTX file in TXID order
+to bring the database up to that point. Because TXIDs form a contiguous
+sequence, Litestream can verify that no transactions are missing before
+restoring—any gap in the sequence would otherwise result in a corrupted
+database file.</p>
+<p>Earlier v0.3.x releases tracked replication state using randomly-generated
+&ldquo;generation&rdquo; IDs and a directory of shadow WAL files. Litestream v0.5 replaces
+both concepts with TXID-based LTX files. See the
+<a href="/docs/migration">Migration Guide</a> if you are upgrading from v0.3.x.</p>
 <h2 id="retention">Retention<a href="#retention" class="anchor" aria-hidden="true">#</a> </h2>
-<p>The time to restore a database from backup is directly related to the number and
-size of WAL files since the snapshot. To avoid having the WAL files grow without
-bound, Litestream performs new snapshots of the data periodically and removes old
-WAL files.</p>
+<p>The time to restore a database from backup is directly related to the number
+and size of LTX files since the last snapshot. To avoid having these files grow
+without bound, Litestream performs new snapshots of the data periodically and
+removes old LTX files.</p>
 <p>This process is broken up into two steps. First, a snapshot interval is set to
 re-snapshot the database on a regular basis. This allows you to keep copies of
 your database at multiple points in time.</p>
 <p>The second step is retention enforcement. This periodically runs and removes any
-snapshots older than the retention time as well as remove any WAL files older
-than the oldest snapshot. By default, this the retention time is 24 hours.
-Litestream will always ensure there is at least one snapshot retained.</p>
+snapshots older than the retention period as well as any LTX files older than
+the oldest snapshot. By default, the retention period is 24 hours. Litestream
+will always ensure there is at least one snapshot retained.</p>
 <p>This two-step process allows for more use cases such as snapshotting every day
 but retaining snapshots for a week.</p>
 <h2 id="read-replicas-with-vfs">Read replicas with VFS<a href="#read-replicas-with-vfs" class="anchor" aria-hidden="true">#</a> </h2>

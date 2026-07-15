@@ -153,7 +153,7 @@
       <link>https://litestream.io/reference/wal/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/wal/</guid>
-      <description>⚠️ The wal command has been deprecated in v0.5.0 and replaced with the ltx command. The wal command lists WAL files available for a database or replica. This command is not typically used in normal usage and is mainly used for debugging.&#xA;For Litestream v0.5.0+, use the ltx command instead.&#xA;Usage List by database This command lists all WAL files across all replicas for a database specified in the Litestream configuration file:</description>
+      <description>⚠️ The wal command has been deprecated in v0.5.0 and replaced with the ltx command. The wal command is a deprecated alias for the ltx command. Running it prints a deprecation warning and then executes ltx with the same arguments:&#xA;$ litestream wal /var/lib/db Warning: &amp;#39;wal&amp;#39; command is deprecated, please use &amp;#39;ltx&amp;#39; instead It accepts only the ltx flags (-config, -no-expand-env, -level, -json). See the ltx command reference for usage, arguments, and examples.</description>
     </item>
   </channel>
 </rss>
