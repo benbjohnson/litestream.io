@@ -179,7 +179,7 @@ Prerequisites This guide assumes you have read the Getting Started tutorial alre
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -287,7 +287,7 @@ INSERT INTO friends (name) VALUES (&#39;Kelly&#39;);
 <p>Next, we&rsquo;ll simulate a catastrophic server failure by stopping Litestream:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">sudo systemctl stop litestream
 </span></span></code></pre></div><p>And then we&rsquo;ll delete our database:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">rm -rf friends.db friends.db-shm friends.db-wal friends.db-litestream
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">rm -rf friends.db friends.db-shm friends.db-wal .friends.db-litestream
 </span></span></code></pre></div><p>This is the state our server would be in if it had crashed and we had rebuilt it
 but lost our data.</p>
 <h2 id="restoring-our-database">Restoring our database<a href="#restoring-our-database" class="anchor" aria-hidden="true">#</a> </h2>

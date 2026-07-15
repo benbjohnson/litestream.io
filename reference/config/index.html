@@ -180,7 +180,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -605,7 +605,7 @@ by their absolute path.</p>
 Litestream automatically strips <code>sqlite://</code> and <code>sqlite3://</code> prefixes, allowing
 you to use the same <code>DATABASE_URL</code> with Litestream and other SQLite tools. See
 <a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a> below.</li>
-<li><code>meta-path</code>—Path to store Litestream metadata (defaults to <code>&lt;path&gt;-litestream</code>)</li>
+<li><code>meta-path</code>—Path to store Litestream metadata (defaults to a hidden <code>.&lt;filename&gt;-litestream</code> directory next to the database file, e.g. <code>/var/lib/db</code> → <code>/var/lib/.db-litestream</code>)</li>
 <li><code>monitor-interval</code>—How often to check for changes (default: <code>1s</code>)</li>
 <li><code>checkpoint-interval</code>—How often to perform WAL checkpoints using PASSIVE mode (default: <code>1m</code>, non-blocking)</li>
 <li><code>busy-timeout</code>—SQLite busy timeout (default: <code>1s</code>)</li>

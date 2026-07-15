@@ -180,7 +180,7 @@ Usage litestream reset [arguments] DB_PATH Arguments -dry-run Print the local LT
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -258,15 +258,15 @@ that would be removed from the metadata directory without actually deleting
 them. This allows you to preview the reset operation before committing to it.</p>
 <pre tabindex="0"><code>$ litestream reset -dry-run /var/lib/db
 Dry run: local Litestream state would be reset for: /var/lib/db
-Would remove: /var/lib/db-litestream/ltx
+Would remove: /var/lib/.db-litestream/ltx
 Files that would be removed:
-  /var/lib/db-litestream/ltx/0000000000000001-0000000000000001.ltx
-  /var/lib/db-litestream/ltx/0000000000000002-0000000000000002.ltx
+  /var/lib/.db-litestream/ltx/0/0000000000000001-0000000000000001.ltx
+  /var/lib/.db-litestream/ltx/0/0000000000000002-0000000000000002.ltx
 No files were removed.
 </code></pre><p>If no local LTX files exist, the dry run reports that:</p>
 <pre tabindex="0"><code>$ litestream reset -dry-run /var/lib/db
 Dry run: local Litestream state would be reset for: /var/lib/db
-Would remove: /var/lib/db-litestream/ltx
+Would remove: /var/lib/.db-litestream/ltx
 No local LTX files would be removed.
 </code></pre><h2 id="when-to-use">When to Use<a href="#when-to-use" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Use <code>litestream reset</code> when you encounter replication errors related to

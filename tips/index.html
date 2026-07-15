@@ -174,7 +174,7 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -259,8 +259,9 @@ files which must be deleted:</p>
 apply those old WAL pages to your new database. Litestream also tracks changes
 via the WAL so it can cause replication issues if the WAL file is leftover.</p>
 <p>Additionally, Litestream currently does not track database deletions. If you
-remove your database and recreate it, you should delete the <code>-litestream</code>
-directory next to your database file and restart Litestream.</p>
+remove your database and recreate it, you should delete the hidden
+<code>.&lt;filename&gt;-litestream</code> metadata directory next to your database file (e.g.
+<code>.db-litestream</code> for a database named <code>db</code>) and restart Litestream.</p>
 <h2 id="synchronous-pragma">Synchronous PRAGMA<a href="#synchronous-pragma" class="anchor" aria-hidden="true">#</a> </h2>
 <p>SQLite must call <code>fsync()</code> to flush data to disk to ensure transactions are
 durable. While in WAL journaling mode, fsync calls can be relaxed in exchange

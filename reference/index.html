@@ -173,7 +173,7 @@
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -201,6 +201,7 @@
   <ul>
     <li><a href="#commands">Commands</a></li>
     <li><a href="#daemon-control-commands">Daemon Control Commands</a></li>
+    <li><a href="#mcp-server">MCP Server</a></li>
     <li><a href="#vfs-extension">VFS Extension</a></li>
     <li><a href="#ipc-endpoints">IPC Endpoints</a></li>
     <li><a href="#prometheus-metrics">Prometheus Metrics</a></li>
@@ -221,7 +222,6 @@ about the options available and different modes of operation.</p>
 <ul>
 <li><a href="/reference/databases"><code>litestream databases</code></a> — Lists databases specified in config file.</li>
 <li><a href="/reference/ltx"><code>litestream ltx</code></a> — List available LTX files for a database.</li>
-<li><a href="/reference/mcp"><code>litestream mcp</code></a> — MCP server for AI assistant integration.</li>
 <li><a href="/reference/replicate"><code>litestream replicate</code></a> — Runs a server to replicate databases.</li>
 <li><a href="/reference/restore"><code>litestream restore</code></a> — Recovers database backup from a replica.</li>
 <li><a href="/reference/status"><code>litestream status</code></a> — Reports local replication status for configured databases.</li>
@@ -239,6 +239,10 @@ IPC control socket. They require a running daemon with the socket enabled.</p>
 <li><a href="/reference/unregister"><code>litestream unregister</code></a> — Removes a database from the daemon.</li>
 <li><a href="/reference/start"><code>litestream start</code></a> — Resumes replication for a stopped database.</li>
 <li><a href="/reference/stop"><code>litestream stop</code></a> — Pauses replication for a database.</li>
+</ul>
+<h2 id="mcp-server">MCP Server<a href="#mcp-server" class="anchor" aria-hidden="true">#</a> </h2>
+<ul>
+<li><a href="/reference/mcp">MCP Server</a> — Model Context Protocol integration for AI assistants, enabled via the <code>replicate</code> command&rsquo;s <code>mcp-addr</code> config setting.</li>
 </ul>
 <h2 id="vfs-extension">VFS Extension<a href="#vfs-extension" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
