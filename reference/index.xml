@@ -20,7 +20,7 @@
       <link>https://litestream.io/reference/vfs/</link>
       <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/vfs/</guid>
-      <description>The Litestream VFS provides read-only access to a replicated SQLite database directly from object storage. It registers a VFS named litestream, fetches pages on-demand, and continuously polls the replica for new LTX files. The VFS is built separately from the main litestream binary and requires CGO. Pre-built binaries are available in GitHub releases.&#xA;Build requirements Go 1.24+ with a working CGO toolchain (gcc/clang). Build with the VFS &amp;amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &amp;#34;vfs,SQLITE3VFS_LOADABLE_EXT&amp;#34; -buildmode=c-archive -o dist/litestream-vfs.</description>
+      <description>The Litestream VFS provides read-only access to a replicated SQLite database directly from object storage. It registers a VFS named litestream, fetches pages on-demand, and continuously polls the replica for new LTX files. The VFS is built separately from the main litestream binary and requires CGO. Pre-built binaries are available in GitHub releases.&#xA;Build requirements Go 1.25+ with a working CGO toolchain (gcc/clang). Build with the VFS &amp;amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &amp;#34;vfs,SQLITE3VFS_LOADABLE_EXT&amp;#34; -buildmode=c-archive -o dist/litestream-vfs.</description>
     </item>
     <item>
       <title>Prometheus Metrics</title>
@@ -34,14 +34,14 @@
       <link>https://litestream.io/reference/databases/</link>
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/databases/</guid>
-      <description>The databases command lists all databases in the configuration file as well as list their associated replicas.&#xA;Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -no-expand-env Disables environment variable expansion in configuration file. -json Output raw JSON instead of human-readable text. Example This example shows a single database /var/lib/db defined in the configuration file with two replicas named &amp;quot;file&amp;quot; and &amp;quot;s3&amp;quot;:&#xA;$ litestream databases path replicas /var/lib/db file,s3 JSON Output v0.</description>
+      <description>The databases command lists all databases in the configuration file along with their associated replica.&#xA;Usage litestream databases [arguments] Arguments -config PATH Specifies the configuration file. Defaults to /etc/litestream.yml -json Output raw JSON instead of human-readable text. -no-expand-env Disables environment variable expansion in configuration file. Output By default, the databases command prints an aligned, human-readable table with one row per database:&#xA;Column Description path Path to the SQLite database replica Type of the configured replica JSON output v0.</description>
     </item>
     <item>
-      <title>Command: mcp</title>
+      <title>MCP Server</title>
       <link>https://litestream.io/reference/mcp/</link>
       <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/mcp/</guid>
-      <description>The mcp server provides Model Context Protocol integration, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.&#xA;Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems. Litestream&amp;rsquo;s MCP server exposes tools that allow AI assistants to:&#xA;View database and replica status Monitor replication health and sync state List available transaction log (LTX) files Restore databases to specific points in time Reset local replication state Print version information This integration enables natural language interaction with your Litestream deployment, making it easier to inspect backups, troubleshoot issues, and perform restores through conversational AI interfaces.</description>
+      <description>Litestream includes a built-in Model Context Protocol (MCP) server, allowing AI assistants like Claude, Copilot, Cursor, and others to interact with Litestream databases and replicas through a standardized HTTP API.&#xA;There is no litestream mcp subcommand. The MCP server runs as part of the replicate command and is enabled by setting mcp-addr in the configuration file.&#xA;Overview v0.5.0 The Model Context Protocol (MCP) is an open standard that enables AI applications to connect with external systems.</description>
     </item>
     <item>
       <title>Command: replicate</title>
@@ -97,7 +97,7 @@
       <link>https://litestream.io/reference/ipc/</link>
       <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/ipc/</guid>
-      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The IPC socket is created at:&#xA;/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.&#xA;Endpoints GET /list Returns all databases currently tracked by the Litestream daemon, along with their last sync time.</description>
+      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The control socket is disabled by default. Enable it with a socket block in your configuration file:&#xA;socket: enabled: true # default: false path: /var/run/litestream.sock permissions: 0600 The path defaults to /var/run/litestream.sock and permissions defaults to 0600.</description>
     </item>
     <item>
       <title>Command: reset</title>

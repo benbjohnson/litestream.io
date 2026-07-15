@@ -13,6 +13,7 @@ spec:
   selector:
     app: myapp
 
+---
 # It is recommended to use a StatefulSet as they restrict the number of pods.
 # Applications using Litestream can only be run on a single node at a time.
 apiVersion: apps/v1
@@ -54,7 +55,7 @@ spec:
       # before starting the application.
       initContainers:
       - name: init-litestream
-        image: litestream/litestream:0.3
+        image: litestream/litestream:0.5
         args: ['restore', '-if-db-not-exists', '-if-replica-exists', '/var/lib/myapp/db']
         volumeMounts:
         - name: data
@@ -86,7 +87,7 @@ spec:
           mountPath: /var/lib/myapp
 
       - name: litestream
-        image: litestream/litestream:0.3
+        image: litestream/litestream:0.5
         args: ['replicate']
         volumeMounts:
         - name: data

@@ -78,7 +78,7 @@ However, this tradeoff may not make sense for all applications. This page lists 
       <guid>https://litestream.io/guides/</guid>
       <description>Overview These guides provide instructions for running Litestream in production on different platforms.
 After completing the Getting Started tutorial, use these guides to deploy Litestream in your production environment. For conceptual background on how Litestream works, see How It Works. If you encounter issues, check the Troubleshooting guide.
-Infrastructure guides Directory Watcher Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service Configuration guides Directory Replication Global Replica Defaults Migration guides AWS SDK v2 Migration Replica guides Alibaba Cloud OSS Amazon S3 S3 Advanced Configuration S3-Compatible Services Go Library Integration VFS Read Replicas VFS Write Mode VFS Hydration Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Local File Path NATS JetStream Scaleway Object Storage SFTP Server Supabase Storage Tigris (Fly.</description>
+Infrastructure guides Directory Watcher Running in a Docker container Running in a Kubernetes cluster Running as a Systemd service Running as a Windows service Configuration guides Directory Replication Global Replica Defaults WAL Truncate Threshold Migration guides AWS SDK v2 Migration Replica guides Alibaba Cloud OSS Amazon S3 S3 Advanced Configuration S3-Compatible Services Go Library Integration VFS Read Replicas VFS Write Mode VFS Hydration Azure Blob Storage Backblaze B2 DigitalOcean Spaces Google Cloud Storage Linode Object Storage Local File Path NATS JetStream Scaleway Object Storage SFTP Server Supabase Storage Tigris (Fly.</description>
     </item>
     
     <item>
@@ -87,7 +87,7 @@ Infrastructure guides Directory Watcher Running in a Docker container Running in
       <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
       
       <guid>https://litestream.io/install/</guid>
-      <description>Overview Most users should install Litestream using prebuilt binaries as they make it easy to get up and running quickly. If a binaries are not available for your operating system or architecture, you&amp;rsquo;ll need to build Litestream from source.
+      <description>Overview Most users should install Litestream using prebuilt binaries as they make it easy to get up and running quickly. If binaries are not available for your operating system or architecture, you&amp;rsquo;ll need to build Litestream from source.
 Install on macOS Install on Linux Build from source </description>
     </item>
     
@@ -99,7 +99,7 @@ Install on macOS Install on Linux Build from source </description>
       <guid>https://litestream.io/reference/</guid>
       <description>The Litestream command line provides several subcommands to help you manage replication &amp;amp; recovery of your databases. This reference provides details about the options available and different modes of operation.
 Commands The litestream commands are:
-litestream databases — Lists databases specified in config file. litestream ltx — List available LTX files for a database. litestream mcp — MCP server for AI assistant integration. litestream replicate — Runs a server to replicate databases.</description>
+litestream databases — Lists databases specified in config file. litestream ltx — List available LTX files for a database. litestream replicate — Runs a server to replicate databases. litestream reset — Clears local Litestream state, forcing a fresh snapshot on the next sync.</description>
     </item>
     
   </channel>

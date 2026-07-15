@@ -174,7 +174,7 @@ Busy timeout SQLite is built to run as a multi-process embedded database and Lit
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -259,8 +259,10 @@ files which must be deleted:</p>
 apply those old WAL pages to your new database. Litestream also tracks changes
 via the WAL so it can cause replication issues if the WAL file is leftover.</p>
 <p>Additionally, Litestream currently does not track database deletions. If you
-remove your database and recreate it, you should delete the <code>-litestream</code>
-directory next to your database file and restart Litestream.</p>
+remove your database and recreate it, you should clear Litestream&rsquo;s local
+metadata and restart. Run <a href="/reference/reset"><code>litestream reset</code></a> on the database
+path, or delete the <code>.&lt;filename&gt;-litestream</code> metadata directory next to your
+database file (for example, <code>.mydb.sqlite-litestream</code> for <code>mydb.sqlite</code>).</p>
 <h2 id="synchronous-pragma">Synchronous PRAGMA<a href="#synchronous-pragma" class="anchor" aria-hidden="true">#</a> </h2>
 <p>SQLite must call <code>fsync()</code> to flush data to disk to ensure transactions are
 durable. While in WAL journaling mode, fsync calls can be relaxed in exchange
@@ -285,16 +287,21 @@ it will attempt to synchronize all outstanding WAL changes to the S3 replica bef
 <p>Synchronous replication is on the Litestream roadmap but has not yet been
 implemented.</p>
 <h2 id="increase-snapshots-frequency-to-improve-restore-performance">Increase snapshots frequency to improve restore performance<a href="#increase-snapshots-frequency-to-improve-restore-performance" class="anchor" aria-hidden="true">#</a> </h2>
-<p>By default, the <code>snapshot-interval</code> on a replica is unset so a new snapshot is
-taken when the previous snapshot is removed because of retention. For example,
-if your retention policy is the default setting of <code>24h</code> then a new snapshot
-will be taken once per day.</p>
-<p>However, if you&rsquo;re writing data often then WAL files will build up over that
-time period and increase your restore time. If you have frequent writes then it
-is recommended to either decrease your <code>retention</code> period or to set the
-<code>snapshot-interval</code> to something lower such as <code>1h</code>.</p>
-<p>For example, if your <code>retention</code> period is one day and your <code>snapshot-interval</code>
-is one hour then you will see a rolling set of 24 snapshots for your replica.</p>
+<p>By default, Litestream takes a full snapshot of each database every <code>24h</code> and
+retains snapshots for <code>24h</code>. Between snapshots, changes are stored as
+incremental LTX files, and a restore replays every LTX file recorded since the
+most recent snapshot.</p>
+<p>If you&rsquo;re writing data often then these incremental files build up between
+snapshots and increase your restore time. If you have frequent writes, it is
+recommended to take snapshots more often by lowering the global
+<code>snapshot.interval</code> setting:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span></code></pre></div><p>The <code>snapshot</code> block is a global setting that applies to all databases; you can
+also override it per database under an individual <code>dbs</code> entry. With a <code>1h</code>
+interval and <code>24h</code> retention you will keep a rolling set of 24 snapshots. See
+the <a href="/reference/config">configuration reference</a> for details.</p>
 <h2 id="disable-autocheckpoints-for-high-write-load-servers">Disable autocheckpoints for high write load servers<a href="#disable-autocheckpoints-for-high-write-load-servers" class="anchor" aria-hidden="true">#</a> </h2>
 <blockquote>
 <p><strong>Note:</strong> Checkpoint detection improvements in v0.5.0+ reduce the need for full snapshots when checkpoints occur.</p>
@@ -308,8 +315,8 @@ lock on the database in between its checkpoint requests.</p>
 <p>However, under high load with many small write transactions (e.g. tens of
 thousands per second), the application&rsquo;s SQLite instance can perform a
 checkpoint in between Litestream-initiated checkpoints and cause Litestream
-to miss a WAL file. When Litestream notices this it will force a new
-generation and take a full snapshot to ensure consistency.</p>
+to miss a WAL update. When Litestream detects this it takes a fresh full
+snapshot to ensure consistency.</p>
 <p>To prevent this, it is recommended to run your application with
 autocheckpointing disabled. To do this, run the following PRAGMA when you
 open your SQLite connection:</p>
@@ -321,16 +328,21 @@ guide</a>.</p>
 <p>Multiple applications replicating into the same bucket &amp; path can cause situations
 where you will be unable to restore. It is <em>your</em> responsibility to ensure you
 do not have multiple applications replicating concurrently. In the off-chance
-that it does happen, and you&rsquo;re unable to restore, you may see an error along
-the lines of:</p>
-<pre tabindex="0"><code>cannot find max wal index for restore: missing initial wal segment: generation=f6d6d1e96d38dafb index=00000093 offset=4152
-</code></pre><p>In this case, manually copy your most recent snapshot in
-<code>generations/&lt;id&gt;/snapshots/&lt;snapshot&gt;.lz4</code> and decompress with <code>lz4</code>.</p>
-<p>It&rsquo;s a good idea to perform an integrity check on the database using <code>sqlite3</code>:</p>
+that it does happen, and you&rsquo;re unable to restore, recover from the replica as
+follows.</p>
+<p>First, attempt a normal restore with <a href="/reference/restore"><code>litestream restore</code></a>,
+which reconstructs the database from the most recent snapshot and the LTX files
+recorded since. You can inspect the LTX files stored in a replica with the
+<a href="/reference/ltx"><code>litestream ltx</code></a> command to understand its state.</p>
+<p>If the local Litestream metadata has become inconsistent, run
+<a href="/reference/reset"><code>litestream reset</code></a> on the database to clear the local
+tracking state. Litestream will take a fresh full snapshot on the next sync.</p>
+<p>Once you have a restored copy, it&rsquo;s a good idea to perform an integrity check on
+the database using <code>sqlite3</code>:</p>
 <pre tabindex="0"><code>$ sqlite3 /path/to/db
 sqlite&gt; PRAGMA integrity_check;
 ok
-</code></pre><p>You now use this snapshot file as your application&rsquo;s database file and continue
+</code></pre><p>Use this restored file as your application&rsquo;s database file and continue
 replicating it again with Litestream.</p>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
@@ -354,7 +366,7 @@ replicating it again with Litestream.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

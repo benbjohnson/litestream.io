@@ -180,7 +180,7 @@ Variable expansion By default, Litestream will perform environment variable expa
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -221,11 +221,16 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
         <li><a href="#logging">Logging</a></li>
         <li><a href="#l0-retention">L0 Retention</a></li>
+        <li><a href="#compaction-verification">Compaction verification</a></li>
+        <li><a href="#heartbeat-monitoring">Heartbeat monitoring</a></li>
+        <li><a href="#shutdown-sync">Shutdown sync</a></li>
+        <li><a href="#control-socket">Control socket</a></li>
       </ul>
     </li>
     <li><a href="#database-settings">Database settings</a>
       <ul>
         <li><a href="#database-configuration-options">Database configuration options</a></li>
+        <li><a href="#per-database-snapshot-settings">Per-database snapshot settings</a></li>
         <li><a href="#directory-replication">Directory replication</a></li>
         <li><a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a></li>
         <li><a href="#directory-configuration">Directory configuration</a></li>
@@ -494,14 +499,25 @@ by setting a bind address:</p>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.12">
     v0.3.12
 </span>
- Log <code>type</code> can be set to either &ldquo;text&rdquo; or &ldquo;json&rdquo;.
-Logging <code>level</code> can be set to &ldquo;debug&rdquo;, &ldquo;info&rdquo;, &ldquo;warn&rdquo; or &ldquo;error&rdquo;. By setting
-<code>stderr</code> to <code>true</code> logs will be written to stderr instead of stdout.</p>
+ Log <code>type</code> can be set to &ldquo;text&rdquo; or &ldquo;json&rdquo;.
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.11">
+    v0.5.11
+</span>
+ A <code>pretty</code> type is also available, which produces
+human-readable output that is colorized when written to a terminal. Logging
+<code>level</code> can be set to &ldquo;debug&rdquo;, &ldquo;info&rdquo;, &ldquo;warn&rdquo; or &ldquo;error&rdquo;. By setting <code>stderr</code> to
+<code>true</code> logs will be written to stderr instead of stdout.</p>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.11">
+    v0.5.11
+</span>
+ Setting <code>source</code> to <code>true</code> adds the source file
+and line number to each log record.</p>
 <p>The defaults are shown below:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">logging</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">info</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span></code></pre></div><h3 id="l0-retention">L0 Retention<a href="#l0-retention" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -575,7 +591,79 @@ Enable debug logging to monitor retention behavior:</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">15s</span><span class="w">
-</span></span></span></code></pre></div><h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><h3 id="compaction-verification">Compaction verification<a href="#compaction-verification" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The <code>verify-compaction</code> option checks TXID
+consistency at the destination level after each compaction. When enabled,
+Litestream logs a warning if it detects gaps or overlaps in the transaction
+ranges. This is primarily a diagnostic aid and is disabled by default.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">verify-compaction</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>verify-compaction</code>—Verify TXID consistency after each compaction and log
+warnings on gaps or overlaps. Defaults to <code>false</code>.</li>
+</ul>
+<h3 id="heartbeat-monitoring">Heartbeat monitoring<a href="#heartbeat-monitoring" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ Litestream can send periodic heartbeat pings to an
+external URL as a dead-man&rsquo;s switch for backup-health monitoring services such as
+<a href="https://healthchecks.io/">Healthchecks.io</a> or Better Stack. A ping is an HTTP
+<code>GET</code> request and is considered delivered when the endpoint returns a <code>2xx</code>
+status code.</p>
+<p>The heartbeat is health-gated, not a plain process-uptime signal: Litestream
+sends a ping only when <strong>all</strong> enabled databases have completed a successful sync
+within the heartbeat interval. If there are no enabled databases, or any database
+has fallen behind, no ping is sent — so a missed heartbeat means replication is
+unhealthy (or the daemon has stopped), not merely that the process exited.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">heartbeat-url</span><span class="p">:</span><span class="w"> </span><span class="l">https://hc-ping.com/your-uuid-here</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">heartbeat-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>heartbeat-url</code>—URL to ping on each heartbeat interval. Heartbeats are disabled
+when this is empty. Defaults to empty (disabled).</li>
+<li><code>heartbeat-interval</code>—How often to ping the heartbeat URL while all databases are
+healthy. Must be at least <code>1m</code>; smaller values are rejected and Litestream fails
+to start. Defaults to <code>5m</code>.</li>
+</ul>
+<h3 id="shutdown-sync">Shutdown sync<a href="#shutdown-sync" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ When Litestream receives a shutdown signal, it
+attempts a final sync of each database to its replica before exiting. These
+settings bound how long that final sync is allowed to take.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">shutdown-sync-timeout</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">shutdown-sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">500ms</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>shutdown-sync-timeout</code>—Maximum time to wait for the final sync to complete
+during shutdown. Defaults to <code>30s</code>.</li>
+<li><code>shutdown-sync-interval</code>—How frequently to retry the final sync while waiting
+for it to succeed during shutdown. Defaults to <code>500ms</code>.</li>
+</ul>
+<h3 id="control-socket">Control socket<a href="#control-socket" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The <code>socket</code> block configures the Unix domain
+socket used by the daemon control commands (<a href="https://litestream.io/reference/stop/"><code>stop</code></a>,
+<a href="https://litestream.io/reference/register/"><code>register</code></a>, and others) and the local
+<a href="https://litestream.io/reference/ipc/">IPC endpoints</a>. The socket is disabled by default and must be
+enabled explicitly.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">socket</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/run/litestream.sock</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">permissions</span><span class="p">:</span><span class="w"> </span><span class="m">0600</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>enabled</code>—Enables the control socket. When <code>false</code>, the daemon does not create
+a socket and control commands cannot connect. Defaults to <code>false</code>.</li>
+<li><code>path</code>—Filesystem path for the Unix socket. Defaults to
+<code>/var/run/litestream.sock</code>.</li>
+<li><code>permissions</code>—Octal file permissions for the socket. Defaults to <code>0600</code>
+(owner read/write only).</li>
+</ul>
+<h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream can monitor one or more database files that are specified in the
 configuration file. Database files are also referenced in <code>litestream</code> commands
 by their absolute path.</p>
@@ -605,7 +693,14 @@ by their absolute path.</p>
 Litestream automatically strips <code>sqlite://</code> and <code>sqlite3://</code> prefixes, allowing
 you to use the same <code>DATABASE_URL</code> with Litestream and other SQLite tools. See
 <a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a> below.</li>
-<li><code>meta-path</code>—Path to store Litestream metadata (defaults to <code>&lt;path&gt;-litestream</code>)</li>
+<li><code>meta-path</code>—Path to store Litestream metadata (defaults to a hidden <code>.&lt;filename&gt;-litestream</code> directory next to the database file, e.g. <code>/var/lib/db</code> → <code>/var/lib/.db-litestream</code>)</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata when using <a href="#directory-replication">directory replication</a>. Only
+valid with <code>dir:</code>, not a single <code>path:</code>. See
+<a href="#metadata-directory">Metadata directory</a> below.</li>
 <li><code>monitor-interval</code>—How often to check for changes (default: <code>1s</code>)</li>
 <li><code>checkpoint-interval</code>—How often to perform WAL checkpoints using PASSIVE mode (default: <code>1m</code>, non-blocking)</li>
 <li><code>busy-timeout</code>—SQLite busy timeout (default: <code>1s</code>)</li>
@@ -614,12 +709,48 @@ you to use the same <code>DATABASE_URL</code> with Litestream and other SQLite t
     v0.5.0
 </span>
  Emergency threshold for TRUNCATE checkpoint (default: <code>121359</code>, ~500MB, <strong>blocks both readers and writers</strong>). Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
+<li><code>restore-if-db-not-exists</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ When <code>true</code>, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to <code>false</code>. This is also available as the <code>-restore-if-db-not-exists</code> flag on the <a href="https://litestream.io/reference/replicate/"><code>replicate</code></a> command.</li>
+<li><code>snapshot</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Per-database <code>interval</code> and <code>retention</code> for snapshots. See <a href="#per-database-snapshot-settings">Per-database snapshot settings</a> below for the promotion semantics.</li>
 <li><code>replica</code>—Single replica configuration (replaces deprecated <code>replicas</code> array)</li>
 </ul>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>
   <div class="w-100">The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead.</div>
 </div>
+<h3 id="per-database-snapshot-settings">Per-database snapshot settings<a href="#per-database-snapshot-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ A <code>snapshot</code> block can be set on an individual
+database, but snapshot settings are ultimately applied globally. The per-database
+block is a convenience for expressing the global snapshot configuration from the
+database level:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/app</span><span class="w">
+</span></span></span></code></pre></div><p>The promotion and conflict rules are:</p>
+<ul>
+<li>A database-level <code>snapshot.interval</code> or <code>snapshot.retention</code> is promoted to the
+global <a href="#complete-configuration-example"><code>snapshot</code></a> configuration <strong>unless</strong> the
+global <code>snapshot</code> block explicitly sets that field.</li>
+<li>An explicit global value always wins over a database-level value.</li>
+<li>If two databases set <strong>different</strong> values for the same field, Litestream fails
+to start with an error such as <code>conflicting database snapshot intervals: …</code>.</li>
+</ul>
+<p>Because the effective snapshot schedule is global, all databases share the same
+snapshot interval and retention. Use per-database blocks only to keep related
+settings next to the database they describe, not to give each database a distinct
+snapshot schedule.</p>
 <h3 id="directory-replication">Directory replication<a href="#directory-replication" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -637,6 +768,11 @@ configure Litestream to replicate all databases in a directory using the <code>d
 <li><code>pattern</code>—Glob pattern for matching database files (e.g., <code>*.db</code>, <code>*.sqlite</code>)</li>
 <li><code>recursive</code>—Scan subdirectories recursively (default: <code>false</code>)</li>
 <li><code>watch</code>—Enable real-time directory monitoring (default: <code>false</code>)</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata. See <a href="#metadata-directory">Metadata directory</a> below.</li>
 </ul>
 <p>When <code>watch</code> is enabled, Litestream monitors the directory for new databases and
 automatically starts replication within seconds. Deleted databases are cleanly
@@ -654,6 +790,56 @@ the directory. For example, <code>/var/lib/app/tenants/acme/data.db</code> would
 <code>s3://mybucket/tenants/acme/data.db/</code>.</p>
 <p>See the <a href="https://litestream.io/guides/directory-watcher/">Directory Watcher Guide</a> for detailed
 configuration examples and use cases.</p>
+<h4 id="metadata-directory">Metadata directory<a href="#metadata-directory" class="anchor" aria-hidden="true">#</a> </h4>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Litestream stores a small amount of local
+metadata for each database (transaction tracking state) in a hidden directory
+named <code>.&lt;filename&gt;-litestream</code>, placed next to the database file by default.
+With directory replication you can instead collect every database&rsquo;s metadata
+under a single root using the <code>meta-dir</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">meta-dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/litestream-meta</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/tenants</span><span class="w">
+</span></span></span></code></pre></div><p>Each discovered database is assigned a unique metadata directory of
+<code>&lt;meta-dir&gt;/&lt;relative-path&gt;-litestream</code>, preserving the source directory
+structure:</p>
+<table>
+<thead>
+<tr>
+<th>Local database path</th>
+<th>Metadata directory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/var/lib/tenants/tenant1.db</code></td>
+<td><code>/var/lib/litestream-meta/tenant1.db-litestream</code></td>
+</tr>
+<tr>
+<td><code>/var/lib/tenants/team-a/db2.db</code></td>
+<td><code>/var/lib/litestream-meta/team-a/db2.db-litestream</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is useful when you want all replication metadata gathered in one place, or
+kept out of the database directory—for example on separate storage, or to avoid
+scattering per-database metadata directories through your data directory. Note
+that Litestream still writes SQLite&rsquo;s <code>-wal</code> and <code>-shm</code> files next to each
+database, so the database directory itself must remain writable.</p>
+<p>The <code>meta-dir</code> field is valid only with <code>dir:</code> and cannot be combined with
+<code>meta-path</code>:</p>
+<ul>
+<li>Using <code>meta-dir</code> with a single <code>path:</code> database fails with
+<code>'meta-dir' can only be used with a directory</code>.</li>
+<li>Setting both <code>meta-path</code> and <code>meta-dir</code> fails with
+<code>cannot specify both 'meta-path' and 'meta-dir'</code>.</li>
+</ul>
 <p>Example with database-level options:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp.db</span><span class="w">
@@ -714,6 +900,12 @@ multi-tenant applications where each tenant has their own database.</p>
 <li><code>recursive</code>—Scan subdirectories when <code>true</code> (default: <code>false</code>)</li>
 <li><code>watch</code>—Enable real-time monitoring for new databases (default: <code>false</code>).
 See <a href="/guides/directory-watcher">Directory Watcher</a> for details.</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata (<code>&lt;meta-dir&gt;/&lt;relative-path&gt;-litestream</code>). Cannot be combined with
+<code>meta-path</code>. See <a href="#metadata-directory">Metadata directory</a>.</li>
 </ul>
 <p>Each discovered database gets a unique replica path by appending its relative
 path from the directory root:</p>
@@ -918,16 +1110,45 @@ requests. Some S3-compatible providers don&rsquo;t support this header on certai
 operations. Automatically disabled for Tigris endpoints. Defaults to <code>true</code>.</p>
 </li>
 <li>
-<p><code>sse-customer-algorithm</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><code>storage-class</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.14">
+    v0.5.14
 </span>
- SSE-C encryption algorithm.</p>
+ Storage class applied to
+objects uploaded to S3 (e.g. <code>STANDARD_IA</code>, <code>GLACIER_IR</code>). If not set, the
+provider&rsquo;s default storage class is used. See the
+<a href="https://litestream.io/guides/s3-advanced/#storage-classes">S3 Advanced Configuration Guide</a>
+for cost trade-offs and retrieval caveats.</p>
 </li>
 <li>
-<p><code>sse-customer-key-md5</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
-    v0.5.8
+<p><code>sse-customer-algorithm</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
 </span>
- Base64-encoded MD5 digest of the SSE-C encryption key.</p>
+ SSE-C encryption
+algorithm. Only <code>AES256</code> is supported. Defaults to <code>AES256</code> when an SSE-C
+key is provided, so it can usually be omitted.</p>
+</li>
+<li>
+<p><code>sse-customer-key</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ Base64-encoded 256-bit
+encryption key for SSE-C. The key&rsquo;s MD5 digest is computed automatically.
+Mutually exclusive with <code>sse-kms-key-id</code>.</p>
+</li>
+<li>
+<p><code>sse-customer-key-path</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ Path to a file
+containing the base64-encoded SSE-C encryption key. Takes precedence over
+<code>sse-customer-key</code>. Supports <code>~</code> expansion.</p>
+</li>
+<li>
+<p><code>sse-kms-key-id</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ AWS KMS key ID or ARN for
+SSE-KMS encryption. Mutually exclusive with the SSE-C settings.</p>
 </li>
 </ul>
 <p>These options can also be set via URL query parameters. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.8">
@@ -985,19 +1206,41 @@ s3://bucket/path?signPayload=true&amp;requireContentMD5=false
 <td>Add Content-MD5 header</td>
 </tr>
 <tr>
+<td><code>storage-class</code></td>
+<td><code>storageClass</code></td>
+<td>—</td>
+<td>S3 storage class</td>
+</tr>
+<tr>
 <td><code>sse-customer-algorithm</code></td>
 <td><code>sseCustomerAlgorithm</code></td>
 <td>—</td>
 <td>SSE-C algorithm</td>
 </tr>
 <tr>
+<td><code>sse-customer-key</code></td>
+<td><code>sseCustomerKey</code></td>
+<td>—</td>
+<td>SSE-C key (base64)</td>
+</tr>
+<tr>
 <td><code>sse-customer-key-md5</code></td>
 <td><code>sseCustomerKeyMD5</code></td>
 <td>—</td>
-<td>SSE-C key MD5</td>
+<td>SSE-C key MD5 digest</td>
+</tr>
+<tr>
+<td><code>sse-kms-key-id</code></td>
+<td><code>sseKmsKeyId</code></td>
+<td>—</td>
+<td>SSE-KMS key ID</td>
 </tr>
 </tbody>
 </table>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">The SSE, `part-size`, and `concurrency` query parameters are only honored on replica URLs passed directly to commands such as `litestream restore s3://...`. They are **silently ignored** in a configuration file's `url:` field — use the equivalent YAML settings described above instead. Configuration file URLs apply only the `endpoint`, `region`, `forcePathStyle`, `skipVerify`, `sign-payload`, `require-content-md5`, and `storage-class` parameters.</div>
+</div>
 <h4 id="s3-compatible-provider-requirements">S3-Compatible Provider Requirements<a href="#s3-compatible-provider-requirements" class="anchor" aria-hidden="true">#</a> </h4>
 <p>Different S3-compatible storage providers have varying requirements for payload
 signing and Content-MD5 headers. The table below shows the recommended settings
@@ -1192,6 +1435,10 @@ account key file, or use workload identity in GKE environments.</p>
 <ul>
 <li><code>account-name</code>—Azure storage account name</li>
 <li><code>account-key</code>—Azure storage account key. Can be set via <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable or injected via <code>${VAR}</code> syntax in config</li>
+<li><code>sas-token</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ Shared Access Signature (SAS) token for authentication, as an alternative to <code>account-key</code></li>
 <li><code>bucket</code>—Container name within the storage account</li>
 <li><code>path</code>—Path within the container</li>
 <li><code>endpoint</code>—Custom endpoint URL (optional)</li>
@@ -1218,6 +1465,10 @@ account key file, or use workload identity in GKE environments.</p>
 <li><code>user</code>—Username for authentication</li>
 <li><code>password</code>—Password for authentication (not recommended for production)</li>
 <li><code>key-path</code>—Path to SSH private key file for key-based authentication</li>
+<li><code>host-key</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
+</span>
+ Expected SSH host public key in <code>authorized_keys</code> format (e.g. <code>ssh-ed25519 AAAA…</code>), used to verify the server&rsquo;s identity. When set, Litestream rejects connections whose host key does not match. When empty, the host key is not verified</li>
 <li><code>path</code>—Remote path where replica files will be stored</li>
 <li><code>concurrent-writes</code>—Enables concurrent writes for improved throughput (defaults
 to <code>true</code>). When enabled, failed uploads must restart from the beginning. Set
@@ -1307,7 +1558,7 @@ configured. All certificate files must be in PEM format.</p>
 <li><code>region</code>—OSS region (e.g., cn-hangzhou, us-west-1)</li>
 <li><code>path</code>—Path within the bucket</li>
 <li><code>part-size</code>—Part size for multipart uploads (default: 5MB)</li>
-<li><code>concurrency</code>—Number of parallel upload workers (default: 1)</li>
+<li><code>concurrency</code>—Number of parallel upload workers (default: 3)</li>
 </ul>
 <p>See the <a href="https://litestream.io/guides/alibaba-oss/">Alibaba Cloud OSS Guide</a> for detailed setup instructions.</p>
 <h3 id="webdav-replica">WebDAV replica<a href="#webdav-replica" class="anchor" aria-hidden="true">#</a> </h3>
@@ -1378,6 +1629,14 @@ old LTX files are dropped through a process called &ldquo;retention&rdquo;.</p>
 <p>Retention is controlled globally via the <code>snapshot.retention</code> field in the root
 configuration, not per-replica. See the <a href="#complete-configuration-example">Complete Configuration Example</a>
 section for an example of how to configure snapshot settings.</p>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ You can also set <code>snapshot.interval</code> and
+<code>snapshot.retention</code> on an individual database, but these values are promoted to
+the global snapshot configuration rather than applied per-database. See
+<a href="#per-database-snapshot-settings">Per-database snapshot settings</a> for the exact
+promotion and conflict rules.</p>
 <p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
 but days, weeks, &amp; years are not supported.</p>
 <h3 id="validation">Validation<a href="#validation" class="anchor" aria-hidden="true">#</a> </h3>
@@ -1403,15 +1662,32 @@ files.</p>
 </ul>
 <h3 id="encryption">Encryption<a href="#encryption" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="alert alert-warning d-flex" role="alert">
-  <div class="flex-shrink-1 alert-icon">⚠️</div>
-  <div class="w-100">**Age Encryption Not Available in v0.5.0+**: Age encryption was removed during the LTX storage layer refactor. Encryption will be re-implemented directly in LTX to support per-page encryption (more efficient for cloud storage). Configuration will be explicitly rejected with an error message. If you are using Age encryption with v0.3.x, please review the [migration guide](/docs/migration/#age-encryption-migration) before upgrading.</div>
+  <div class="flex-shrink-1 alert-icon">⛔️</div>
+  <div class="w-100">**Age client-side encryption is unsupported in v0.5.x.** Since v0.5.1, a replica configuration whose `age:` block sets `identities` or `recipients` causes Litestream to exit at startup with the error `age encryption is not currently supported`. (v0.5.0 accepted age settings but silently ignored them.) Server-side encryption for S3 replicas via SSE-C / SSE-KMS is unaffected.</div>
 </div>
+<p>Age client-side encryption was removed during the LTX storage-layer refactor.
+Starting with <strong>v0.5.1</strong>, any <code>age:</code> block that specifies <code>identities</code> or
+<code>recipients</code> is <strong>hard-rejected</strong> — the daemon refuses to start and prints
+<code>age encryption is not currently supported</code>. (An empty <code>age:</code> mapping is
+accepted but has no effect, and v0.5.0 accepted age settings without applying
+them.) Client-side encryption is expected to be re-implemented directly in LTX
+to support per-page encryption, which is more efficient for cloud storage.</p>
+<p>This affects only client-side <code>age</code> encryption. Server-side encryption remains
+available for S3 replicas: the S3 SSE-C options (<code>sse-customer-algorithm</code>,
+<code>sse-customer-key-md5</code>) are documented in the S3 replica settings above, and the
+S3 backend also supports SSE-KMS.</p>
+<p>If you are upgrading from v0.3.x with age encryption enabled, review the
+<a href="/docs/migration/#age-encryption-migration">migration guide</a> before upgrading.</p>
+<h4 id="age-encryption-v03x-only">Age encryption (v0.3.x only)<a href="#age-encryption-v03x-only" class="anchor" aria-hidden="true">#</a> </h4>
+<p>The configuration in this section applies <strong>only to Litestream v0.3.x</strong> and is
+retained for historical reference. It does not work on v0.5.1 or later, where a
+non-empty <code>age:</code> block is rejected as described above.</p>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.3.10">
     v0.3.10
 </span>
- Client-side encryption can be enabled per replica by adding an <code>age</code> section to
-the replica configuration with corresponding <code>identities</code> and <code>recipients</code>
-fields.</p>
+ On v0.3.x, client-side encryption could be enabled
+per replica by adding an <code>age</code> section to the replica configuration with
+corresponding <code>identities</code> and <code>recipients</code> fields.</p>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">❗️</div>
   <div class="w-100">When enabling encryption restoring requires matching age identity to restore from the replica.</div>
@@ -1428,18 +1704,15 @@ fields.</p>
 </span></span></span></code></pre></div><p>To generate keys, refer to the
 age <a href="https://github.com/FiloSottile/age/blob/main/README.md">README</a>
 how to install and use the command line tools.</p>
-<p>As of now identities must be a superset of recipients but key rotation can be
+<p>On v0.3.x, identities must be a superset of recipients but key rotation can be
 achieved by adding a new identity while changing the recipient list to only have
 a key for it.</p>
 <p>Note that enabling encryption after replication has already been done can
 confuse Litestream so it is recommended the replica is empty when doing so.
 Restoring from a replica that has mixed encrypted and non-encrypted files will
 fail.</p>
-<h4 id="identity-files">Identity Files<a href="#identity-files" class="anchor" aria-hidden="true">#</a> </h4>
-<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
-    v0.5.0
-</span>
- You can also reference identity files instead of embedding keys directly:</p>
+<p>On v0.3.x you can also reference identity files instead of embedding keys
+directly:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
@@ -1607,7 +1880,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

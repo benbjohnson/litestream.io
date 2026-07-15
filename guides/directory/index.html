@@ -180,7 +180,7 @@ dbs: - dir: /var/lib/tenants pattern: &#34;*.">
     <li><a class="docs-link" href="https://litestream.io/reference/vfs/">VFS Extension</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/metrics/">Prometheus Metrics</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/databases/">Command: databases</a></li>
-    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">Command: mcp</a></li>
+    <li><a class="docs-link" href="https://litestream.io/reference/mcp/">MCP Server</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/replicate/">Command: replicate</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/ltx/">Command: ltx</a></li>
     <li><a class="docs-link" href="https://litestream.io/reference/restore/">Command: restore</a></li>
@@ -214,6 +214,7 @@ dbs: - dir: /var/lib/tenants pattern: &#34;*.">
       </ul>
     </li>
     <li><a href="#replica-path-behavior">Replica path behavior</a></li>
+    <li><a href="#metadata-location">Metadata location</a></li>
     <li><a href="#use-cases">Use cases</a>
       <ul>
         <li><a href="#multi-tenant-applications">Multi-tenant applications</a></li>
@@ -264,6 +265,11 @@ matching SQLite databases.</p>
 <li><code>recursive</code>—Scan subdirectories when <code>true</code> (default: <code>false</code>)</li>
 <li><code>watch</code>—Enable real-time monitoring for new databases (default: <code>false</code>).
 See <a href="/guides/directory-watcher">Directory Watcher</a> for details.</li>
+<li><code>meta-dir</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Root directory for per-database
+metadata. See <a href="#metadata-location">Metadata location</a> below.</li>
 </ul>
 <p>All standard database options like <code>monitor-interval</code> and <code>checkpoint-interval</code>
 are also supported and apply to each discovered database.</p>
@@ -316,16 +322,57 @@ collision risk.</p>
 <tbody>
 <tr>
 <td><code>/var/lib/databases/tenant1.db</code></td>
-<td><code>backups/prod/tenant1.db/ltx/...</code></td>
+<td><code>backups/prod/tenant1.db/0000/...</code></td>
 </tr>
 <tr>
 <td><code>/var/lib/databases/team-a/db2.db</code></td>
-<td><code>backups/prod/team-a/db2.db/ltx/...</code></td>
+<td><code>backups/prod/team-a/db2.db/0000/...</code></td>
 </tr>
 </tbody>
 </table>
 <p>The relative path from the directory root is appended to the configured replica
 path, preserving the directory structure.</p>
+<h2 id="metadata-location">Metadata location<a href="#metadata-location" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.13">
+    v0.5.13
+</span>
+ Litestream keeps a small amount of local metadata
+for each database (transaction tracking state) in a hidden directory named
+<code>.&lt;database&gt;-litestream</code>, placed next to each database file by default. To gather
+every database&rsquo;s metadata under a single root instead—keeping the per-database
+metadata directories out of the data directory or on separate storage—use the
+<code>meta-dir</code> field:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/tenants</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;*.db&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">recursive</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">meta-dir</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/litestream-meta</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/tenants</span><span class="w">
+</span></span></span></code></pre></div><p>Each database receives a unique metadata directory under the root, mirroring its
+relative path:</p>
+<table>
+<thead>
+<tr>
+<th>Local database path</th>
+<th>Metadata directory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/var/lib/tenants/tenant1.db</code></td>
+<td><code>/var/lib/litestream-meta/tenant1.db-litestream</code></td>
+</tr>
+<tr>
+<td><code>/var/lib/tenants/team-a/db2.db</code></td>
+<td><code>/var/lib/litestream-meta/team-a/db2.db-litestream</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>meta-dir</code> field is only valid with <code>dir:</code> and cannot be combined with
+<code>meta-path</code>. Using it with a single <code>path:</code> database fails with
+<code>'meta-dir' can only be used with a directory</code>, and setting both <code>meta-path</code> and
+<code>meta-dir</code> fails with <code>cannot specify both 'meta-path' and 'meta-dir'</code>.</p>
 <h2 id="use-cases">Use cases<a href="#use-cases" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="multi-tenant-applications">Multi-tenant applications<a href="#multi-tenant-applications" class="anchor" aria-hidden="true">#</a> </h3>
 <p>For applications where each tenant has their own database file:</p>
@@ -441,7 +488,7 @@ enable automatic replication of new databases without restarting Litestream.</li
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.15c1012b9a33632539f19a591b4990be75048a789f40cd3049e21c41cd81ce02c39f41310f39b946ec23185cadf963009331fe8a13516ffe78b646b2e6be185e.js" integrity="sha512-FcEBK5ozYyU58ZpZG0mQvnUEinifQM0wSeIcQc2BzgLDn0ExDzm5RuwjGFyt&#43;WMAkzH&#43;ihNRb/54tkay5r4YXg==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

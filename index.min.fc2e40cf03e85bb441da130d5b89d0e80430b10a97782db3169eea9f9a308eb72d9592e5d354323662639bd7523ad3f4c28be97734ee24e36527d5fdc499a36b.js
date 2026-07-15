@@ -678,13 +678,11 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">\${NATS_PASSWORD}</span><span class="w">
 </span></span></span></code></pre></div></li>
 <li>
-<p><strong>Create NATS bucket</strong>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Create JetStream bucket</span>
-</span></span><span class="line"><span class="cl">nats stream create my-app-bucket <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --subjects<span class="o">=</span><span class="s2">&#34;my-app-bucket.&gt;&#34;</span> <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --storage<span class="o">=</span>file <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --retention<span class="o">=</span>limits <span class="se">\\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --max-age<span class="o">=</span>168h
+<p><strong>Create NATS object store bucket</strong>:</p>
+<p>Litestream requires a JetStream Object Store bucket, and the bucket must
+exist before Litestream starts:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Create JetStream Object Store bucket</span>
+</span></span><span class="line"><span class="cl">nats object add my-app-bucket
 </span></span></code></pre></div></li>
 </ol>
 <h3 id="migrating-between-cloud-providers">Migrating Between Cloud Providers</h3>
@@ -1297,9 +1295,9 @@ file type is eligible for deletion helps diagnose retention issues:</p>
 </tbody>
 </table>
 <p>The effective cleanup delay is approximately: <code>snapshot.interval</code> + <code>snapshot.retention</code></p>
-<p><strong>Example timing with default configuration:</strong></p>
+<p><strong>Example timing with an example configuration:</strong></p>
 <ul>
-<li>Configuration: <code>interval=30m</code> + <code>retention=1h</code></li>
+<li>Configuration: <code>interval=30m</code> + <code>retention=1h</code> (the defaults are <code>24h</code>/<code>24h</code>)</li>
 <li>First snapshot created at T+30m (age: 0)</li>
 <li>Second snapshot created at T+1h (first snapshot age: 30m)</li>
 <li>First snapshot becomes eligible for deletion at T+1h30m (age exceeds 1h)</li>
