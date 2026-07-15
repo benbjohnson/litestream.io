@@ -47,8 +47,12 @@ pip install litestream-vfs
 **Example:**
 
 ```python
+import os
 import sqlite3
 import litestream_vfs
+
+# The replica URL must be set before loading the extension.
+os.environ["LITESTREAM_REPLICA_URL"] = "s3://mybucket/db"
 
 conn = sqlite3.connect(":memory:")
 litestream_vfs.load(conn)
@@ -78,6 +82,9 @@ platform automatically.
 const Database = require('better-sqlite3');
 const { getLoadablePath } = require('litestream-vfs');
 
+// The replica URL must be set before loading the extension.
+process.env.LITESTREAM_REPLICA_URL = 's3://mybucket/db';
+
 const db = new Database(':memory:');
 db.loadExtension(getLoadablePath());
 
@@ -106,6 +113,9 @@ Platform-specific gems are published for each supported platform.
 require 'sqlite3'
 require 'litestream_vfs'
 
+# The replica URL must be set before loading the extension.
+ENV['LITESTREAM_REPLICA_URL'] = 's3://mybucket/db'
+
 db = SQLite3::Database.new(':memory:')
 LitestreamVfs.load(db)
 
@@ -115,10 +125,10 @@ db.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica")
 
 ### Configuration
 
-After loading the extension, configure the replica location using environment
-variables as described in the [Configuration](#configuration-environment-variables)
-section below. The `LITESTREAM_REPLICA_URL` environment variable must be set
-before opening a database with the `litestream` VFS.
+Configure the replica location using environment variables as described in the
+[Configuration](#configuration-environment-variables) section below. The
+`LITESTREAM_REPLICA_URL` environment variable is required and must be set
+**before loading the extension** — the extension fails to initialize without it.
 
 
 ## Build requirements
