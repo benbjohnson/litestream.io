@@ -38,8 +38,8 @@ manager, and no OS distribution files.
 
 | Variant | Tags | Base |
 |---------|------|------|
-| Default (Debian) | `latest`, `0.5.9` | `debian:bookworm-slim` |
-| Hardened (Scratch) | `latest-scratch`, `0.5.9-scratch` | `scratch` |
+| Default (Debian) | `latest`, `0.5.14` | `debian:bookworm-slim` |
+| Hardened (Scratch) | `latest-scratch`, `0.5.14-scratch` | `scratch` |
 
 Existing users are unaffected — the default tags (`latest`, version numbers)
 continue to produce the Debian image.
@@ -59,7 +59,7 @@ docker pull litestream/litestream:latest-scratch
 ```
 
 Replace `litestream/litestream` with `litestream/litestream:latest-scratch` (or
-a version-pinned tag like `0.5.9-scratch`) in your Dockerfiles and run commands.
+a version-pinned tag like `0.5.14-scratch`) in your Dockerfiles and run commands.
 
 
 ## Running as a sidecar
