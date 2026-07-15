@@ -97,7 +97,7 @@
       <link>https://litestream.io/reference/ipc/</link>
       <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/reference/ipc/</guid>
-      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The IPC socket is created at:&#xA;/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.&#xA;Endpoints GET /list Returns all databases currently tracked by the Litestream daemon, along with their last sync time.</description>
+      <description>v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.&#xA;Socket Path The control socket is disabled by default. Enable it with a socket block in your configuration file:&#xA;socket: enabled: true # default: false path: /var/run/litestream.sock permissions: 0600 The path defaults to /var/run/litestream.sock and permissions defaults to 0600.</description>
     </item>
     <item>
       <title>Command: reset</title>

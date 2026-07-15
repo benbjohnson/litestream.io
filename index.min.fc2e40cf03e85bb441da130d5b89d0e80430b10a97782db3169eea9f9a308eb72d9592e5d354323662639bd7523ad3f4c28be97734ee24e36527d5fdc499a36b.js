@@ -1295,9 +1295,9 @@ file type is eligible for deletion helps diagnose retention issues:</p>
 </tbody>
 </table>
 <p>The effective cleanup delay is approximately: <code>snapshot.interval</code> + <code>snapshot.retention</code></p>
-<p><strong>Example timing with default configuration:</strong></p>
+<p><strong>Example timing with an example configuration:</strong></p>
 <ul>
-<li>Configuration: <code>interval=30m</code> + <code>retention=1h</code></li>
+<li>Configuration: <code>interval=30m</code> + <code>retention=1h</code> (the defaults are <code>24h</code>/<code>24h</code>)</li>
 <li>First snapshot created at T+30m (age: 0)</li>
 <li>Second snapshot created at T+1h (first snapshot age: 30m)</li>
 <li>First snapshot becomes eligible for deletion at T+1h30m (age exceeds 1h)</li>

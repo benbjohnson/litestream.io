@@ -221,6 +221,7 @@ Automatic Provider Detection New in v0.5.0: Litestream automatically detects S3-
         <li><a href="#wasabi">Wasabi</a></li>
         <li><a href="#cloudflare-r2">Cloudflare R2</a></li>
         <li><a href="#digitalocean-spaces">DigitalOcean Spaces</a></li>
+        <li><a href="#hetzner-object-storage">Hetzner Object Storage</a></li>
         <li><a href="#linode-object-storage">Linode Object Storage</a></li>
         <li><a href="#oci-object-storage">OCI Object Storage</a></li>
         <li><a href="#vultr-object-storage">Vultr Object Storage</a></li>
@@ -288,13 +289,18 @@ for most providers.</p>
 </tr>
 <tr>
 <td>MinIO</td>
-<td><code>*.minio.*</code></td>
+<td>Custom endpoint with a port that isn&rsquo;t a known provider (e.g. <code>host:9000</code>)</td>
 <td><code>sign-payload: true</code>, <code>force-path-style: true</code></td>
 </tr>
 <tr>
 <td>DigitalOcean Spaces</td>
 <td><code>*.digitaloceanspaces.com</code></td>
 <td><code>sign-payload: true</code></td>
+</tr>
+<tr>
+<td>Hetzner</td>
+<td><code>*.your-objectstorage.com</code></td>
+<td><code>sign-payload: true</code> (v0.5.9+)</td>
 </tr>
 <tr>
 <td>Scaleway</td>
@@ -313,8 +319,8 @@ for most providers.</p>
 </tr>
 <tr>
 <td>Tigris</td>
-<td><code>*.tigris.dev</code></td>
-<td><code>sign-payload: true</code>, consistency header</td>
+<td><code>fly.storage.tigris.dev</code>, <code>t3.storage.dev</code></td>
+<td><code>sign-payload: true</code>, disables MD5</td>
 </tr>
 </tbody>
 </table>
@@ -390,7 +396,8 @@ infrastructure.</p>
 </span></span></span></code></pre></div><p><strong>Notes:</strong></p>
 <ul>
 <li>Create access keys in the MinIO Console before configuring Litestream</li>
-<li>The <code>region</code> field is required but MinIO ignores the value; use <code>us-east-1</code></li>
+<li>The <code>region</code> field is optional; MinIO ignores the value. Set <code>us-east-1</code> if
+your tooling requires one</li>
 <li>For self-signed certificates, add <code>skip-verify: true</code> (not for production)</li>
 <li>Default credentials for new installations are <code>minioadmin</code>/<code>minioadmin</code></li>
 </ul>
@@ -582,6 +589,41 @@ simple, scalable object storage with a CDN included.</p>
 <li>Connection resets may appear in logs; Litestream handles these automatically</li>
 </ul>
 <p>See the <a href="/guides/digitalocean/">DigitalOcean Spaces Guide</a> for detailed setup.</p>
+<h3 id="hetzner-object-storage">Hetzner Object Storage<a href="#hetzner-object-storage" class="anchor" aria-hidden="true">#</a> </h3>
+<p><a href="https://www.hetzner.com/storage/object-storage/">Hetzner Object Storage</a>
+provides S3-compatible storage in European data centers.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/db?endpoint=fsn1.your-objectstorage.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${HETZNER_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${HETZNER_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Notes:</strong></p>
+<ul>
+<li>
+<p>Endpoint format: <code>&lt;location&gt;.your-objectstorage.com</code> (for example,
+<code>fsn1.your-objectstorage.com</code>)</p>
+</li>
+<li>
+<p><strong>Litestream v0.5.9+</strong> auto-detects the <code>.your-objectstorage.com</code> endpoint and
+sets <code>sign-payload: true</code>, but <strong>only when the endpoint is supplied through the
+replica <code>url:</code> field</strong> (as shown above). Auto-detection does not apply if you
+use the explicit <code>endpoint:</code> configuration field, and it is not available at
+all on releases before v0.5.9. In either case, set <code>sign-payload: true</code>
+manually:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/path/to/db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">s3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="l">mybucket</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l">fsn1.your-objectstorage.com</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">sign-payload</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${HETZNER_ACCESS_KEY}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${HETZNER_SECRET_KEY}</span><span class="w">
+</span></span></span></code></pre></div></li>
+</ul>
 <h3 id="linode-object-storage">Linode Object Storage<a href="#linode-object-storage" class="anchor" aria-hidden="true">#</a> </h3>
 <p><a href="https://www.linode.com/products/object-storage/">Linode Object Storage</a>
 provides S3-compatible storage across multiple regions.</p>
@@ -880,6 +922,13 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.</p>
 <td>✓</td>
 </tr>
 <tr>
+<td>Hetzner</td>
+<td>Yes</td>
+<td>Optional</td>
+<td>No</td>
+<td>✓ (URL only, v0.5.9+)</td>
+</tr>
+<tr>
 <td>Linode</td>
 <td>Yes</td>
 <td>Yes</td>
@@ -1042,7 +1091,10 @@ not affected as it fully supports aws-chunked encoding.</p>
 <li><code>AWS_ACCESS_KEY_ID</code> or <code>LITESTREAM_ACCESS_KEY_ID</code></li>
 <li><code>AWS_SECRET_ACCESS_KEY</code> or <code>LITESTREAM_SECRET_ACCESS_KEY</code></li>
 </ul>
-<p>Litestream-specific variables take precedence over AWS variables.</p>
+<p>The standard <code>AWS_*</code> variables take precedence. The <code>LITESTREAM_*</code> variables are
+fallback aliases: Litestream uses one only when the matching <code>AWS_*</code> variable is
+unset. Provide credentials through either pair, but if both are set for the same
+credential, the <code>AWS_*</code> value wins.</p>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/guides/s3">Replicating to Amazon S3</a> - AWS S3 setup guide</li>
@@ -1080,7 +1132,7 @@ not affected as it fully supports aws-chunked encoding.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.5d204bfa87a5644dc714157607bd32b3daeaf0c03c019d664ac8107a0d2448adf3b9b799b94738b5738e0130ad6b3d6107f35986359342c0c023841d6b985ff4.js" integrity="sha512-XSBL&#43;oelZE3HFBV2B70ys9rq8MA8AZ1mSsgQeg0kSK3zubeZuUc4tXOOATCtaz1hB/NZhjWTQsDAI4Qda5hf9A==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>

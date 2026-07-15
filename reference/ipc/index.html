@@ -21,9 +21,8 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="IPC Endpoints">
 <meta name="twitter:description" content="v0.5.8 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.
-Socket Path The IPC socket is created at:
-/var/run/litestream.sock The socket is automatically created when Litestream starts replication and removed on shutdown.
-Endpoints GET /list Returns all databases currently tracked by the Litestream daemon, along with their last sync time.">
+Socket Path The control socket is disabled by default. Enable it with a socket block in your configuration file:
+socket: enabled: true # default: false path: /var/run/litestream.sock permissions: 0600 The path defaults to /var/run/litestream.sock and permissions defaults to 0600.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -214,8 +213,11 @@ Endpoints GET /list Returns all databases currently tracked by the Litestream da
         <li><a href="#get-info">GET /info</a></li>
         <li><a href="#post-register">POST /register</a></li>
         <li><a href="#post-unregister">POST /unregister</a></li>
+        <li><a href="#post-start">POST /start</a></li>
+        <li><a href="#post-stop">POST /stop</a></li>
         <li><a href="#get-txid">GET /txid</a></li>
         <li><a href="#post-sync">POST /sync</a></li>
+        <li><a href="#get-debugsync-status">GET /debug/sync-status</a></li>
         <li><a href="#debugpprof">/debug/pprof/*</a></li>
       </ul>
     </li>
@@ -235,10 +237,17 @@ Endpoints GET /list Returns all databases currently tracked by the Litestream da
 endpoints via a Unix domain socket. These endpoints allow local tools and scripts
 to query database status and collect profiling data without exposing an HTTP port.</p>
 <h2 id="socket-path">Socket Path<a href="#socket-path" class="anchor" aria-hidden="true">#</a> </h2>
-<p>The IPC socket is created at:</p>
-<pre tabindex="0"><code>/var/run/litestream.sock
-</code></pre><p>The socket is automatically created when Litestream starts replication and
-removed on shutdown.</p>
+<p>The control socket is <strong>disabled by default</strong>. Enable it with a <code>socket</code> block
+in your configuration file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">socket</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled: true            # default</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/run/litestream.sock</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">permissions</span><span class="p">:</span><span class="w"> </span><span class="m">0600</span><span class="w">
+</span></span></span></code></pre></div><p>The <code>path</code> defaults to <code>/var/run/litestream.sock</code> and <code>permissions</code> defaults to
+<code>0600</code>.</p>
+<p>Once enabled, the socket is created when the Litestream daemon starts and
+removed on shutdown. The CLI commands and <code>curl</code> examples below assume the
+default path; pass <code>-socket &lt;path&gt;</code> (or <code>--unix-socket &lt;path&gt;</code>) if you changed it.</p>
 <h2 id="endpoints">Endpoints<a href="#endpoints" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="get-list">GET /list<a href="#get-list" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Returns all databases currently tracked by the Litestream daemon, along with their
@@ -246,8 +255,31 @@ last sync time.</p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    http://localhost/list
-</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;databases&#34;</span>:<span class="o">[{</span><span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;active&#34;</span>,<span class="s2">&#34;last_sync_at&#34;</span>:<span class="s2">&#34;2026-02-12T00:00:00Z&#34;</span><span class="o">}]}</span>
-</span></span></code></pre></div><p><strong>CLI equivalent:</strong> <code>litestream list -socket /var/run/litestream.sock</code></p>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;databases&#34;</span>:<span class="o">[{</span><span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;replicating&#34;</span>,<span class="s2">&#34;last_sync_at&#34;</span>:<span class="s2">&#34;2026-02-12T00:00:00Z&#34;</span><span class="o">}]}</span>
+</span></span></code></pre></div><p><strong>Status values:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>replicating</code></td>
+<td>Database is open and actively replicating to a replica</td>
+</tr>
+<tr>
+<td><code>open</code></td>
+<td>Database is open but has no replica monitoring enabled</td>
+</tr>
+<tr>
+<td><code>stopped</code></td>
+<td>Database is registered but replication is not running</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CLI equivalent:</strong> <code>litestream list -socket /var/run/litestream.sock</code></p>
 <hr>
 <h3 id="get-info">GET /info<a href="#get-info" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Returns information about the running Litestream daemon including version, PID, and uptime.</p>
@@ -312,6 +344,116 @@ last sync time.</p>
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
 </span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;}&#39;</span>
 </span></span></code></pre></div><p><strong>CLI equivalent:</strong> <code>litestream unregister -socket /var/run/litestream.sock /path/to/my.db</code></p>
+<hr>
+<h3 id="post-start">POST /start<a href="#post-start" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Starts replication for a database that is registered but stopped, without
+restarting the daemon.</p>
+<p><strong>Request body (JSON):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Absolute path to the SQLite database file</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>No</td>
+<td>Maximum wait time in seconds. If omitted, the request runs without a timeout.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/start <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;}&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;started&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
+</span></span></code></pre></div><p><strong>Response statuses:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>started</code></td>
+<td>Replication was started for the database</td>
+</tr>
+<tr>
+<td><code>already_running</code></td>
+<td>Database was already open. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CLI equivalent:</strong> <code>litestream start -socket /var/run/litestream.sock /path/to/my.db</code></p>
+<hr>
+<h3 id="post-stop">POST /stop<a href="#post-stop" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Stops replication for a database without unregistering it or restarting the
+daemon.</p>
+<p><strong>Request body (JSON):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Yes</td>
+<td>Absolute path to the SQLite database file</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>No</td>
+<td>Maximum wait time in seconds (default: <code>30</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -X POST http://localhost/stop <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -H <span class="s2">&#34;Content-Type: application/json&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -d <span class="s1">&#39;{&#34;path&#34;:&#34;/path/to/my.db&#34;}&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;status&#34;</span>:<span class="s2">&#34;stopped&#34;</span>,<span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;txid&#34;</span>:42<span class="o">}</span>
+</span></span></code></pre></div><p><strong>Response statuses:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stopped</code></td>
+<td>Replication was stopped for the database</td>
+</tr>
+<tr>
+<td><code>already_stopped</code></td>
+<td>Database was already stopped. <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CLI equivalent:</strong> <code>litestream stop -socket /var/run/litestream.sock /path/to/my.db</code></p>
 <hr>
 <h3 id="get-txid">GET /txid<a href="#get-txid" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Returns the current transaction ID for a database.</p>
@@ -435,6 +577,110 @@ complete.</p>
 </table>
 <p><strong>CLI equivalent:</strong> <code>litestream sync -socket /var/run/litestream.sock /path/to/my.db</code></p>
 <hr>
+<h3 id="get-debugsync-status">GET /debug/sync-status<a href="#get-debugsync-status" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Returns detailed sync diagnostics for the
+databases tracked by the daemon. This is useful for observing in-progress sync
+and checkpoint operations. Without the <code>path</code> parameter, diagnostics for all
+databases are returned.</p>
+<p><strong>Query parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>No</td>
+<td>Absolute path to a single database. Returns <code>404</code> if the path is not registered.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example (all databases):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    http://localhost/debug/sync-status
+</span></span><span class="line"><span class="cl"><span class="o">{</span><span class="s2">&#34;databases&#34;</span>:<span class="o">[{</span><span class="s2">&#34;path&#34;</span>:<span class="s2">&#34;/path/to/my.db&#34;</span>,<span class="s2">&#34;active&#34;</span>:true,<span class="s2">&#34;operation&#34;</span>:<span class="s2">&#34;sync&#34;</span>,<span class="s2">&#34;phase&#34;</span>:<span class="s2">&#34;write_ltx_from_wal&#34;</span>,<span class="s2">&#34;started_at&#34;</span>:<span class="s2">&#34;2026-02-12T00:00:00Z&#34;</span>,<span class="s2">&#34;updated_at&#34;</span>:<span class="s2">&#34;2026-02-12T00:00:01Z&#34;</span>,<span class="s2">&#34;elapsed_seconds&#34;</span>:1.2,<span class="s2">&#34;txid&#34;</span>:42,<span class="s2">&#34;wal_size&#34;</span>:32768,<span class="s2">&#34;last_synced_wal_offset&#34;</span>:16384<span class="o">}]}</span>
+</span></span></code></pre></div><p><strong>Example (single database):</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl --unix-socket /var/run/litestream.sock <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="s2">&#34;http://localhost/debug/sync-status?path=/path/to/my.db&#34;</span>
+</span></span></code></pre></div><p><strong>Response fields:</strong></p>
+<p>Each entry in <code>databases</code> contains the following fields. <code>path</code> and <code>active</code>
+are always present; the remaining fields are omitted when empty or zero. When
+<code>active</code> is <code>false</code>, the operation-specific fields describe the most recently
+completed operation rather than work in progress.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Absolute path to the database file</td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>Whether a sync or checkpoint operation is currently in progress</td>
+</tr>
+<tr>
+<td><code>operation</code></td>
+<td>Operation type: <code>sync</code> or <code>checkpoint</code></td>
+</tr>
+<tr>
+<td><code>phase</code></td>
+<td>Fine-grained phase within the operation (e.g. <code>starting</code>, <code>write_ltx_from_wal</code>, <code>checkpoint_exec</code>)</td>
+</tr>
+<tr>
+<td><code>started_at</code></td>
+<td>Timestamp when the operation started</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>Timestamp of the most recent phase transition</td>
+</tr>
+<tr>
+<td><code>elapsed_seconds</code></td>
+<td>Seconds elapsed since the operation started</td>
+</tr>
+<tr>
+<td><code>txid</code></td>
+<td>LTX transaction ID being generated by the operation (may be <code>0</code> before it is assigned)</td>
+</tr>
+<tr>
+<td><code>wal_size</code></td>
+<td>WAL size in bytes; during sync phases this reflects the WAL bytes being processed rather than the full file size</td>
+</tr>
+<tr>
+<td><code>last_synced_wal_offset</code></td>
+<td>Byte offset of the last WAL data synced to LTX</td>
+</tr>
+<tr>
+<td><code>snapshotting</code></td>
+<td>Whether a full snapshot is in progress</td>
+</tr>
+<tr>
+<td><code>checkpoint_mode</code></td>
+<td>Checkpoint mode when a checkpoint is running (e.g. <code>PASSIVE</code>, <code>RESTART</code>, <code>TRUNCATE</code>)</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td>Why a full snapshot was required (e.g. WAL truncated or salt reset), when applicable</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>Error message if the last operation failed</td>
+</tr>
+</tbody>
+</table>
+<hr>
 <h3 id="debugpprof">/debug/pprof/*<a href="#debugpprof" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Standard Go <a href="https://pkg.go.dev/net/http/pprof">pprof</a> endpoints for runtime
 profiling. These allow you to collect CPU profiles, heap snapshots, and
@@ -529,7 +775,7 @@ goroutine dumps without running a separate HTTP server.</p>
 </footer>
     
     <script src="https://litestream.io/main.f4006b8dd3163d19fa41adf9892089fe185101b404b96884ed2a22ec4e9cb0706759ecdb3f4520a1d37fc5ad7a90a8d90abfb30055a1ff67aefb5b2324355d12.js" integrity="sha512-9ABrjdMWPRn6Qa35iSCJ/hhRAbQEuWiE7Soi7E6csHBnWezbP0UgodN/xa16kKjZCr&#43;zAFWh/2eu&#43;1sjJDVdEg==" crossorigin="anonymous" defer></script>
-  <script src="https://litestream.io/index.min.5d204bfa87a5644dc714157607bd32b3daeaf0c03c019d664ac8107a0d2448adf3b9b799b94738b5738e0130ad6b3d6107f35986359342c0c023841d6b985ff4.js" integrity="sha512-XSBL&#43;oelZE3HFBV2B70ys9rq8MA8AZ1mSsgQeg0kSK3zubeZuUc4tXOOATCtaz1hB/NZhjWTQsDAI4Qda5hf9A==" crossorigin="anonymous" defer></script>
+  <script src="https://litestream.io/index.min.fc2e40cf03e85bb441da130d5b89d0e80430b10a97782db3169eea9f9a308eb72d9592e5d354323662639bd7523ad3f4c28be97734ee24e36527d5fdc499a36b.js" integrity="sha512-/C5AzwPoW7RB2hMNW4nQ6AQwsQqXeC2zFp7qn5owjrctlZLl01QyNmJjm9dSOtP0wovpdzTuJONlJ9X9xJmjaw==" crossorigin="anonymous" defer></script>
 
   </body>
 </html>
