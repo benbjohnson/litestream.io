@@ -16,7 +16,7 @@ final sync to ensure all data is replicated.
 The `stop` command communicates with a running `litestream replicate` process
 over the IPC control socket. The daemon must already be running.
 
-{{< alert icon="💡" text="The `stop` command does not shut down the Litestream daemon. It pauses replication for a single database on an already-running daemon. To stop the daemon itself, terminate the `litestream replicate` process." >}}
+{{< alert icon="💡" text="The <code>stop</code> command does not shut down the Litestream daemon. It pauses replication for a single database on an already-running daemon. To stop the daemon itself, terminate the <code>litestream replicate</code> process." >}}
 
 
 ## Usage

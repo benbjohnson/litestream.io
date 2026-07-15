@@ -15,7 +15,7 @@ already be registered with the daemon.
 The `start` command communicates with a running `litestream replicate` process
 over the IPC control socket. The daemon must already be running.
 
-{{< alert icon="💡" text="The `start` command is different from `litestream replicate`. Use `replicate` to launch the daemon process. Use `start` to resume replication for a specific database on an already-running daemon." >}}
+{{< alert icon="💡" text="The <code>start</code> command is different from <code>litestream replicate</code>. Use <code>replicate</code> to launch the daemon process. Use <code>start</code> to resume replication for a specific database on an already-running daemon." >}}
 
 
 ## Usage
