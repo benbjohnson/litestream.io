@@ -277,11 +277,14 @@ flexibility. We&rsquo;ll pass this configuration file in by using a Kubernetes
 <p>First, create a file called <code>litestream.yml</code> locally. Update the <code>YOURBUCKET</code>
 text in configuration file to your S3 bucket name. This configuration file
 is set up to replicate a database at <code>/var/lib/myapp/db</code> to a remote S3 bucket.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/myapp/db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://YOURBUCKET/db</span><span class="w">
-</span></span></span></code></pre></div><p>Next, we&rsquo;ll need to add this as a ConfigMap in our Kubernetes cluster:</p>
+</span></span></span></code></pre></div><p>The <code>addr</code> setting enables Litestream&rsquo;s <a href="/reference/config#metrics">Prometheus metrics</a> endpoint on
+port <code>9090</code>. Without it, the metrics server does not start.</p>
+<p>Next, we&rsquo;ll need to add this as a ConfigMap in our Kubernetes cluster:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl create configmap litestream --from-file<span class="o">=</span>litestream.yml
 </span></span></code></pre></div><h2 id="create-a-statefulset">Create a StatefulSet<a href="#create-a-statefulset" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="ensure-single-replica">Ensure single replica<a href="#ensure-single-replica" class="anchor" aria-hidden="true">#</a> </h3>
@@ -335,7 +338,7 @@ by running it in a Kubernetes <a href="https://kubernetes.io/docs/concepts/workl
 StatefulSet by setting the <code>spec.template.spec.initContainers</code> to:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl"><span class="nt">initContainers</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">init-litestream</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.5</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;restore&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-db-not-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-if-replica-exists&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;/var/lib/myapp/db&#39;</span><span class="p">]</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
@@ -385,7 +388,7 @@ above except this time we will be running the <code>litestream replicate</code> 
 <p>You can specify Litestream as the second container in the
 <code>spec.template.spec.containers</code> property on our StatefulSet:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yml" data-lang="yml"><span class="line"><span class="cl">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">litestream</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">litestream/litestream:0.5</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;replicate&#39;</span><span class="p">]</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">data</span><span class="w">
@@ -407,7 +410,8 @@ above except this time we will be running the <code>litestream replicate</code> 
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">ports</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">metrics</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="m">9090</span><span class="w">
-</span></span></span></code></pre></div><p>Additionally, we open port <code>9090</code> to provide Prometheus metrics.</p>
+</span></span></span></code></pre></div><p>Additionally, we open port <code>9090</code> to expose the Prometheus metrics endpoint we
+enabled with <code>addr: &quot;:9090&quot;</code> in the ConfigMap above.</p>
 <h3 id="applying-changes">Applying changes<a href="#applying-changes" class="anchor" aria-hidden="true">#</a> </h3>
 <p>The full Kubernetes configuration for our StatefulSet &amp; Service can be found
 at <a href="https://raw.githubusercontent.com/benbjohnson/litestream.io/main/content/guides/kubernetes/litestream-k8s.yml">litestream-k8s.yml</a>. We can deploy this on our Kubernetes cluster:</p>
@@ -436,18 +440,15 @@ again:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl delete pvc --wait<span class="o">=</span><span class="nb">false</span> data-myapp-0
 </span></span></code></pre></div><p>Then delete the pod that is using it:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">kubectl delete pod myapp-0
-</span></span></code></pre></div><p>Once our pod is back up and running, we can read the logs from the init
-container to see that it was restored from S3:</p>
+</span></span></code></pre></div><p>Once our pod is back up and running, the init container will have restored the
+database from S3. On success the <code>restore</code> command completes silently, so
+<code>kubectl logs myapp-0 init-litestream</code> shows no output. If you want a
+confirmation line in the logs, add <code>-integrity-check full</code> to the init
+container&rsquo;s <code>args</code>, which verifies the restored database and logs:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ kubectl logs myapp-0 init-litestream
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: restoring snapshot 24456b497507f0c5/00000000 to /var/lib/myapp/db.tmp
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: restoring wal files: <span class="nv">generation</span><span class="o">=</span>24456b497507f0c5 <span class="nv">index</span><span class="o">=[</span>00000000,00000001<span class="o">]</span>
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: downloaded wal 24456b497507f0c5/00000000 <span class="nv">elapsed</span><span class="o">=</span>613.525612ms
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: downloaded wal 24456b497507f0c5/00000001 <span class="nv">elapsed</span><span class="o">=</span>599.573817ms
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: applied wal 24456b497507f0c5/00000000 <span class="nv">elapsed</span><span class="o">=</span>2.357647ms
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: applied wal 24456b497507f0c5/00000001 <span class="nv">elapsed</span><span class="o">=</span>1.800142ms
-</span></span><span class="line"><span class="cl">2000/01/01 00:00:00.000000 /var/lib/myapp/db<span class="o">(</span>s3<span class="o">)</span>: renaming database from temporary location
-</span></span></code></pre></div><p>We can then cURL our endpoint again and see that the count continues from where
-it left off before the PVC deletion:</p>
+</span></span><span class="line"><span class="cl"><span class="nv">time</span><span class="o">=</span>2000-01-01T00:00:00.000Z <span class="nv">level</span><span class="o">=</span>INFO <span class="nv">msg</span><span class="o">=</span><span class="s2">&#34;post-restore integrity check passed&#34;</span> <span class="nv">db</span><span class="o">=</span>/var/lib/myapp/db <span class="nv">replica</span><span class="o">=</span>s3
+</span></span></code></pre></div><p>Either way, we can cURL our endpoint again and see that the count continues from
+where it left off before the PVC deletion, confirming the database was restored:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">$ kubectl <span class="nb">exec</span> -it -c myapp myapp-0 -- curl localhost:8080
 </span></span><span class="line"><span class="cl">This server has been visited <span class="m">3</span> times.
 </span></span></code></pre></div><h2 id="conclusion">Conclusion<a href="#conclusion" class="anchor" aria-hidden="true">#</a> </h2>
