@@ -679,9 +679,26 @@ The following settings are specific to S3 replicas:
   requests. Some S3-compatible providers don't support this header on certain
   operations. Automatically disabled for Tigris endpoints. Defaults to `true`.
 
-- `sse-customer-algorithm`—{{< since version="0.5.8" >}} SSE-C encryption algorithm.
+- `storage-class`—{{< since version="0.5.14" >}} Storage class applied to
+  objects uploaded to S3 (e.g. `STANDARD_IA`, `GLACIER_IR`). If not set, the
+  provider's default storage class is used. See the
+  [S3 Advanced Configuration Guide]({{< ref "s3-advanced#storage-classes" >}})
+  for cost trade-offs and retrieval caveats.
 
-- `sse-customer-key-md5`—{{< since version="0.5.8" >}} Base64-encoded MD5 digest of the SSE-C encryption key.
+- `sse-customer-algorithm`—{{< since version="0.5.6" >}} SSE-C encryption
+  algorithm. Only `AES256` is supported. Defaults to `AES256` when an SSE-C
+  key is provided, so it can usually be omitted.
+
+- `sse-customer-key`—{{< since version="0.5.6" >}} Base64-encoded 256-bit
+  encryption key for SSE-C. The key's MD5 digest is computed automatically.
+  Mutually exclusive with `sse-kms-key-id`.
+
+- `sse-customer-key-path`—{{< since version="0.5.6" >}} Path to a file
+  containing the base64-encoded SSE-C encryption key. Takes precedence over
+  `sse-customer-key`. Supports `~` expansion.
+
+- `sse-kms-key-id`—{{< since version="0.5.6" >}} AWS KMS key ID or ARN for
+  SSE-KMS encryption. Mutually exclusive with the SSE-C settings.
 
 These options can also be set via URL query parameters. {{< since version="0.5.8" >}}
 Both camelCase and hyphenated forms are accepted:
@@ -701,8 +718,13 @@ s3://bucket/path?signPayload=true&requireContentMD5=false
 | `part-size` | `partSize` | `5MB` | Size of each upload part |
 | `sign-payload` | `signPayload` | `true` | Sign request payload |
 | `require-content-md5` | `requireContentMD5` | `true` | Add Content-MD5 header |
+| `storage-class` | `storageClass` | — | S3 storage class |
 | `sse-customer-algorithm` | `sseCustomerAlgorithm` | — | SSE-C algorithm |
-| `sse-customer-key-md5` | `sseCustomerKeyMD5` | — | SSE-C key MD5 |
+| `sse-customer-key` | `sseCustomerKey` | — | SSE-C key (base64) |
+| `sse-customer-key-md5` | `sseCustomerKeyMD5` | — | SSE-C key MD5 digest |
+| `sse-kms-key-id` | `sseKmsKeyId` | — | SSE-KMS key ID |
+
+{{< alert icon="⚠️" text="The SSE, `part-size`, and `concurrency` query parameters are only honored on replica URLs passed directly to commands such as `litestream restore s3://...`. They are **silently ignored** in a configuration file's `url:` field — use the equivalent YAML settings described above instead. Configuration file URLs apply only the `endpoint`, `region`, `forcePathStyle`, `skipVerify`, `sign-payload`, `require-content-md5`, and `storage-class` parameters." >}}
 
 #### S3-Compatible Provider Requirements
 
