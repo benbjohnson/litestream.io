@@ -15,7 +15,7 @@ of SQLite databases. Directory replication is useful for:
 - Applications managing multiple SQLite databases
 - Batch replication without listing each database individually
 
-{{< since version="0.5.0" >}}
+{{< since version="0.5.3" >}}
 
 
 ## Configuration

@@ -26,7 +26,7 @@ dollar sign followed by characters—for example, a password. In this case, you
 can set the `-no-expand-env` flag on any `litestream` command to disable
 expansion.
 
-{{< since version="0.5.8" >}} Litestream automatically sets `$PID` during config
+{{< since version="0.5.7" >}} Litestream automatically sets `$PID` during config
 file parsing, expanding to the current process ID. This is useful for creating
 unique replica paths when running multiple Litestream instances on the same host:
 
@@ -148,7 +148,7 @@ are compromised — an attacker with leaked credentials cannot delete your backu
 
 ### Global replica defaults
 
-{{< since version="0.5.0" >}} Global replica defaults allow you to set default
+{{< since version="0.5.3" >}} Global replica defaults allow you to set default
 settings at the top level of your configuration file. These defaults are
 automatically inherited by all replicas while still allowing per-replica
 overrides. This eliminates configuration duplication across multiple databases.
@@ -292,7 +292,7 @@ logging:
 
 ### L0 Retention
 
-{{< since version="0.5.0" >}} L0 retention controls how long L0 (level 0) files
+{{< since version="0.5.3" >}} L0 retention controls how long L0 (level 0) files
 are kept after being compacted into L1 files. This setting is important when
 using VFS (Virtual File System) read replicas, as it prevents race conditions
 where L0 files could be deleted before VFS has time to fetch newly created L1
@@ -476,7 +476,7 @@ Each database supports the following configuration options:
 - `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
 - `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
-- `truncate-page-n`—{{< since version="0.5.0" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocks both readers and writers**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
+- `truncate-page-n`—{{< since version="0.5.3" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocks both readers and writers**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
 - `restore-if-db-not-exists`—{{< since version="0.5.6" >}} When `true`, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to `false`. This is also available as the `-restore-if-db-not-exists` flag on the [`replicate`]({{< ref "replicate" >}}) command.
 - `snapshot`—{{< since version="0.5.12" >}} Per-database `interval` and `retention` for snapshots. See [Per-database snapshot settings](#per-database-snapshot-settings) below for the promotion semantics.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
@@ -617,7 +617,7 @@ dbs:
 
 ### SQLite Connection String Prefixes
 
-{{< since version="0.5.0" >}} Litestream automatically strips `sqlite://` and
+{{< since version="0.5.3" >}} Litestream automatically strips `sqlite://` and
 `sqlite3://` prefixes from database paths. This allows you to use a single
 `DATABASE_URL` environment variable across Litestream and other SQLite tools
 that require the protocol prefix.
@@ -650,7 +650,7 @@ prisma migrate deploy     # Prisma
 
 ### Directory configuration
 
-{{< since version="0.5.0" >}} Litestream can replicate all SQLite databases in a
+{{< since version="0.5.3" >}} Litestream can replicate all SQLite databases in a
 directory using the `dir` field instead of `path`. This is useful for
 multi-tenant applications where each tenant has their own database.
 
@@ -766,7 +766,7 @@ dbs:
       url: s3://mybkt.litestream.io/db
 ```
 
-{{< since version="0.5.0" >}} You can also use S3 access point ARNs for VPC-only
+{{< since version="0.5.3" >}} You can also use S3 access point ARNs for VPC-only
 configurations and simplified access control:
 
 ```yaml
@@ -829,23 +829,23 @@ The following settings are specific to S3 replicas:
 - `skip-verify`—Disables TLS verification. This is useful when testing against
   a local node such as MinIO and you are using self-signed certificates.
 
-- `part-size`—{{< since version="0.5.0" >}} Size of each part in multipart uploads. Accepts
+- `part-size`—{{< since version="0.5.3" >}} Size of each part in multipart uploads. Accepts
   human-readable sizes like `5MB`, `10MB`, or `1GB`. Default is 5 MiB. Minimum
   is 5 MiB (S3 requirement), maximum is 5 GiB. See the
   [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
 
-- `concurrency`—{{< since version="0.5.0" >}} Number of parts to upload in parallel during
+- `concurrency`—{{< since version="0.5.3" >}} Number of parts to upload in parallel during
   multipart uploads. Default is 5. Higher values improve throughput on fast
   networks but use more memory. See the
   [S3 Advanced Configuration Guide]({{< ref "s3-advanced" >}}) for tuning recommendations.
 
-- `sign-payload`—{{< since version="0.5.0" >}} Signs the request payload.
+- `sign-payload`—{{< since version="0.5.3" >}} Signs the request payload.
   {{< since version="0.5.5" >}} Defaults to `true` for compatibility with AWS S3
   and most S3-compatible providers. Previously defaulted to `false`, which caused
   `SignatureDoesNotMatch` errors with some configurations. Set to `false` only if
   your specific provider requires unsigned payloads.
 
-- `require-content-md5`—{{< since version="0.5.0" >}} Adds Content-MD5 header to
+- `require-content-md5`—{{< since version="0.5.3" >}} Adds Content-MD5 header to
   requests. Some S3-compatible providers don't support this header on certain
   operations. Automatically disabled for Tigris endpoints. Defaults to `true`.
 
@@ -915,7 +915,7 @@ for popular providers:
 
 ### Tigris (Fly.io) Configuration
 
-{{< since version="0.5.0" >}} [Tigris](https://www.tigrisdata.com/) is Fly.io's
+{{< since version="0.5.3" >}} [Tigris](https://www.tigrisdata.com/) is Fly.io's
 globally distributed S3-compatible object storage. Litestream automatically
 detects Tigris endpoints and applies required configuration settings.
 
@@ -1209,7 +1209,7 @@ See the [NATS Integration Guide]({{< ref "nats" >}}) for detailed TLS setup inst
 
 ### Alibaba Cloud OSS replica
 
-{{< since version="0.5.0" >}} Native Alibaba Cloud OSS support using the official SDK.
+{{< since version="0.5.3" >}} Native Alibaba Cloud OSS support using the official SDK.
 
 OSS replicas can be configured using the `url` field:
 
@@ -1247,7 +1247,7 @@ See the [Alibaba Cloud OSS Guide]({{< ref "alibaba-oss" >}}) for detailed setup 
 
 ### WebDAV replica
 
-{{< since version="0.5.0" >}} WebDAV replicas allow replication to any RFC 4918 compliant WebDAV server,
+{{< since version="0.5.3" >}} WebDAV replicas allow replication to any RFC 4918 compliant WebDAV server,
 including Nextcloud, ownCloud, and Apache mod_dav.
 
 WebDAV replicas can be configured using the `url` field:
@@ -1348,7 +1348,7 @@ but days, weeks, & years are not supported.
 
 ### Validation
 
-{{< since version="0.5.8" >}} Litestream periodically validates replica integrity
+{{< since version="0.5.7" >}} Litestream periodically validates replica integrity
 by checking LTX files for sort order and contiguity. The background validation
 monitor runs at the configured interval and reports gaps, overlaps, or unsorted
 files.

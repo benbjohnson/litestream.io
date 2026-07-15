@@ -12,7 +12,7 @@ This guide will show you how to use the directory watcher feature for automatic
 database discovery. This is useful for multi-tenant applications where databases
 are dynamically created and removed at runtime.
 
-{{< since version="0.5.0" >}}
+{{< since version="0.5.4" >}}
 
 
 ## Overview

@@ -8,7 +8,7 @@ menu:
 weight: 544
 ---
 
-{{< since version="0.5.12" >}} The `list` command displays all databases
+{{< since version="0.5.8" >}} The `list` command displays all databases
 currently managed by a running Litestream daemon, along with their replication
 status and last sync time.
 

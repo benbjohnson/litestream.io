@@ -12,8 +12,8 @@ This guide covers advanced S3 configuration options, including multipart upload
 tuning and storage classes. These settings control how Litestream uploads data
 to S3 and S3-compatible storage services.
 
-{{< since version="0.5.0" >}} Part size and concurrency configuration options
-were added in Litestream v0.5.0.
+{{< since version="0.5.3" >}} Part size and concurrency configuration options
+were added in Litestream v0.5.3.
 
 ## Overview
 

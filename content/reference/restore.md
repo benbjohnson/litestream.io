@@ -518,7 +518,7 @@ fi
 
 ## Format Detection
 
-{{< since version="0.5.8" >}} The `restore` command automatically detects whether
+{{< since version="0.5.7" >}} The `restore` command automatically detects whether
 backups are in v0.3.x format or LTX format and restores from whichever has the
 best available data. This works transparently for both file and S3 backends.
 

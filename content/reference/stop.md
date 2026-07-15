@@ -8,7 +8,7 @@ menu:
 weight: 549
 ---
 
-{{< since version="0.5.12" >}} The `stop` command pauses replication for a
+{{< since version="0.5.7" >}} The `stop` command pauses replication for a
 database without removing it from the daemon. The database remains registered
 and can be resumed with the `start` command. Before stopping, it performs a
 final sync to ensure all data is replicated.

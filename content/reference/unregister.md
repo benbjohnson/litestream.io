@@ -8,7 +8,7 @@ menu:
 weight: 547
 ---
 
-{{< since version="0.5.12" >}} The `unregister` command dynamically removes a
+{{< since version="0.5.8" >}} The `unregister` command dynamically removes a
 database from a running Litestream daemon without requiring a restart. Before
 completing, it performs a final sync to ensure all data is replicated.
 
