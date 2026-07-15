@@ -80,7 +80,8 @@ sqlite> .open 'file:replica.db?vfs=litestream'
 
 ### Replica URL
 
-Set `LITESTREAM_REPLICA_URL` to specify the replica location using a URL format:
+Set `LITESTREAM_REPLICA_URL` to specify the replica location using a URL format.
+This variable is **required**—the loadable extension fails to initialize without it.
 
 | Scheme | Backend | Example |
 |--------|---------|---------|
@@ -107,21 +108,13 @@ LITESTREAM_REPLICA_URL="s3://mybucket/db?endpoint=<account>.r2.cloudflarestorage
 ### Other configuration
 
 - `LITESTREAM_LOG_LEVEL` — `DEBUG` or `INFO` (default).
+- `LITESTREAM_LOG_FILE` — append log output to a file instead of stdout.
+  {{< since version="0.5.7" >}}
+- `LITESTREAM_S3_ENDPOINT` — custom endpoint for S3-compatible storage
+  (alternative to the `endpoint` query parameter in the replica URL).
 - Standard cloud provider credentials (AWS, GCP, Azure) are honored by their
   respective SDKs. For example: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
   `AWS_PROFILE`, `GOOGLE_APPLICATION_CREDENTIALS`, `AZURE_STORAGE_ACCOUNT`.
-
-### Legacy S3 configuration
-
-The following S3-specific variables are still supported for backwards
-compatibility but `LITESTREAM_REPLICA_URL` is preferred:
-
-- `LITESTREAM_S3_BUCKET` — bucket containing the replica.
-- `LITESTREAM_S3_PATH` — prefix/path to the database replica.
-- `LITESTREAM_S3_REGION` — defaults to the bucket's region, or `us-east-1` when using a custom endpoint.
-- `LITESTREAM_S3_ENDPOINT` — custom endpoint for S3-compatible storage.
-- `LITESTREAM_S3_FORCE_PATH_STYLE` — `true` to force path-style URLs (default `false`).
-- `LITESTREAM_S3_SKIP_VERIFY` — `true` to skip TLS verification (default `false`; testing only).
 
 ### Runtime tuning
 
@@ -246,35 +239,44 @@ SELECT litestream_txid(), litestream_lag(), litestream_time();
 SELECT litestream_set_time('10 minutes ago');
 ```
 
-### Hydration monitoring functions
+### PRAGMA litestream_hydration_progress
 
-These functions are available when hydration is enabled:
-
-| Function | Description |
-|----------|-------------|
-| `litestream_hydration_progress()` | Returns hydration progress as percentage (0-100) |
-| `litestream_hydration_status()` | Returns status: `idle`, `restoring`, `catching_up`, `complete` |
-
-Example:
+{{< since version="0.5.7" >}} Returns [hydration](/guides/vfs-hydration) progress
+as a percentage (0–100, one decimal place). Returns `0` when hydration is not
+enabled. Read-only.
 
 ```sql
-SELECT litestream_hydration_status(), litestream_hydration_progress();
--- Returns: restoring, 45
+PRAGMA litestream_hydration_progress;
+-- Returns: 45.0
 ```
 
-### Write mode functions
+### PRAGMA litestream_hydration_file
 
-These functions are available when write mode is enabled:
-
-| Function | Description |
-|----------|-------------|
-| `litestream_write_buffer_size()` | Returns current write buffer size in bytes |
-
-Example:
+{{< since version="0.5.7" >}} Returns the local file path of the hydrated
+database. Read-only.
 
 ```sql
-SELECT litestream_write_buffer_size();
--- Returns: 8192
+PRAGMA litestream_hydration_file;
+-- Returns: /var/lib/litestream/hydrated.db
+```
+
+### PRAGMA litestream_write_enabled
+
+{{< since version="0.5.9" >}} Gets or sets [write mode](/guides/vfs-write-mode)
+at runtime.
+
+**Get current state:**
+
+```sql
+PRAGMA litestream_write_enabled;
+-- Returns: 0 (disabled) or 1 (enabled)
+```
+
+**Enable or disable:**
+
+```sql
+PRAGMA litestream_write_enabled = 1;   -- also accepts true, on
+PRAGMA litestream_write_enabled = 0;   -- also accepts false, off
 ```
 
 
@@ -292,7 +294,7 @@ SELECT litestream_write_buffer_size();
 
 ## Limitations & constraints
 
-- **Default read-only**: Write attempts return `litestream is a read only vfs` unless
+- **Default read-only**: Write attempts fail with `attempt to write a readonly database` unless
   [write mode](/guides/vfs-write-mode) is enabled with `LITESTREAM_WRITE_ENABLED=true`.
 - **Write mode constraints**: When enabled, write mode assumes a single writer. Multiple
   concurrent writers trigger conflict detection (not prevention). Applications must handle
