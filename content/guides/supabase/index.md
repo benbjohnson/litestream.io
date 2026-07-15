@@ -58,17 +58,19 @@ export AWS_ACCESS_KEY_ID=your-access-key-id
 export AWS_SECRET_ACCESS_KEY=your-secret-access-key
 ```
 
-Then specify your bucket with the Supabase endpoint as a replica URL:
+Then specify your bucket with the Supabase endpoint as a replica URL. Always
+quote the URL, because your shell interprets the `?` as a glob pattern: `zsh`
+aborts with `no matches found`, and other shells may mangle the URL.
 
 ```sh
-litestream replicate /path/to/db s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3
+litestream replicate /path/to/db "s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3"
 ```
 
 You can later restore your database from Supabase Storage to a local `my.db`
 path:
 
 ```sh
-litestream restore -o my.db s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3
+litestream restore -o my.db "s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3"
 ```
 
 ### Configuration file usage
