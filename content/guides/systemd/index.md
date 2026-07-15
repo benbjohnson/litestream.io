@@ -59,7 +59,7 @@ file. Make sure to replace your AWS credentials with your own, the bucket name
 with your bucket name, and update `MYUSER` to your local Linux username.
 
 ```
-sudo cat > /etc/litestream.yml <<EOF
+sudo tee /etc/litestream.yml >/dev/null <<EOF
 access-key-id:     AKIAxxxxxxxxxxxxxxxx
 secret-access-key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxx
 
@@ -135,7 +135,7 @@ path:
 litestream restore friends.db
 ```
 
-Litesteam will find the database in the configuration file and restore the most
+Litestream will find the database in the configuration file and restore the most
 recent copy it has from its S3 replica.
 
 You can verify that your data is all there by connecting with SQLite:

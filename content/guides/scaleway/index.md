@@ -51,7 +51,7 @@ copy those for use later.**
 
 ### Configuration file usage
 
-Here is an example `litestream.yml` configuration file. Make sure to specifi the `region` and `endpoint` values.
+Here is an example `litestream.yml` configuration file. Make sure to specify the `region` and `endpoint` values.
 
 ```yaml
 dbs:

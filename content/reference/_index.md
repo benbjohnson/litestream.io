@@ -15,6 +15,7 @@ The `litestream` commands are:
 - [`litestream databases`](/reference/databases) — Lists databases specified in config file.
 - [`litestream ltx`](/reference/ltx) — List available LTX files for a database.
 - [`litestream replicate`](/reference/replicate) — Runs a server to replicate databases.
+- [`litestream reset`](/reference/reset) — Clears local Litestream state, forcing a fresh snapshot on the next sync.
 - [`litestream restore`](/reference/restore) — Recovers database backup from a replica.
 - [`litestream status`](/reference/status) — Reports local replication status for configured databases.
 - [`litestream sync`](/reference/sync) — Forces immediate WAL-to-LTX sync for a database.

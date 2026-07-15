@@ -114,8 +114,8 @@ dbs:
 
 | Local database path | Replica path |
 |---------------------|--------------|
-| `/var/lib/databases/tenant1.db` | `backups/prod/tenant1.db/ltx/...` |
-| `/var/lib/databases/team-a/db2.db` | `backups/prod/team-a/db2.db/ltx/...` |
+| `/var/lib/databases/tenant1.db` | `backups/prod/tenant1.db/0000/...` |
+| `/var/lib/databases/team-a/db2.db` | `backups/prod/team-a/db2.db/0000/...` |
 
 The relative path from the directory root is appended to the configured replica
 path, preserving the directory structure.
