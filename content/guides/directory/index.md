@@ -45,6 +45,8 @@ Directory configurations support the following options:
 - `recursive`—Scan subdirectories when `true` (default: `false`)
 - `watch`—Enable real-time monitoring for new databases (default: `false`).
   See [Directory Watcher](/guides/directory-watcher) for details.
+- `meta-dir`—{{< since version="0.5.13" >}} Root directory for per-database
+  metadata. See [Metadata location](#metadata-location) below.
 
 All standard database options like `monitor-interval` and `checkpoint-interval`
 are also supported and apply to each discovered database.
@@ -117,6 +119,39 @@ dbs:
 
 The relative path from the directory root is appended to the configured replica
 path, preserving the directory structure.
+
+
+## Metadata location
+
+{{< since version="0.5.13" >}} Litestream keeps a small amount of local metadata
+for each database (transaction tracking state) in a hidden directory named
+`.<database>-litestream`, placed next to each database file by default. To gather
+every database's metadata under a single root instead—keeping the per-database
+metadata directories out of the data directory or on separate storage—use the
+`meta-dir` field:
+
+```yaml
+dbs:
+  - dir: /var/lib/tenants
+    pattern: "*.db"
+    recursive: true
+    meta-dir: /var/lib/litestream-meta
+    replica:
+      url: s3://mybucket/tenants
+```
+
+Each database receives a unique metadata directory under the root, mirroring its
+relative path:
+
+| Local database path | Metadata directory |
+|---------------------|--------------------|
+| `/var/lib/tenants/tenant1.db` | `/var/lib/litestream-meta/tenant1.db-litestream` |
+| `/var/lib/tenants/team-a/db2.db` | `/var/lib/litestream-meta/team-a/db2.db-litestream` |
+
+The `meta-dir` field is only valid with `dir:` and cannot be combined with
+`meta-path`. Using it with a single `path:` database fails with
+`'meta-dir' can only be used with a directory`, and setting both `meta-path` and
+`meta-dir` fails with `cannot specify both 'meta-path' and 'meta-dir'`.
 
 
 ## Use cases
