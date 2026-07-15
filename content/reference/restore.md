@@ -87,6 +87,11 @@ litestream restore [arguments] REPLICA_URL
     Overwrite an existing non-empty database file.
     Required when the output path already exists and is not empty.
 
+-integrity-check MODE
+    Run a post-restore integrity check on the database.
+    MODE is one of: none, quick, full.
+    Defaults to none.
+
 -json
     Output raw JSON instead of human-readable text.
 
@@ -231,6 +236,26 @@ $ litestream restore -force -o /tmp/my.db s3://mybkt/my.db
 The `-if-db-not-exists` flag continues to work as before — it returns exit code
 0 if the database already exists, without attempting to overwrite. The `-force`
 flag is for cases where you explicitly want to replace an existing database.
+
+
+## Integrity Check
+
+{{< since version="0.5.10" >}} The `-integrity-check` flag runs a SQLite
+integrity check on the restored database after the restore completes. If the
+check fails, the restore command returns a non-zero exit code.
+
+| Mode | Description |
+|------|-------------|
+| `none` | No integrity check is performed. This is the default. |
+| `quick` | Runs `PRAGMA quick_check`, which validates the database structure but skips verifying index content and `UNIQUE` constraints. |
+| `full` | Runs `PRAGMA integrity_check`, which performs a thorough structural validation of the database. Foreign-key constraints are not checked. |
+
+```
+$ litestream restore -integrity-check quick -o /tmp/my.db s3://mybkt/my.db
+```
+
+When the `replicate` command automatically restores a missing database from a
+replica on startup, it always uses `quick` mode.
 
 
 ## JSON Output
