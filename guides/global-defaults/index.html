@@ -327,8 +327,12 @@ to replicas where they are relevant.</p>
 </tbody>
 </table>
 <p>Note: Snapshot and retention settings (<code>snapshot.interval</code>, <code>snapshot.retention</code>)
-are configured separately at the top level under the <code>snapshot:</code> section. See the
-<a href="/reference/config">Configuration Reference</a> for details.</p>
+are configured separately at the top level under the <code>snapshot:</code> section. Since
+v0.5.12 you can also set <code>snapshot.interval</code>/<code>snapshot.retention</code> on an individual
+database, but those values are promoted to the global snapshot configuration
+rather than applied per-database — the effective snapshot schedule is always
+global. See the <a href="/reference/config#per-database-snapshot-settings">Configuration Reference</a>
+for the promotion and conflict rules.</p>
 <h3 id="s3-and-s3-compatible-settings">S3 and S3-Compatible Settings<a href="#s3-and-s3-compatible-settings" class="anchor" aria-hidden="true">#</a> </h3>
 <p>These settings apply to S3, Backblaze B2, DigitalOcean Spaces, and other
 S3-compatible services:</p>

@@ -266,11 +266,13 @@ URL or in <strong>Settings</strong> &gt; <strong>General</strong>.</p>
 environment variables with your S3 access keys:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>your-access-key-id
 </span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>your-secret-access-key
-</span></span></code></pre></div><p>Then specify your bucket with the Supabase endpoint as a replica URL:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db s3://BUCKETNAME/db?endpoint<span class="o">=</span>PROJECT_REF.supabase.co/storage/v1/s3
+</span></span></code></pre></div><p>Then specify your bucket with the Supabase endpoint as a replica URL. Always
+quote the URL, because your shell interprets the <code>?</code> as a glob pattern: <code>zsh</code>
+aborts with <code>no matches found</code>, and other shells may mangle the URL.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream replicate /path/to/db <span class="s2">&#34;s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3&#34;</span>
 </span></span></code></pre></div><p>You can later restore your database from Supabase Storage to a local <code>my.db</code>
 path:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db s3://BUCKETNAME/db?endpoint<span class="o">=</span>PROJECT_REF.supabase.co/storage/v1/s3
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">litestream restore -o my.db <span class="s2">&#34;s3://BUCKETNAME/db?endpoint=PROJECT_REF.supabase.co/storage/v1/s3&#34;</span>
 </span></span></code></pre></div><h3 id="configuration-file-usage">Configuration file usage<a href="#configuration-file-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>Litestream is typically run as a background service which uses a configuration
 file. You can configure a replica for your database using the <code>url</code> format:</p>

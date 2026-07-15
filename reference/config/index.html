@@ -221,11 +221,16 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
         <li><a href="#logging">Logging</a></li>
         <li><a href="#l0-retention">L0 Retention</a></li>
+        <li><a href="#compaction-verification">Compaction verification</a></li>
+        <li><a href="#heartbeat-monitoring">Heartbeat monitoring</a></li>
+        <li><a href="#shutdown-sync">Shutdown sync</a></li>
+        <li><a href="#control-socket">Control socket</a></li>
       </ul>
     </li>
     <li><a href="#database-settings">Database settings</a>
       <ul>
         <li><a href="#database-configuration-options">Database configuration options</a></li>
+        <li><a href="#per-database-snapshot-settings">Per-database snapshot settings</a></li>
         <li><a href="#directory-replication">Directory replication</a></li>
         <li><a href="#sqlite-connection-string-prefixes">SQLite Connection String Prefixes</a></li>
         <li><a href="#directory-configuration">Directory configuration</a></li>
@@ -575,7 +580,79 @@ Enable debug logging to monitor retention behavior:</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">15s</span><span class="w">
-</span></span></span></code></pre></div><h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></span></code></pre></div><h3 id="compaction-verification">Compaction verification<a href="#compaction-verification" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The <code>verify-compaction</code> option checks TXID
+consistency at the destination level after each compaction. When enabled,
+Litestream logs a warning if it detects gaps or overlaps in the transaction
+ranges. This is primarily a diagnostic aid and is disabled by default.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">verify-compaction</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>verify-compaction</code>—Verify TXID consistency after each compaction and log
+warnings on gaps or overlaps. Defaults to <code>false</code>.</li>
+</ul>
+<h3 id="heartbeat-monitoring">Heartbeat monitoring<a href="#heartbeat-monitoring" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ Litestream can send periodic heartbeat pings to an
+external URL as a dead-man&rsquo;s switch for backup-health monitoring services such as
+<a href="https://healthchecks.io/">Healthchecks.io</a> or Better Stack. A ping is an HTTP
+<code>GET</code> request and is considered delivered when the endpoint returns a <code>2xx</code>
+status code.</p>
+<p>The heartbeat is health-gated, not a plain process-uptime signal: Litestream
+sends a ping only when <strong>all</strong> enabled databases have completed a successful sync
+within the heartbeat interval. If there are no enabled databases, or any database
+has fallen behind, no ping is sent — so a missed heartbeat means replication is
+unhealthy (or the daemon has stopped), not merely that the process exited.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">heartbeat-url</span><span class="p">:</span><span class="w"> </span><span class="l">https://hc-ping.com/your-uuid-here</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">heartbeat-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>heartbeat-url</code>—URL to ping on each heartbeat interval. Heartbeats are disabled
+when this is empty. Defaults to empty (disabled).</li>
+<li><code>heartbeat-interval</code>—How often to ping the heartbeat URL while all databases are
+healthy. Must be at least <code>1m</code>; smaller values are rejected and Litestream fails
+to start. Defaults to <code>5m</code>.</li>
+</ul>
+<h3 id="shutdown-sync">Shutdown sync<a href="#shutdown-sync" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ When Litestream receives a shutdown signal, it
+attempts a final sync of each database to its replica before exiting. These
+settings bound how long that final sync is allowed to take.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">shutdown-sync-timeout</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">shutdown-sync-interval</span><span class="p">:</span><span class="w"> </span><span class="l">500ms</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>shutdown-sync-timeout</code>—Maximum time to wait for the final sync to complete
+during shutdown. Defaults to <code>30s</code>.</li>
+<li><code>shutdown-sync-interval</code>—How frequently to retry the final sync while waiting
+for it to succeed during shutdown. Defaults to <code>500ms</code>.</li>
+</ul>
+<h3 id="control-socket">Control socket<a href="#control-socket" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The <code>socket</code> block configures the Unix domain
+socket used by the daemon control commands (<a href="https://litestream.io/reference/stop/"><code>stop</code></a>,
+<a href="https://litestream.io/reference/register/"><code>register</code></a>, and others) and the local
+<a href="https://litestream.io/reference/ipc/">IPC endpoints</a>. The socket is disabled by default and must be
+enabled explicitly.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">socket</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/run/litestream.sock</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">permissions</span><span class="p">:</span><span class="w"> </span><span class="m">0600</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>enabled</code>—Enables the control socket. When <code>false</code>, the daemon does not create
+a socket and control commands cannot connect. Defaults to <code>false</code>.</li>
+<li><code>path</code>—Filesystem path for the Unix socket. Defaults to
+<code>/var/run/litestream.sock</code>.</li>
+<li><code>permissions</code>—Octal file permissions for the socket. Defaults to <code>0600</code>
+(owner read/write only).</li>
+</ul>
+<h2 id="database-settings">Database settings<a href="#database-settings" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream can monitor one or more database files that are specified in the
 configuration file. Database files are also referenced in <code>litestream</code> commands
 by their absolute path.</p>
@@ -621,12 +698,48 @@ valid with <code>dir:</code>, not a single <code>path:</code>. See
     v0.5.0
 </span>
  Emergency threshold for TRUNCATE checkpoint (default: <code>121359</code>, ~500MB, <strong>blocks both readers and writers</strong>). Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
+<li><code>restore-if-db-not-exists</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
+    v0.5.6
+</span>
+ When <code>true</code>, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to <code>false</code>. This is also available as the <code>-restore-if-db-not-exists</code> flag on the <a href="https://litestream.io/reference/replicate/"><code>replicate</code></a> command.</li>
+<li><code>snapshot</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ Per-database <code>interval</code> and <code>retention</code> for snapshots. See <a href="#per-database-snapshot-settings">Per-database snapshot settings</a> below for the promotion semantics.</li>
 <li><code>replica</code>—Single replica configuration (replaces deprecated <code>replicas</code> array)</li>
 </ul>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>
   <div class="w-100">The max-checkpoint-page-count field has been removed in v0.5.0 due to safety concerns with RESTART checkpoints. Use truncate-page-n instead.</div>
 </div>
+<h3 id="per-database-snapshot-settings">Per-database snapshot settings<a href="#per-database-snapshot-settings" class="anchor" aria-hidden="true">#</a> </h3>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ A <code>snapshot</code> block can be set on an individual
+database, but snapshot settings are ultimately applied globally. The per-database
+block is a convenience for expressing the global snapshot configuration from the
+database level:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://mybucket/app</span><span class="w">
+</span></span></span></code></pre></div><p>The promotion and conflict rules are:</p>
+<ul>
+<li>A database-level <code>snapshot.interval</code> or <code>snapshot.retention</code> is promoted to the
+global <a href="#complete-configuration-example"><code>snapshot</code></a> configuration <strong>unless</strong> the
+global <code>snapshot</code> block explicitly sets that field.</li>
+<li>An explicit global value always wins over a database-level value.</li>
+<li>If two databases set <strong>different</strong> values for the same field, Litestream fails
+to start with an error such as <code>conflicting database snapshot intervals: …</code>.</li>
+</ul>
+<p>Because the effective snapshot schedule is global, all databases share the same
+snapshot interval and retention. Use per-database blocks only to keep related
+settings next to the database they describe, not to give each database a distinct
+snapshot schedule.</p>
 <h3 id="directory-replication">Directory replication<a href="#directory-replication" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.0">
     v0.5.0
@@ -1311,6 +1424,10 @@ account key file, or use workload identity in GKE environments.</p>
 <ul>
 <li><code>account-name</code>—Azure storage account name</li>
 <li><code>account-key</code>—Azure storage account key. Can be set via <code>LITESTREAM_AZURE_ACCOUNT_KEY</code> environment variable or injected via <code>${VAR}</code> syntax in config</li>
+<li><code>sas-token</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ Shared Access Signature (SAS) token for authentication, as an alternative to <code>account-key</code></li>
 <li><code>bucket</code>—Container name within the storage account</li>
 <li><code>path</code>—Path within the container</li>
 <li><code>endpoint</code>—Custom endpoint URL (optional)</li>
@@ -1337,6 +1454,10 @@ account key file, or use workload identity in GKE environments.</p>
 <li><code>user</code>—Username for authentication</li>
 <li><code>password</code>—Password for authentication (not recommended for production)</li>
 <li><code>key-path</code>—Path to SSH private key file for key-based authentication</li>
+<li><code>host-key</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
+    v0.5.3
+</span>
+ Expected SSH host public key in <code>authorized_keys</code> format (e.g. <code>ssh-ed25519 AAAA…</code>), used to verify the server&rsquo;s identity. When set, Litestream rejects connections whose host key does not match. When empty, the host key is not verified</li>
 <li><code>path</code>—Remote path where replica files will be stored</li>
 <li><code>concurrent-writes</code>—Enables concurrent writes for improved throughput (defaults
 to <code>true</code>). When enabled, failed uploads must restart from the beginning. Set
@@ -1497,6 +1618,14 @@ old LTX files are dropped through a process called &ldquo;retention&rdquo;.</p>
 <p>Retention is controlled globally via the <code>snapshot.retention</code> field in the root
 configuration, not per-replica. See the <a href="#complete-configuration-example">Complete Configuration Example</a>
 section for an example of how to configure snapshot settings.</p>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ You can also set <code>snapshot.interval</code> and
+<code>snapshot.retention</code> on an individual database, but these values are promoted to
+the global snapshot configuration rather than applied per-database. See
+<a href="#per-database-snapshot-settings">Per-database snapshot settings</a> for the exact
+promotion and conflict rules.</p>
 <p>Duration values can be specified using second (<code>s</code>), minute (<code>m</code>), or hour (<code>h</code>)
 but days, weeks, &amp; years are not supported.</p>
 <h3 id="validation">Validation<a href="#validation" class="anchor" aria-hidden="true">#</a> </h3>
