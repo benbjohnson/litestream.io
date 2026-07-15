@@ -39,7 +39,7 @@ manager, and no OS distribution files.
 | Variant | Tags | Base |
 |---------|------|------|
 | Default (Debian) | `latest`, `0.5.14` | `debian:bookworm-slim` |
-| Hardened (Scratch) | `latest-scratch`, `0.5.14-scratch` | `scratch` |
+| Hardened (Scratch) | `0.5-scratch`, `0.5.14-scratch` | `scratch` |
 
 Existing users are unaffected — the default tags (`latest`, version numbers)
 continue to produce the Debian image.
@@ -55,11 +55,13 @@ continue to produce the Debian image.
 ### Pulling the scratch image
 
 ```sh
-docker pull litestream/litestream:latest-scratch
+docker pull litestream/litestream:0.5-scratch
 ```
 
-Replace `litestream/litestream` with `litestream/litestream:latest-scratch` (or
+Replace `litestream/litestream` with `litestream/litestream:0.5-scratch` (or
 a version-pinned tag like `0.5.14-scratch`) in your Dockerfiles and run commands.
+Note that there is no `latest-scratch` tag — use the minor version tag
+(`0.5-scratch`) to track the latest scratch release.
 
 
 ## Running as a sidecar
@@ -163,7 +165,7 @@ litestream replicate -exec "myapp -myflag myarg"
 
 Or you can pass them in via the config file:
 
-```sh
+```yml
 exec: myapp -myflag myarg
 dbs:
   - path: /path/to/db
