@@ -14,7 +14,10 @@ and can be resumed with the `start` command. Before stopping, it performs a
 final sync to ensure all data is replicated.
 
 The `stop` command communicates with a running `litestream replicate` process
-over the IPC control socket. The daemon must already be running.
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting `enabled: true` in the [`socket` block]({{< ref "config#control-socket" >}})
+of the configuration file.
 
 {{< alert icon="💡" text="The <code>stop</code> command does not shut down the Litestream daemon. It pauses replication for a single database on an already-running daemon. To stop the daemon itself, terminate the <code>litestream replicate</code> process." >}}
 

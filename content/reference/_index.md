@@ -31,7 +31,9 @@ The `litestream` commands are:
 ## Daemon Control Commands
 
 These commands communicate with a running `litestream replicate` daemon over the
-IPC control socket. They require a running daemon with the socket enabled.
+IPC control socket. They require a running daemon with the
+[control socket](/reference/config#control-socket) enabled; the socket is
+disabled by default.
 
 - [`litestream info`](/reference/info) — Shows daemon version, PID, and uptime.
 - [`litestream list`](/reference/list) — Lists databases managed by the daemon.
