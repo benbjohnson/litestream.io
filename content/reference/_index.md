@@ -8,6 +8,11 @@ The Litestream command line provides several subcommands to help you manage
 replication & recovery of your databases. This reference provides details
 about the options available and different modes of operation.
 
+## Configuration File
+
+- [Configuration File](/reference/config) — YAML file for defining databases, replicas, and global settings.
+
+
 ## Commands
 
 The `litestream` commands are:
