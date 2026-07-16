@@ -20,8 +20,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Replicating to an SFTP Server">
-<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running. The overwhelmingly most common sftp server is openssh, which defaults to providing an sftp server whenever an ssh server is provided and is the most widely used ssh server and client.
-Usage Command line usage You can specify your SFTP replica using a replica URL on the command line.">
+<meta name="twitter:description" content="This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running.
+Usage Command line usage You can specify your SFTP replica using a replica URL on the command line. For example, you can replicate a database to an SFTP server with the following command. Replace the placeholders with your username, password, server, &amp; path.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -216,7 +216,6 @@ Usage Command line usage You can specify your SFTP replica using a replica URL o
         <li><a href="#trade-offs">Trade-offs</a></li>
         <li><a href="#when-to-disable-concurrent-writes">When to disable concurrent writes</a></li>
         <li><a href="#configuration">Configuration</a></li>
-        <li><a href="#host-keys">Host Keys</a></li>
       </ul>
     </li>
     <li><a href="#see-also">See Also</a></li>
@@ -229,10 +228,7 @@ Usage Command line usage You can specify your SFTP replica using a replica URL o
 		<h1>Replicating to an SFTP Server</h1>
 			<p class="lead"></p>
 			<p>This guide will show you how to use Litestream to replicate to a remote SFTP
-server. You will need to have an SFTP server already set up and running. The
-overwhelmingly most common sftp server is <a href="https://www.openssh.org/manual.html">openssh</a>,
-which defaults to providing an sftp server whenever an ssh server is provided and
-is the most widely used ssh server and client.</p>
+server. You will need to have an SFTP server already set up and running.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="command-line-usage">Command line usage<a href="#command-line-usage" class="anchor" aria-hidden="true">#</a> </h3>
 <p>You can specify your SFTP replica using a replica URL on the command line. For
@@ -262,7 +258,6 @@ file</a>. You can configure a replica for your database using the <code>url</cod
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">user</span><span class="p">:</span><span class="w">     </span><span class="l">USER</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l">PASSWORD</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">     </span><span class="l">PATH</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">host-key</span><span class="p">:</span><span class="w"> </span><span class="l">HOSTKEY</span><span class="w">
 </span></span></span></code></pre></div><p>The <code>path</code> is treated as a relative path from the present working directory
 unless there is a leading slash.</p>
 <p>You can also specify an SSH key file path instead of using a password The key
@@ -320,23 +315,6 @@ configuration:</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w">              </span><span class="l">PATH</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">concurrent-writes</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span></code></pre></div><p>The <code>concurrent-writes</code> option accepts <code>true</code> (default) or <code>false</code>.</p>
-<h3 id="host-keys">Host Keys<a href="#host-keys" class="anchor" aria-hidden="true">#</a> </h3>
-<p>The <code>host-key</code> option specifies the expected public host key of the SFTP server.
-If not set, the key of the host will not be verified and instead a warning will be logged:</p>
-<blockquote>
-<p>sftp host key not verified host=example.com</p>
-</blockquote>
-<p>You can obtain the host key by running</p>
-<blockquote>
-<p>ssh-keyscan example.com</p>
-</blockquote>
-<p>Then set the value in your configuration:</p>
-<blockquote>
-<p>sftp:
-host: example.com
-host-key: &ldquo;ecdsa-sha2-nistp256 &hellip;&rdquo;</p>
-</blockquote>
-<p>If there is a <code>host-key</code> mismatch Litestream will abort with an error.</p>
 <h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>

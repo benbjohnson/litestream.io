@@ -174,7 +174,7 @@
       <link>https://litestream.io/guides/sftp/</link>
       <pubDate>Wed, 02 Jun 2021 00:00:00 +0000</pubDate>
       <guid>https://litestream.io/guides/sftp/</guid>
-      <description>This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running. The overwhelmingly most common sftp server is openssh, which defaults to providing an sftp server whenever an ssh server is provided and is the most widely used ssh server and client.&#xA;Usage Command line usage You can specify your SFTP replica using a replica URL on the command line.</description>
+      <description>This guide will show you how to use Litestream to replicate to a remote SFTP server. You will need to have an SFTP server already set up and running.&#xA;Usage Command line usage You can specify your SFTP replica using a replica URL on the command line. For example, you can replicate a database to an SFTP server with the following command. Replace the placeholders with your username, password, server, &amp;amp; path.</description>
     </item>
     <item>
       <title>Replicating to a Local File Path</title>
