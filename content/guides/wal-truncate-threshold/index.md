@@ -16,7 +16,7 @@ SQLite's WAL (write-ahead log) grows as database pages are modified. To prevent 
 
 Litestream uses a carefully designed 3-tier checkpoint strategy that balances WAL size management with write availability:
 
-1. **Emergency truncation** (checked first) prevents unbounded WAL growth at a high threshold (~500MB), but will block writers and readers when triggered
+1. **Emergency truncation** (checked first) prevents unbounded WAL growth at a high threshold (~500MB); it tries a non-blocking checkpoint first and blocks writers and readers only when a TRUNCATE must be forced
 2. **Non-blocking checkpoints** run frequently to keep WAL small under normal operation (~4MB), never blocking the application
 3. **Time-based checkpoints** provide regular cleanup even when WAL is small, also non-blocking
 
@@ -34,7 +34,7 @@ truncate-page-n: 121359  # Default: ~500MB
 
 - **Trigger:** WAL exceeds 121,359 pages (~500MB)
 - **Mode:** Attempts a PASSIVE checkpoint first, then falls back to a TRUNCATE checkpoint via `sqlite3_wal_checkpoint_v2()` only when that passive checkpoint does not bring the WAL back below the threshold (see [Passive-first truncation](#passive-first-truncation) below)
-- **Behavior:** Non-blocking in the common case; **blocking** only when a genuine TRUNCATE is forced, which waits for all active writers AND readers to complete
+- **Behavior:** Non-blocking when the passive checkpoint restarts the WAL below the threshold; **blocking** only when a genuine TRUNCATE is forced, which waits for all active writers AND readers to complete
 - **Purpose:** Emergency brake to prevent unbounded WAL growth
 - **Priority:** Checked first to prevent runaway WAL growth
 
@@ -301,12 +301,13 @@ sqlite3 /path/to/db "PRAGMA wal_checkpoint(PASSIVE);"
 When the WAL crosses the `truncate-page-n` threshold, Litestream logs one of two lines:
 
 ```
-# Common case: the passive checkpoint restarted the WAL, so the blocking
-# truncate was skipped, avoiding its prolonged writer stall.
+# Skip case: the passive checkpoint restarted the WAL and dropped the
+# synced offset below the threshold, so the blocking truncate was skipped.
 wal restarted by passive checkpoint, skipping truncate checkpoint wal_size=... threshold=...
 
-# Fallback: the passive checkpoint could not restart the WAL (e.g. a
-# long-lived reader), so a blocking TRUNCATE was forced.
+# Fallback: the passive checkpoint did not restart the WAL, or the synced
+# offset stayed at/above the threshold (e.g. a long-lived reader), so a
+# blocking TRUNCATE was forced.
 forcing truncate checkpoint wal_size=... threshold=...
 ```
 
