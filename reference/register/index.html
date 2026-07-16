@@ -21,8 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: register">
 <meta name="twitter:description" content="v0.5.8 The register command dynamically adds a database to a running Litestream daemon without requiring a restart. This enables runtime database management for applications that create databases on-the-fly.
-The register command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-Usage litestream register [arguments] DB_PATH Arguments -replica URL Replica destination URL (e.g., s3://bucket/prefix, file:///backup/path). Required. -socket PATH Path to the control socket.">
+The register command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running with the control socket enabled. The socket is disabled by default; enable it by setting enabled: true in the socket block of the configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -236,7 +235,10 @@ database to a running Litestream daemon without requiring a restart. This
 enables runtime database management for applications that create databases
 on-the-fly.</p>
 <p>The <code>register</code> command communicates with a running <code>litestream replicate</code> process
-over the IPC control socket. The daemon must already be running.</p>
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting <code>enabled: true</code> in the <a href="https://litestream.io/reference/config/#control-socket"><code>socket</code> block</a>
+of the configuration file.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>litestream register [arguments] DB_PATH
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>

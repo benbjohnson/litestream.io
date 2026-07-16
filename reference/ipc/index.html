@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="IPC Endpoints">
 <meta name="twitter:description" content="v0.5.7 Litestream exposes IPC (Inter-Process Communication) endpoints via a Unix domain socket. These endpoints allow local tools and scripts to query database status and collect profiling data without exposing an HTTP port.
-Socket Path The control socket is disabled by default. Enable it with a socket block in your configuration file:
+Enabling the Socket The control socket is disabled by default. Enable it with a socket block in your configuration file:
 socket: enabled: true # default: false path: /var/run/litestream.sock permissions: 0600 The path defaults to /var/run/litestream.sock and permissions defaults to 0600.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
@@ -206,7 +206,7 @@ socket: enabled: true # default: false path: /var/run/litestream.sock permission
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#socket-path">Socket Path</a></li>
+    <li><a href="#enabling-the-socket">Enabling the Socket</a></li>
     <li><a href="#endpoints">Endpoints</a>
       <ul>
         <li><a href="#get-list">GET /list</a></li>
@@ -236,7 +236,7 @@ socket: enabled: true # default: false path: /var/run/litestream.sock permission
  Litestream exposes IPC (Inter-Process Communication)
 endpoints via a Unix domain socket. These endpoints allow local tools and scripts
 to query database status and collect profiling data without exposing an HTTP port.</p>
-<h2 id="socket-path">Socket Path<a href="#socket-path" class="anchor" aria-hidden="true">#</a> </h2>
+<h2 id="enabling-the-socket">Enabling the Socket<a href="#enabling-the-socket" class="anchor" aria-hidden="true">#</a> </h2>
 <p>The control socket is <strong>disabled by default</strong>. Enable it with a <code>socket</code> block
 in your configuration file:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">socket</span><span class="p">:</span><span class="w">

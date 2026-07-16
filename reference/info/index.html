@@ -21,8 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: info">
 <meta name="twitter:description" content="v0.5.8 The info command displays information about a running Litestream daemon, including version, process ID, uptime, and the number of databases being managed.
-The info command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-Usage litestream info [arguments] Arguments -socket PATH Path to the control socket. Defaults to /var/run/litestream.sock -timeout SECONDS Maximum time to wait in seconds. Defaults to 10.">
+The info command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running with the control socket enabled. The socket is disabled by default; enable it by setting enabled: true in the socket block of the configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -232,7 +231,10 @@ Usage litestream info [arguments] Arguments -socket PATH Path to the control soc
 running Litestream daemon, including version, process ID, uptime, and the number
 of databases being managed.</p>
 <p>The <code>info</code> command communicates with a running <code>litestream replicate</code> process
-over the IPC control socket. The daemon must already be running.</p>
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting <code>enabled: true</code> in the <a href="https://litestream.io/reference/config/#control-socket"><code>socket</code> block</a>
+of the configuration file.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>litestream info [arguments]
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>

@@ -21,8 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: unregister">
 <meta name="twitter:description" content="v0.5.8 The unregister command dynamically removes a database from a running Litestream daemon without requiring a restart. Before completing, it performs a final sync to ensure all data is replicated.
-The unregister command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-Usage litestream unregister [arguments] DB_PATH Arguments -socket PATH Path to the control socket. Defaults to /var/run/litestream.sock -timeout SECONDS Maximum time to wait in seconds.">
+The unregister command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running with the control socket enabled. The socket is disabled by default; enable it by setting enabled: true in the socket block of the configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -235,7 +234,10 @@ Usage litestream unregister [arguments] DB_PATH Arguments -socket PATH Path to t
 database from a running Litestream daemon without requiring a restart. Before
 completing, it performs a final sync to ensure all data is replicated.</p>
 <p>The <code>unregister</code> command communicates with a running <code>litestream replicate</code> process
-over the IPC control socket. The daemon must already be running.</p>
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting <code>enabled: true</code> in the <a href="https://litestream.io/reference/config/#control-socket"><code>socket</code> block</a>
+of the configuration file.</p>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>litestream unregister [arguments] DB_PATH
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>

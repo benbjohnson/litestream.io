@@ -21,8 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: stop">
 <meta name="twitter:description" content="v0.5.7 The stop command pauses replication for a database without removing it from the daemon. The database remains registered and can be resumed with the start command. Before stopping, it performs a final sync to ensure all data is replicated.
-The stop command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-💡 The stop command does not shut down the Litestream daemon.">
+The stop command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running with the control socket enabled. The socket is disabled by default; enable it by setting enabled: true in the socket block of the configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -235,7 +234,10 @@ database without removing it from the daemon. The database remains registered
 and can be resumed with the <code>start</code> command. Before stopping, it performs a
 final sync to ensure all data is replicated.</p>
 <p>The <code>stop</code> command communicates with a running <code>litestream replicate</code> process
-over the IPC control socket. The daemon must already be running.</p>
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting <code>enabled: true</code> in the <a href="https://litestream.io/reference/config/#control-socket"><code>socket</code> block</a>
+of the configuration file.</p>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">💡</div>
   <div class="w-100">The <code>stop</code> command does not shut down the Litestream daemon. It pauses replication for a single database on an already-running daemon. To stop the daemon itself, terminate the <code>litestream replicate</code> process.</div>

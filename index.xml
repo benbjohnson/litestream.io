@@ -98,8 +98,8 @@ Install on macOS Install on Linux Build from source </description>
       
       <guid>https://litestream.io/reference/</guid>
       <description>The Litestream command line provides several subcommands to help you manage replication &amp;amp; recovery of your databases. This reference provides details about the options available and different modes of operation.
-Commands The litestream commands are:
-litestream databases — Lists databases specified in config file. litestream ltx — List available LTX files for a database. litestream replicate — Runs a server to replicate databases. litestream reset — Clears local Litestream state, forcing a fresh snapshot on the next sync.</description>
+Configuration File Configuration File — YAML file for defining databases, replicas, and global settings. Commands The litestream commands are:
+litestream databases — Lists databases specified in config file. litestream ltx — List available LTX files for a database. litestream replicate — Runs a server to replicate databases.</description>
     </item>
     
   </channel>

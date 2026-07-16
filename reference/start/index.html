@@ -21,8 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: start">
 <meta name="twitter:description" content="v0.5.7 The start command resumes replication for a database that was previously stopped via the stop command. The database must already be registered with the daemon.
-The start command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-💡 The start command is different from litestream replicate. Use replicate to launch the daemon process. Use start to resume replication for a specific database on an already-running daemon.">
+The start command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running with the control socket enabled. The socket is disabled by default; enable it by setting enabled: true in the socket block of the configuration file.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -234,7 +233,10 @@ The start command communicates with a running litestream replicate process over 
 database that was previously stopped via the <code>stop</code> command. The database must
 already be registered with the daemon.</p>
 <p>The <code>start</code> command communicates with a running <code>litestream replicate</code> process
-over the IPC control socket. The daemon must already be running.</p>
+over the IPC control socket. The daemon must already be running with the
+control socket enabled. The socket is disabled by default; enable it by
+setting <code>enabled: true</code> in the <a href="https://litestream.io/reference/config/#control-socket"><code>socket</code> block</a>
+of the configuration file.</p>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">💡</div>
   <div class="w-100">The <code>start</code> command is different from <code>litestream replicate</code>. Use <code>replicate</code> to launch the daemon process. Use <code>start</code> to resume replication for a specific database on an already-running daemon.</div>

@@ -219,6 +219,7 @@
     <li><a href="#run-once-mode">Run-once mode</a></li>
     <li><a href="#restore-if-the-database-does-not-exist">Restore if the database does not exist</a></li>
     <li><a href="#log-level">Log level</a></li>
+    <li><a href="#control-socket">Control socket</a></li>
     <li><a href="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -458,11 +459,26 @@ and overrides the <a href="https://litestream.io/reference/config/#logging"><cod
 configuration file. Valid values are <code>trace</code>, <code>debug</code>, <code>info</code>, <code>warn</code>, and
 <code>error</code>.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream replicate -log-level debug /var/lib/mydb.db s3://mybucket/mydb
-</span></span></code></pre></div><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
+</span></span></code></pre></div><h2 id="control-socket">Control socket<a href="#control-socket" class="anchor" aria-hidden="true">#</a> </h2>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.7">
+    v0.5.7
+</span>
+ The daemon can expose a Unix domain control
+socket that the daemon control commands (<a href="https://litestream.io/reference/info/"><code>info</code></a>,
+<a href="https://litestream.io/reference/list/"><code>list</code></a>, <a href="https://litestream.io/reference/sync/"><code>sync</code></a>, and others) and
+the local <a href="https://litestream.io/reference/ipc/">IPC endpoints</a> connect to. The socket is
+disabled by default. Enable it with a <code>socket</code> block in the configuration
+file:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">socket</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><p>See the <a href="https://litestream.io/reference/config/#control-socket"><code>socket</code> configuration</a> for the
+socket path and permission options.</p>
+<h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li><a href="/reference/start">Command: start</a> - Resume replication for a database on a running daemon</li>
 <li><a href="/reference/stop">Command: stop</a> - Pause replication for a database on a running daemon</li>
 <li><a href="/reference/config">Configuration Reference</a> - Complete configuration options</li>
+<li><a href="/reference/ipc">IPC Endpoints</a> - Unix socket endpoints for local status queries and profiling</li>
 <li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
 <li><a href="/getting-started">Getting Started</a> - Tutorial for setting up replication</li>
 </ul>
