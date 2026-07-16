@@ -97,8 +97,8 @@ Install on macOS Install on Debian Build from source </description>
       
       <guid>https://litestream.io/v0.3/reference/</guid>
       <description>The Litestream command line provides several subcommands to help you manage replication &amp;amp; recovery of your databases. This reference provides details about the options available and different modes of operation.
-Commands The litestream commands are:
-litestream databases — Lists databases specified in config file. litestream generations — list available generations for a database. litestream replicate — Runs a server to replicate databases. litestream restore — Recovers database backup from a replica.</description>
+Configuration File Configuration File — YAML file for defining databases, replicas, and global settings. Commands The litestream commands are:
+litestream databases — Lists databases specified in config file. litestream generations — list available generations for a database. litestream replicate — Runs a server to replicate databases.</description>
     </item>
     
   </channel>

@@ -20,9 +20,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="Command: replicate">
-<meta name="twitter:description" content="The replicate command starts a server to monitor &amp; continuously replicate SQLite databases. You can specify your database &amp; replica in a configuration file or you can replicate a single database file by specifying its path and its replica in the command line arguments.
-Usage Using a configuration file This command format will read all options from the configuration file. This is the recommended approach for production systems.
-litestream replicate [arguments] Replicate a single file (Command-line mode) This command format sets up replication for a single database file DB_PATH to a single replica URL without a configuration file.">
+<meta name="twitter:description" content="The replicate command starts a server to monitor &amp; continuously replicate SQLite databases. This is the Litestream daemon itself—the long-running process you launch directly or via your service manager. You can specify your database &amp; replica in a configuration file or you can replicate a single database file by specifying its path and its replica in the command line arguments.
+💡 The replicate command is different from the start and stop commands.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -230,9 +229,14 @@ litestream replicate [arguments] Replicate a single file (Command-line mode) Thi
 		<h1>Command: replicate</h1>
 			<p class="lead"></p>
 			<p>The <code>replicate</code> command starts a server to monitor &amp; continuously replicate
-SQLite databases. You can specify your database &amp; replica in a configuration
-file or you can replicate a single database file by specifying its path and its
-replica in the command line arguments.</p>
+SQLite databases. This is the Litestream daemon itself—the long-running process
+you launch directly or via your service manager. You can specify your database
+&amp; replica in a configuration file or you can replicate a single database file
+by specifying its path and its replica in the command line arguments.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100">The <code>replicate</code> command is different from the <code>start</code> and <code>stop</code> commands. Use <code>replicate</code> to launch the Litestream daemon process. The <code>start</code> and <code>stop</code> commands are client commands that resume or pause replication for a single database on an already-running daemon—they do not launch or shut down the daemon itself.</div>
+</div>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="using-a-configuration-file">Using a configuration file<a href="#using-a-configuration-file" class="anchor" aria-hidden="true">#</a> </h3>
 <p>This command format will read all options from the configuration file. This
@@ -456,6 +460,8 @@ configuration file. Valid values are <code>trace</code>, <code>debug</code>, <co
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream replicate -log-level debug /var/lib/mydb.db s3://mybucket/mydb
 </span></span></code></pre></div><h2 id="see-also">See Also<a href="#see-also" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
+<li><a href="/reference/start">Command: start</a> - Resume replication for a database on a running daemon</li>
+<li><a href="/reference/stop">Command: stop</a> - Pause replication for a database on a running daemon</li>
 <li><a href="/reference/config">Configuration Reference</a> - Complete configuration options</li>
 <li><a href="/docs/troubleshooting">Troubleshooting</a> - Common issues and solutions</li>
 <li><a href="/getting-started">Getting Started</a> - Tutorial for setting up replication</li>

@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Command: stop">
 <meta name="twitter:description" content="v0.5.7 The stop command pauses replication for a database without removing it from the daemon. The database remains registered and can be resumed with the start command. Before stopping, it performs a final sync to ensure all data is replicated.
 The stop command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-Usage litestream stop [arguments] DB_PATH Arguments -socket PATH Path to the control socket.">
+💡 The stop command does not shut down the Litestream daemon.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -236,6 +236,10 @@ and can be resumed with the <code>start</code> command. Before stopping, it perf
 final sync to ensure all data is replicated.</p>
 <p>The <code>stop</code> command communicates with a running <code>litestream replicate</code> process
 over the IPC control socket. The daemon must already be running.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100">The <code>stop</code> command does not shut down the Litestream daemon. It pauses replication for a single database on an already-running daemon. To stop the daemon itself, terminate the <code>litestream replicate</code> process.</div>
+</div>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>litestream stop [arguments] DB_PATH
 </code></pre><h2 id="arguments">Arguments<a href="#arguments" class="anchor" aria-hidden="true">#</a> </h2>

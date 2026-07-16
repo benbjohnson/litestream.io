@@ -217,6 +217,7 @@
         <li><a href="#changes-arent-being-replicated">Changes aren&rsquo;t being replicated</a></li>
       </ul>
     </li>
+    <li><a href="#a-note-on-replicate-vs-startstop">A note on <code>replicate</code> vs <code>start</code>/<code>stop</code></a></li>
     <li><a href="#further-reading">Further reading</a></li>
     <li><a href="#explore-further">Explore Further</a></li>
     <li><a href="#next-steps">Next Steps</a></li>
@@ -355,6 +356,38 @@ the <a href="/reference/config#minio-configuration">MinIO Configuration</a> sect
 </ul>
 <p>If using a config file, ensure credentials are correct and the file is being read
 by passing the <code>-config</code> flag to Litestream.</p>
+<h2 id="a-note-on-replicate-vs-startstop">A note on <code>replicate</code> vs <code>start</code>/<code>stop</code><a href="#a-note-on-replicate-vs-startstop" class="anchor" aria-hidden="true">#</a> </h2>
+<p>The <code>litestream replicate</code> command used above is what launches the <strong>Litestream
+daemon</strong>. It is the command you run (or configure your service manager to run)
+to begin replication, and it keeps replicating until the process exits.</p>
+<p>Litestream also has <a href="/reference/start"><code>start</code></a> and <a href="/reference/stop"><code>stop</code></a>
+commands, but they do something different—they are <strong>client commands</strong> that
+tell an already-running daemon to resume or pause replication for a single
+database. They do not launch or shut down the daemon itself, and they require
+the daemon&rsquo;s <a href="/reference/ipc">IPC control socket</a> to be enabled in the
+configuration file.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>litestream replicate</code></td>
+<td>Launches the Litestream daemon</td>
+</tr>
+<tr>
+<td><code>litestream start DB_PATH</code></td>
+<td>Tells a running daemon to resume replicating a database</td>
+</tr>
+<tr>
+<td><code>litestream stop DB_PATH</code></td>
+<td>Tells a running daemon to pause replicating a database</td>
+</tr>
+</tbody>
+</table>
 <h2 id="further-reading">Further reading<a href="#further-reading" class="anchor" aria-hidden="true">#</a> </h2>
 <p>Litestream was built to run as a background service that you don&rsquo;t need to worry
 about—it just replicates your database all the time. To run Litestream as a

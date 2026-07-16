@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Command: start">
 <meta name="twitter:description" content="v0.5.7 The start command resumes replication for a database that was previously stopped via the stop command. The database must already be registered with the daemon.
 The start command communicates with a running litestream replicate process over the IPC control socket. The daemon must already be running.
-💡 The `start` command is different from `litestream replicate`. Use `replicate` to launch the daemon process. Use `start` to resume replication for a specific database on an already-running daemon.">
+💡 The start command is different from litestream replicate. Use replicate to launch the daemon process. Use start to resume replication for a specific database on an already-running daemon.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -237,7 +237,7 @@ already be registered with the daemon.</p>
 over the IPC control socket. The daemon must already be running.</p>
 <div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">💡</div>
-  <div class="w-100">The `start` command is different from `litestream replicate`. Use `replicate` to launch the daemon process. Use `start` to resume replication for a specific database on an already-running daemon.</div>
+  <div class="w-100">The <code>start</code> command is different from <code>litestream replicate</code>. Use <code>replicate</code> to launch the daemon process. Use <code>start</code> to resume replication for a specific database on an already-running daemon.</div>
 </div>
 <h2 id="usage">Usage<a href="#usage" class="anchor" aria-hidden="true">#</a> </h2>
 <pre tabindex="0"><code>litestream start [arguments] DB_PATH
