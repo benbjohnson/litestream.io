@@ -60,6 +60,7 @@ dbs:
       user:     USER
       password: PASSWORD
       path:     PATH
+      host-key: HOSTKEY
 ```
 
 The `path` is treated as a relative path from the present working directory
@@ -128,6 +129,23 @@ dbs:
 
 The `concurrent-writes` option accepts `true` (default) or `false`.
 
+### Host Keys
+
+The `host-key` option specifies the expected public host key of the SFTP server.
+If not set, the key of the host will not be verified and instead a warning will be logged:
+
+> sftp host key not verified host=example.com
+
+You can obtain the host key by running
+> ssh-keyscan example.com
+
+Then set the value in your configuration:
+
+> sftp:
+>  host: example.com
+>  host-key: "ecdsa-sha2-nistp256 ..."
+
+If there is a `host-key` mismatch Litestream will abort with an error.
 
 ## See Also
 
