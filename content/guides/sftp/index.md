@@ -9,7 +9,10 @@ weight: 460
 ---
 
 This guide will show you how to use Litestream to replicate to a remote SFTP
-server. You will need to have an SFTP server already set up and running.
+server. You will need to have an SFTP server already set up and running. The
+overwhelmingly most common sftp server is [openssh](https://www.openssh.org/manual.html),
+which defaults to providing an sftp server whenever an ssh server is provided and
+is the most widely used ssh server and client.
 
 
 ## Usage
