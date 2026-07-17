@@ -16,6 +16,132 @@ Pre-built binaries are available in
 [GitHub releases](https://github.com/benbjohnson/litestream/releases).
 
 
+## Installation via package managers
+
+{{< since version="0.5.14" >}}
+
+The VFS extension is distributed as `litestream-vfs` through PyPI, npm, and
+RubyGems. These packages bundle the pre-built shared library for supported
+platforms, eliminating the need for manual downloads or CGO builds.
+
+**Supported platforms:**
+
+- `x86_64-linux` (Linux Intel/AMD 64-bit)
+- `aarch64-linux` (Linux ARM 64-bit)
+- `x86_64-darwin` (macOS Intel)
+- `arm64-darwin` (macOS Apple Silicon)
+
+### Python
+
+Install from PyPI:
+
+```sh
+pip install litestream-vfs
+```
+
+**API:**
+
+- `litestream_vfs.load(conn)` — Load the extension into a SQLite connection
+- `litestream_vfs.loadable_path()` — Return the path to the shared library
+
+**Example:**
+
+Set the replica URL in the shell before starting Python:
+
+```sh
+export LITESTREAM_REPLICA_URL=s3://mybucket/db
+```
+
+```python
+import sqlite3
+import litestream_vfs
+
+conn = sqlite3.connect(":memory:")
+litestream_vfs.load(conn)
+
+# Open a replica database
+conn.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica")
+```
+
+### Node.js
+
+Install from npm:
+
+```sh
+npm install litestream-vfs
+```
+
+The package uses `optionalDependencies` to install only the binary for your
+platform automatically.
+
+**API:**
+
+- `getLoadablePath()` — Return the path to the shared library
+
+**Example:**
+
+Set the replica URL in the shell before starting Node.js:
+
+```sh
+export LITESTREAM_REPLICA_URL=s3://mybucket/db
+```
+
+```javascript
+const Database = require('better-sqlite3');
+const { getLoadablePath } = require('litestream-vfs');
+
+const db = new Database(':memory:');
+db.loadExtension(getLoadablePath());
+
+// Open a replica database
+db.exec("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica");
+```
+
+### Ruby
+
+Install from RubyGems:
+
+```sh
+gem install litestream-vfs
+```
+
+Platform-specific gems are published for each supported platform.
+
+**API:**
+
+- `LitestreamVfs.load(db)` — Load the extension into a SQLite connection
+- `LitestreamVfs.loadable_path` — Return the path to the shared library
+
+**Example:**
+
+Set the replica URL in the shell before starting Ruby:
+
+```sh
+export LITESTREAM_REPLICA_URL=s3://mybucket/db
+```
+
+```ruby
+require 'sqlite3'
+require 'litestream_vfs'
+
+db = SQLite3::Database.new(':memory:')
+LitestreamVfs.load(db)
+
+# Open a replica database
+db.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica")
+```
+
+### Configuration
+
+Configure the replica location using environment variables as described in the
+[Configuration](#configuration-environment-variables) section below. The
+`LITESTREAM_REPLICA_URL` environment variable is required and must be set in the
+process environment **before your application starts** — the extension fails to
+initialize without it. Setting it from inside the process (e.g. `os.environ`,
+`process.env`, or `ENV`) is not reliably visible to the extension's embedded
+runtime, so export it in the shell or set it in your process manager instead.
+
+
 ## Build requirements
 
 - Go 1.25+ with a working CGO toolchain (gcc/clang).
