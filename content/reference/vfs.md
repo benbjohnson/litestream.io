@@ -18,7 +18,7 @@ Pre-built binaries are available in
 
 ## Installation via package managers
 
-{{< since version="0.5.10" >}}
+{{< since version="0.5.14" >}}
 
 The VFS extension is distributed as `litestream-vfs` through PyPI, npm, and
 RubyGems. These packages bundle the pre-built shared library for supported
@@ -46,13 +46,15 @@ pip install litestream-vfs
 
 **Example:**
 
+Set the replica URL in the shell before starting Python:
+
+```sh
+export LITESTREAM_REPLICA_URL=s3://mybucket/db
+```
+
 ```python
-import os
 import sqlite3
 import litestream_vfs
-
-# The replica URL must be set before loading the extension.
-os.environ["LITESTREAM_REPLICA_URL"] = "s3://mybucket/db"
 
 conn = sqlite3.connect(":memory:")
 litestream_vfs.load(conn)
@@ -78,12 +80,15 @@ platform automatically.
 
 **Example:**
 
+Set the replica URL in the shell before starting Node.js:
+
+```sh
+export LITESTREAM_REPLICA_URL=s3://mybucket/db
+```
+
 ```javascript
 const Database = require('better-sqlite3');
 const { getLoadablePath } = require('litestream-vfs');
-
-// The replica URL must be set before loading the extension.
-process.env.LITESTREAM_REPLICA_URL = 's3://mybucket/db';
 
 const db = new Database(':memory:');
 db.loadExtension(getLoadablePath());
@@ -109,12 +114,15 @@ Platform-specific gems are published for each supported platform.
 
 **Example:**
 
+Set the replica URL in the shell before starting Ruby:
+
+```sh
+export LITESTREAM_REPLICA_URL=s3://mybucket/db
+```
+
 ```ruby
 require 'sqlite3'
 require 'litestream_vfs'
-
-# The replica URL must be set before loading the extension.
-ENV['LITESTREAM_REPLICA_URL'] = 's3://mybucket/db'
 
 db = SQLite3::Database.new(':memory:')
 LitestreamVfs.load(db)
@@ -127,8 +135,11 @@ db.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica")
 
 Configure the replica location using environment variables as described in the
 [Configuration](#configuration-environment-variables) section below. The
-`LITESTREAM_REPLICA_URL` environment variable is required and must be set
-**before loading the extension** — the extension fails to initialize without it.
+`LITESTREAM_REPLICA_URL` environment variable is required and must be set in the
+process environment **before your application starts** — the extension fails to
+initialize without it. Setting it from inside the process (e.g. `os.environ`,
+`process.env`, or `ENV`) is not reliably visible to the extension's embedded
+runtime, so export it in the shell or set it in your process manager instead.
 
 
 ## Build requirements
