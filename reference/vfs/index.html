@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://litestream.io/images/twitter-image.png">
 <meta name="twitter:title" content="VFS Extension">
 <meta name="twitter:description" content="The Litestream VFS provides read-only access to a replicated SQLite database directly from object storage. It registers a VFS named litestream, fetches pages on-demand, and continuously polls the replica for new LTX files. The VFS is built separately from the main litestream binary and requires CGO. Pre-built binaries are available in GitHub releases.
-Build requirements Go 1.25&#43; with a working CGO toolchain (gcc/clang). Build with the VFS &amp; extension tags using the repository Makefile (handles platform flags): make vfs Manual Linux build: CGO_ENABLED=1 go build -tags &#34;vfs,SQLITE3VFS_LOADABLE_EXT&#34; -buildmode=c-archive -o dist/litestream-vfs.">
+Installation via package managers v0.5.14 The VFS extension is distributed as litestream-vfs through PyPI, npm, and RubyGems. These packages bundle the pre-built shared library for supported platforms, eliminating the need for manual downloads or CGO builds.">
 <meta name="twitter:site" content="@litestreamio">
 <meta name="twitter:creator" content="@benbjohnson">
 
@@ -205,6 +205,14 @@ Build requirements Go 1.25&#43; with a working CGO toolchain (gcc/clang). Build 
     <h3>On this page</h3>
     <nav id="TableOfContents">
   <ul>
+    <li><a href="#installation-via-package-managers">Installation via package managers</a>
+      <ul>
+        <li><a href="#python">Python</a></li>
+        <li><a href="#nodejs">Node.js</a></li>
+        <li><a href="#ruby">Ruby</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+      </ul>
+    </li>
     <li><a href="#build-requirements">Build requirements</a></li>
     <li><a href="#supported-storage-backends">Supported storage backends</a></li>
     <li><a href="#vfs-registration--usage">VFS registration &amp; usage</a></li>
@@ -245,6 +253,88 @@ pages on-demand, and continuously polls the replica for new LTX files. The VFS
 is built separately from the main <code>litestream</code> binary and requires CGO.
 Pre-built binaries are available in
 <a href="https://github.com/benbjohnson/litestream/releases">GitHub releases</a>.</p>
+<h2 id="installation-via-package-managers">Installation via package managers<a href="#installation-via-package-managers" class="anchor" aria-hidden="true">#</a> </h2>
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.14">
+    v0.5.14
+</span>
+
+<p>The VFS extension is distributed as <code>litestream-vfs</code> through PyPI, npm, and
+RubyGems. These packages bundle the pre-built shared library for supported
+platforms, eliminating the need for manual downloads or CGO builds.</p>
+<p><strong>Supported platforms:</strong></p>
+<ul>
+<li><code>x86_64-linux</code> (Linux Intel/AMD 64-bit)</li>
+<li><code>aarch64-linux</code> (Linux ARM 64-bit)</li>
+<li><code>x86_64-darwin</code> (macOS Intel)</li>
+<li><code>arm64-darwin</code> (macOS Apple Silicon)</li>
+</ul>
+<h3 id="python">Python<a href="#python" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Install from PyPI:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">pip install litestream-vfs
+</span></span></code></pre></div><p><strong>API:</strong></p>
+<ul>
+<li><code>litestream_vfs.load(conn)</code> — Load the extension into a SQLite connection</li>
+<li><code>litestream_vfs.loadable_path()</code> — Return the path to the shared library</li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>Set the replica URL in the shell before starting Python:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span>s3://mybucket/db
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sqlite3</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">litestream_vfs</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&#34;:memory:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">litestream_vfs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Open a replica database</span>
+</span></span><span class="line"><span class="cl"><span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&#34;ATTACH DATABASE &#39;file:replica.db?vfs=litestream&#39; AS replica&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><h3 id="nodejs">Node.js<a href="#nodejs" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Install from npm:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">npm install litestream-vfs
+</span></span></code></pre></div><p>The package uses <code>optionalDependencies</code> to install only the binary for your
+platform automatically.</p>
+<p><strong>API:</strong></p>
+<ul>
+<li><code>getLoadablePath()</code> — Return the path to the shared library</li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>Set the replica URL in the shell before starting Node.js:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span>s3://mybucket/db
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">Database</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;better-sqlite3&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="p">{</span> <span class="nx">getLoadablePath</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;litestream-vfs&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Database</span><span class="p">(</span><span class="s1">&#39;:memory:&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nx">db</span><span class="p">.</span><span class="nx">loadExtension</span><span class="p">(</span><span class="nx">getLoadablePath</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Open a replica database
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">db</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="s2">&#34;ATTACH DATABASE &#39;file:replica.db?vfs=litestream&#39; AS replica&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><h3 id="ruby">Ruby<a href="#ruby" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Install from RubyGems:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">gem install litestream-vfs
+</span></span></code></pre></div><p>Platform-specific gems are published for each supported platform.</p>
+<p><strong>API:</strong></p>
+<ul>
+<li><code>LitestreamVfs.load(db)</code> — Load the extension into a SQLite connection</li>
+<li><code>LitestreamVfs.loadable_path</code> — Return the path to the shared library</li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>Set the replica URL in the shell before starting Ruby:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">LITESTREAM_REPLICA_URL</span><span class="o">=</span>s3://mybucket/db
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ruby" data-lang="ruby"><span class="line"><span class="cl"><span class="nb">require</span> <span class="s1">&#39;sqlite3&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">require</span> <span class="s1">&#39;litestream_vfs&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">db</span> <span class="o">=</span> <span class="no">SQLite3</span><span class="o">::</span><span class="no">Database</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;:memory:&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="no">LitestreamVfs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Open a replica database</span>
+</span></span><span class="line"><span class="cl"><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&#34;ATTACH DATABASE &#39;file:replica.db?vfs=litestream&#39; AS replica&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><h3 id="configuration">Configuration<a href="#configuration" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Configure the replica location using environment variables as described in the
+<a href="#configuration-environment-variables">Configuration</a> section below. The
+<code>LITESTREAM_REPLICA_URL</code> environment variable is required and must be set in the
+process environment <strong>before your application starts</strong> — the extension fails to
+initialize without it. Setting it from inside the process (e.g. <code>os.environ</code>,
+<code>process.env</code>, or <code>ENV</code>) is not reliably visible to the extension&rsquo;s embedded
+runtime, so export it in the shell or set it in your process manager instead.</p>
 <h2 id="build-requirements">Build requirements<a href="#build-requirements" class="anchor" aria-hidden="true">#</a> </h2>
 <ul>
 <li>Go 1.25+ with a working CGO toolchain (gcc/clang).</li>
