@@ -77,6 +77,13 @@ These settings apply to all replica types:
 |---------|-------------|---------|
 | `sync-interval` | How often to push frames to replica | `1s` |
 | `validation-interval` | How often to validate replica integrity | disabled |
+| `max-sync-ltx-files` | Maximum L0 LTX files uploaded per background monitor sync run (`0` uploads all pending files in one run) | `256` |
+
+{{< since version="0.5.15" >}} `max-sync-ltx-files` is inherited by every replica unless a replica sets
+its own value. The cap applies only to the periodic monitor loop; a manual
+`litestream sync` and the final sync on shutdown always upload all pending
+files. See the [Configuration Reference](/reference/config#replica-settings)
+for details.
 
 Note: Snapshot and retention settings (`snapshot.interval`, `snapshot.retention`)
 are configured separately at the top level under the `snapshot:` section. Since

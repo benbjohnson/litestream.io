@@ -477,6 +477,7 @@ Each database supports the following configuration options:
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
 - `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
 - `truncate-page-n`—{{< since version="0.5.3" >}} Emergency threshold for the TRUNCATE checkpoint (default: `121359`, ~500MB). {{< since version="0.5.15" >}} When the WAL crosses this threshold Litestream first attempts a non-blocking PASSIVE checkpoint and only forces a blocking TRUNCATE (which blocks both readers and writers) when that passive checkpoint does not bring the WAL back below the threshold. This setting therefore bounds WAL *growth*: after a passive restart the physical `-wal` file may keep its high-water size on disk rather than shrinking. Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
+- `max-sync-wal-bytes`—{{< since version="0.5.15" >}} Soft limit on the number of WAL bytes Litestream processes in a single incremental sync pass (default: `67108864`, 64MB). When the pending WAL is larger than this limit, Litestream splits the catch-up across successive passes instead of buffering the whole WAL at once. The limit is only evaluated at transaction (commit) boundaries, so a single transaction larger than this value is still processed in full, and it is not applied while taking an initial or recovery snapshot. Set to `0` to process the entire pending WAL in a single pass.
 - `restore-if-db-not-exists`—{{< since version="0.5.6" >}} When `true`, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to `false`. This is also available as the `-restore-if-db-not-exists` flag on the [`replicate`]({{< ref "replicate" >}}) command.
 - `snapshot`—{{< since version="0.5.12" >}} Per-database `interval` and `retention` for snapshots. See [Per-database snapshot settings](#per-database-snapshot-settings) below for the promotion semantics.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
@@ -723,6 +724,16 @@ The following replica settings are available for all replica types:
   automatically resets local state when LTX errors are detected during
   replication. This triggers the same recovery as running
   [`litestream reset`]({{< ref "reset" >}}) manually. Defaults to `false`.
+
+- `max-sync-ltx-files`—{{< since version="0.5.15" >}} Maximum number of L0 LTX files uploaded in a single
+  background monitor sync run (default: `256`). When more than this many files are pending, the monitor loop
+  uploads them across successive runs. This cap applies only to the periodic
+  monitor loop; a manual [`litestream sync`]({{< ref "sync" >}}) and the final
+  sync performed on shutdown always upload all pending files regardless of this
+  value. Set to `0` to upload all pending L0 files in one run. This is a global
+  replica setting, so it can be set at the top level of the configuration to
+  apply to every replica or overridden per-replica. See
+  [Global Replica Defaults](/guides/global-defaults) for inheritance rules.
 
 ### Auto-recover
 
