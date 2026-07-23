@@ -217,6 +217,7 @@ Database Metrics These metrics track the state and operations of each replicated
         <li><a href="#litestream_sync_count">litestream_sync_count</a></li>
         <li><a href="#litestream_sync_error_count">litestream_sync_error_count</a></li>
         <li><a href="#litestream_sync_seconds">litestream_sync_seconds</a></li>
+        <li><a href="#litestream_disk_full">litestream_disk_full</a></li>
         <li><a href="#litestream_checkpoint_count">litestream_checkpoint_count</a></li>
         <li><a href="#litestream_checkpoint_error_count">litestream_checkpoint_error_count</a></li>
         <li><a href="#litestream_checkpoint_seconds">litestream_checkpoint_seconds</a></li>
@@ -295,6 +296,17 @@ non-zero growth indicates issues with the sync process.</p>
 <p>Cumulative time spent syncing shadow WAL, in seconds. Divide by <code>litestream_sync_count</code>
 to get average sync duration.</p>
 <pre tabindex="0"><code>litestream_sync_seconds{db=&#34;/var/lib/myapp.db&#34;} 0.523
+</code></pre><h3 id="litestream_disk_full">litestream_disk_full<a href="#litestream_disk_full" class="anchor" aria-hidden="true">#</a> </h3>
+<p><strong>Type:</strong> Gauge</p>
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
+    v0.5.15
+</span>
+
+<p>Whether replication is paused because the local disk is full. Set to <code>1</code> when a
+sync fails with a disk-full error while staging an LTX file, and reset to <code>0</code> on
+the next sync that completes without a disk-full error. Use this as an alerting
+target for the disk-full staging wedge.</p>
+<pre tabindex="0"><code>litestream_disk_full{db=&#34;/var/lib/myapp.db&#34;} 0
 </code></pre><h3 id="litestream_checkpoint_count">litestream_checkpoint_count<a href="#litestream_checkpoint_count" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter
 <strong>Labels:</strong> <code>db</code>, <code>mode</code></p>
