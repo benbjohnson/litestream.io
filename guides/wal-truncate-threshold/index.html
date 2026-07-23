@@ -260,7 +260,7 @@ Background SQLite&rsquo;s WAL (write-ahead log) grows as database pages are modi
 <p>SQLite&rsquo;s WAL (write-ahead log) grows as database pages are modified. To prevent unbounded growth, the WAL must be periodically truncated through checkpointing. However, aggressive checkpointing can block database writes when read transactions are active.</p>
 <p>Litestream uses a carefully designed 3-tier checkpoint strategy that balances WAL size management with write availability:</p>
 <ol>
-<li><strong>Emergency truncation</strong> (checked first) prevents unbounded WAL growth at a high threshold (~500MB), but will block writers and readers when triggered</li>
+<li><strong>Emergency truncation</strong> (checked first) prevents unbounded WAL growth at a high threshold (~500MB); it tries a non-blocking checkpoint first and blocks writers and readers only when a TRUNCATE must be forced</li>
 <li><strong>Non-blocking checkpoints</strong> run frequently to keep WAL small under normal operation (~4MB), never blocking the application</li>
 <li><strong>Time-based checkpoints</strong> provide regular cleanup even when WAL is small, also non-blocking</li>
 </ol>
@@ -271,12 +271,18 @@ Background SQLite&rsquo;s WAL (write-ahead log) grows as database pages are modi
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">truncate-page-n: 121359  # Default</span><span class="p">:</span><span class="w"> </span><span class="l">~500MB</span><span class="w">
 </span></span></span></code></pre></div><ul>
 <li><strong>Trigger:</strong> WAL exceeds 121,359 pages (~500MB)</li>
-<li><strong>Mode:</strong> TRUNCATE checkpoint via <code>sqlite3_wal_checkpoint_v2()</code></li>
-<li><strong>Behavior:</strong> <strong>Blocking</strong>—waits for all active writers AND readers to complete before truncating WAL</li>
+<li><strong>Mode:</strong> Attempts a PASSIVE checkpoint first, then falls back to a TRUNCATE checkpoint via <code>sqlite3_wal_checkpoint_v2()</code> only when that passive checkpoint does not bring the WAL back below the threshold (see <a href="#passive-first-truncation">Passive-first truncation</a> below)</li>
+<li><strong>Behavior:</strong> Non-blocking when the passive checkpoint restarts the WAL below the threshold; <strong>blocking</strong> only when a genuine TRUNCATE is forced, which waits for all active writers AND readers to complete</li>
 <li><strong>Purpose:</strong> Emergency brake to prevent unbounded WAL growth</li>
 <li><strong>Priority:</strong> Checked first to prevent runaway WAL growth</li>
-<li><strong>Important:</strong> Inherits RESTART semantics from SQLite, meaning both readers and writers can block this checkpoint</li>
 </ul>
+<h4 id="passive-first-truncation">Passive-first truncation<a href="#passive-first-truncation" class="anchor" aria-hidden="true">#</a> </h4>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
+    v0.5.15
+</span>
+ Crossing the <code>truncate-page-n</code> threshold no longer forces a blocking checkpoint immediately. Litestream first attempts a <strong>PASSIVE checkpoint</strong>. If that restarts the WAL and brings the synced offset back below the threshold, the blocking TRUNCATE—and its mandatory boundary snapshot—is skipped entirely.</p>
+<p>Because a passive restart does not truncate the physical <code>-wal</code> file, the file <strong>retains its high-water size on disk</strong> even though the WAL has logically restarted from the beginning. In other words, <code>truncate-page-n</code> bounds WAL <em>growth</em> rather than guaranteeing the <code>-wal</code> file shrinks: disk usage stays roughly bounded to the threshold plus catch-up overshoot.</p>
+<p>A genuine blocking TRUNCATE runs only when the passive checkpoint does not bring the WAL back below the threshold—for example, when a long-lived reader keeps the WAL open so it cannot be restarted. When a TRUNCATE is forced, it always takes a full boundary snapshot while holding the write lock, which can stall writers on a large database (see <a href="https://github.com/benbjohnson/litestream/issues/1332">benbjohnson/litestream#1332</a>).</p>
 <h3 id="2-mincheckpointpagen-passive-non-blocking">2. MinCheckpointPageN (PASSIVE, Non-Blocking)<a href="#2-mincheckpointpagen-passive-non-blocking" class="anchor" aria-hidden="true">#</a> </h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">min-checkpoint-page-count: 1000  # Default</span><span class="p">:</span><span class="w"> </span><span class="l">~4MB</span><span class="w">
 </span></span></span></code></pre></div><ul>
@@ -474,9 +480,18 @@ Background SQLite&rsquo;s WAL (write-ahead log) grows as database pages are modi
 <li>Blocking occurs when TRUNCATE checkpoint waits for active readers and writers</li>
 </ul>
 <p><strong>Log Messages:</strong></p>
-<pre tabindex="0"><code>checkpoint truncate: pages=121359 mode=TRUNCATE
-</code></pre><p><strong>Root Cause:</strong>
-TRUNCATE checkpoints inherit RESTART semantics from SQLite, meaning they wait for both all active readers AND writers to complete before truncating the WAL. Long-lived read transactions will cause extended blocking periods.</p>
+<p>When the WAL crosses the <code>truncate-page-n</code> threshold, Litestream logs one of two lines:</p>
+<pre tabindex="0"><code># Skip case: the passive checkpoint restarted the WAL and dropped the
+# synced offset below the threshold, so the blocking truncate was skipped.
+wal restarted by passive checkpoint, skipping truncate checkpoint wal_size=... threshold=...
+
+# Fallback: the passive checkpoint did not restart the WAL, or the synced
+# offset stayed at/above the threshold (e.g. a long-lived reader), so a
+# blocking TRUNCATE was forced.
+forcing truncate checkpoint wal_size=... threshold=...
+</code></pre><p>Only <code>forcing truncate checkpoint</code> indicates a blocking checkpoint that can stall writers and readers.</p>
+<p><strong>Root Cause:</strong>
+A forced TRUNCATE checkpoint inherits RESTART semantics from SQLite, meaning it waits for both all active readers AND writers to complete before truncating the WAL. Long-lived read transactions will cause extended blocking periods.</p>
 <p><strong>Solutions:</strong></p>
 <ol>
 <li>Increase <code>truncate-page-n</code> threshold: <code>truncate-page-n: 250000</code></li>

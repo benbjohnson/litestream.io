@@ -708,7 +708,10 @@ valid with <code>dir:</code>, not a single <code>path:</code>. See
 <li><code>truncate-page-n</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
     v0.5.3
 </span>
- Emergency threshold for TRUNCATE checkpoint (default: <code>121359</code>, ~500MB, <strong>blocks both readers and writers</strong>). Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
+ Emergency threshold for the TRUNCATE checkpoint (default: <code>121359</code>, ~500MB). <span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
+    v0.5.15
+</span>
+ When the WAL crosses this threshold Litestream first attempts a non-blocking PASSIVE checkpoint and only forces a blocking TRUNCATE (which blocks both readers and writers) when that passive checkpoint does not bring the WAL back below the threshold. This setting therefore bounds WAL <em>growth</em>: after a passive restart the physical <code>-wal</code> file may keep its high-water size on disk rather than shrinking. Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
 <li><code>restore-if-db-not-exists</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
     v0.5.6
 </span>
