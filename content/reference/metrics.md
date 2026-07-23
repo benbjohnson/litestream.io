@@ -116,13 +116,12 @@ litestream_sync_seconds{db="/var/lib/myapp.db"} 0.523
 
 **Type:** Gauge
 
-<!-- TODO(since): this metric ships in the release after v0.5.14 (benbjohnson/litestream#1322). Once that version is tagged, replace the "next release after v0.5.14" wording below with the version number. -->
+{{< since version="0.5.15" >}}
 
 Whether replication is paused because the local disk is full. Set to `1` when a
 sync fails with a disk-full error while staging an LTX file, and reset to `0` on
 the next sync that completes without a disk-full error. Use this as an alerting
-target for the disk-full staging wedge. Available in the next release after
-v0.5.14.
+target for the disk-full staging wedge.
 
 ```
 litestream_disk_full{db="/var/lib/myapp.db"} 0
