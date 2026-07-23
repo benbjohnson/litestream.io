@@ -40,9 +40,7 @@ truncate-page-n: 121359  # Default: ~500MB
 
 #### Passive-first truncation
 
-<!-- TODO(since): once the release after v0.5.14 ships benbjohnson/litestream#1292, add a "since" version shortcode (version set to that release) to the paragraph below and replace the "next release after v0.5.14" wording with the version number. Do not write the shortcode syntax inside a comment: Hugo still expands it. -->
-
-Starting in the next release after v0.5.14, crossing the `truncate-page-n` threshold no longer forces a blocking checkpoint immediately. Litestream first attempts a **PASSIVE checkpoint**. If that restarts the WAL and brings the synced offset back below the threshold, the blocking TRUNCATE—and its mandatory boundary snapshot—is skipped entirely.
+{{< since version="0.5.15" >}} Crossing the `truncate-page-n` threshold no longer forces a blocking checkpoint immediately. Litestream first attempts a **PASSIVE checkpoint**. If that restarts the WAL and brings the synced offset back below the threshold, the blocking TRUNCATE—and its mandatory boundary snapshot—is skipped entirely.
 
 Because a passive restart does not truncate the physical `-wal` file, the file **retains its high-water size on disk** even though the WAL has logically restarted from the beginning. In other words, `truncate-page-n` bounds WAL *growth* rather than guaranteeing the `-wal` file shrinks: disk usage stays roughly bounded to the threshold plus catch-up overshoot.
 
