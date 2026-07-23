@@ -712,6 +712,10 @@ valid with <code>dir:</code>, not a single <code>path:</code>. See
     v0.5.15
 </span>
  When the WAL crosses this threshold Litestream first attempts a non-blocking PASSIVE checkpoint and only forces a blocking TRUNCATE (which blocks both readers and writers) when that passive checkpoint does not bring the WAL back below the threshold. This setting therefore bounds WAL <em>growth</em>: after a passive restart the physical <code>-wal</code> file may keep its high-water size on disk rather than shrinking. Set to <code>0</code> to disable. See the <a href="/guides/wal-truncate-threshold">WAL Truncate Threshold Guide</a> for details.</li>
+<li><code>max-sync-wal-bytes</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
+    v0.5.15
+</span>
+ Soft limit on the number of WAL bytes Litestream processes in a single incremental sync pass (default: <code>67108864</code>, 64MB). When the pending WAL is larger than this limit, Litestream splits the catch-up across successive passes instead of buffering the whole WAL at once. The limit is only evaluated at transaction (commit) boundaries, so a single transaction larger than this value is still processed in full, and it is not applied while taking an initial or recovery snapshot. Set to <code>0</code> to process the entire pending WAL in a single pass.</li>
 <li><code>restore-if-db-not-exists</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
     v0.5.6
 </span>
@@ -974,6 +978,20 @@ increase cloud storage costs due to more frequent PUT requests. See the
 automatically resets local state when LTX errors are detected during
 replication. This triggers the same recovery as running
 <a href="https://litestream.io/reference/reset/"><code>litestream reset</code></a> manually. Defaults to <code>false</code>.</p>
+</li>
+<li>
+<p><code>max-sync-ltx-files</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
+    v0.5.15
+</span>
+ Maximum number of L0 LTX files uploaded in a single
+background monitor sync run (default: <code>256</code>). When more than this many files are pending, the monitor loop
+uploads them across successive runs. This cap applies only to the periodic
+monitor loop; a manual <a href="https://litestream.io/reference/sync/"><code>litestream sync</code></a> and the final
+sync performed on shutdown always upload all pending files regardless of this
+value. Set to <code>0</code> to upload all pending L0 files in one run. This is a global
+replica setting, so it can be set at the top level of the configuration to
+apply to every replica or overridden per-replica. See
+<a href="/guides/global-defaults">Global Replica Defaults</a> for inheritance rules.</p>
 </li>
 </ul>
 <h3 id="auto-recover">Auto-recover<a href="#auto-recover" class="anchor" aria-hidden="true">#</a> </h3>

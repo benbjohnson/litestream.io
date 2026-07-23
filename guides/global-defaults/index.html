@@ -324,8 +324,21 @@ to replicas where they are relevant.</p>
 <td>How often to validate replica integrity</td>
 <td>disabled</td>
 </tr>
+<tr>
+<td><code>max-sync-ltx-files</code></td>
+<td>Maximum L0 LTX files uploaded per background monitor sync run (<code>0</code> uploads all pending files in one run)</td>
+<td><code>256</code></td>
+</tr>
 </tbody>
 </table>
+<p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
+    v0.5.15
+</span>
+ <code>max-sync-ltx-files</code> is inherited by every replica unless a replica sets
+its own value. The cap applies only to the periodic monitor loop; a manual
+<code>litestream sync</code> and the final sync on shutdown always upload all pending
+files. See the <a href="/reference/config#replica-settings">Configuration Reference</a>
+for details.</p>
 <p>Note: Snapshot and retention settings (<code>snapshot.interval</code>, <code>snapshot.retention</code>)
 are configured separately at the top level under the <code>snapshot:</code> section. Since
 v0.5.12 you can also set <code>snapshot.interval</code>/<code>snapshot.retention</code> on an individual
