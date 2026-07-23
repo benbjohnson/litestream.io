@@ -476,7 +476,7 @@ Each database supports the following configuration options:
 - `checkpoint-interval`—How often to perform WAL checkpoints using PASSIVE mode (default: `1m`, non-blocking)
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
 - `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
-- `truncate-page-n`—{{< since version="0.5.3" >}} Emergency threshold for TRUNCATE checkpoint (default: `121359`, ~500MB, **blocks both readers and writers**). Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
+- `truncate-page-n`—{{< since version="0.5.3" >}} Emergency threshold for the TRUNCATE checkpoint (default: `121359`, ~500MB). {{< since version="0.5.15" >}} When the WAL crosses this threshold Litestream first attempts a non-blocking PASSIVE checkpoint and only forces a blocking TRUNCATE (which blocks both readers and writers) when that passive checkpoint does not bring the WAL back below the threshold. This setting therefore bounds WAL *growth*: after a passive restart the physical `-wal` file may keep its high-water size on disk rather than shrinking. Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
 - `restore-if-db-not-exists`—{{< since version="0.5.6" >}} When `true`, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to `false`. This is also available as the `-restore-if-db-not-exists` flag on the [`replicate`]({{< ref "replicate" >}}) command.
 - `snapshot`—{{< since version="0.5.12" >}} Per-database `interval` and `retention` for snapshots. See [Per-database snapshot settings](#per-database-snapshot-settings) below for the promotion semantics.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
@@ -1458,8 +1458,8 @@ mean more frequent requests when changes occur.
 - `sync-interval: 10s` with constant writes: ~259,200 requests/month = **$1.30/month**  
 - `sync-interval: 1m` with constant writes: ~43,200 requests/month = **$0.22/month**
 
-_Note: Actual costs depend on your database write patterns. Litestream batches
-writes by time interval, so costs scale with write frequency._
+*Note: Actual costs depend on your database write patterns. Litestream batches
+writes by time interval, so costs scale with write frequency.*
 
 ### Storage vs Request Costs
 
