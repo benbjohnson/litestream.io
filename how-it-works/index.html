@@ -275,7 +275,9 @@ default.</li>
 while older history is consolidated into fewer, larger files. Compaction
 intervals and snapshot frequency are configurable—see the
 <a href="/reference/config">Configuration Reference</a> for details, and the
-<a href="/reference/ltx"><code>ltx</code> command</a> for inspecting files at each level.</p>
+<a href="/reference/ltx"><code>ltx</code> command</a> for inspecting files at each level. The
+<a href="/reference/config#compaction-levels">Compaction levels</a> and
+<a href="/reference/config#snapshots">Snapshots</a> sections cover the intervals directly.</p>
 <h2 id="restoring-a-database">Restoring a database<a href="#restoring-a-database" class="anchor" aria-hidden="true">#</a> </h2>
 <p>To restore a database, Litestream fetches the most recent snapshot that does not
 overshoot the requested restore point and then applies each subsequent LTX file

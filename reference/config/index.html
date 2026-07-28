@@ -221,6 +221,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
         <li><a href="#logging">Logging</a></li>
         <li><a href="#compaction-levels">Compaction levels</a></li>
+        <li><a href="#snapshots">Snapshots</a></li>
         <li><a href="#l0-retention">L0 Retention</a></li>
         <li><a href="#compaction-verification">Compaction verification</a></li>
         <li><a href="#heartbeat-monitoring">Heartbeat monitoring</a></li>
@@ -264,6 +265,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#provider-specific-considerations">Provider-Specific Considerations</a></li>
       </ul>
     </li>
+    <li><a href="#configuration-defaults">Configuration defaults</a></li>
     <li><a href="#complete-configuration-example">Complete Configuration Example</a></li>
     <li><a href="#migration-from-v03x">Migration from v0.3.x</a></li>
   </ul>
@@ -555,7 +557,7 @@ eight entries. A ninth entry fails at startup with:</p>
 </code></pre><p><strong>L9 is the snapshot level and is configured by <code>snapshot.interval</code>.</strong> It holds
 full snapshots rather than incremental compactions, so it is not part of
 <code>levels:</code> and cannot be added as a ninth entry. Its interval comes from the
-global <a href="#complete-configuration-example"><code>snapshot.interval</code></a> setting, which
+global <a href="#snapshots"><code>snapshot.interval</code></a> setting, which
 defaults to <code>24h</code>. Litestream starts a level 9 monitor whenever background
 compaction monitoring is enabled, which is the default for <code>litestream replicate</code>. That is why startup logs show a level 9 even though no entry in
 <code>levels:</code> produced it.</p>
@@ -589,6 +591,28 @@ pass finishes. Every attempt therefore lands a little after its boundary, by
 roughly the duration of the previous pass. That lag is normally milliseconds,
 but a slow pass makes it larger. Each iteration recomputes its target from the
 grid, so the lag does not accumulate.</p>
+<h3 id="snapshots">Snapshots<a href="#snapshots" class="anchor" aria-hidden="true">#</a> </h3>
+<p>A snapshot is a full copy of the database, stored at compaction level 9. The
+other levels hold incremental compactions; see
+<a href="#compaction-levels">Compaction levels</a>. The global <code>snapshot</code> block controls
+how often Litestream takes a snapshot and how long it keeps one.</p>
+<p>The defaults are shown below:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li><code>interval</code>—How often Litestream takes a full snapshot. Defaults to <code>24h</code>.</li>
+<li><code>retention</code>—How long Litestream keeps snapshots and their associated LTX files
+before retention enforcement removes them. Defaults to <code>24h</code>.</li>
+</ul>
+<p>Snapshot settings are global and apply to every database in the configuration.
+<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
+    v0.5.12
+</span>
+ You can also set them on an individual database,
+but those values are promoted to the global configuration rather than applied
+per-database. See <a href="#per-database-snapshot-settings">Per-database snapshot
+settings</a> for the promotion and conflict rules.</p>
 <h3 id="l0-retention">L0 Retention<a href="#l0-retention" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
     v0.5.3
@@ -799,7 +823,7 @@ valid with <code>dir:</code>, not a single <code>path:</code>. See
 <li><code>max-sync-wal-bytes</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.15">
     v0.5.15
 </span>
- Soft limit on the number of WAL bytes Litestream processes in a single incremental sync pass (default: <code>67108864</code>, 64MB). When the pending WAL is larger than this limit, Litestream splits the catch-up across successive passes instead of buffering the whole WAL at once. The limit is only evaluated at transaction (commit) boundaries, so a single transaction larger than this value is still processed in full, and it is not applied while taking an initial or recovery snapshot. Set to <code>0</code> to process the entire pending WAL in a single pass.</li>
+ Soft limit on the number of WAL bytes Litestream processes in a single incremental sync pass (default: <code>67108864</code>, 64 MiB). When the pending WAL is larger than this limit, Litestream splits the catch-up across successive passes instead of buffering the whole WAL at once. The limit is only evaluated at transaction (commit) boundaries, so a single transaction larger than this value is still processed in full, and it is not applied while taking an initial or recovery snapshot. Set to <code>0</code> to process the entire pending WAL in a single pass.</li>
 <li><code>restore-if-db-not-exists</code>—<span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.6">
     v0.5.6
 </span>
@@ -832,7 +856,7 @@ database level:</p>
 </span></span></span></code></pre></div><p>The promotion and conflict rules are:</p>
 <ul>
 <li>A database-level <code>snapshot.interval</code> or <code>snapshot.retention</code> is promoted to the
-global <a href="#complete-configuration-example"><code>snapshot</code></a> configuration <strong>unless</strong> the
+global <a href="#snapshots"><code>snapshot</code></a> configuration <strong>unless</strong> the
 global <code>snapshot</code> block explicitly sets that field.</li>
 <li>An explicit global value always wins over a database-level value.</li>
 <li>If two databases set <strong>different</strong> values for the same field, Litestream fails
@@ -1732,8 +1756,8 @@ cross-region replication features or multiple Litestream instances.</p>
 LTX page updates. These updates take up space so new snapshots are created and
 old LTX files are dropped through a process called &ldquo;retention&rdquo;.</p>
 <p>Retention is controlled globally via the <code>snapshot.retention</code> field in the root
-configuration, not per-replica. See the <a href="#complete-configuration-example">Complete Configuration Example</a>
-section for an example of how to configure snapshot settings.</p>
+configuration, not per-replica. It defaults to <code>24h</code>. See the
+<a href="#snapshots">Snapshots</a> section for the full set of snapshot settings.</p>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.12">
     v0.5.12
 </span>
@@ -1879,8 +1903,197 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 <li><strong>MinIO/Self-hosted</strong>: Only infrastructure costs</li>
 </ul>
 <p>Always consult your provider&rsquo;s current pricing documentation for accurate estimates.</p>
+<h2 id="configuration-defaults">Configuration defaults<a href="#configuration-defaults" class="anchor" aria-hidden="true">#</a> </h2>
+<p>Every option below is optional. The tables collect the effective defaults for the
+most commonly set options; see each option&rsquo;s own section for the full
+description.</p>
+<p><strong>Global settings:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addr</code></td>
+<td>disabled</td>
+<td><a href="#metrics">Metrics</a></td>
+</tr>
+<tr>
+<td><code>mcp-addr</code></td>
+<td>disabled</td>
+<td><a href="#mcp-model-context-protocol">MCP</a></td>
+</tr>
+<tr>
+<td><code>levels</code></td>
+<td><code>30s</code>, <code>5m</code>, <code>1h</code> (L1–L3)</td>
+<td><a href="#compaction-levels">Compaction levels</a></td>
+</tr>
+<tr>
+<td><code>snapshot.interval</code></td>
+<td><code>24h</code></td>
+<td><a href="#snapshots">Snapshots</a></td>
+</tr>
+<tr>
+<td><code>snapshot.retention</code></td>
+<td><code>24h</code></td>
+<td><a href="#snapshots">Snapshots</a></td>
+</tr>
+<tr>
+<td><code>retention.enabled</code></td>
+<td><code>true</code></td>
+<td><a href="#retention">Retention</a></td>
+</tr>
+<tr>
+<td><code>validation.interval</code></td>
+<td>disabled</td>
+<td><a href="#validation">Validation</a></td>
+</tr>
+<tr>
+<td><code>l0-retention</code></td>
+<td><code>5m</code></td>
+<td><a href="#l0-retention">L0 Retention</a></td>
+</tr>
+<tr>
+<td><code>l0-retention-check-interval</code></td>
+<td><code>15s</code></td>
+<td><a href="#l0-retention">L0 Retention</a></td>
+</tr>
+<tr>
+<td><code>verify-compaction</code></td>
+<td><code>false</code></td>
+<td><a href="#compaction-verification">Compaction verification</a></td>
+</tr>
+<tr>
+<td><code>heartbeat-url</code></td>
+<td>empty (disabled)</td>
+<td><a href="#heartbeat-monitoring">Heartbeat monitoring</a></td>
+</tr>
+<tr>
+<td><code>heartbeat-interval</code></td>
+<td><code>5m</code></td>
+<td><a href="#heartbeat-monitoring">Heartbeat monitoring</a></td>
+</tr>
+<tr>
+<td><code>shutdown-sync-timeout</code></td>
+<td><code>30s</code></td>
+<td><a href="#shutdown-sync">Shutdown sync</a></td>
+</tr>
+<tr>
+<td><code>shutdown-sync-interval</code></td>
+<td><code>500ms</code></td>
+<td><a href="#shutdown-sync">Shutdown sync</a></td>
+</tr>
+<tr>
+<td><code>socket.enabled</code></td>
+<td><code>false</code></td>
+<td><a href="#control-socket">Control socket</a></td>
+</tr>
+<tr>
+<td><code>socket.path</code></td>
+<td><code>/var/run/litestream.sock</code></td>
+<td><a href="#control-socket">Control socket</a></td>
+</tr>
+<tr>
+<td><code>socket.permissions</code></td>
+<td><code>0600</code></td>
+<td><a href="#control-socket">Control socket</a></td>
+</tr>
+<tr>
+<td><code>logging.level</code></td>
+<td><code>info</code></td>
+<td><a href="#logging">Logging</a></td>
+</tr>
+<tr>
+<td><code>logging.type</code></td>
+<td><code>text</code></td>
+<td><a href="#logging">Logging</a></td>
+</tr>
+<tr>
+<td><code>logging.stderr</code></td>
+<td><code>false</code></td>
+<td><a href="#logging">Logging</a></td>
+</tr>
+<tr>
+<td><code>logging.source</code></td>
+<td><code>false</code></td>
+<td><a href="#logging">Logging</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Per-database settings</strong> (see <a href="#database-configuration-options">Database configuration
+options</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>monitor-interval</code></td>
+<td><code>1s</code></td>
+</tr>
+<tr>
+<td><code>checkpoint-interval</code></td>
+<td><code>1m</code></td>
+</tr>
+<tr>
+<td><code>busy-timeout</code></td>
+<td><code>1s</code></td>
+</tr>
+<tr>
+<td><code>min-checkpoint-page-count</code></td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td><code>truncate-page-n</code></td>
+<td><code>121359</code> (~500MB)</td>
+</tr>
+<tr>
+<td><code>max-sync-wal-bytes</code></td>
+<td><code>67108864</code> (64 MiB)</td>
+</tr>
+<tr>
+<td><code>restore-if-db-not-exists</code></td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Replica settings</strong> (see <a href="#replica-settings">Replica settings</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sync-interval</code></td>
+<td><code>1s</code></td>
+</tr>
+<tr>
+<td><code>auto-recover</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>max-sync-ltx-files</code></td>
+<td><code>256</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="complete-configuration-example">Complete Configuration Example<a href="#complete-configuration-example" class="anchor" aria-hidden="true">#</a> </h2>
-<p>Example showing available configuration options:</p>
+<p>The example below shows a broad range of options together in one file. Several
+options are deliberately set to non-default values to show what an override
+looks like, so read it as a tour of the syntax rather than a defaults reference.
+Where the example differs from the default, the comment says so, and
+<a href="#configuration-defaults">Configuration defaults</a> above collects them in one
+place.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global settings</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">access-key-id</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_ACCESS_KEY_ID}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">secret-access-key</span><span class="p">:</span><span class="w"> </span><span class="l">${AWS_SECRET_ACCESS_KEY}</span><span class="w">
@@ -1889,43 +2102,45 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># retention:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c">#   enabled: false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Metrics endpoint</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Metrics endpoint — disabled by default</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:9090&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># MCP server for AI integration  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># MCP server for AI integration — disabled by default</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Subcommand to execute</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Subcommand to execute — no default; omit to run Litestream alone</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">exec</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp -config /etc/myapp.conf&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Logging configuration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Logging configuration — all shown at their defaults</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">logging</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l">info</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Compaction levels (position sets the level: L1, L2, L3)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Overridden here; defaults are 30s (L1), 5m (L2), 1h (L3)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">levels</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global snapshot settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global snapshot settings — interval overridden here; default is 24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h  </span><span class="w"> </span><span class="c"># default</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Validation settings</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Validation settings — disabled by default</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">validation</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">6h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># L0 retention settings (for VFS support)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># L0 retention settings (for VFS support) — both shown at their defaults</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention-check-interval</span><span class="p">:</span><span class="w"> </span><span class="l">15s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Database configurations</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># S3 replica</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># S3 replica — monitor-interval, checkpoint-interval, and sync-interval</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># are shown at their defaults</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app1.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">monitor-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">checkpoint-interval</span><span class="p">:</span><span class="w"> </span><span class="l">1m</span><span class="w">
