@@ -104,6 +104,41 @@ litestream restore [arguments] REPLICA_URL
 ```
 
 
+## Restore Granularity
+
+Litestream replays whole LTX files, so `-txid` and `-timestamp` can only land on
+the boundaries of files that still exist in the replica. A file whose range would
+overshoot the target is skipped entirely rather than partially applied, so not
+every replicated transaction is a valid restore point.
+
+Run [`litestream ltx -level all`](/reference/ltx) to list the endpoints that are
+currently available. Every `max_txid` in that listing is a valid `-txid` target;
+values in between are not.
+
+```
+$ litestream ltx -level all /var/lib/db
+level  min_txid          max_txid          size  created
+1      0000000000000004  0000000000000006  249   2026-07-28T14:18:09Z
+1      0000000000000007  0000000000000008  266   2026-07-28T14:18:13Z
+
+$ litestream restore -txid 0000000000000006 -o /tmp/r.db /var/lib/db   # succeeds
+$ litestream restore -txid 0000000000000005 -o /tmp/r.db /var/lib/db
+Error: no matching backup files available
+```
+
+{{< alert icon="⚠️" text="The <code>no matching backup files available</code> error does not distinguish between a transaction that was never replicated and one that exists but is only reachable at a coarser granularity. Check the <code>ltx</code> listing before concluding that data is missing." >}}
+
+Granularity is finest while L0 files are retained—roughly one endpoint per sync
+interval—and coarsens to L1 boundaries once L0 files expire. See
+[Restore granularity](/how-it-works#restore-granularity) for the full model and
+for the settings that keep fine-grained endpoints available longer.
+
+Boundary comparisons differ between the two flags. `-txid` is inclusive: a file
+is eligible when its maximum TXID is at or below the requested TXID.
+`-timestamp` is exclusive: a file must have been created strictly before the
+requested timestamp, so a file created at exactly that instant is skipped.
+
+
 ## Conditional Restore Behavior
 
 ### Using -if-replica-exists

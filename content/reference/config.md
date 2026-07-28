@@ -146,6 +146,11 @@ when retention is disabled.
 need `DeleteObject` permissions. This limits the blast radius if credentials
 are compromised — an attacker with leaked credentials cannot delete your backups.
 
+**Restore granularity:** Because nothing is removed from remote storage, the
+fine-grained restore endpoints that L0 files provide do not degrade over time
+unless a provider lifecycle policy removes the files. See
+[Restore granularity](/how-it-works#restore-granularity).
+
 ### Global replica defaults
 
 {{< since version="0.5.3" >}} Global replica defaults allow you to set default
@@ -316,6 +321,9 @@ l0-retention-check-interval: 15s
 - `l0-retention`—Minimum time to retain L0 files after they have been compacted
   into L1. The file must meet both criteria before deletion: it must be
   compacted into L1 AND the retention period must have elapsed. Defaults to `5m`.
+  Must be greater than zero; `l0-retention: 0` is rejected at startup with
+  `l0 retention must be greater than 0`. To keep L0 files effectively forever,
+  use a large duration such as `8760h`.
 
 - `l0-retention-check-interval`—How frequently Litestream checks for expired L0
   files. This should be more frequent than the L1 compaction interval to ensure
@@ -329,6 +337,12 @@ l0-retention-check-interval: 15s
 | Storage-constrained environments | Use default or slightly lower retention if VFS latency is low |
 | Frequent database writes | Default values typically sufficient |
 | Infrequent writes with VFS | Consider increasing retention to ensure L1 file availability |
+| Fine-grained point-in-time restore | Increase `l0-retention` to keep per-sync restore endpoints available longer |
+
+L0 retention also determines how long fine-grained restore points survive. While
+an L0 file exists, its boundary is a valid restore target; once it is deleted the
+finest surviving endpoints are L1 boundaries. See
+[Restore granularity](/how-it-works#restore-granularity).
 
 **Example configuration:**
 
