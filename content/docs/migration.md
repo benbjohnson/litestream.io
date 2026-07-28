@@ -738,7 +738,7 @@ Error: multiple replicas on a single database are no longer supported
 
 Choose whichever destination you want to be authoritative and drop the rest.
 
-{{< alert icon="⚠️" text="Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint and then logs recurring <code>sync error</code> messages." >}}
+{{< alert icon="⚠️" text="Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint, then intermittently logs <code>sync error</code> messages as the two managers remove each other's temporary files." >}}
 
 If you genuinely need a second copy in another location, replicate at the
 storage layer instead: S3 Cross-Region Replication, GCS dual-region buckets, or
@@ -778,8 +778,7 @@ Two fields here are easy to get wrong:
 
 - `exec` is a single command string, not a list of hooks. Litestream runs the
   command alongside replication and shuts down when it exits. Passing a list
-  fails immediately with `yaml: unmarshal errors: cannot unmarshal !!seq into
-  string`.
+  fails immediately with `cannot unmarshal !!seq into string`.
 - `levels` entries accept `interval` only. Retention is configured once, in the
   root `snapshot` block.
 
@@ -1043,9 +1042,15 @@ Always have a rollback plan:
 
 ### Configuration Validation Errors
 
-**Error**: `yaml: unmarshal errors: cannot unmarshal !!seq into string`
+**Error**: `cannot unmarshal !!seq into string`
 **Solution**: A field expecting a single value was given a list. The usual cause
-is writing `exec` as a list of hooks; it takes one command string.
+is writing `exec` as a list of hooks; it takes one command string. The full
+message reports the offending line:
+
+```text
+Error: yaml: unmarshal errors:
+  line 2: cannot unmarshal !!seq into string
+```
 
 **Error**: `multiple replicas on a single database are no longer supported`
 **Solution**: Reduce the `replicas` array to a single entry, or move it to the
