@@ -297,7 +297,7 @@ files produced by the level below it at a longer interval, so recent
 transactions stay fine-grained while older data is consolidated into fewer,
 larger files.
 
-The `levels:` block configures this. The values below are the defaults, applied
+The `levels:` block configures them. The values below are the defaults, applied
 when `levels:` is omitted entirely:
 
 ```yaml
@@ -319,8 +319,8 @@ entry; you cannot skip the levels below it.
 
 **L0 is implicit and cannot be configured here.** L0 is the raw stream of LTX
 files written as transactions commit during replication. It has no compaction
-interval of its own and never appears in `levels:`. How long its files are kept
-is controlled separately, by [L0 retention](#l0-retention) below.
+interval of its own and never appears in `levels:`. [L0 retention](#l0-retention)
+below controls how long its files are kept.
 
 **L8 is the highest configurable level.** The `levels:` list accepts at most
 eight entries. A ninth entry fails at startup with:
@@ -339,18 +339,17 @@ produced it.
 
 #### Compaction scheduling
 
-Compaction runs on an absolute time grid, not on a timer relative to when the
-daemon started. Each level's next run is its interval boundary following the
-current time, so a level with a `5m` interval fires at `:00`, `:05`, `:10`, and
-so on regardless of start time.
+Compaction runs on an absolute time grid. Each level fires at the next boundary
+of its interval, so a level with a `5m` interval compacts at `:00`, `:05`,
+`:10`, and so on no matter when the daemon started.
 
 Two consequences follow:
 
 - Each level also makes one immediate compaction attempt at startup, before its
   first grid boundary. A freshly started daemon logs a compaction within seconds.
-- The first *scheduled* run lands on the next boundary, not a full interval
-  later. A daemon started at `14:54:36` with a `5m` level compacts at `14:55:00`,
-  24 seconds in.
+- The first run on the grid lands on the next boundary, not a full interval
+  later. A daemon started at `14:54:36` with a `5m` level compacts at
+  `14:55:00`, 24 seconds in.
 
 A daemon started at `09:16:48` with `30s` and `1m` levels produces:
 
