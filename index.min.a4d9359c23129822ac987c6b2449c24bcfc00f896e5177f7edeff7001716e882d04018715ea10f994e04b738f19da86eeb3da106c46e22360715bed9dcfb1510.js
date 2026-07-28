@@ -67,7 +67,9 @@ var suggestions=document.getElementById("suggestions"),userinput=document.getEle
 <li>
 <p><strong>Configuration Changes</strong>:</p>
 <ul>
-<li>Single <code>replica</code> field replaces <code>replicas</code> array (backward compatible)</li>
+<li>Single <code>replica</code> field replaces the <code>replicas</code> array. A <code>replicas</code> array
+holding exactly one entry still loads, but two or more is now a startup
+error (see <a href="#single-replica-vs-multiple-replicas">Single Replica vs Multiple Replicas</a>)</li>
 <li>New global configuration sections: <code>levels</code>, <code>snapshot</code>, <code>exec</code></li>
 <li>Extended replica configuration options</li>
 </ul>
@@ -94,15 +96,28 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># NEW FORMAT (recommended)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
-</span></span></span></code></pre></div><ol>
+</span></span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Retention is <strong>not</strong> a replica setting and never has been in v0.5. If your v0.3.x config had <code>retention</code> under a replica, drop it during the migration and set the global <code>snapshot.retention</code> instead. Litestream ignores unrecognized keys rather than rejecting them, so a leftover <code>retention:</code> under <code>replica:</code> starts cleanly and silently leaves you on the 24h default.</div>
+</div>
+<p>Retention moved to the root <code>snapshot</code> block, which applies to every database:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># v0.3.x per-replica retention becomes a global snapshot setting</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
+</span></span></span></code></pre></div><p>See <a href="https://litestream.io/reference/config/#retention-period">Retention period</a> for the
+full retention model.</p>
+<ol>
 <li><strong>Override default settings</strong>:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Add MCP support (disabled by default)</span><span class="w">
@@ -113,13 +128,16 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Add level-based retention (no default levels configured)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Override the default compaction levels (defaults: L1=30s, L2=5m, L3=1h).</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Each level takes an interval only; retention is not a per-level setting.</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">levels</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h</span><span class="w">
-</span></span></span></code></pre></div><ol>
+</span></span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">💡</div>
+  <div class="w-100">Litestream always configures compaction levels. Omit the <code>levels</code> block entirely to keep the L1/L2/L3 defaults. Specifying it <strong>replaces</strong> the defaults rather than adding to them, so the two-entry example above leaves you with L1=1h and L2=24h.</div>
+</div>
+<ol>
 <li><strong>Update command usage</strong>:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># OLD: Query WAL information</span>
@@ -211,11 +229,13 @@ format backups without any special flags or configuration</li>
 </ol>
 <h4 id="option-3-use-unencrypted-backups-temporarily">Option 3: Use Unencrypted Backups Temporarily</h4>
 <p>While Age encryption is unavailable, use standard unencrypted replication:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">snapshot</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">72h</span><span class="w">
 </span></span></span></code></pre></div><p>For encryption at rest, consider:</p>
 <ul>
 <li>S3 Server-Side Encryption (SSE-S3, SSE-KMS)</li>
@@ -298,7 +318,7 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c"># No account-key needed - uses Managed Identity</span><span class="w">
 </span></span></span></code></pre></div><div class="alert alert-warning d-flex" role="alert">
   <div class="flex-shrink-1 alert-icon">⚠️</div>
-  <div class="w-100">Managed Identity only works when running on Azure infrastructure. For local development, use Azure CLI authentication (\`az login\`) or explicit credentials.</div>
+  <div class="w-100">Managed Identity only works when running on Azure infrastructure. For local development, use Azure CLI authentication (<code>az login</code>) or explicit credentials.</div>
 </div>
 <h5 id="shared-key-authentication-backward-compatible">Shared Key Authentication (Backward Compatible)</h5>
 <p>Existing configurations using account keys continue to work:</p>
@@ -316,7 +336,7 @@ format backups without any special flags or configuration</li>
 <p>With SDK v2, you can now:</p>
 <ul>
 <li>Use Managed Identity without any credential configuration</li>
-<li>Leverage service principal authentication via environment variables</li>
+<li>Use service principal authentication via environment variables</li>
 <li>Benefit from improved retry handling automatically</li>
 </ul>
 <h5 id="before-and-after-examples">Before and After Examples</h5>
@@ -571,7 +591,7 @@ format backups without any special flags or configuration</li>
 <h2 id="configuration-migration-1">Configuration Migration</h2>
 <h3 id="single-replica-vs-multiple-replicas">Single Replica vs Multiple Replicas</h3>
 <p>The new configuration format uses a single <code>replica</code> field instead of a <code>replicas</code> array:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Multiple replicas (OLD - still supported)</span><span class="w">
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># OLD - fails to start on v0.5</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replicas</span><span class="p">:</span><span class="w">
@@ -580,37 +600,40 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">file</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/backup</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Single replica (NEW - recommended)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># NEW - one replica per database</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">dbs</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://primary-bucket/app</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db </span><span class="w"> </span><span class="c"># Separate entry for each replica</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://secondary-bucket/app</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">file</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/local/backup</span><span class="w">
-</span></span></span></code></pre></div><h3 id="global-configuration-sections">Global Configuration Sections</h3>
+</span></span></span></code></pre></div><p>v0.5 supports exactly one replica per database so that a single remote is the
+source of truth. A <code>replicas</code> array with more than one entry is rejected at
+startup:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Error: multiple replicas on a single database are no longer supported
+</span></span></code></pre></div><p>Choose whichever destination you want to be authoritative and drop the rest.</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint, then intermittently logs <code>sync error</code> messages as they remove each other's temporary files.</div>
+</div>
+<p>If you genuinely need a second copy in another location, replicate at the
+storage layer instead: S3 Cross-Region Replication, GCS dual-region buckets, or
+an equivalent provider feature. See
+<a href="https://litestream.io/reference/config/#legacy-multiple-replicas">Legacy Multiple Replicas</a>
+for more detail.</p>
+<h3 id="global-configuration-sections">Global Configuration Sections</h3>
 <p>New global sections provide better control:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Global snapshot configuration</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">snapshot</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global level-based retention</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global compaction levels (interval only)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">levels</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">24h</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="l">168h</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Global exec hooks</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">exec</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">cmd</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;/usr/local/bin/notify&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;Litestream started&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Subcommand to run alongside replication</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">exec</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp -config /etc/myapp.conf&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Enable MCP server</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">mcp-addr</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;:3001&#34;</span><span class="w">
@@ -619,7 +642,15 @@ format backups without any special flags or configuration</li>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://my-bucket/app</span><span class="w">
-</span></span></span></code></pre></div><h2 id="replica-type-migration">Replica Type Migration</h2>
+</span></span></span></code></pre></div><p>Two fields here are easy to get wrong:</p>
+<ul>
+<li><code>exec</code> is a single command string, not a list of hooks. Litestream runs the
+command alongside replication and shuts down when it exits. Passing a list
+fails immediately with <code>cannot unmarshal !!seq into string</code>.</li>
+<li><code>levels</code> entries accept <code>interval</code> only. Retention is configured once, in the
+root <code>snapshot</code> block.</li>
+</ul>
+<h2 id="replica-type-migration">Replica Type Migration</h2>
 <h3 id="migrating-from-file-to-s3">Migrating from File to S3</h3>
 <ol>
 <li>
@@ -730,37 +761,62 @@ exist before Litestream starts:</p>
 </span></span><span class="line"><span class="cl">sudo systemctl start litestream
 </span></span></code></pre></div></li>
 </ol>
-<h3 id="zero-downtime-migration">Zero-Downtime Migration</h3>
-<p>For production systems requiring zero downtime:</p>
+<h3 id="switching-replica-destinations">Switching Replica Destinations</h3>
+<p>Your application keeps serving reads and writes throughout this process; only
+Litestream restarts. The new destination stays behind until it catches up, so
+keep the old one intact until you have verified the new one.</p>
+<p>Because v0.5 allows only one replica per database, you cannot write to the old
+and new destinations at the same time. Migrate sequentially instead:</p>
+<div class="alert alert-warning d-flex" role="alert">
+  <div class="flex-shrink-1 alert-icon">⚠️</div>
+  <div class="w-100">Do not skip the reset in step 4. Litestream tracks its replication position in the local metadata directory, not per destination. An empty destination starts at TXID 0, so Litestream tries to upload from TXID 1. On any database that has been running long enough for L0 retention to expire those files, they are already gone. Replication then stalls with <code>no such file or directory</code> on an L0 file, and eventually <code>shutdown sync timeout</code>. A newly created database will not show this, because nothing has been compacted away yet.</div>
+</div>
 <ol>
 <li>
-<p><strong>Set up parallel replication</strong>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># Keep existing replica</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">s3://old-bucket/app</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># Add new replica type  </span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/new-bucket</span><span class="w">
-</span></span></span></code></pre></div></li>
-<li>
-<p><strong>Monitor both replicas</strong>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Watch replication status</span>
-</span></span><span class="line"><span class="cl">watch -n <span class="m">5</span> <span class="s1">&#39;litestream databases&#39;</span>
+<p><strong>Confirm the current replica restores cleanly</strong> before changing anything:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /tmp/preflight.db /var/lib/app.db
+</span></span><span class="line"><span class="cl">sqlite3 /tmp/preflight.db <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
 </span></span></code></pre></div></li>
 <li>
-<p><strong>Switch over when new replica is synchronized</strong>:</p>
+<p><strong>Stop Litestream</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo systemctl stop litestream
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Point the database at the new destination</strong>:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">dbs</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># Remove old replica, keep new one</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">/var/lib/app.db</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">replica</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">nats</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l">nats://localhost:4222/new-bucket</span><span class="w">
 </span></span></span></code></pre></div></li>
+<li>
+<p><strong>Reset the local Litestream state</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream reset /var/lib/app.db
+</span></span></code></pre></div><p>This removes the local LTX files under the database&rsquo;s <code>.db-litestream</code>
+metadata directory so the next sync starts with a fresh snapshot. The
+database file itself is not touched.</p>
+</li>
+<li>
+<p><strong>Start Litestream</strong> and wait for the replica to catch up:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo systemctl start litestream
+</span></span><span class="line"><span class="cl">journalctl -u litestream -f
+</span></span></code></pre></div><p>Each sync logs a <code>replica sync</code> line carrying both positions. The new
+destination has caught up once <code>txid.replica</code> matches <code>txid.db</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">msg=&#34;replica sync&#34; system=store db=app.db replica=file txid.replica=0000000000000002 txid.db=0000000000000002
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Verify the new destination before retiring the old one</strong>. Write a marker
+row first, so the restore proves the destination is current rather than
+merely intact:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sqlite3 /var/lib/app.db <span class="s2">&#34;CREATE TABLE IF NOT EXISTS litestream_check(id INTEGER PRIMARY KEY, at TEXT); INSERT INTO litestream_check(at) VALUES (datetime(&#39;now&#39;));&#34;</span>
+</span></span></code></pre></div><p>Wait for the next <code>replica sync</code> line to show the two positions matching
+again, then restore and confirm the marker arrived:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">litestream restore -o /tmp/verify.db /var/lib/app.db
+</span></span><span class="line"><span class="cl">sqlite3 /tmp/verify.db <span class="s2">&#34;PRAGMA integrity_check;&#34;</span>
+</span></span><span class="line"><span class="cl">sqlite3 /tmp/verify.db <span class="s2">&#34;SELECT count(*) FROM litestream_check;&#34;</span>
+</span></span></code></pre></div><p>Leave the old bucket in place until the marker count matches what you wrote.
+It remains a valid point-in-time backup up to the moment you switched.</p>
+</li>
 </ol>
 <h2 id="command-line-migration">Command-Line Migration</h2>
 <h3 id="script-updates">Script Updates</h3>
@@ -817,8 +873,39 @@ exist before Litestream starts:</p>
 </ol>
 <h2 id="common-migration-issues-1">Common Migration Issues</h2>
 <h3 id="configuration-validation-errors">Configuration Validation Errors</h3>
-<p><strong>Error</strong>: <code>yaml: unmarshal errors</code>
-<strong>Solution</strong>: Validate YAML syntax and check for unsupported options</p>
+<p><strong>Error</strong>: <code>cannot unmarshal !!seq into string</code>
+<strong>Solution</strong>: You passed a list to a field that expects a single value. The
+usual cause is writing <code>exec</code> as a list of hooks; it takes one command string.
+The full message reports the offending line:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Error: yaml: unmarshal errors:
+</span></span><span class="line"><span class="cl">  line 2: cannot unmarshal !!seq into string
+</span></span></code></pre></div><p><strong>Error</strong>: <code>multiple replicas on a single database are no longer supported</code>
+<strong>Solution</strong>: Reduce the <code>replicas</code> array to a single entry, or move it to the
+<code>replica</code> field. See <a href="#single-replica-vs-multiple-replicas">Single Replica vs Multiple Replicas</a>.</p>
+<h3 id="settings-that-appear-to-have-no-effect">Settings That Appear to Have No Effect</h3>
+<p>Litestream ignores unrecognized configuration keys instead of rejecting them, so
+a misplaced setting starts cleanly and silently does nothing. If a value seems
+not to apply, confirm it belongs where you put it. The
+<a href="https://litestream.io/reference/config/">Configuration Reference</a> is the authoritative
+list. Two common cases:</p>
+<ul>
+<li><code>retention</code> under a <code>replica</code> block. It is global: use <code>snapshot.retention</code>.</li>
+<li><code>retention</code> on a <code>levels</code> entry. Levels take <code>interval</code> only.</li>
+</ul>
+<p>To check what Litestream actually loaded, run <code>litestream databases -config /etc/litestream.yml</code> to confirm each database resolved to the replica type you
+expect. For compaction and snapshot settings, read the <code>replicate</code> startup log:
+it logs a <code>starting compaction monitor</code> line per level with the interval in
+effect, where level 9 is the snapshot level.</p>
+<h3 id="checking-replication-progress">Checking Replication Progress</h3>
+<p><code>litestream databases</code> reads the configuration and prints each database path
+with its replica type. It reports no transaction IDs, no lag, and no
+synchronization state, so it cannot tell you whether a replica is current.
+Switching between two destinations of the same type produces identical output
+either way. Use it to confirm the config parsed, nothing more.</p>
+<p>For replication progress, use <code>litestream status</code> for the local transaction ID
+and WAL size, and read the <code>replicate</code> log for the <code>replica sync</code> lines that
+carry both <code>txid.replica</code> and <code>txid.db</code>. A replica is caught up when those two
+match.</p>
 <h3 id="missing-dependencies">Missing Dependencies</h3>
 <p><strong>Error</strong>: MCP server fails to start
 <strong>Solution</strong>: Ensure all required ports are available and firewall rules permit access</p>
