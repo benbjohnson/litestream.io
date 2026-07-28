@@ -78,7 +78,9 @@ litestream version
    - NATS replica support with JetStream
 
 4. **Configuration Changes**:
-   - Single `replica` field replaces `replicas` array (backward compatible)
+   - Single `replica` field replaces the `replicas` array. A `replicas` array
+     holding exactly one entry still loads, but two or more is now a startup
+     error (see [Single Replica vs Multiple Replicas](#single-replica-vs-multiple-replicas))
    - New global configuration sections: `levels`, `snapshot`, `exec`
    - Extended replica configuration options
 
@@ -98,15 +100,31 @@ dbs:
   - path: /var/lib/app.db
     replicas:
       - url: s3://my-bucket/app
-        retention: 72h
 
 # NEW FORMAT (recommended)
 dbs:
   - path: /var/lib/app.db
     replica:
       url: s3://my-bucket/app
-      retention: 72h
 ```
+
+{{< alert icon="⚠️" text="Retention is <strong>not</strong> a replica setting and never has been in v0.5. If your v0.3.x config had <code>retention</code> under a replica, drop it during the migration and set the global <code>snapshot.retention</code> instead. Litestream ignores unrecognized keys rather than rejecting them, so a leftover <code>retention:</code> under <code>replica:</code> starts cleanly and silently leaves you on the 24h default." >}}
+
+Retention moved to the root `snapshot` block, which applies to every database:
+
+```yaml
+# v0.3.x per-replica retention becomes a global snapshot setting
+snapshot:
+  retention: 72h
+
+dbs:
+  - path: /var/lib/app.db
+    replica:
+      url: s3://my-bucket/app
+```
+
+See [Retention period]({{< ref "/reference/config" >}}#retention-period) for the
+full retention model.
 
 1. **Override default settings**:
 
@@ -119,13 +137,14 @@ snapshot:
   interval: 24h
   retention: 168h
 
-# Add level-based retention (no default levels configured)
+# Override the default compaction levels (defaults: L1=30s, L2=5m, L3=1h).
+# Each level takes an interval only; retention is not a per-level setting.
 levels:
   - interval: 1h
-    retention: 24h
   - interval: 24h
-    retention: 168h
 ```
+
+{{< alert icon="💡" text="Litestream always configures compaction levels. Omit the <code>levels</code> block entirely to keep the L1/L2/L3 defaults — specifying it <strong>replaces</strong> the defaults rather than adding to them, so the two-entry example above leaves you with L1=1h and L2=24h." >}}
 
 1. **Update command usage**:
 
@@ -245,11 +264,13 @@ If you can migrate away from Age encryption:
 While Age encryption is unavailable, use standard unencrypted replication:
 
 ```yaml
+snapshot:
+  retention: 72h
+
 dbs:
   - path: /var/lib/app.db
     replica:
       url: s3://my-bucket/app
-      retention: 72h
 ```
 
 For encryption at rest, consider:
@@ -360,7 +381,7 @@ dbs:
       # No account-key needed - uses Managed Identity
 ```
 
-{{< alert icon="⚠️" text="Managed Identity only works when running on Azure infrastructure. For local development, use Azure CLI authentication (`az login`) or explicit credentials." >}}
+{{< alert icon="⚠️" text="Managed Identity only works when running on Azure infrastructure. For local development, use Azure CLI authentication (<code>az login</code>) or explicit credentials." >}}
 
 ##### Shared Key Authentication (Backward Compatible)
 
@@ -691,7 +712,7 @@ See the [SQLite PRAGMA documentation](https://www.sqlite.org/pragma.html) for th
 The new configuration format uses a single `replica` field instead of a `replicas` array:
 
 ```yaml
-# Multiple replicas (OLD - still supported)
+# OLD - fails to start on v0.5
 dbs:
   - path: /var/lib/app.db
     replicas:
@@ -700,19 +721,30 @@ dbs:
       - type: file
         path: /local/backup
 
-# Single replica (NEW - recommended)
+# NEW - one replica per database
 dbs:
   - path: /var/lib/app.db
     replica:
       url: s3://primary-bucket/app
-  - path: /var/lib/app.db  # Separate entry for each replica
-    replica:
-      url: s3://secondary-bucket/app
-  - path: /var/lib/app.db
-    replica:
-      type: file
-      path: /local/backup
 ```
+
+v0.5 supports exactly one replica per database so that a single remote is
+unambiguously the source of truth. A `replicas` array with more than one entry
+is rejected at startup:
+
+```text
+Error: multiple replicas on a single database are no longer supported
+```
+
+Choose whichever destination you want to be authoritative and drop the rest.
+
+{{< alert icon="⚠️" text="Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint and then logs recurring <code>sync error</code> messages." >}}
+
+If you genuinely need a second copy in another location, replicate at the
+storage layer instead — S3 Cross-Region Replication, GCS dual-region buckets, or
+an equivalent provider feature. See
+[Legacy Multiple Replicas]({{< ref "/reference/config" >}}#legacy-multiple-replicas)
+for more detail.
 
 ### Global Configuration Sections
 
@@ -724,18 +756,14 @@ snapshot:
   interval: 24h
   retention: 168h
 
-# Global level-based retention
+# Global compaction levels (interval only)
 levels:
   - interval: 5m
-    retention: 1h
   - interval: 1h
-    retention: 24h
   - interval: 24h
-    retention: 168h
 
-# Global exec hooks
-exec:
-  - cmd: ["/usr/local/bin/notify", "Litestream started"]
+# Subcommand to run alongside replication
+exec: "myapp -config /etc/myapp.conf"
 
 # Enable MCP server
 mcp-addr: ":3001"
@@ -745,6 +773,15 @@ dbs:
     replica:
       url: s3://my-bucket/app
 ```
+
+Two notes on these sections:
+
+- `exec` is a single command string, not a list of hooks. Litestream runs the
+  command alongside replication and shuts down when it exits. Passing a list
+  fails immediately with `yaml: unmarshal errors: cannot unmarshal !!seq into
+  string`.
+- `levels` entries accept `interval` only. Retention is configured once, in the
+  root `snapshot` block.
 
 ## Replica Type Migration
 
@@ -883,43 +920,50 @@ When changing replica types, you may want to preserve existing backups:
    sudo systemctl start litestream
    ```
 
-### Zero-Downtime Migration
+### Switching Replica Destinations
 
-For production systems requiring zero downtime:
+Your application keeps serving reads and writes throughout this process — only
+Litestream restarts. There is, however, a short window where the new destination
+has not caught up yet, so keep the old one intact until you have verified the
+new one.
 
-1. **Set up parallel replication**:
+Because v0.5 allows only one replica per database, you cannot write to the old
+and new destinations at the same time. Migrate sequentially instead:
+
+1. **Confirm the current replica restores cleanly** before changing anything:
+
+   ```bash
+   litestream restore -o /tmp/preflight.db /var/lib/app.db
+   sqlite3 /tmp/preflight.db "PRAGMA integrity_check;"
+   ```
+
+2. **Point the database at the new destination**:
 
    ```yaml
    dbs:
-     # Keep existing replica
-     - path: /var/lib/app.db
-       replica:
-         url: s3://old-bucket/app
-     
-     # Add new replica type  
      - path: /var/lib/app.db
        replica:
          type: nats
          url: nats://localhost:4222/new-bucket
    ```
 
-2. **Monitor both replicas**:
+3. **Restart Litestream**. It takes a fresh snapshot against the new
+   destination and continues replicating from there:
 
    ```bash
-   # Watch replication status
+   sudo systemctl restart litestream
    watch -n 5 'litestream databases'
    ```
 
-3. **Switch over when new replica is synchronized**:
+4. **Verify the new destination before retiring the old one**:
 
-   ```yaml
-   dbs:
-     # Remove old replica, keep new one
-     - path: /var/lib/app.db
-       replica:
-         type: nats
-         url: nats://localhost:4222/new-bucket
+   ```bash
+   litestream restore -o /tmp/verify.db /var/lib/app.db
+   sqlite3 /tmp/verify.db "PRAGMA integrity_check;"
    ```
+
+   Leave the old bucket in place until this succeeds. It remains a valid
+   point-in-time backup up to the moment you switched.
 
 ## Command-Line Migration
 
@@ -1000,8 +1044,30 @@ Always have a rollback plan:
 
 ### Configuration Validation Errors
 
-**Error**: `yaml: unmarshal errors`
-**Solution**: Validate YAML syntax and check for unsupported options
+**Error**: `yaml: unmarshal errors: cannot unmarshal !!seq into string`
+**Solution**: A field expecting a single value was given a list. The usual cause
+is writing `exec` as a list of hooks; it takes one command string.
+
+**Error**: `multiple replicas on a single database are no longer supported`
+**Solution**: Reduce the `replicas` array to a single entry, or move it to the
+`replica` field. See [Single Replica vs Multiple Replicas](#single-replica-vs-multiple-replicas).
+
+### Settings That Appear to Have No Effect
+
+Litestream ignores unrecognized configuration keys instead of rejecting them, so
+a misplaced setting starts cleanly and silently does nothing. If a value seems
+not to apply, confirm it belongs where you put it — the
+[Configuration Reference]({{< ref "/reference/config" >}}) is the authoritative
+list. Two common cases:
+
+- `retention` under a `replica` block. It is global: use `snapshot.retention`.
+- `retention` on a `levels` entry. Levels take `interval` only.
+
+To check what Litestream actually loaded, run `litestream databases -config
+/etc/litestream.yml` to confirm each database resolved to the replica type you
+expect. For compaction and snapshot settings, read the `replicate` startup log:
+it logs a `starting compaction monitor` line per level with the interval in
+effect, where level 9 is the snapshot level.
 
 ### Missing Dependencies
 
