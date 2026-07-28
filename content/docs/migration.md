@@ -738,7 +738,7 @@ Error: multiple replicas on a single database are no longer supported
 
 Choose whichever destination you want to be authoritative and drop the rest.
 
-{{< alert icon="⚠️" text="Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint, then intermittently logs <code>sync error</code> messages as the two managers remove each other's temporary files." >}}
+{{< alert icon="⚠️" text="Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint, then intermittently logs <code>sync error</code> messages as they remove each other's temporary files." >}}
 
 If you genuinely need a second copy in another location, replicate at the
 storage layer instead: S3 Cross-Region Replication, GCS dual-region buckets, or
@@ -1043,9 +1043,9 @@ Always have a rollback plan:
 ### Configuration Validation Errors
 
 **Error**: `cannot unmarshal !!seq into string`
-**Solution**: A field expecting a single value was given a list. The usual cause
-is writing `exec` as a list of hooks; it takes one command string. The full
-message reports the offending line:
+**Solution**: You passed a list to a field that expects a single value. The
+usual cause is writing `exec` as a list of hooks; it takes one command string.
+The full message reports the offending line:
 
 ```text
 Error: yaml: unmarshal errors:
