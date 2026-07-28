@@ -220,6 +220,7 @@ Variable expansion By default, Litestream will perform environment variable expa
         <li><a href="#metrics">Metrics</a></li>
         <li><a href="#mcp-model-context-protocol">MCP (Model Context Protocol)</a></li>
         <li><a href="#logging">Logging</a></li>
+        <li><a href="#compaction-levels">Compaction levels</a></li>
         <li><a href="#l0-retention">L0 Retention</a></li>
         <li><a href="#compaction-verification">Compaction verification</a></li>
         <li><a href="#heartbeat-monitoring">Heartbeat monitoring</a></li>
@@ -415,6 +416,10 @@ when retention is disabled.</p>
 <p><strong>Security benefit:</strong> With retention disabled, your IAM credentials no longer
 need <code>DeleteObject</code> permissions. This limits the blast radius if credentials
 are compromised — an attacker with leaked credentials cannot delete your backups.</p>
+<p><strong>Restore granularity:</strong> Because nothing is removed from remote storage, the
+fine-grained restore endpoints that L0 files provide do not degrade over time
+unless a provider lifecycle policy removes the files. See
+<a href="/how-it-works#restore-granularity">Restore granularity</a>.</p>
 <h3 id="global-replica-defaults">Global replica defaults<a href="#global-replica-defaults" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
     v0.5.3
@@ -518,7 +523,73 @@ and line number to each log record.</p>
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
-</span></span></span></code></pre></div><h3 id="l0-retention">L0 Retention<a href="#l0-retention" class="anchor" aria-hidden="true">#</a> </h3>
+</span></span></span></code></pre></div><h3 id="compaction-levels">Compaction levels<a href="#compaction-levels" class="anchor" aria-hidden="true">#</a> </h3>
+<p>Litestream compacts LTX files through a series of levels. Each level merges the
+files produced by the level below it. The defaults use progressively longer
+intervals, so recent transactions stay fine-grained while older data is
+consolidated into fewer, larger files.</p>
+<p>The <code>levels:</code> block configures them. The values below are the defaults, applied
+when <code>levels:</code> is omitted entirely:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">levels</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">30s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
+</span></span></span></code></pre></div><p><code>interval</code> is the only key an entry accepts. Unrecognized keys are silently
+ignored rather than rejected, so a stray <code>retention:</code> under a level entry has no
+effect. Litestream does not require intervals to grow with the level; each one
+only has to be greater than zero.</p>
+<p><strong>Position in the list sets the level number.</strong> The first entry configures L1,
+the second L2, the third L3, and so on. There is no <code>level:</code> key — a level&rsquo;s
+number comes entirely from its position. The default config above therefore
+gives you L1, L2, and L3 as the configurable levels; L9 is separate and covered
+below. To reach L4 you must supply a fourth entry; you cannot skip the levels
+below it.</p>
+<p><strong>L0 is implicit and cannot be configured here.</strong> L0 is the raw stream of LTX
+files Litestream writes from committed WAL changes on each replication sync, so
+a single file can cover several transactions. It has no compaction interval of
+its own and never appears in <code>levels:</code>. <a href="#l0-retention">L0 retention</a> below
+controls how long its files are kept.</p>
+<p><strong>L8 is the highest configurable level.</strong> The <code>levels:</code> list accepts at most
+eight entries. A ninth entry fails at startup with:</p>
+<pre tabindex="0"><code>Error: cannot open store: compaction level cannot exceed 8
+</code></pre><p><strong>L9 is the snapshot level and is configured by <code>snapshot.interval</code>.</strong> It holds
+full snapshots rather than incremental compactions, so it is not part of
+<code>levels:</code> and cannot be added as a ninth entry. Its interval comes from the
+global <a href="#complete-configuration-example"><code>snapshot.interval</code></a> setting, which
+defaults to <code>24h</code>. Litestream starts a level 9 monitor whenever background
+compaction monitoring is enabled, which is the default for <code>litestream replicate</code>. That is why startup logs show a level 9 even though no entry in
+<code>levels:</code> produced it.</p>
+<h4 id="compaction-scheduling">Compaction scheduling<a href="#compaction-scheduling" class="anchor" aria-hidden="true">#</a> </h4>
+<p>Compaction is scheduled on an absolute time grid. Each level targets the next
+boundary of its interval, so a <code>5m</code> level aims at <code>:00</code>, <code>:05</code>, <code>:10</code>, and so on
+no matter when the daemon started.</p>
+<p>Two consequences follow:</p>
+<ul>
+<li>Each level also makes one immediate compaction attempt at startup, before its
+first grid boundary. It only logs a completed compaction if the level below it
+has something to merge.</li>
+<li>The first run on the grid is due at the next boundary, not a full interval
+later. A daemon started at <code>14:54:36</code> with a <code>5m</code> level reaches its first
+boundary at <code>14:55:00</code>, 24 seconds in.</li>
+</ul>
+<p>A daemon started at <code>09:16:48</code> with <code>30s</code> and <code>1m</code> levels produces the sequence
+below, abridged to the timestamp and level:</p>
+<pre tabindex="0"><code>09:16:50 compaction complete level=1     # immediate attempt at startup
+09:17:00 compaction complete level=2     # next 1m boundary
+09:17:00 compaction complete level=1     # next 30s boundary
+09:17:30 compaction complete level=1
+09:18:00 compaction complete level=2
+09:18:00 compaction complete level=1
+</code></pre><p>Because the interval is truncated against absolute time, the grid is anchored to
+UTC rather than to local time. In a timezone offset by a half hour, an hourly
+level is due at <code>:30</code> past each local hour.</p>
+<p>Boundaries are targets rather than exact firing times. The delay until the next
+attempt is computed <em>before</em> each pass runs, and the timer only starts once the
+pass finishes. Every attempt therefore lands a little after its boundary, by
+roughly the duration of the previous pass. That lag is normally milliseconds,
+but a slow pass makes it larger. Each iteration recomputes its target from the
+grid, so the lag does not accumulate.</p>
+<h3 id="l0-retention">L0 Retention<a href="#l0-retention" class="anchor" aria-hidden="true">#</a> </h3>
 <p><span class="badge badge-info litestream-version" title="This feature has been available since Litestream v0.5.3">
     v0.5.3
 </span>
@@ -540,7 +611,12 @@ for VFS clients that haven&rsquo;t yet discovered the new L1 files.</p>
 <li>
 <p><code>l0-retention</code>—Minimum time to retain L0 files after they have been compacted
 into L1. The file must meet both criteria before deletion: it must be
-compacted into L1 AND the retention period must have elapsed. Defaults to <code>5m</code>.</p>
+compacted into L1 AND the retention period must have elapsed. Defaults to <code>5m</code>.
+Must be greater than zero. Setting <code>l0-retention: 0</code> is rejected at startup
+with <code>Error: l0-retention: l0 retention must be greater than 0 (got 0s)</code>, so
+there is no way to retain L0 indefinitely. Pick a duration that covers however
+long you need fine-grained restore points. <code>8760h</code> is one year, after which
+those L0 files become eligible for deletion again.</p>
 </li>
 <li>
 <p><code>l0-retention-check-interval</code>—How frequently Litestream checks for expired L0
@@ -573,8 +649,16 @@ timely cleanup. Defaults to <code>15s</code>.</p>
 <td>Infrequent writes with VFS</td>
 <td>Consider increasing retention to ensure L1 file availability</td>
 </tr>
+<tr>
+<td>Fine-grained point-in-time restore</td>
+<td>Increase <code>l0-retention</code> to keep per-sync restore endpoints available longer</td>
+</tr>
 </tbody>
 </table>
+<p>L0 retention also determines how long fine-grained restore points survive. While
+an L0 file exists, its boundary is a valid restore target; once it is deleted the
+finest surviving endpoints are L1 boundaries. See
+<a href="/how-it-works#restore-granularity">Restore granularity</a>.</p>
 <p><strong>Example configuration:</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># Extended retention for high-latency VFS environments</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">l0-retention</span><span class="p">:</span><span class="w"> </span><span class="l">10m</span><span class="w">
@@ -1820,7 +1904,7 @@ frequency. Longer retention periods increase storage but reduce snapshot overhea
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">text</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">stderr</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Compaction levels</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c"># Compaction levels (position sets the level: L1, L2, L3)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">levels</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5m</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span>- <span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">1h</span><span class="w">
