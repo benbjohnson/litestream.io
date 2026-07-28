@@ -111,9 +111,12 @@ the boundaries of files that still exist in the replica. A file whose range woul
 overshoot the target is skipped entirely rather than partially applied, so not
 every replicated transaction is a valid restore point.
 
-Run [`litestream ltx -level all`](/reference/ltx) to list the endpoints currently
-available. Every `max_txid` in that listing is a valid `-txid` target; values in
-between are not.
+Run [`litestream ltx -level all`](/reference/ltx) to list the files currently
+available. A TXID that is not some file's `max_txid` is never a valid `-txid`
+target. The reverse is not guaranteed: `ltx` lists what is stored without
+checking that a restore plan can be built, so a listed `max_txid` still fails if
+no retained snapshot sits at or below it, or if a gap breaks the chain leading to
+it. Confirm a candidate with [`restore -dry-run`](#dry-run) before relying on it.
 
 ```
 $ litestream ltx -level all /var/lib/db
@@ -127,11 +130,16 @@ level  min_txid          max_txid          size  created
 1      000000000000000c  000000000000000d  310   2026-07-28T14:27:18Z
 9      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
 
-$ litestream restore -txid 0000000000000005 -o /tmp/r.db /var/lib/db   # succeeds
+$ litestream restore -txid 0000000000000005 -o /tmp/r5.db /var/lib/db   # succeeds
 
-$ litestream restore -txid 0000000000000004 -o /tmp/r.db /var/lib/db
+$ litestream restore -txid 0000000000000004 -o /tmp/r4.db /var/lib/db
 Error: no matching backup files available
 ```
+
+Each restore needs its own output path. Litestream refuses to write over an
+existing non-empty file, and that check runs before the restore plan is
+evaluated, so reusing one path reports `cannot restore, output path already
+exists and is not empty` instead of the granularity error above.
 
 {{< alert icon="⚠️" text="The <code>no matching backup files available</code> error does not distinguish between a transaction that was never replicated and one that exists but is only reachable at a coarser granularity. Check the <code>ltx</code> listing before concluding that data is missing." >}}
 

@@ -113,18 +113,20 @@ matching backup files available` even though the transaction itself was
 replicated.
 
 Restore granularity is therefore coarser than the write rate, and it coarsens
-further over time as compaction and retention consolidate history.
+further over time as retention prunes the files that held the finer endpoints.
 
 **While L0 files are retained**, restore endpoints are the boundaries of each L0
 file. Under continuous writes that is roughly one endpoint per sync interval. An
 idle period produces no file at all, and a single catch-up sync after a burst can
 emit several.
 
-**After L0 expiry**, the finest surviving endpoints are L1 file boundaries, and
-they get coarser again as L1 files merge into L2 and L3. L0 files are removed
-once they have been compacted into L1 _and_ have outlived
+**After L0 expiry**, the finest surviving endpoints are L1 file boundaries. L0
+files are removed once they have been compacted into L1 _and_ have outlived
 [`l0-retention`](/reference/config#l0-retention) (default `5m`), so a restore
 point that was available a few minutes ago can become permanently unreachable.
+Compacting L1 into L2 does not cost you anything further: compaction writes the
+larger file but leaves the source files in place, so L1 boundaries stay
+restorable until retention removes them.
 
 **At the snapshot cutoff**, retention enforcement derives a single minimum
 snapshot TXID from `snapshot.retention` and applies that same cutoff to every
@@ -150,11 +152,14 @@ level  min_txid          max_txid          size  created
 9      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
 ```
 
-Each `max_txid` in that listing is a valid `-txid` target: `0000000000000001`,
-`0000000000000003`, `0000000000000005`, `0000000000000008`, `000000000000000b`,
-and `000000000000000d`. Every other TXID in the range fails because those
+The snapshot covers TXID 1 and the L1 files chain contiguously from there, so
+every `max_txid` above is reachable: `0000000000000001`, `0000000000000003`,
+`0000000000000005`, `0000000000000008`, `000000000000000b`, and
+`000000000000000d`. Every other TXID in the range fails because those
 transactions survive only inside a larger L1 file that cannot be partially
-applied.
+applied. A `max_txid` on its own is not a guarantee—`ltx` reports what is stored,
+not what can be replayed—so a listed endpoint still fails if retention has
+removed the snapshot beneath it or broken the chain leading to it.
 
 You can also preview a plan without writing files using
 [`restore -dry-run`](/reference/restore#dry-run), which shows the snapshot and
@@ -182,9 +187,9 @@ Two settings widen the window in which fine-grained restore points remain
 available:
 
 - Increase [`l0-retention`](/reference/config#l0-retention) to keep per-sync
-  endpoints around longer. There is currently no way to retain L0 forever, since
-  `l0-retention: 0` is rejected by config validation, so use a large duration
-  such as `8760h` instead.
+  endpoints around longer. There is no way to retain L0 indefinitely, since
+  `l0-retention: 0` is rejected by config validation, so pick a duration that
+  covers the period you care about. `8760h` buys one year.
 - Set [`retention.enabled: false`](/reference/config#retention) to stop
   Litestream from deleting anything in remote storage. Local files are still
   cleaned up, but remote granularity does not degrade at all unless a provider
