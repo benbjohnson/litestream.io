@@ -111,9 +111,9 @@ the boundaries of files that still exist in the replica. A file whose range woul
 overshoot the target is skipped entirely rather than partially applied, so not
 every replicated transaction is a valid restore point.
 
-Run [`litestream ltx -level all`](/reference/ltx) to list the endpoints that are
-currently available. Every `max_txid` in that listing is a valid `-txid` target;
-values in between are not.
+Run [`litestream ltx -level all`](/reference/ltx) to list the endpoints currently
+available. Every `max_txid` in that listing is a valid `-txid` target; values in
+between are not.
 
 ```
 $ litestream ltx -level all /var/lib/db
@@ -131,7 +131,7 @@ Error: no matching backup files available
 Granularity is finest while L0 files are retained—roughly one endpoint per sync
 interval—and coarsens to L1 boundaries once L0 files expire. See
 [Restore granularity](/how-it-works#restore-granularity) for the full model and
-for the settings that keep fine-grained endpoints available longer.
+the settings that keep fine-grained endpoints available longer.
 
 Boundary comparisons differ between the two flags. `-txid` is inclusive: a file
 is eligible when its maximum TXID is at or below the requested TXID.

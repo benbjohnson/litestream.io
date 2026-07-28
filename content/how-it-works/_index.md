@@ -104,21 +104,21 @@ both concepts with TXID-based LTX files. See the
 
 ## Restore granularity
 
-Litestream replays whole LTX files. It never applies part of a file, so the
-restore points available to you are the boundaries of the files that still exist
-in the replica—not every individual transaction. A file is eligible for a
-restore plan only if its entire TXID range fits within the target; a file that
-would overshoot is skipped rather than partially applied. If skipping it leaves
-the plan short of the requested TXID, the restore fails with `no matching backup
-files available` even though the transaction itself was replicated.
+Litestream replays whole LTX files and never applies part of one, so your restore
+points are the boundaries of the files that still exist in the replica. A file is
+eligible for a restore plan only if its entire TXID range fits within the target;
+a file that would overshoot is skipped rather than partially applied. If skipping
+it leaves the plan short of the requested TXID, the restore fails with `no
+matching backup files available` even though the transaction itself was
+replicated.
 
-Restore granularity is therefore always coarser than the write rate, and it
-coarsens further over time as compaction and retention consolidate history.
+Restore granularity is therefore coarser than the write rate, and it coarsens
+further over time as compaction and retention consolidate history.
 
 **While L0 files are retained**, restore endpoints are the boundaries of each L0
-file. Under continuous writes that works out to roughly one endpoint per sync
-interval, though not exactly. An idle period produces no file at all, and a
-single catch-up sync after a burst can emit several.
+file. Under continuous writes that is roughly one endpoint per sync interval. An
+idle period produces no file at all, and a single catch-up sync after a burst can
+emit several.
 
 **After L0 expiry**, the finest surviving endpoints are L1 file boundaries, and
 they get coarser again as L1 files merge into L2 and L3. L0 files are removed
@@ -129,12 +129,12 @@ point that was available a few minutes ago can become permanently unreachable.
 **At the snapshot cutoff**, retention enforcement derives a single minimum
 snapshot TXID from `snapshot.retention` and applies that same cutoff to every
 configured compaction level in one pass. L1, L2, and L3 do not age out
-independently by level—older history is pruned across all of them together.
+independently by level; older history is pruned across all of them together.
 
 ### Choosing a restore point
 
-Use the [`ltx` command](/reference/ltx) to see which endpoints actually exist
-before planning a restore:
+Use the [`ltx` command](/reference/ltx) to see which endpoints exist before
+planning a restore:
 
 ```
 $ litestream ltx -level all /var/lib/db
@@ -147,7 +147,7 @@ level  min_txid          max_txid          size  created
 
 Each `max_txid` in that listing is a valid `-txid` target. In the example above,
 `0000000000000006` and `0000000000000008` restore successfully, while
-`0000000000000004`, `0000000000000005`, and `0000000000000007` do not—their
+`0000000000000004`, `0000000000000005`, and `0000000000000007` do not. Their
 transactions survive only inside a larger L1 file that cannot be partially
 applied. You can also preview a plan without writing files using
 [`restore -dry-run`](/reference/restore#dry-run).
