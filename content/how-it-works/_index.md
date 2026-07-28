@@ -78,7 +78,9 @@ This tiered approach means recent changes are available at fine granularity
 while older history is consolidated into fewer, larger files. Compaction
 intervals and snapshot frequency are configurable—see the
 [Configuration Reference](/reference/config) for details, and the
-[`ltx` command](/reference/ltx) for inspecting files at each level.
+[`ltx` command](/reference/ltx) for inspecting files at each level. The
+[Compaction levels](/reference/config#compaction-levels) and
+[Snapshots](/reference/config#snapshots) sections cover the intervals directly.
 
 
 ## Restoring a database

@@ -340,7 +340,7 @@ Error: cannot open store: compaction level cannot exceed 8
 **L9 is the snapshot level and is configured by `snapshot.interval`.** It holds
 full snapshots rather than incremental compactions, so it is not part of
 `levels:` and cannot be added as a ninth entry. Its interval comes from the
-global [`snapshot.interval`](#complete-configuration-example) setting, which
+global [`snapshot.interval`](#snapshots) setting, which
 defaults to `24h`. Litestream starts a level 9 monitor whenever background
 compaction monitoring is enabled, which is the default for `litestream
 replicate`. That is why startup logs show a level 9 even though no entry in
@@ -383,6 +383,32 @@ pass finishes. Every attempt therefore lands a little after its boundary, by
 roughly the duration of the previous pass. That lag is normally milliseconds,
 but a slow pass makes it larger. Each iteration recomputes its target from the
 grid, so the lag does not accumulate.
+
+
+### Snapshots
+
+A snapshot is a full copy of the database, stored at compaction level 9. The
+other levels hold incremental compactions; see
+[Compaction levels](#compaction-levels). The global `snapshot` block controls
+how often Litestream takes a snapshot and how long it keeps one.
+
+The defaults are shown below:
+
+```yaml
+snapshot:
+  interval: 24h
+  retention: 24h
+```
+
+- `interval`—How often Litestream takes a full snapshot. Defaults to `24h`.
+- `retention`—How long Litestream keeps snapshots and their associated LTX files
+  before retention enforcement removes them. Defaults to `24h`.
+
+Snapshot settings are global and apply to every database in the configuration.
+{{< since version="0.5.12" >}} You can also set them on an individual database,
+but those values are promoted to the global configuration rather than applied
+per-database. See [Per-database snapshot
+settings](#per-database-snapshot-settings) for the promotion and conflict rules.
 
 
 ### L0 Retention
@@ -583,7 +609,7 @@ Each database supports the following configuration options:
 - `busy-timeout`—SQLite busy timeout (default: `1s`)
 - `min-checkpoint-page-count`—Minimum pages before PASSIVE checkpoint (default: `1000`, ~4MB, non-blocking)
 - `truncate-page-n`—{{< since version="0.5.3" >}} Emergency threshold for the TRUNCATE checkpoint (default: `121359`, ~500MB). {{< since version="0.5.15" >}} When the WAL crosses this threshold Litestream first attempts a non-blocking PASSIVE checkpoint and only forces a blocking TRUNCATE (which blocks both readers and writers) when that passive checkpoint does not bring the WAL back below the threshold. This setting therefore bounds WAL *growth*: after a passive restart the physical `-wal` file may keep its high-water size on disk rather than shrinking. Set to `0` to disable. See the [WAL Truncate Threshold Guide](/guides/wal-truncate-threshold) for details.
-- `max-sync-wal-bytes`—{{< since version="0.5.15" >}} Soft limit on the number of WAL bytes Litestream processes in a single incremental sync pass (default: `67108864`, 64MB). When the pending WAL is larger than this limit, Litestream splits the catch-up across successive passes instead of buffering the whole WAL at once. The limit is only evaluated at transaction (commit) boundaries, so a single transaction larger than this value is still processed in full, and it is not applied while taking an initial or recovery snapshot. Set to `0` to process the entire pending WAL in a single pass.
+- `max-sync-wal-bytes`—{{< since version="0.5.15" >}} Soft limit on the number of WAL bytes Litestream processes in a single incremental sync pass (default: `67108864`, 64 MiB). When the pending WAL is larger than this limit, Litestream splits the catch-up across successive passes instead of buffering the whole WAL at once. The limit is only evaluated at transaction (commit) boundaries, so a single transaction larger than this value is still processed in full, and it is not applied while taking an initial or recovery snapshot. Set to `0` to process the entire pending WAL in a single pass.
 - `restore-if-db-not-exists`—{{< since version="0.5.6" >}} When `true`, Litestream restores the database from its replica on startup if the local file does not exist. Defaults to `false`. This is also available as the `-restore-if-db-not-exists` flag on the [`replicate`]({{< ref "replicate" >}}) command.
 - `snapshot`—{{< since version="0.5.12" >}} Per-database `interval` and `retention` for snapshots. See [Per-database snapshot settings](#per-database-snapshot-settings) below for the promotion semantics.
 - `replica`—Single replica configuration (replaces deprecated `replicas` array)
@@ -610,7 +636,7 @@ dbs:
 The promotion and conflict rules are:
 
 - A database-level `snapshot.interval` or `snapshot.retention` is promoted to the
-  global [`snapshot`](#complete-configuration-example) configuration **unless** the
+  global [`snapshot`](#snapshots) configuration **unless** the
   global `snapshot` block explicitly sets that field.
 - An explicit global value always wins over a database-level value.
 - If two databases set **different** values for the same field, Litestream fails
@@ -1450,8 +1476,8 @@ LTX page updates. These updates take up space so new snapshots are created and
 old LTX files are dropped through a process called "retention".
 
 Retention is controlled globally via the `snapshot.retention` field in the root
-configuration, not per-replica. See the [Complete Configuration Example](#complete-configuration-example)
-section for an example of how to configure snapshot settings.
+configuration, not per-replica. It defaults to `24h`. See the
+[Snapshots](#snapshots) section for the full set of snapshot settings.
 
 {{< since version="0.5.12" >}} You can also set `snapshot.interval` and
 `snapshot.retention` on an individual database, but these values are promoted to
@@ -1620,9 +1646,67 @@ Different S3-compatible providers have varying pricing models:
 
 Always consult your provider's current pricing documentation for accurate estimates.
 
+## Configuration defaults
+
+Every option below is optional. The tables collect the effective defaults for the
+most commonly set options; see each option's own section for the full
+description.
+
+**Global settings:**
+
+| Option | Default | Section |
+|--------|---------|---------|
+| `addr` | disabled | [Metrics](#metrics) |
+| `mcp-addr` | disabled | [MCP](#mcp-model-context-protocol) |
+| `levels` | `30s`, `5m`, `1h` (L1–L3) | [Compaction levels](#compaction-levels) |
+| `snapshot.interval` | `24h` | [Snapshots](#snapshots) |
+| `snapshot.retention` | `24h` | [Snapshots](#snapshots) |
+| `retention.enabled` | `true` | [Retention](#retention) |
+| `validation.interval` | disabled | [Validation](#validation) |
+| `l0-retention` | `5m` | [L0 Retention](#l0-retention) |
+| `l0-retention-check-interval` | `15s` | [L0 Retention](#l0-retention) |
+| `verify-compaction` | `false` | [Compaction verification](#compaction-verification) |
+| `heartbeat-url` | empty (disabled) | [Heartbeat monitoring](#heartbeat-monitoring) |
+| `heartbeat-interval` | `5m` | [Heartbeat monitoring](#heartbeat-monitoring) |
+| `shutdown-sync-timeout` | `30s` | [Shutdown sync](#shutdown-sync) |
+| `shutdown-sync-interval` | `500ms` | [Shutdown sync](#shutdown-sync) |
+| `socket.enabled` | `false` | [Control socket](#control-socket) |
+| `socket.path` | `/var/run/litestream.sock` | [Control socket](#control-socket) |
+| `socket.permissions` | `0600` | [Control socket](#control-socket) |
+| `logging.level` | `info` | [Logging](#logging) |
+| `logging.type` | `text` | [Logging](#logging) |
+| `logging.stderr` | `false` | [Logging](#logging) |
+| `logging.source` | `false` | [Logging](#logging) |
+
+**Per-database settings** (see [Database configuration
+options](#database-configuration-options)):
+
+| Option | Default |
+|--------|---------|
+| `monitor-interval` | `1s` |
+| `checkpoint-interval` | `1m` |
+| `busy-timeout` | `1s` |
+| `min-checkpoint-page-count` | `1000` |
+| `truncate-page-n` | `121359` (~500MB) |
+| `max-sync-wal-bytes` | `67108864` (64 MiB) |
+| `restore-if-db-not-exists` | `false` |
+
+**Replica settings** (see [Replica settings](#replica-settings)):
+
+| Option | Default |
+|--------|---------|
+| `sync-interval` | `1s` |
+| `auto-recover` | `false` |
+| `max-sync-ltx-files` | `256` |
+
 ## Complete Configuration Example
 
-Example showing available configuration options:
+The example below shows a broad range of options together in one file. Several
+options are deliberately set to non-default values to show what an override
+looks like, so read it as a tour of the syntax rather than a defaults reference.
+Where the example differs from the default, the comment says so, and
+[Configuration defaults](#configuration-defaults) above collects them in one
+place.
 
 ```yaml
 # Global settings
@@ -1633,43 +1717,45 @@ secret-access-key: ${AWS_SECRET_ACCESS_KEY}
 # retention:
 #   enabled: false
 
-# Metrics endpoint
+# Metrics endpoint — disabled by default
 addr: ":9090"
 
-# MCP server for AI integration  
+# MCP server for AI integration — disabled by default
 mcp-addr: ":3001"
 
-# Subcommand to execute
+# Subcommand to execute — no default; omit to run Litestream alone
 exec: "myapp -config /etc/myapp.conf"
 
-# Logging configuration
+# Logging configuration — all shown at their defaults
 logging:
   level: info
   type: text
   stderr: false
 
 # Compaction levels (position sets the level: L1, L2, L3)
+# Overridden here; defaults are 30s (L1), 5m (L2), 1h (L3)
 levels:
   - interval: 5m
   - interval: 1h
   - interval: 24h
 
-# Global snapshot settings
+# Global snapshot settings — interval overridden here; default is 24h
 snapshot:
   interval: 1h
-  retention: 24h
+  retention: 24h   # default
 
-# Validation settings
+# Validation settings — disabled by default
 validation:
   interval: 6h
 
-# L0 retention settings (for VFS support)
+# L0 retention settings (for VFS support) — both shown at their defaults
 l0-retention: 5m
 l0-retention-check-interval: 15s
 
 # Database configurations
 dbs:
-  # S3 replica
+  # S3 replica — monitor-interval, checkpoint-interval, and sync-interval
+  # are shown at their defaults
   - path: /var/lib/app1.db
     monitor-interval: 1s
     checkpoint-interval: 1m
