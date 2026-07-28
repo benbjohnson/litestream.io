@@ -112,11 +112,11 @@ overshoot the target is skipped entirely rather than partially applied, so not
 every replicated transaction is a valid restore point.
 
 Run [`litestream ltx -level all`](/reference/ltx) to list the files currently
-available. A TXID that is not some file's `max_txid` is never a valid `-txid`
-target. The reverse is not guaranteed: `ltx` lists what is stored without
-checking that a restore plan can be built, so a listed `max_txid` still fails if
-no retained snapshot sits at or below it, or if a gap breaks the chain leading to
-it. Confirm a candidate with [`restore -dry-run`](#dry-run) before relying on it.
+available. A TXID that is no file's `max_txid` is never a valid `-txid` target,
+but the reverse does not hold. `ltx` lists what is stored without checking that a
+restore plan can be built, so a listed `max_txid` still fails if no retained
+snapshot sits at or below it, or if a gap breaks the chain leading to it. Confirm
+a candidate with [`restore -dry-run`](#dry-run) before relying on it.
 
 ```
 $ litestream ltx -level all /var/lib/db

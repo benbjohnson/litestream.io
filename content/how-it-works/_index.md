@@ -124,9 +124,8 @@ emit several.
 files are removed once they have been compacted into L1 _and_ have outlived
 [`l0-retention`](/reference/config#l0-retention) (default `5m`), so a restore
 point that was available a few minutes ago can become permanently unreachable.
-Compacting L1 into L2 does not cost you anything further: compaction writes the
-larger file but leaves the source files in place, so L1 boundaries stay
-restorable until retention removes them.
+Compacting L1 into L2 writes the larger file but leaves the source files in
+place, so L1 boundaries stay restorable until retention removes them.
 
 **At the snapshot cutoff**, retention enforcement derives a single minimum
 snapshot TXID from `snapshot.retention` and applies that same cutoff to every
@@ -157,9 +156,9 @@ every `max_txid` above is reachable: `0000000000000001`, `0000000000000003`,
 `0000000000000005`, `0000000000000008`, `000000000000000b`, and
 `000000000000000d`. Every other TXID in the range fails because those
 transactions survive only inside a larger L1 file that cannot be partially
-applied. A `max_txid` on its own is not a guarantee—`ltx` reports what is stored,
-not what can be replayed—so a listed endpoint still fails if retention has
-removed the snapshot beneath it or broken the chain leading to it.
+applied. A `max_txid` on its own is not a guarantee. `ltx` reports what is
+stored, not what can be replayed, so a listed endpoint still fails if retention
+has removed the snapshot beneath it or broken the chain leading to it.
 
 You can also preview a plan without writing files using
 [`restore -dry-run`](/reference/restore#dry-run), which shows the snapshot and
@@ -189,7 +188,7 @@ available:
 - Increase [`l0-retention`](/reference/config#l0-retention) to keep per-sync
   endpoints around longer. There is no way to retain L0 indefinitely, since
   `l0-retention: 0` is rejected by config validation, so pick a duration that
-  covers the period you care about. `8760h` buys one year.
+  covers the period you care about. `8760h` is one year.
 - Set [`retention.enabled: false`](/reference/config#retention) to stop
   Litestream from deleting anything in remote storage. Local files are still
   cleaned up, but remote granularity does not degrade at all unless a provider
