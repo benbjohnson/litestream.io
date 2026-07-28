@@ -412,7 +412,7 @@ The upgrade to Azure SDK v2 maintains **full backward compatibility**. All exist
 With SDK v2, you can now:
 
 - Use Managed Identity without any credential configuration
-- Leverage service principal authentication via environment variables
+- Use service principal authentication via environment variables
 - Benefit from improved retry handling automatically
 
 ##### Before and After Examples
