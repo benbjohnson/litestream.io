@@ -928,6 +928,8 @@ keep the old one intact until you have verified the new one.
 Because v0.5 allows only one replica per database, you cannot write to the old
 and new destinations at the same time. Migrate sequentially instead:
 
+{{< alert icon="⚠️" text="Do not skip the reset in step 4. Litestream tracks its replication position in the local metadata directory, not per destination. An empty destination starts at TXID 0, so Litestream tries to upload from TXID 1 — and on any database that has been running long enough for L0 retention to expire those files, they are already gone. Replication then stalls with <code>no such file or directory</code> on an L0 file, and eventually <code>shutdown sync timeout</code>. A newly created database will not show this, because nothing has been compacted away yet." >}}
+
 1. **Confirm the current replica restores cleanly** before changing anything:
 
    ```bash
@@ -935,7 +937,13 @@ and new destinations at the same time. Migrate sequentially instead:
    sqlite3 /tmp/preflight.db "PRAGMA integrity_check;"
    ```
 
-2. **Point the database at the new destination**:
+2. **Stop Litestream**:
+
+   ```bash
+   sudo systemctl stop litestream
+   ```
+
+3. **Point the database at the new destination**:
 
    ```yaml
    dbs:
@@ -945,23 +953,49 @@ and new destinations at the same time. Migrate sequentially instead:
          url: nats://localhost:4222/new-bucket
    ```
 
-3. **Restart Litestream**. It takes a fresh snapshot against the new
-   destination and continues replicating from there:
+4. **Reset the local Litestream state**:
 
    ```bash
-   sudo systemctl restart litestream
-   watch -n 5 'litestream databases'
+   litestream reset /var/lib/app.db
    ```
 
-4. **Verify the new destination before retiring the old one**:
+   This removes the local LTX files under the database's `.db-litestream`
+   metadata directory so the next sync starts with a fresh snapshot. The
+   database file itself is not touched.
+
+5. **Start Litestream** and wait for the replica to catch up:
+
+   ```bash
+   sudo systemctl start litestream
+   journalctl -u litestream -f
+   ```
+
+   Each sync logs a `replica sync` line carrying both positions. The new
+   destination has caught up once `txid.replica` matches `txid.db`:
+
+   ```text
+   msg="replica sync" system=store db=app.db replica=file txid.replica=0000000000000002 txid.db=0000000000000002
+   ```
+
+6. **Verify the new destination before retiring the old one**. Write a marker
+   row first, so the restore proves the destination is current rather than
+   merely intact:
+
+   ```bash
+   sqlite3 /var/lib/app.db "CREATE TABLE IF NOT EXISTS litestream_check(id INTEGER PRIMARY KEY, at TEXT); INSERT INTO litestream_check(at) VALUES (datetime('now'));"
+   ```
+
+   Wait for the next `replica sync` line to show the two positions level again,
+   then restore and confirm the marker arrived:
 
    ```bash
    litestream restore -o /tmp/verify.db /var/lib/app.db
    sqlite3 /tmp/verify.db "PRAGMA integrity_check;"
+   sqlite3 /tmp/verify.db "SELECT count(*) FROM litestream_check;"
    ```
 
-   Leave the old bucket in place until this succeeds. It remains a valid
-   point-in-time backup up to the moment you switched.
+   Leave the old bucket in place until the marker count matches what you wrote.
+   It remains a valid point-in-time backup up to the moment you switched.
 
 ## Command-Line Migration
 
@@ -1072,6 +1106,19 @@ To check what Litestream actually loaded, run `litestream databases -config
 expect. For compaction and snapshot settings, read the `replicate` startup log:
 it logs a `starting compaction monitor` line per level with the interval in
 effect, where level 9 is the snapshot level.
+
+### Checking Replication Progress
+
+`litestream databases` reads the configuration and prints each database path
+with its replica type. It reports no transaction IDs, no lag, and no
+synchronization state, so it cannot tell you whether a replica is current —
+switching between two destinations of the same type produces identical output
+either way. Use it to confirm the config parsed, nothing more.
+
+For replication progress, use `litestream status` for the local transaction ID
+and WAL size, and read the `replicate` log for the `replica sync` lines that
+carry both `txid.replica` and `txid.db`. A replica is caught up when those two
+match.
 
 ### Missing Dependencies
 
