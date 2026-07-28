@@ -315,9 +315,9 @@ only has to be greater than zero.
 **Position in the list sets the level number.** The first entry configures L1,
 the second L2, the third L3, and so on. There is no `level:` key — a level's
 number comes entirely from its position. The default config above therefore
-gives you L1, L2, and L3 as the configurable levels; L9 is separate and is
-described below. To reach L4 you must supply a fourth entry; you cannot skip the
-levels below it.
+gives you L1, L2, and L3 as the configurable levels; L9 is separate and covered
+below. To reach L4 you must supply a fourth entry; you cannot skip the levels
+below it.
 
 **L0 is implicit and cannot be configured here.** L0 is the raw stream of LTX
 files Litestream writes from committed WAL changes on each replication sync, so
@@ -344,17 +344,17 @@ replicate`. That is why startup logs show a level 9 even though no entry in
 #### Compaction scheduling
 
 Compaction is scheduled on an absolute time grid. Each level targets the next
-boundary of its interval, so a level with a `5m` interval targets `:00`, `:05`,
-`:10`, and so on no matter when the daemon started.
+boundary of its interval, so a `5m` level aims at `:00`, `:05`, `:10`, and so on
+no matter when the daemon started.
 
 Two consequences follow:
 
 - Each level also makes one immediate compaction attempt at startup, before its
-  first grid boundary. Whether that attempt logs a completed compaction depends
-  on whether the level below it has anything to merge.
+  first grid boundary. It only logs a completed compaction if the level below it
+  has something to merge.
 - The first run on the grid is due at the next boundary, not a full interval
-  later. A daemon started at `14:54:36` with a `5m` level is due at `14:55:00`,
-  24 seconds in.
+  later. A daemon started at `14:54:36` with a `5m` level reaches its first
+  boundary at `14:55:00`, 24 seconds in.
 
 A daemon started at `09:16:48` with `30s` and `1m` levels produces the sequence
 below, abridged to the timestamp and level:
@@ -374,10 +374,10 @@ level is due at `:30` past each local hour.
 
 Boundaries are targets rather than exact firing times. The delay until the next
 attempt is computed *before* each pass runs, and the timer only starts once the
-pass finishes, so every attempt lands a little after its boundary by roughly the
-duration of the previous pass. That lag is normally milliseconds, but a slow
-pass makes it larger. Each iteration recomputes its target from the grid, so the
-lag does not accumulate.
+pass finishes. Every attempt therefore lands a little after its boundary, by
+roughly the duration of the previous pass. That lag is normally milliseconds,
+but a slow pass makes it larger. Each iteration recomputes its target from the
+grid, so the lag does not accumulate.
 
 
 ### L0 Retention
