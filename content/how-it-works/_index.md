@@ -128,9 +128,9 @@ point that was available a few minutes ago can become permanently unreachable.
 
 **At the snapshot cutoff**, retention enforcement derives a single minimum
 snapshot TXID from `snapshot.retention` and applies that same cutoff to every
-configured compaction level above L0 in one pass. L1, L2, and L3 do not age out
-independently by level; older history is pruned across all of them together. L0
-is exempt because it has its own `l0-retention` schedule.
+configured compaction level in one pass, skipping L0, which has its own
+`l0-retention` schedule. L1, L2, and L3 do not age out independently by level;
+older history is pruned across all of them together.
 
 ### Choosing a restore point
 
@@ -150,11 +150,11 @@ level  min_txid          max_txid          size  created
 9      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
 ```
 
-Each `max_txid` in that listing is a valid `-txid` target. In the replica above
-that is `0000000000000001`, `0000000000000003`, `0000000000000005`,
-`0000000000000008`, `000000000000000b`, and `000000000000000d`. Every other TXID
-in the range fails, because those transactions survive only inside a larger L1
-file that cannot be partially applied.
+Each `max_txid` in that listing is a valid `-txid` target: `0000000000000001`,
+`0000000000000003`, `0000000000000005`, `0000000000000008`, `000000000000000b`,
+and `000000000000000d`. Every other TXID in the range fails because those
+transactions survive only inside a larger L1 file that cannot be partially
+applied.
 
 You can also preview a plan without writing files using
 [`restore -dry-run`](/reference/restore#dry-run), which shows the snapshot and
