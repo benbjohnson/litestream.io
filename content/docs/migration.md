@@ -928,7 +928,7 @@ keep the old one intact until you have verified the new one.
 Because v0.5 allows only one replica per database, you cannot write to the old
 and new destinations at the same time. Migrate sequentially instead:
 
-{{< alert icon="⚠️" text="Do not skip the reset in step 4. Litestream tracks its replication position in the local metadata directory, not per destination. An empty destination starts at TXID 0, so Litestream tries to upload from TXID 1 — and on any database that has been running long enough for L0 retention to expire those files, they are already gone. Replication then stalls with <code>no such file or directory</code> on an L0 file, and eventually <code>shutdown sync timeout</code>. A newly created database will not show this, because nothing has been compacted away yet." >}}
+{{< alert icon="⚠️" text="Do not skip the reset in step 4. Litestream tracks its replication position in the local metadata directory, not per destination. An empty destination starts at TXID 0, so Litestream tries to upload from TXID 1. On any database that has been running long enough for L0 retention to expire those files, they are already gone. Replication then stalls with <code>no such file or directory</code> on an L0 file, and eventually <code>shutdown sync timeout</code>. A newly created database will not show this, because nothing has been compacted away yet." >}}
 
 1. **Confirm the current replica restores cleanly** before changing anything:
 
@@ -985,8 +985,8 @@ and new destinations at the same time. Migrate sequentially instead:
    sqlite3 /var/lib/app.db "CREATE TABLE IF NOT EXISTS litestream_check(id INTEGER PRIMARY KEY, at TEXT); INSERT INTO litestream_check(at) VALUES (datetime('now'));"
    ```
 
-   Wait for the next `replica sync` line to show the two positions level again,
-   then restore and confirm the marker arrived:
+   Wait for the next `replica sync` line to show the two positions matching
+   again, then restore and confirm the marker arrived:
 
    ```bash
    litestream restore -o /tmp/verify.db /var/lib/app.db
@@ -1111,8 +1111,8 @@ effect, where level 9 is the snapshot level.
 
 `litestream databases` reads the configuration and prints each database path
 with its replica type. It reports no transaction IDs, no lag, and no
-synchronization state, so it cannot tell you whether a replica is current —
-switching between two destinations of the same type produces identical output
+synchronization state, so it cannot tell you whether a replica is current.
+Switching between two destinations of the same type produces identical output
 either way. Use it to confirm the config parsed, nothing more.
 
 For replication progress, use `litestream status` for the local transaction ID
