@@ -293,9 +293,9 @@ logging:
 ### Compaction levels
 
 Litestream compacts LTX files through a series of levels. Each level merges the
-files produced by the level below it at a longer interval, so recent
-transactions stay fine-grained while older data is consolidated into fewer,
-larger files.
+files produced by the level below it. The defaults use progressively longer
+intervals, so recent transactions stay fine-grained while older data is
+consolidated into fewer, larger files.
 
 The `levels:` block configures them. The values below are the defaults, applied
 when `levels:` is omitted entirely:
@@ -309,18 +309,21 @@ levels:
 
 `interval` is the only key an entry accepts. Unrecognized keys are silently
 ignored rather than rejected, so a stray `retention:` under a level entry has no
-effect.
+effect. Litestream does not require intervals to grow with the level; each one
+only has to be greater than zero.
 
 **Position in the list sets the level number.** The first entry configures L1,
 the second L2, the third L3, and so on. There is no `level:` key — a level's
 number comes entirely from its position. The default config above therefore
-gives you L1, L2, and L3, and nothing else. To reach L4 you must supply a fourth
-entry; you cannot skip the levels below it.
+gives you L1, L2, and L3 as the configurable levels; L9 is separate and is
+described below. To reach L4 you must supply a fourth entry; you cannot skip the
+levels below it.
 
 **L0 is implicit and cannot be configured here.** L0 is the raw stream of LTX
-files written as transactions commit during replication. It has no compaction
-interval of its own and never appears in `levels:`. [L0 retention](#l0-retention)
-below controls how long its files are kept.
+files Litestream writes from committed WAL changes on each replication sync, so
+a single file can cover several transactions. It has no compaction interval of
+its own and never appears in `levels:`. [L0 retention](#l0-retention) below
+controls how long its files are kept.
 
 **L8 is the highest configurable level.** The `levels:` list accepts at most
 eight entries. A ninth entry fails at startup with:
@@ -333,23 +336,25 @@ Error: cannot open store: compaction level cannot exceed 8
 full snapshots rather than incremental compactions, so it is not part of
 `levels:` and cannot be added as a ninth entry. Its interval comes from the
 global [`snapshot.interval`](#complete-configuration-example) setting, which
-defaults to `24h`. Litestream always starts a level 9 compaction monitor, which
-is why the startup log shows a level 9 even though no entry in `levels:`
-produced it.
+defaults to `24h`. Litestream starts a level 9 monitor whenever background
+compaction monitoring is enabled, which is the default for `litestream
+replicate`. That is why startup logs show a level 9 even though no entry in
+`levels:` produced it.
 
 #### Compaction scheduling
 
-Compaction runs on an absolute time grid. Each level fires at the next boundary
-of its interval, so a level with a `5m` interval compacts at `:00`, `:05`,
+Compaction is scheduled on an absolute time grid. Each level targets the next
+boundary of its interval, so a level with a `5m` interval targets `:00`, `:05`,
 `:10`, and so on no matter when the daemon started.
 
 Two consequences follow:
 
 - Each level also makes one immediate compaction attempt at startup, before its
-  first grid boundary. A freshly started daemon logs a compaction within seconds.
-- The first run on the grid lands on the next boundary, not a full interval
-  later. A daemon started at `14:54:36` with a `5m` level compacts at
-  `14:55:00`, 24 seconds in.
+  first grid boundary. Whether that attempt logs a completed compaction depends
+  on whether the level below it has anything to merge.
+- The first run on the grid is due at the next boundary, not a full interval
+  later. A daemon started at `14:54:36` with a `5m` level is due at `14:55:00`,
+  24 seconds in.
 
 A daemon started at `09:16:48` with `30s` and `1m` levels produces the sequence
 below, abridged to the timestamp and level:
@@ -365,11 +370,14 @@ below, abridged to the timestamp and level:
 
 Because the interval is truncated against absolute time, the grid is anchored to
 UTC rather than to local time. In a timezone offset by a half hour, an hourly
-level fires at `:30` past each local hour.
+level is due at `:30` past each local hour.
 
-The delay until the next attempt is computed *before* each pass runs, so a
-compaction that takes longer than its interval pushes the following attempt past
-its boundary. The schedule re-anchors to the grid on the next iteration.
+Boundaries are targets rather than exact firing times. The delay until the next
+attempt is computed *before* each pass runs, and the timer only starts once the
+pass finishes, so every attempt lands a little after its boundary by roughly the
+duration of the previous pass. That lag is normally milliseconds, but a slow
+pass makes it larger. Each iteration recomputes its target from the grid, so the
+lag does not accumulate.
 
 
 ### L0 Retention
