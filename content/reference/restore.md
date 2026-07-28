@@ -104,7 +104,7 @@ litestream restore [arguments] REPLICA_URL
 ```
 
 
-## Restore Granularity
+## Restore granularity
 
 Litestream replays whole LTX files, so `-txid` and `-timestamp` can only land on
 the boundaries of files that still exist in the replica. A file whose range would
@@ -118,11 +118,18 @@ between are not.
 ```
 $ litestream ltx -level all /var/lib/db
 level  min_txid          max_txid          size  created
-1      0000000000000004  0000000000000006  249   2026-07-28T14:18:09Z
-1      0000000000000007  0000000000000008  266   2026-07-28T14:18:13Z
+0      000000000000000d  000000000000000d  310   2026-07-28T14:27:18Z
+1      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
+1      0000000000000002  0000000000000003  224   2026-07-28T14:26:58Z
+1      0000000000000004  0000000000000005  240   2026-07-28T14:27:02Z
+1      0000000000000006  0000000000000008  266   2026-07-28T14:27:08Z
+1      0000000000000009  000000000000000b  289   2026-07-28T14:27:14Z
+1      000000000000000c  000000000000000d  310   2026-07-28T14:27:18Z
+9      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
 
-$ litestream restore -txid 0000000000000006 -o /tmp/r.db /var/lib/db   # succeeds
-$ litestream restore -txid 0000000000000005 -o /tmp/r.db /var/lib/db
+$ litestream restore -txid 0000000000000005 -o /tmp/r.db /var/lib/db   # succeeds
+
+$ litestream restore -txid 0000000000000004 -o /tmp/r.db /var/lib/db
 Error: no matching backup files available
 ```
 

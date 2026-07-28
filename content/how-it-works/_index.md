@@ -128,8 +128,9 @@ point that was available a few minutes ago can become permanently unreachable.
 
 **At the snapshot cutoff**, retention enforcement derives a single minimum
 snapshot TXID from `snapshot.retention` and applies that same cutoff to every
-configured compaction level in one pass. L1, L2, and L3 do not age out
-independently by level; older history is pruned across all of them together.
+configured compaction level above L0 in one pass. L1, L2, and L3 do not age out
+independently by level; older history is pruned across all of them together. L0
+is exempt because it has its own `l0-retention` schedule.
 
 ### Choosing a restore point
 
@@ -139,18 +140,41 @@ planning a restore:
 ```
 $ litestream ltx -level all /var/lib/db
 level  min_txid          max_txid          size  created
-0      0000000000000015  0000000000000015  373   2026-07-28T14:18:39Z
-0      0000000000000016  0000000000000016  383   2026-07-28T14:18:41Z
-1      0000000000000004  0000000000000006  249   2026-07-28T14:18:09Z
-1      0000000000000007  0000000000000008  266   2026-07-28T14:18:13Z
+0      000000000000000d  000000000000000d  310   2026-07-28T14:27:18Z
+1      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
+1      0000000000000002  0000000000000003  224   2026-07-28T14:26:58Z
+1      0000000000000004  0000000000000005  240   2026-07-28T14:27:02Z
+1      0000000000000006  0000000000000008  266   2026-07-28T14:27:08Z
+1      0000000000000009  000000000000000b  289   2026-07-28T14:27:14Z
+1      000000000000000c  000000000000000d  310   2026-07-28T14:27:18Z
+9      0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
 ```
 
-Each `max_txid` in that listing is a valid `-txid` target. In the example above,
-`0000000000000006` and `0000000000000008` restore successfully, while
-`0000000000000004`, `0000000000000005`, and `0000000000000007` do not. Their
-transactions survive only inside a larger L1 file that cannot be partially
-applied. You can also preview a plan without writing files using
-[`restore -dry-run`](/reference/restore#dry-run).
+Each `max_txid` in that listing is a valid `-txid` target. In the replica above
+that is `0000000000000001`, `0000000000000003`, `0000000000000005`,
+`0000000000000008`, `000000000000000b`, and `000000000000000d`. Every other TXID
+in the range fails, because those transactions survive only inside a larger L1
+file that cannot be partially applied.
+
+You can also preview a plan without writing files using
+[`restore -dry-run`](/reference/restore#dry-run), which shows the snapshot and
+the contiguous run of LTX files that would be replayed:
+
+```
+$ litestream restore -dry-run -txid 0000000000000008 -o /tmp/r.db /var/lib/db
+Restore plan:
+  source: /var/lib/db
+  target: /tmp/r.db
+  replica: file
+  txid range: 0000000000000001 - 0000000000000008
+
+Files to fetch:
+level  file                                   min_txid          max_txid          size  timestamp
+9      0000000000000001-0000000000000001.ltx  0000000000000001  0000000000000001  639   2026-07-28T14:26:48Z
+1      0000000000000002-0000000000000003.ltx  0000000000000002  0000000000000003  224   2026-07-28T14:26:58Z
+1      0000000000000004-0000000000000005.ltx  0000000000000004  0000000000000005  240   2026-07-28T14:27:02Z
+1      0000000000000006-0000000000000008.ltx  0000000000000006  0000000000000008  266   2026-07-28T14:27:08Z
+```
 
 ### Keeping granularity longer
 

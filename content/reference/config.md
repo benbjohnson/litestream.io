@@ -321,9 +321,9 @@ l0-retention-check-interval: 15s
 - `l0-retention`—Minimum time to retain L0 files after they have been compacted
   into L1. The file must meet both criteria before deletion: it must be
   compacted into L1 AND the retention period must have elapsed. Defaults to `5m`.
-  Must be greater than zero; `l0-retention: 0` is rejected at startup with
-  `l0 retention must be greater than 0`. To keep L0 files effectively forever,
-  use a large duration such as `8760h`.
+  Must be greater than zero. Setting `l0-retention: 0` is rejected at startup
+  with `Error: l0-retention: l0 retention must be greater than 0 (got 0s)`. To
+  keep L0 files effectively forever, use a large duration such as `8760h`.
 
 - `l0-retention-check-interval`—How frequently Litestream checks for expired L0
   files. This should be more frequent than the L1 compaction interval to ensure
