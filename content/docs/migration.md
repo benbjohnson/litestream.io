@@ -144,7 +144,7 @@ levels:
   - interval: 24h
 ```
 
-{{< alert icon="💡" text="Litestream always configures compaction levels. Omit the <code>levels</code> block entirely to keep the L1/L2/L3 defaults — specifying it <strong>replaces</strong> the defaults rather than adding to them, so the two-entry example above leaves you with L1=1h and L2=24h." >}}
+{{< alert icon="💡" text="Litestream always configures compaction levels. Omit the <code>levels</code> block entirely to keep the L1/L2/L3 defaults. Specifying it <strong>replaces</strong> the defaults rather than adding to them, so the two-entry example above leaves you with L1=1h and L2=24h." >}}
 
 1. **Update command usage**:
 
@@ -728,9 +728,9 @@ dbs:
       url: s3://primary-bucket/app
 ```
 
-v0.5 supports exactly one replica per database so that a single remote is
-unambiguously the source of truth. A `replicas` array with more than one entry
-is rejected at startup:
+v0.5 supports exactly one replica per database so that a single remote is the
+source of truth. A `replicas` array with more than one entry is rejected at
+startup:
 
 ```text
 Error: multiple replicas on a single database are no longer supported
@@ -741,7 +741,7 @@ Choose whichever destination you want to be authoritative and drop the rest.
 {{< alert icon="⚠️" text="Do not work around this by listing the same database path under several <code>dbs</code> entries. Each entry derives its metadata directory from the database path, so duplicate paths give you two managers writing to the same <code>.db-litestream</code> directory and racing over the same LTX files. It starts without complaint and then logs recurring <code>sync error</code> messages." >}}
 
 If you genuinely need a second copy in another location, replicate at the
-storage layer instead — S3 Cross-Region Replication, GCS dual-region buckets, or
+storage layer instead: S3 Cross-Region Replication, GCS dual-region buckets, or
 an equivalent provider feature. See
 [Legacy Multiple Replicas]({{< ref "/reference/config" >}}#legacy-multiple-replicas)
 for more detail.
@@ -774,7 +774,7 @@ dbs:
       url: s3://my-bucket/app
 ```
 
-Two notes on these sections:
+Two fields here are easy to get wrong:
 
 - `exec` is a single command string, not a list of hooks. Litestream runs the
   command alongside replication and shuts down when it exits. Passing a list
@@ -922,10 +922,9 @@ When changing replica types, you may want to preserve existing backups:
 
 ### Switching Replica Destinations
 
-Your application keeps serving reads and writes throughout this process — only
-Litestream restarts. There is, however, a short window where the new destination
-has not caught up yet, so keep the old one intact until you have verified the
-new one.
+Your application keeps serving reads and writes throughout this process; only
+Litestream restarts. The new destination stays behind until it catches up, so
+keep the old one intact until you have verified the new one.
 
 Because v0.5 allows only one replica per database, you cannot write to the old
 and new destinations at the same time. Migrate sequentially instead:
@@ -1056,7 +1055,7 @@ is writing `exec` as a list of hooks; it takes one command string.
 
 Litestream ignores unrecognized configuration keys instead of rejecting them, so
 a misplaced setting starts cleanly and silently does nothing. If a value seems
-not to apply, confirm it belongs where you put it — the
+not to apply, confirm it belongs where you put it. The
 [Configuration Reference]({{< ref "/reference/config" >}}) is the authoritative
 list. Two common cases:
 
