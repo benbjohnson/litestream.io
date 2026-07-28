@@ -351,7 +351,8 @@ Two consequences follow:
   later. A daemon started at `14:54:36` with a `5m` level compacts at
   `14:55:00`, 24 seconds in.
 
-A daemon started at `09:16:48` with `30s` and `1m` levels produces:
+A daemon started at `09:16:48` with `30s` and `1m` levels produces the following,
+with log fields other than the timestamp and level omitted for clarity:
 
 ```
 09:16:50 compaction complete level=1     # immediate attempt at startup

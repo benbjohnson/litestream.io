@@ -119,15 +119,13 @@ snapshot:
   interval: 24h
   retention: 168h
 
-# Override the compaction levels (defaults: 30s, 5m, 1h for L1, L2, L3)
+# Add level-based retention (no default levels configured)
 levels:
   - interval: 1h
+    retention: 24h
   - interval: 24h
+    retention: 168h
 ```
-
-Each entry's position sets its level number, and `interval` is the only key an
-entry accepts. See [Compaction levels](/reference/config/#compaction-levels) for
-the full model.
 
 1. **Update command usage**:
 
@@ -726,11 +724,14 @@ snapshot:
   interval: 24h
   retention: 168h
 
-# Global compaction levels (position sets the level: L1, L2, L3)
+# Global level-based retention
 levels:
   - interval: 5m
+    retention: 1h
   - interval: 1h
+    retention: 24h
   - interval: 24h
+    retention: 168h
 
 # Global exec hooks
 exec:
