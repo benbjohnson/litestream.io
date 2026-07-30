@@ -56,8 +56,8 @@ committed WAL pages writes no file and assigns no TXID. When the pending WAL
 exceeds
 [`max-sync-wal-bytes`](/reference/config#database-configuration-options)
 (64 MiB by default), Litestream splits the catch-up across several files, each
-with its own TXID. It always cuts batches at commit boundaries, so a single
-SQLite transaction never spans two LTX files.
+with its own TXID. Litestream always cuts batches at commit boundaries, so a
+single SQLite transaction never spans two LTX files.
 
 LTX files are named after the TXID range they cover—for example,
 `0000000000000001-0000000000000005.ltx` covers TXIDs 1 through 5.
