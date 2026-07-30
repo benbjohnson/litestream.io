@@ -51,13 +51,17 @@ consistency. A TXID identifies the whole batch of WAL pages in that file, which
 may span one or more SQLite write transactions, so it is not a per-transaction
 identifier.
 
-Syncs and LTX files do not line up one to one. A sync that finds no newly
-committed WAL pages writes no file and assigns no TXID. When the pending WAL
-exceeds
+Syncs and LTX files do not line up one to one. An incremental sync that finds no
+newly committed WAL pages writes no file and assigns no TXID. A sync that has to
+establish or repair replication state writes a full-state file instead, even
+when there are no new pages.
+
+When the pending WAL exceeds
 [`max-sync-wal-bytes`](/reference/config#database-configuration-options)
-(64 MiB by default), Litestream splits the catch-up across several files, each
-with its own TXID. Litestream always cuts batches at commit boundaries, so a
-single SQLite transaction never spans two LTX files.
+(64 MiB by default), Litestream can split the catch-up across several files,
+each with its own TXID. It checks that limit only after reading a WAL commit
+marker, so a batch never ends mid-transaction, and a single transaction larger
+than the limit still goes into one file.
 
 LTX files are named after the TXID range they cover—for example,
 `0000000000000001-0000000000000005.ltx` covers TXIDs 1 through 5.
