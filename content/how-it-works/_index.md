@@ -60,8 +60,8 @@ When the pending WAL exceeds
 [`max-sync-wal-bytes`](/reference/config#database-configuration-options)
 (64 MiB by default), Litestream can split the catch-up across several files,
 each with its own TXID. It checks that limit only after reading a WAL commit
-marker, so a batch never ends mid-transaction, and a single transaction larger
-than the limit still goes into one file.
+marker, so a batch never ends mid-transaction. A single transaction larger than
+the limit still goes into one file.
 
 LTX files are named after the TXID range they cover—for example,
 `0000000000000001-0000000000000005.ltx` covers TXIDs 1 through 5.
