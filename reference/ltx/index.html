@@ -296,6 +296,11 @@ following fields:</p>
 </tr>
 </tbody>
 </table>
+<p>A TXID identifies one L0 LTX file rather than one SQLite transaction. An
+incremental L0 file covers everything committed to the WAL since the previous
+sync, so the span between <code>min_txid</code> and <code>max_txid</code> counts LTX files, not
+transactions. An L0 file carries a single TXID, so both values are the same;
+compacted files at higher levels can cover a wider range.</p>
 <p>When no LTX files are found, the command outputs an empty array (<code>[]</code>).</p>
 <h2 id="examples">Examples<a href="#examples" class="anchor" aria-hidden="true">#</a> </h2>
 <h3 id="database-ltx-files">Database LTX files<a href="#database-ltx-files" class="anchor" aria-hidden="true">#</a> </h3>

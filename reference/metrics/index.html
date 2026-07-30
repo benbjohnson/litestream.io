@@ -277,8 +277,13 @@ metric is cumulative and only increases.</p>
 <pre tabindex="0"><code>litestream_total_wal_bytes{db=&#34;/var/lib/myapp.db&#34;} 1048576
 </code></pre><h3 id="litestream_txid">litestream_txid<a href="#litestream_txid" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Gauge</p>
-<p>The current transaction ID (TXID) of the database. This value increases with
-each SQLite transaction.</p>
+<p>The current transaction ID (TXID) of the database, as recorded at the end of
+Litestream&rsquo;s most recent sync. A TXID identifies one L0 LTX file, which covers
+everything committed to the WAL since the previous sync and may span many SQLite
+transactions. This gauge does not count transactions, and you cannot derive a
+transaction count from it.</p>
+<p>The value is a position rather than a running total. It stays at zero until the
+first sync after startup, even when the replica already holds LTX files.</p>
 <pre tabindex="0"><code>litestream_txid{db=&#34;/var/lib/myapp.db&#34;} 42
 </code></pre><h3 id="litestream_sync_count">litestream_sync_count<a href="#litestream_sync_count" class="anchor" aria-hidden="true">#</a> </h3>
 <p><strong>Type:</strong> Counter</p>
