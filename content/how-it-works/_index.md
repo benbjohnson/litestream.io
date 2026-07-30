@@ -45,10 +45,21 @@ and restarting the WAL file. Instead, it continually reads new WAL pages and
 manually calls out to SQLite to perform checkpoints as necessary.
 
 New WAL pages are packaged into _LTX files_ (Litestream Transaction Log files).
-Each sync assigns the next monotonically incrementing _transaction ID_ (TXID)
-to the batch of new WAL pages—which may span one or more SQLite write
-transactions—and writes them as an LTX file along with checksums to ensure
-consistency. LTX files are named after the TXID range they cover—for example,
+Litestream assigns each LTX file it writes the next monotonically incrementing
+_transaction ID_ (TXID) and stores checksums alongside the pages to ensure
+consistency. A TXID identifies the whole batch of WAL pages in that file, which
+may span one or more SQLite write transactions, so it is not a per-transaction
+identifier.
+
+Syncs and LTX files do not line up one to one. A sync that finds no newly
+committed WAL pages writes no file and assigns no TXID. When the pending WAL
+exceeds
+[`max-sync-wal-bytes`](/reference/config#database-configuration-options)
+(64MB by default), Litestream splits the catch-up across several files, each
+with its own TXID. It always cuts batches at commit boundaries, so a single
+SQLite transaction never spans two LTX files.
+
+LTX files are named after the TXID range they cover—for example,
 `0000000000000001-0000000000000005.ltx` covers TXIDs 1 through 5.
 
 LTX files are staged in a hidden directory next to your database (e.g.
@@ -63,12 +74,12 @@ guide](/guides/wal-truncate-threshold).
 
 ## Compaction & snapshots
 
-Litestream writes LTX files continuously as transactions occur, so the lowest
+Litestream writes an LTX file on every sync that has new pages, so the lowest
 level—called _L0_—accumulates many small files. To keep restores fast, a
 background compaction process periodically merges files from one level into
 larger files at the next level:
 
-- **L0** — raw transaction files written continuously during replication.
+- **L0** — uncompacted per-sync batches written continuously during replication.
 - **L1, L2, L3** — compacted files, merged every 30 seconds, 5 minutes, and
   1 hour by default.
 - **Snapshot level** — a full copy of the database, created every 24 hours by

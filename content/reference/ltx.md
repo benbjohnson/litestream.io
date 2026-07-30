@@ -66,6 +66,12 @@ following fields:
 | `size` | Size of the LTX file in bytes |
 | `timestamp` | Creation timestamp in RFC3339 format |
 
+A TXID identifies one batch of WAL pages rather than one SQLite transaction. A
+batch holds everything committed since the previous sync, so the span between
+`min_txid` and `max_txid` tells you how many batches a file covers, not how many
+transactions. An L0 file holds a single batch, so both values are the same;
+compacted files at higher levels cover a wider range.
+
 When no LTX files are found, the command outputs an empty array (`[]`).
 
 
