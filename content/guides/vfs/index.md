@@ -261,7 +261,7 @@ SELECT litestream_set_time('5 minutes ago');  -- Set time travel point
 
 > **Note**: Time travel requires sufficient L0 retention on the primary. Configure
 > `l0-retention` in your Litestream config to keep historical data available.
-> See the [L0 retention configuration](/reference/config#l0-retention-vfs-read-replicas).
+> See the [L0 retention configuration](/reference/config#l0-retention).
 
 
 ## Performance tuning
