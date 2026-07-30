@@ -67,10 +67,11 @@ litestream_total_wal_bytes{db="/var/lib/myapp.db"} 1048576
 
 **Type:** Gauge
 
-The current transaction ID (TXID) of the database. It advances once per LTX
-file, and each LTX file covers everything committed to the WAL since the
-previous sync. One TXID can span many SQLite transactions, so this gauge does
-not count transactions and cannot be used to derive that count.
+The current transaction ID (TXID) of the database. It advances once per L0 LTX
+file, the uncompacted batch Litestream writes on each sync that has new WAL
+pages. One TXID covers everything committed to the WAL since the previous sync,
+which may be many SQLite transactions, so this gauge does not count transactions
+and cannot be used to derive that count.
 
 ```
 litestream_txid{db="/var/lib/myapp.db"} 42

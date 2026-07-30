@@ -45,7 +45,7 @@ and restarting the WAL file. Instead, it continually reads new WAL pages and
 manually calls out to SQLite to perform checkpoints as necessary.
 
 New WAL pages are packaged into _LTX files_ (Litestream Transaction Log files).
-Litestream assigns each LTX file it writes the next monotonically incrementing
+Litestream assigns each of these files the next monotonically incrementing
 _transaction ID_ (TXID) and stores checksums alongside the pages to ensure
 consistency. A TXID identifies the whole batch of WAL pages in that file, which
 may span one or more SQLite write transactions, so it is not a per-transaction
@@ -55,7 +55,7 @@ Syncs and LTX files do not line up one to one. A sync that finds no newly
 committed WAL pages writes no file and assigns no TXID. When the pending WAL
 exceeds
 [`max-sync-wal-bytes`](/reference/config#database-configuration-options)
-(64MB by default), Litestream splits the catch-up across several files, each
+(64 MiB by default), Litestream splits the catch-up across several files, each
 with its own TXID. It always cuts batches at commit boundaries, so a single
 SQLite transaction never spans two LTX files.
 
