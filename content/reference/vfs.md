@@ -144,9 +144,11 @@ extension's embedded runtime.
 
 {{< since version="0.5.17" >}} Registration no longer requires
 `LITESTREAM_REPLICA_URL`. Per-database configuration belongs in the
-`replica_url` URI parameter or the Go registry (`litestream.SetVFSConfig`),
-neither of which touches the process-wide environment. A database opened with
-no replica location configured fails with `no replica client configured`.
+`replica_url` URI parameter (`file:replica.db?vfs=litestream&replica_url=...`),
+which is read per connection and does not touch the process-wide environment.
+
+Opening a database with no replica location from either source fails with a
+generic SQLite error that does not name the cause.
 
 
 ## Build requirements
@@ -216,8 +218,9 @@ sqlite> .open 'file:replica.db?vfs=litestream'
 Set `LITESTREAM_REPLICA_URL` to specify the replica location using a URL format.
 Prior to v0.5.17 this variable is required—the loadable extension fails to
 initialize without it. {{< since version="0.5.17" >}} Registration succeeds
-without it, and the replica location can come from the database URI or the Go
-registry instead.
+without it, and the replica location can come from the `replica_url` URI
+parameter instead. Go applications linking the VFS directly can also set it
+through the config registry (`litestream.SetVFSConfig`).
 
 | Scheme | Backend | Example |
 |--------|---------|---------|
