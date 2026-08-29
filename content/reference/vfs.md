@@ -141,6 +141,10 @@ initialize without it. Setting it from inside the process (e.g. `os.environ`,
 `process.env`, or `ENV`) is not reliably visible to the extension's embedded
 runtime, so export it in the shell or set it in your process manager instead.
 
+{{< since version="0.5.17" >}} The replica location and the runtime settings can
+also be supplied as [URI parameters](#configuration-uri-parameters) on the
+database URI, which avoids the environment entirely.
+
 
 ## Build requirements
 
@@ -245,7 +249,9 @@ LITESTREAM_REPLICA_URL="s3://mybucket/db?endpoint=<account>.r2.cloudflarestorage
 ### Runtime tuning
 
 VFS runtime tuning is set in code (Go) by adjusting `VFS.PollInterval` (default
-`1s`) and `VFS.CacheSize` (default `10MB`).
+`1s`) and `VFS.CacheSize` (default `10MB`). {{< since version="0.5.17" >}} Both
+are also settable per connection through the `poll_interval` and `cache_size`
+[URI parameters](#configuration-uri-parameters).
 
 
 ### Write mode configuration
@@ -285,6 +291,172 @@ hydration file to track the current transaction ID (TXID). On the next open, if
 both files exist, hydration resumes from the saved TXID instead of performing a
 full restore. See the [VFS Hydration Guide](/guides/vfs-hydration/#persistence--resume-behavior)
 for details.
+
+
+## Configuration (URI parameters)
+
+{{< since version="0.5.17" >}} The VFS reads its configuration from the database
+URI when a connection opens, so each connection can point at a different replica
+or use different tuning without touching the process environment.
+
+`setenv()` is not thread-safe on Linux, so an application that only learns its
+replica location after startup had no safe way to set `LITESTREAM_REPLICA_URL`
+from inside the process. That is the reason the feature exists. URI
+parameters and the [config registry](#configuration-go-registry) remove that
+constraint.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `replica_url` | string | value of `LITESTREAM_REPLICA_URL` | Replica location for this connection, using the same URL schemes as the environment variable |
+| `write_enabled` | boolean | `false` | Enable [write mode](/guides/vfs-write-mode) |
+| `sync_interval` | duration | `1s` | How often write mode syncs to the replica |
+| `buffer_path` | string | temp file | Local write buffer path for crash recovery |
+| `hydration_enabled` | boolean | `false` | Enable background [hydration](/guides/vfs-hydration) |
+| `hydration_path` | string | temp file | Local file path for the hydrated database |
+| `poll_interval` | duration | `1s` | How often to poll the replica for new LTX files |
+| `cache_size` | integer | `10485760` | Page cache size in bytes |
+
+No parameter is required on its own, but a connection needs a replica URL from
+one source or another. If neither `replica_url` nor `LITESTREAM_REPLICA_URL`
+provides one, the open fails with `no replica client configured`.
+
+Durations use Go syntax (`250ms`, `5s`, `2m`). Booleans accept `true` or `1`;
+any other value is treated as false. `cache_size` is a plain byte count with no
+unit suffix. An unparseable duration or cache size fails the open with an error
+naming the parameter. Parameters the VFS does not recognize are ignored, so
+driver options such as `_busy_timeout` can share the same URI.
+
+Setting `replica_url` creates a replica client dedicated to that connection,
+which is closed when the connection closes.
+
+If the replica URL carries its own query parameters, percent-encode it so its
+`?` and `&` are not read as part of the outer URI:
+
+```
+file:replica.db?vfs=litestream&replica_url=s3%3A%2F%2Fmybucket%2Fdb%3Fendpoint%3Dminio.example.com
+```
+
+### sqlite3 CLI
+
+```sh
+sqlite3
+sqlite> .load ./dist/litestream-vfs sqlite3_litestreamvfs_init
+sqlite> .open 'file:replica.db?vfs=litestream&replica_url=s3://mybucket/db&poll_interval=5s'
+```
+
+### Python
+
+```python
+import sqlite3
+import litestream_vfs
+
+conn = sqlite3.connect(":memory:")
+litestream_vfs.load(conn)
+
+conn.execute(
+    "ATTACH DATABASE 'file:replica.db?vfs=litestream"
+    "&replica_url=s3://mybucket/db&poll_interval=5s' AS replica"
+)
+```
+
+### Node.js
+
+```javascript
+const Database = require('better-sqlite3');
+const { getLoadablePath } = require('litestream-vfs');
+
+const db = new Database(':memory:');
+db.loadExtension(getLoadablePath());
+
+db.exec(
+  "ATTACH DATABASE 'file:replica.db?vfs=litestream" +
+  "&replica_url=s3://mybucket/db&poll_interval=5s' AS replica"
+);
+```
+
+### Ruby
+
+```ruby
+require 'sqlite3'
+require 'litestream_vfs'
+
+db = SQLite3::Database.new(':memory:')
+LitestreamVfs.load(db)
+
+db.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream" \
+           "&replica_url=s3://mybucket/db&poll_interval=5s' AS replica")
+```
+
+
+## Configuration (Go registry)
+
+{{< since version="0.5.17" >}} Go applications that link the VFS directly can
+register configuration by database name instead of encoding it in the URI:
+
+```go
+litestream.SetVFSConfig(dbName string, cfg *litestream.VFSConfig)
+litestream.GetVFSConfig(dbName string) *litestream.VFSConfig
+litestream.DeleteVFSConfig(dbName string)
+```
+
+The registry is mutex-guarded and can be written at any point in the process
+lifetime, including while other connections are open. `SetVFSConfig` stores a
+copy of the config and `GetVFSConfig` returns a copy, so a caller cannot mutate
+registry state after handing it over.
+
+`dbName` is the database path exactly as it appears in the URI before the `?`.
+For `file:/var/data/replica.db?vfs=litestream` the key is
+`/var/data/replica.db`; for `file:replica.db?vfs=litestream` it is
+`replica.db`. The VFS does not resolve relative paths, so the key has to match
+the string the connection uses.
+
+`VFSConfig` mirrors the URI parameters. The optional fields are pointers so an
+unset field falls back to the VFS default rather than to its zero value:
+
+```go
+type VFSConfig struct {
+    ReplicaURL       string
+    WriteEnabled     *bool
+    SyncInterval     *time.Duration
+    BufferPath       string
+    HydrationEnabled *bool
+    HydrationPath    string
+    PollInterval     *time.Duration
+    CacheSize        *int
+}
+```
+
+Example:
+
+```go
+pollInterval := 5 * time.Second
+
+litestream.SetVFSConfig("/var/data/replica.db", &litestream.VFSConfig{
+    ReplicaURL:   "s3://mybucket/db",
+    PollInterval: &pollInterval,
+})
+
+db, err := sql.Open("sqlite3", "file:/var/data/replica.db?vfs=litestream")
+```
+
+The registry is a Go API only. It is not exposed through the loadable
+extension, so Python, Node.js, Ruby, and `sqlite3` clients configure the VFS
+with URI parameters or environment variables.
+
+
+## Configuration precedence
+
+Three sources feed a connection, listed lowest precedence first:
+
+1. **Environment variables**, read once when the extension registers the VFS
+   and applied to every connection.
+2. **The registry entry** for the database name, if one is set.
+3. **URI parameters** on the connection itself.
+
+Merging happens field by field: a URI parameter overrides the registry entry
+for that field alone, and any field set in neither falls back to the
+environment-derived VFS defaults. The merge runs on every open, so two
+connections to the same database can hold different settings.
 
 
 ## PRAGMAs & SQL functions
