@@ -134,12 +134,21 @@ db.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica")
 ### Configuration
 
 Configure the replica location using environment variables as described in the
-[Configuration](#configuration-environment-variables) section below. The
-`LITESTREAM_REPLICA_URL` environment variable is required and must be set in the
-process environment **before your application starts** — the extension fails to
-initialize without it. Setting it from inside the process (e.g. `os.environ`,
-`process.env`, or `ENV`) is not reliably visible to the extension's embedded
-runtime, so export it in the shell or set it in your process manager instead.
+[Configuration](#configuration-environment-variables) section below.
+
+The environment is process-wide, and the extension reads it once when it
+registers the VFS. Set `LITESTREAM_REPLICA_URL` in the shell or in your process
+manager **before your application starts**; setting it from inside the process
+(e.g. `os.environ`, `process.env`, or `ENV`) is not reliably visible to the
+extension's embedded runtime.
+
+{{< since version="0.5.17" >}} Registration no longer requires
+`LITESTREAM_REPLICA_URL`. Per-database configuration belongs in the
+`replica_url` URI parameter (`file:replica.db?vfs=litestream&replica_url=...`),
+which is read per connection and does not touch the process-wide environment.
+
+Opening a database with no replica location from either source fails with a
+generic SQLite error that does not name the cause.
 
 
 ## Build requirements
@@ -169,8 +178,8 @@ gcc -DSQLITE3VFS_LOADABLE_EXT -fPIC -shared -o dist/litestream-vfs.so src/litest
 
 ## Supported storage backends
 
-The loadable extension supports all Litestream replica backends via the
-`LITESTREAM_REPLICA_URL` environment variable:
+The loadable extension supports all Litestream replica backends. The scheme of
+the replica URL selects the backend:
 
 - **S3** — AWS S3 and S3-compatible storage (MinIO, R2, Tigris, etc.)
 - **GCS** — Google Cloud Storage
@@ -207,7 +216,11 @@ sqlite> .open 'file:replica.db?vfs=litestream'
 ### Replica URL
 
 Set `LITESTREAM_REPLICA_URL` to specify the replica location using a URL format.
-This variable is **required**—the loadable extension fails to initialize without it.
+Prior to v0.5.17 this variable is required—the loadable extension fails to
+initialize without it. {{< since version="0.5.17" >}} Registration succeeds
+without it, and the replica location can come from the `replica_url` URI
+parameter instead. Go applications linking the VFS directly can also set it
+through the config registry (`litestream.SetVFSConfig`).
 
 | Scheme | Backend | Example |
 |--------|---------|---------|
