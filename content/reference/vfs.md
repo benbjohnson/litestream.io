@@ -318,13 +318,18 @@ constraint.
 
 No parameter is required on its own, but a connection needs a replica URL from
 one source or another. If neither `replica_url` nor `LITESTREAM_REPLICA_URL`
-provides one, the open fails with `no replica client configured`.
+provides one, the open fails.
 
 Durations use Go syntax (`250ms`, `5s`, `2m`). Booleans accept `true` or `1`;
 any other value is treated as false. `cache_size` is a plain byte count with no
-unit suffix. An unparseable duration or cache size fails the open with an error
-naming the parameter. Parameters the VFS does not recognize are ignored, so
-driver options such as `_busy_timeout` can share the same URI.
+unit suffix. An unparseable duration or cache size also fails the open.
+Parameters the VFS does not recognize are ignored, so driver options such as
+`_busy_timeout` can share the same URI.
+
+SQLite does not carry the VFS's error text back to the client, so a bad
+parameter surfaces as a generic failure such as `SQL logic error` rather than
+naming the cause. Check the parameter values in the URI when an open fails
+unexpectedly.
 
 Setting `replica_url` creates a replica client dedicated to that connection,
 which is closed when the connection closes.
@@ -335,6 +340,13 @@ If the replica URL carries its own query parameters, percent-encode it so its
 ```
 file:replica.db?vfs=litestream&replica_url=s3%3A%2F%2Fmybucket%2Fdb%3Fendpoint%3Dminio.example.com
 ```
+
+URI parameters only reach the VFS when the SQLite client enables URI filename
+handling (`SQLITE_OPEN_URI`). The `sqlite3` CLI, Python's `sqlite3` module, and
+the Ruby `sqlite3` gem all enable it. `better-sqlite3` does not, and there is no
+option to turn it on, so it treats the whole string as a literal filename and
+attaches an empty database instead of the replica. Use the `sqlite3` package
+with the `OPEN_URI` flag on Node.js.
 
 ### sqlite3 CLI
 
@@ -362,16 +374,19 @@ conn.execute(
 ### Node.js
 
 ```javascript
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3');
 const { getLoadablePath } = require('litestream-vfs');
 
-const db = new Database(':memory:');
-db.loadExtension(getLoadablePath());
+const flags = sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE | sqlite3.OPEN_URI;
 
-db.exec(
-  "ATTACH DATABASE 'file:replica.db?vfs=litestream" +
-  "&replica_url=s3://mybucket/db&poll_interval=5s' AS replica"
-);
+const db = new sqlite3.Database(':memory:', flags, () => {
+  db.loadExtension(getLoadablePath(), () => {
+    db.exec(
+      "ATTACH DATABASE 'file:replica.db?vfs=litestream" +
+      "&replica_url=s3://mybucket/db&poll_interval=5s' AS replica"
+    );
+  });
+});
 ```
 
 ### Ruby
