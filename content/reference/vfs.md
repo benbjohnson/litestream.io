@@ -65,14 +65,14 @@ conn.execute("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica")
 
 ### Node.js
 
-Install from npm:
+Install from npm, along with the `sqlite3` package used by the example below:
 
 ```sh
-npm install litestream-vfs
+npm install litestream-vfs sqlite3
 ```
 
-The package uses `optionalDependencies` to install only the binary for your
-platform automatically.
+The `litestream-vfs` package uses `optionalDependencies` to install only the
+binary for your platform automatically.
 
 **API:**
 
