@@ -87,15 +87,26 @@ export LITESTREAM_REPLICA_URL=s3://mybucket/db
 ```
 
 ```javascript
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3');
 const { getLoadablePath } = require('litestream-vfs');
 
-const db = new Database(':memory:');
-db.loadExtension(getLoadablePath());
+const flags = sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE | sqlite3.OPEN_URI;
 
-// Open a replica database
-db.exec("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica");
+const db = new sqlite3.Database(':memory:', flags, () => {
+  db.loadExtension(getLoadablePath(), () => {
+    // Open a replica database
+    db.exec("ATTACH DATABASE 'file:replica.db?vfs=litestream' AS replica");
+  });
+});
 ```
+
+The example uses the `sqlite3` package because the VFS is selected through a URI
+filename, and SQLite parses one only when the connection is opened with
+`SQLITE_OPEN_URI`. `better-sqlite3` does not set that flag and exposes no option
+to enable it, so it treats `file:replica.db?vfs=litestream` as a literal
+filename and attaches an empty database by that name. The `ATTACH` succeeds and
+leaves a file named `file:replica.db?vfs=litestream` in the working directory;
+the failure surfaces later as a missing-table error.
 
 ### Ruby
 
