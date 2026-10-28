@@ -49,6 +49,7 @@ encounter issues, check the [Troubleshooting](/docs/troubleshooting) guide.
 - [Linode Object Storage](/guides/linode)
 - [Local File Path](/guides/file)
 - [NATS JetStream](/guides/nats)
+- [Neon Object Storage](/guides/neon)
 - [Scaleway Object Storage](/guides/scaleway)
 - [SFTP Server](/guides/sftp)
 - [Supabase Storage](/guides/supabase)

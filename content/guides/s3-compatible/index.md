@@ -30,6 +30,7 @@ for most providers.
 | Scaleway | `*.scw.cloud` | `sign-payload: true` |
 | Cloudflare R2 | `*.r2.cloudflarestorage.com` | `sign-payload: true`, `concurrency: 2` |
 | Supabase Storage | `*.supabase.co` | `sign-payload: true`, `force-path-style: true` |
+| Neon Object Storage | `*.storage.*.neon.tech` | `sign-payload: true`, `force-path-style: true` (v0.5.18+) |
 | Tigris | `fly.storage.tigris.dev`, `t3.storage.dev` | `sign-payload: true`, disables MD5 |
 
 Auto-detection means you can use simpler configurations without worrying about
@@ -526,6 +527,39 @@ dbs:
 
 See the [Supabase Storage Guide](/guides/supabase/) for detailed setup instructions.
 
+### Neon Object Storage
+
+[Neon Object Storage](https://neon.com/docs/storage/overview) provides an
+S3-compatible API on each Neon branch. It's suitable for projects already using
+Neon that want to keep their Litestream replicas next to their Postgres
+branches.
+
+**Configuration:**
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: db
+      endpoint: BRANCH_ID.storage.CELL.REGION.aws.neon.tech
+      access-key-id: ${NEON_S3_ACCESS_KEY}
+      secret-access-key: ${NEON_S3_SECRET_KEY}
+```
+
+**Notes:**
+
+- Endpoint format: `<BRANCH_ID>.storage.<CELL>.<REGION>.aws.neon.tech`; each
+  branch has its own endpoint and buckets
+- **Litestream v0.5.18+** automatically detects Neon and sets
+  `force-path-style: true` and `sign-payload: true`; you can omit these settings
+- Create buckets with `neon buckets create` and S3 access keys with
+  `neon credentials create --scope storage:read --scope storage:write` via the
+  Neon CLI
+
+See the [Neon Object Storage Guide](/guides/neon/) for detailed setup instructions.
+
 ### Filebase
 
 [Filebase](https://filebase.com/) provides S3-compatible access to decentralized
@@ -574,6 +608,7 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.
 | Vultr | Yes | Yes | No | — |
 | Scaleway | Yes | Yes | No | ✓ |
 | Supabase | Yes | Optional | Auto | ✓ |
+| Neon | Yes | Optional | Auto | ✓ (v0.5.18+) |
 | Tigris | Yes | `auto` | No | ✓ |
 | Filebase | Yes | `us-east-1` | Auto | ✓ |
 
