@@ -554,6 +554,35 @@ dbs:
 - Rate limit of 100 requests per second
 - Provides decentralized storage with IPFS pinning
 
+### Hippius
+
+[Hippius](https://hippius.com/) provides S3-compatible object storage on a
+decentralized storage network.
+
+**Configuration:**
+
+```yaml
+dbs:
+  - path: /path/to/db
+    replica:
+      type: s3
+      bucket: mybucket
+      path: db
+      endpoint: s3.hippius.com
+      region: decentralized
+      access-key-id: ${HIPPIUS_ACCESS_KEY}
+      secret-access-key: ${HIPPIUS_SECRET_KEY}
+```
+
+**Notes:**
+
+- Single global endpoint: `s3.hippius.com`
+- Region is `decentralized`
+- Only supports path-style URLs, which Litestream uses automatically when an
+  `endpoint` is set
+- Create access keys under **Object Storage** in the
+  [Hippius console](https://docs.hippius.com/use/console/s3)
+
 ## Provider Compatibility Matrix
 
 The following table summarizes configuration requirements for each provider.
@@ -576,6 +605,7 @@ automatically configured in Litestream v0.5.0+ based on the endpoint URL.
 | Supabase | Yes | Optional | Auto | ✓ |
 | Tigris | Yes | `auto` | No | ✓ |
 | Filebase | Yes | `us-east-1` | Auto | ✓ |
+| Hippius | Yes | Optional | No | — |
 
 ## Advanced Configuration Options
 
